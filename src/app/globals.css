@@ -5,22 +5,159 @@
   --secundario: #171c35;
   --terciario: #0e1023;
   --white: #fff2e0;
-}
 
-@theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* RGB para opacidades */
+  --principal-rgb: 232, 138, 66;
+  --secundario-rgb: 23, 28, 53;
+  --terciario-rgb: 14, 16, 35;
+  --white-rgb: 255, 242, 224;
+
+  /* Modo claro (default) */
+  --background: var(--white);
+  --foreground: var(--terciario);
+  --foreground-rgb: var(--terciario-rgb);
+  --text: var(--secundario);
+  
+  /* Componentes UI - Modo Claro */
+  --card-bg: rgba(var(--white-rgb), 0.6);
+  --card-border: rgba(var(--secundario-rgb), 0.15);
+  --input-bg: rgba(var(--white-rgb), 0.8);
+  --input-border: rgba(var(--secundario-rgb), 0.2);
+  --input-text: var(--terciario);
+  --input-placeholder: rgba(var(--secundario-rgb), 0.5);
+
+  /* Scrollbar - Modo Claro */
+  --scrollbar-track: rgba(var(--white-rgb), 0.3);
+  --scrollbar-thumb: rgba(var(--secundario-rgb), 0.3);
+  --scrollbar-thumb-hover: rgba(var(--secundario-rgb), 0.5);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: var(--secundario);
+    --foreground: var(--white);
+    --foreground-rgb: var(--white-rgb);
+    --text: var(--white);
+    
+    /* Componentes UI - Modo Oscuro */
+    --card-bg: var(--terciario);
+    --card-border: rgba(var(--white-rgb), 0.1);
+    --input-bg: var(--secundario);
+    --input-border: rgba(var(--white-rgb), 0.1);
+    --input-text: var(--white);
+    --input-placeholder: rgba(var(--white-rgb), 0.4);
+
+    /* Scrollbar - Modo Oscuro */
+    --scrollbar-track: rgba(var(--white-rgb), 0.05);
+    --scrollbar-thumb: rgba(var(--white-rgb), 0.2);
+    --scrollbar-thumb-hover: var(--principal);
   }
+}
+
+.dark {
+  --background: var(--secundario);
+  --foreground: var(--white);
+  --foreground-rgb: var(--white-rgb);
+  --text: var(--white);
+  
+  --card-bg: var(--terciario);
+  --card-border: rgba(var(--white-rgb), 0.1);
+  --input-bg: var(--secundario);
+  --input-border: rgba(var(--white-rgb), 0.1);
+  --input-text: var(--white);
+  --input-placeholder: rgba(var(--white-rgb), 0.4);
+
+  --scrollbar-track: rgba(var(--white-rgb), 0.05);
+  --scrollbar-thumb: rgba(var(--white-rgb), 0.2);
+  --scrollbar-thumb-hover: var(--principal);
+}
+
+.light {
+  --background: var(--white);
+  --foreground: var(--terciario);
+  --foreground-rgb: var(--terciario-rgb);
+  --text: var(--secundario);
+  
+  --card-bg: rgba(var(--white-rgb), 0.6);
+  --card-border: rgba(var(--secundario-rgb), 0.15);
+  --input-bg: rgba(var(--white-rgb), 0.8);
+  --input-border: rgba(var(--secundario-rgb), 0.2);
+  --input-text: var(--terciario);
+  --input-placeholder: rgba(var(--secundario-rgb), 0.5);
+
+  --scrollbar-track: rgba(var(--white-rgb), 0.3);
+  --scrollbar-thumb: rgba(var(--secundario-rgb), 0.3);
+  --scrollbar-thumb-hover: rgba(var(--secundario-rgb), 0.5);
+}
+
+@theme inline {
+  --font-sans: var(--font-fredoka);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Colores principales */
+.bg-principal { background-color: var(--principal); }
+.bg-secundario { background-color: var(--secundario); }
+.bg-terciario { background-color: var(--terciario); }
+.bg-white { background-color: var(--white); }
+
+.text-principal { color: var(--principal); }
+.text-secundario { color: var(--secundario); }
+.text-terciario { color: var(--terciario); }
+.text-white { color: var(--white); }
+.text-error { color: rgb(239, 68, 68); }
+
+.border-principal { border-color: var(--principal); }
+.border-secundario { border-color: var(--secundario); }
+.border-terciario { border-color: var(--terciario); }
+
+/* Variables de componentes UI */
+.bg-card { background-color: var(--card-bg); }
+.border-card { border-color: var(--card-border); }
+.bg-input { background-color: var(--input-bg); }
+.border-input { border-color: var(--input-border); }
+.text-input { color: var(--input-text); }
+.placeholder-input::placeholder { color: var(--input-placeholder); }
+
+/* ============================================ */
+/* SCROLLBAR PERSONALIZADO */
+/* ============================================ */
+
+/* Para Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* Para Webkit (Chrome, Safari, Edge) */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Scrollbar más delgado para elementos pequeños */
+.thin-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }

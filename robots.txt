@@ -1,0 +1,45 @@
+# robots.txt para MaxShop
+
+User-agent: *
+Allow: /
+
+# Bloquear páginas de administración
+Disallow: /admin/
+Disallow: /api/
+Disallow: /checkout/confirmation/
+Disallow: /account/orders/
+
+# Bloquear búsquedas internas
+Disallow: /search?
+Disallow: /*?sort=
+Disallow: /*?filter=
+
+# Permitir acceso a assets importantes
+Allow: /*.css
+Allow: /*.js
+Allow: /*.jpg
+Allow: /*.jpeg
+Allow: /*.png
+Allow: /*.gif
+Allow: /*.svg
+Allow: /*.webp
+
+# Sitemap
+Sitemap: https://maxshop.com/sitemap.xml
+
+# Crawl-delay para bots específicos
+User-agent: Googlebot
+Crawl-delay: 0
+
+User-agent: Bingbot
+Crawl-delay: 1
+
+# Bloquear bots problemáticos
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
