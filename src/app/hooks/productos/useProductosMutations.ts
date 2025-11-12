@@ -341,6 +341,58 @@ export function useBulkUpdateEstado(options: UseBulkUpdateEstadoOptions = {}) {
     };
 }
 
+interface UseToggleDestacadoOptions {
+    onSuccess?: (data: IProductos) => void;
+    onError?: (error: Error) => void;
+}
+
+export function useToggleDestacado(options: UseToggleDestacadoOptions = {}) {
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: (id: number) => productosService.toggleDestacado(id),
+
+        onSuccess: (data, id) => {
+            // Actualizar cache del detalle
+            queryClient.setQueryData(productosKeys.detail(id), data);
+
+            // Invalidar listas y destacados
+            queryClient.invalidateQueries({
+                queryKey: productosKeys.lists()
+            });
+            queryClient.invalidateQueries({
+                queryKey: productosKeys.destacados()
+            });
+
+            const accion = data.destacado ? 'marcado como destacado' : 'removido de destacados';
+
+            toast.success('Producto actualizado', {
+                description: `${data.nombre} fue ${accion}`,
+            });
+
+            options.onSuccess?.(data);
+        },
+
+        onError: (error: Error) => {
+            toast.error('Error al cambiar estado destacado', {
+                description: error.message || 'Ocurrió un error inesperado',
+            });
+
+            options.onError?.(error);
+        },
+    });
+
+    return {
+        toggleDestacado: mutation.mutate,
+        toggleDestacadoAsync: mutation.mutateAsync,
+        isToggling: mutation.isPending,
+        isSuccess: mutation.isSuccess,
+        isError: mutation.isError,
+        error: mutation.error,
+        reset: mutation.reset,
+    };
+}
+
 export function useProductosMutations() {
     const create = useCreateProducto();
     const update = useUpdateProducto();
@@ -348,6 +400,7 @@ export function useProductosMutations() {
     const updateStock = useUpdateStockProducto();
     const bulkDelete = useBulkDeleteProductos();
     const bulkUpdateEstado = useBulkUpdateEstado();
+    const toggleDestacado = useToggleDestacado();
 
     return {
         // Create
@@ -366,6 +419,10 @@ export function useProductosMutations() {
         updateStock: updateStock.updateStock,
         isUpdatingStock: updateStock.isUpdating,
 
+        // Destacado
+        toggleDestacado: toggleDestacado.toggleDestacado,
+        isTogglingDestacado: toggleDestacado.isToggling,
+
         // Bulk
         bulkDelete: bulkDelete.bulkDelete,
         isBulkDeleting: bulkDelete.isDeleting,
@@ -379,6 +436,7 @@ export function useProductosMutations() {
             update.isUpdating ||
             deleteProducto.isDeleting ||
             updateStock.isUpdating ||
+            toggleDestacado.isToggling ||
             bulkDelete.isDeleting ||
             bulkUpdateEstado.isUpdating
     };

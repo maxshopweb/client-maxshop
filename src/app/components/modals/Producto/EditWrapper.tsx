@@ -25,7 +25,7 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
             id_interno: producto.id_interno || '',
             cod_sku: producto.cod_sku || '',
             modelo: producto.modelo || '',
-            id_cat: producto.subcategoria?.id_cat?.toString() || '',
+            id_cat: producto.id_cat?.toString() || '',
             id_subcat: producto.id_subcat?.toString() || '',
             descripcion: producto.descripcion || '',
             id_marca: producto.id_marca?.toString() || '',
@@ -38,9 +38,9 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
             stock: producto.stock || 0,
             stock_min: producto.stock_min || undefined,
             stock_mayorista: producto.stock_mayorista || undefined,
-            id_iva: producto.id_iva?.toString() || '',
-            estado: producto.estado as 0 | 1 | undefined,
-        },
+            id_iva: producto.id_iva || undefined,
+            estado: producto.estado || undefined,
+        } as any,
     });
 
     const { updateProducto, isUpdating } = useUpdateProducto({
@@ -70,14 +70,26 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
     const handleComplete = async () => {
         const isValid = await form.trigger();
         console.log(isValid);
-        
+
         if (!isValid) {
             console.log('Errores de validación:', form.formState.errors);
             return;
         }
-        
-        const data = form.getValues();
-        
+
+        const rawData = form.getValues();
+
+        // Transformar los valores string a number para los selects
+        const data = {
+            ...rawData,
+            id_cat: rawData.id_cat ? Number(rawData.id_cat) : undefined,
+            id_subcat: rawData.id_subcat ? Number(rawData.id_subcat) : undefined,
+            id_marca: rawData.id_marca ? Number(rawData.id_marca) : undefined,
+            id_iva: rawData.id_iva ? Number(rawData.id_iva) : undefined,
+            estado: rawData.estado ? Number(rawData.estado) : undefined,
+        };
+
+        console.log('📦 Datos transformados:', data);
+
         // Ejecutar la mutación de actualización
         updateProducto({
             id: producto.id_prod,

@@ -11,7 +11,7 @@ const optionalNumberField = z
 
 
 const selectNumberField = z
-  .string()
+  .union([z.string(), z.number()])
   .optional()
   .transform((val) => {
     if (!val || val === '') return undefined;

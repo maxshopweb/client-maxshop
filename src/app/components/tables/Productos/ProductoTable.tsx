@@ -28,7 +28,7 @@ export function ProductosTable({
     tableState,
 }: ProductosTableProps) {
     // Hooks
-    const { filters, setSort } = useProductosFilters();
+    const { filters, setSort, categorias, marcas } = useProductosFilters();
     const { productos, isLoading, isError, error } = useProductos({ filters });
 
     const {
@@ -47,6 +47,8 @@ export function ProductosTable({
         onDelete,
         onToggleDestacado,
         onUpdateStock,
+        categorias,
+        marcas,
     });
 
     // Instancia de la tabla
@@ -96,7 +98,6 @@ export function ProductosTable({
             </div>
         );
     }
-
 
     return (
         <div className="w-full">

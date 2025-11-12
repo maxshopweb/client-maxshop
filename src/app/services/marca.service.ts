@@ -9,7 +9,7 @@ class MarcaService {
 
     async createMarca(data: ICreateMarcaDTO): Promise<any> {
         const response = await axiosInstance.post('/marcas', data);
-        return response.data;
+        return response;
     }
 }
 

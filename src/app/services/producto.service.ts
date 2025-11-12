@@ -26,6 +26,8 @@ class ProductosService {
     if (filters.precio_min !== undefined) params.append('precio_min', filters.precio_min.toString());
     if (filters.precio_max !== undefined) params.append('precio_max', filters.precio_max.toString());
     if (filters.destacado !== undefined) params.append('destacado', filters.destacado.toString());
+    if (filters.financiacion !== undefined) params.append('financiacion', filters.financiacion.toString());
+    if (filters.stock_bajo !== undefined) params.append('stock_bajo', filters.stock_bajo.toString());
 
     const response = await axiosInstance.get<IPaginatedResponse<IProductos>>(
       `/productos?${params.toString()}`
@@ -129,6 +131,18 @@ class ProductosService {
 
   async updateDestacadoMultiple(ids: number[], destacado: boolean): Promise<void> {
     await Promise.all(ids.map(id => this.update(id, { destacado })));
+  }
+
+  async toggleDestacado(id: number): Promise<IProductos> {
+    const response = await axiosInstance.patch<IApiResponse<IProductos>>(
+      `/productos/${id}/destacado`
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.error || 'Error al cambiar estado destacado');
+    }
+
+    return response.data.data;
   }
 }
 

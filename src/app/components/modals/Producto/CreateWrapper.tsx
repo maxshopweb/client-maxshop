@@ -51,20 +51,31 @@ export function CreateProductoModal({ onClose }: CreateProductoModalProps) {
 
     const handleComplete = async () => {
         console.log('🚀 handleComplete iniciado');
-        
+
         // Validar todo el formulario
         const isValid = await form.trigger();
         console.log('Formulario válido:', isValid);
-        
+
         if (!isValid) {
             console.log('Errores de validación:', form.formState.errors);
             return;
         }
-        
-        const data = form.getValues();
+
+        const rawData = form.getValues();
+
+        // Transformar los valores string a number para los selects
+        const data = {
+            ...rawData,
+            id_cat: rawData.id_cat ? Number(rawData.id_cat) : undefined,
+            id_subcat: rawData.id_subcat ? Number(rawData.id_subcat) : undefined,
+            id_marca: rawData.id_marca ? Number(rawData.id_marca) : undefined,
+            id_iva: rawData.id_iva ? Number(rawData.id_iva) : undefined,
+            estado: rawData.estado ? Number(rawData.estado) : undefined,
+        };
+
         console.log('📦 Datos del formulario:', data);
         console.log('🔄 Llamando a createProducto...');
-        
+
         // Ejecutar la mutación
         createProducto(data);
     };
@@ -75,7 +86,7 @@ export function CreateProductoModal({ onClose }: CreateProductoModalProps) {
             onClose={onClose}
             onComplete={handleComplete}
             isLoading={isCreating}
-            title="Crear Nuevo Producto"
+            title="Crear nuevo producto"
             steps={[
                 {
                     title: 'Información Básica',

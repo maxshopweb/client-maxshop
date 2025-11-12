@@ -1,10 +1,10 @@
-// src/app/hooks/productos/useProductFilter.ts
-
 import { useCallback, useMemo, useState, useEffect } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useDebounce } from '@/app/hooks/useDebounce';
 import type { IProductoFilters } from '@/app/types/producto.type';
 import { EstadoGeneral } from '@/app/types/estados.type';
+import { useCategorias, useSubcategorias } from '@/app/hooks/categorias/useCategorias';
+import { useMarcas } from '@/app/hooks/marcas/useMarcas';
 
 const DEFAULT_FILTERS: IProductoFilters = {
     page: 1,
@@ -23,6 +23,21 @@ export function useProductosFilters() {
 
     // Debounce solo para la búsqueda
     const debouncedBusqueda = useDebounce(localBusqueda, 500);
+
+    // Obtener datos del backend
+    const { data: categoriasResponse, isLoading: loadingCategorias } = useCategorias();
+    const { data: marcasResponse, isLoading: loadingMarcas } = useMarcas();
+
+    // Obtener subcategorías según la categoría seleccionada
+    const idCatFromUrl = searchParams.get('id_cat');
+    const { data: subcategoriasResponse, isLoading: loadingSubcategorias } = useSubcategorias(
+        idCatFromUrl ? Number(idCatFromUrl) : undefined
+    );
+
+    // Extraer los arrays de data
+    const categorias = categoriasResponse?.data || [];
+    const subcategorias = subcategoriasResponse?.data || [];
+    const marcas = marcasResponse?.data || [];
 
     const filters = useMemo<IProductoFilters>(() => {
         const params: IProductoFilters = { ...DEFAULT_FILTERS };
@@ -220,5 +235,13 @@ export function useProductosFilters() {
         prevPage,
         goToPage,
         setSort,
+        // Datos del backend
+        categorias,
+        subcategorias,
+        marcas,
+        // Estados de carga
+        loadingCategorias,
+        loadingSubcategorias,
+        loadingMarcas,
     };
 }

@@ -5,6 +5,9 @@ import * as Popover from '@radix-ui/react-popover';
 import * as Checkbox from '@radix-ui/react-checkbox';
 import { Check } from 'lucide-react';
 import Input from '../../ui/Input';
+import Select from '../../ui/Select';
+import type { ICategoria } from '@/app/types/categoria.type';
+import type { IMarca } from '@/app/types/marca.type';
 
 export function ProductosFilters() {
     const {
@@ -13,6 +16,12 @@ export function ProductosFilters() {
         clearFilters,
         hasActiveFilters,
         activeFiltersCount,
+        categorias,
+        subcategorias,
+        marcas,
+        loadingCategorias,
+        loadingSubcategorias,
+        loadingMarcas,
     } = useProductosFilters();
 
     const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
@@ -90,42 +99,68 @@ export function ProductosFilters() {
 
                             {/* CATEGORÍA */}
                             <div>
-                                <label className="block text-sm font-medium text-input mb-1.5">
-                                    Categoría
-                                </label>
-                                <select
+                                <Select
+                                    label="Categoría"
+                                    options={[
+                                        { value: '', label: 'Todas las categorías' },
+                                        ...(categorias?.map((cat: ICategoria) => ({
+                                            value: cat.id_cat,
+                                            label: cat.nombre || 'Sin nombre',
+                                        })) || [])
+                                    ]}
                                     value={filters.id_cat || ''}
-                                    onChange={(e) =>
-                                        setFilter('id_cat', e.target.value ? Number(e.target.value) : undefined)
-                                    }
-                                    className="w-full px-3 py-2.5 bg-input border border-input rounded-2xl text-input text-sm focus:outline-none focus:ring-2 focus:ring-principal transition-all"
-                                >
-                                    <option value="">Todas las categorías</option>
-                                    <option value="1">Electrónica</option>
-                                    <option value="2">Hogar</option>
-                                    <option value="3">Deportes</option>
-                                    <option value="4">Moda</option>
-                                </select>
+                                    onChange={(value) => {
+                                        setFilter('id_cat', value ? Number(value) : undefined);
+                                        // Limpiar subcategoría al cambiar categoría
+                                        if (filters.id_subcat) {
+                                            setFilter('id_subcat', undefined);
+                                        }
+                                    }}
+                                    disabled={loadingCategorias}
+                                    placeholder={loadingCategorias ? "Cargando..." : "Seleccionar categoría"}
+                                />
                             </div>
+
+                            {/* SUBCATEGORÍA */}
+                            {filters.id_cat && (
+                                <div>
+                                    <Select
+                                        label="Subcategoría"
+                                        options={[
+                                            { value: '', label: 'Todas las subcategorías' },
+                                            ...(subcategorias?.map((subcat: any) => ({
+                                                value: subcat.id_subcat,
+                                                label: subcat.nombre || 'Sin nombre',
+                                            })) || [])
+                                        ]}
+                                        value={filters.id_subcat || ''}
+                                        onChange={(value) => {
+                                            setFilter('id_subcat', value ? Number(value) : undefined);
+                                        }}
+                                        disabled={loadingSubcategorias}
+                                        placeholder={loadingSubcategorias ? "Cargando..." : "Seleccionar subcategoría"}
+                                    />
+                                </div>
+                            )}
 
                             {/* MARCA */}
                             <div>
-                                <label className="block text-sm font-medium text-input mb-1.5">
-                                    Marca
-                                </label>
-                                <select
+                                <Select
+                                    label="Marca"
+                                    options={[
+                                        { value: '', label: 'Todas las marcas' },
+                                        ...(marcas?.map((marca: IMarca) => ({
+                                            value: marca.id_marca,
+                                            label: marca.nombre || 'Sin nombre',
+                                        })) || [])
+                                    ]}
                                     value={filters.id_marca || ''}
-                                    onChange={(e) =>
-                                        setFilter('id_marca', e.target.value ? Number(e.target.value) : undefined)
-                                    }
-                                    className="w-full px-3 py-2.5 bg-input border border-input rounded-2xl text-input text-sm focus:outline-none focus:ring-2 focus:ring-principal transition-all"
-                                >
-                                    <option value="">Todas las marcas</option>
-                                    <option value="1">Samsung</option>
-                                    <option value="2">LG</option>
-                                    <option value="3">Sony</option>
-                                    <option value="4">HP</option>
-                                </select>
+                                    onChange={(value) => {
+                                        setFilter('id_marca', value ? Number(value) : undefined);
+                                    }}
+                                    disabled={loadingMarcas}
+                                    placeholder={loadingMarcas ? "Cargando..." : "Seleccionar marca"}
+                                />
                             </div>
 
                             {/* RANGO DE PRECIOS */}

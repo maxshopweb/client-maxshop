@@ -10,6 +10,7 @@ import { CreateProductoModal } from '@/app/components/modals/Producto/CreateWrap
 import { EditProductoModal } from '@/app/components/modals/Producto/EditWrapper';
 import { DeleteProductoModal } from '@/app/components/modals/Producto/DeleteProduct';
 import { BulkDeleteProductosModal } from '@/app/components/modals/Producto/BulkDeleteProductosModal';
+import { useToggleDestacado } from '@/app/hooks/productos/useProductosMutations';
 
 type ModalType = 'create' | 'edit' | 'delete' | 'stock' | 'bulk-delete' | null;
 
@@ -26,6 +27,8 @@ export default function ProductosPage() {
     const openEditModal = (producto: IProductos) => setModal({ type: 'edit', producto });
     const openDeleteDialog = (producto: IProductos) => setModal({ type: 'delete', producto });
     const openStockDialog = (producto: IProductos) => setModal({ type: 'stock', producto });
+    const { toggleDestacado } = useToggleDestacado();
+
     const closeModal = () => {
         setModal({ type: null });
         setBulkDeleteIds([]);
@@ -37,7 +40,7 @@ export default function ProductosPage() {
     };
 
     const handleToggleDestacado = (producto: IProductos) => {
-        console.log('Toggle destacado:', producto);
+        toggleDestacado(producto.id_prod);
     };
 
     return (

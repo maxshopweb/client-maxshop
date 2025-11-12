@@ -84,7 +84,10 @@ export function StepTwoPricing({ form }: StepTwoProps) {
                     { value: 2, label: '10.5%' }
                 ]}
                 placeholder="Seleccionar IVA"
-                {...register('id_iva')}
+                value={form.watch('id_iva')}
+                onChange={(value) => {
+                    form.setValue('id_iva', value as number);
+                }}
             />
         </div>
     );

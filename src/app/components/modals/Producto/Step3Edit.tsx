@@ -7,7 +7,7 @@ interface StepThreeProps {
 }
 
 export function StepThreeEstado({ form }: StepThreeProps) {
-    const { register } = form;
+    const { formState: { errors } } = form;
 
     return (
         <div className="space-y-4 px-2">
@@ -23,7 +23,11 @@ export function StepThreeEstado({ form }: StepThreeProps) {
                         { value: 2, label: '❌ Inactivo' }
                     ]}
                     placeholder="Seleccionar estado"
-                    {...register('estado')}
+                    value={form.watch('estado') ?? ''}
+                    onChange={(value) => {
+                        form.setValue('estado', value as any);
+                    }}
+                    error={errors.estado?.message}
                 />
 
                 <div className="mt-4 p-4 bg-input/30 rounded-xl">

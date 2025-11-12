@@ -12,6 +12,8 @@ interface ProductosTableActions {
     onDelete: (producto: IProductos) => void;
     onToggleDestacado: (producto: IProductos) => void;
     onUpdateStock: (producto: IProductos) => void;
+    categorias?: any[];
+    marcas?: any[];
 }
 
 export const getProductosColumns = (
@@ -94,35 +96,58 @@ export const getProductosColumns = (
             },
         },
         {
-            accessorKey: 'subcategoria.nombre',
+            id: 'categoria',
+            accessorKey: 'id_cat',
             header: 'Categoría',
             cell: ({ row }) => {
-                const subcategoria = row.original.subcategoria;
+                const producto = row.original;
+                const subcategoria = producto.subcategoria;
                 const categoria = subcategoria?.categoria;
 
-                if (!subcategoria) return <span className="text-gray-400">-</span>;
+                // Si tiene subcategoría poblada, mostrarla
+                if (subcategoria?.nombre) {
+                    return (
+                        <div className="flex flex-col gap-1">
+                            <span className="text-sm font-medium">{subcategoria.nombre}</span>
+                            {categoria?.nombre && (
+                                <span className="text-xs text-text">{categoria.nombre}</span>
+                            )}
+                        </div>
+                    );
+                }
 
-                return (
-                    <div className="flex flex-col gap-1">
-                        <span className="text-sm font-medium">{subcategoria.nombre}</span>
-                        {categoria && (
-                            <span className="text-xs text-text">{categoria.nombre}</span>
-                        )}
-                    </div>
-                );
+                // Si no, buscar por ID en la lista de categorías
+                if (producto.id_cat && actions.categorias) {
+                    const cat = actions.categorias.find((c: any) => c.id_cat === producto.id_cat);
+                    if (cat?.nombre) {
+                        return <span className="text-sm font-medium">{cat.nombre}</span>;
+                    }
+                }
+
+                return <span className="text-gray-400">-</span>;
             },
         },
         {
-            accessorKey: 'marca.nombre',
+            id: 'marca',
+            accessorKey: 'id_marca',
             header: 'Marca',
             cell: ({ row }) => {
-                const marca = row.original.marca?.nombre;
-                return marca ? (
+                const producto = row.original;
+                const marca = producto.marca;
+                let nombreMarca = marca?.nombre;
+
+                // Si no tiene marca poblada, buscar por ID
+                if (!nombreMarca && producto.id_marca && actions.marcas) {
+                    const marcaFound = actions.marcas.find((m: any) => m.id_marca === producto.id_marca);
+                    nombreMarca = marcaFound?.nombre;
+                }
+
+                return nombreMarca ? (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-text border border-input-border">
-                        {marca}
+                        {nombreMarca}
                     </span>
                 ) : (
-                    <span className="text-text">-</span>
+                    <span className="text-gray-400">-</span>
                 );
             },
         },

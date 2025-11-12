@@ -1,5 +1,3 @@
-// components/ui/Select.tsx
-
 'use client';
 
 import React, { forwardRef, SelectHTMLAttributes, useState } from 'react';
