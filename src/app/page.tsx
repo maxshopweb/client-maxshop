@@ -1,3 +1,4 @@
+
 import TopHeader from "./components/Tienda/TopHeader";
 import NavigationBar from "./components/Tienda/NavigationBar";
 import Carousel from "./components/Tienda/Carousel";
@@ -25,7 +26,7 @@ export default function TiendaHome() {
       {/* Products Carousel - PRODUCTOS EN OFERTA */}
       <ProductsCarousel 
         title="PRODUCTOS EN OFERTA" 
-        filter="all"
+        filter="ofertas"
         showViewAllButton={true}
       />
 
@@ -35,7 +36,7 @@ export default function TiendaHome() {
       {/* Products Carousel - PRODUCTOS DESTACADOS */}
       <ProductsCarousel 
         title="PRODUCTOS DESTACADOS" 
-        filter="all"
+        filter="destacados"
         showViewAllButton={true}
       />
 

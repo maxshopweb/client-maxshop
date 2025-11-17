@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/app/context/ThemeProvider";
 import { Providers } from "@/app/context/Providers";
 import { Toaster } from "sonner";
+import { AuthProvider } from "./context/AuthContext";
 
 const fredoka = Fredoka({
   variable: "--font-fredoka",
@@ -119,8 +120,10 @@ export default function RootLayout({
       <body className={`${fredoka.variable} antialiased`}>
         <Providers>
           <ThemeProvider>
-            {children}
-          <Toaster/>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+            <Toaster />
           </ThemeProvider>
         </Providers>
       </body>
