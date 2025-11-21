@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import HeroButton from "@/app/components/ui/HeroButton";
 
 const carouselImages = [
   "/carrousel/black-decker-1.jpg",
@@ -38,7 +39,7 @@ export default function Carousel() {
   };
 
   return (
-    <div className="relative w-full h-[250px] sm:h-[300px] md:h-[400px] overflow-hidden bg-secundario group">
+    <div className="relative w-full h-full min-h-[500px] overflow-hidden bg-secundario group z-0">
       {/* Carousel Images */}
       <div className="relative w-full h-full">
         {carouselImages.map((image, index) => (
@@ -62,6 +63,33 @@ export default function Carousel() {
       {/* Gradient Overlays for better visibility of controls */}
       <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-black/50 to-transparent pointer-events-none" />
       <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-black/50 to-transparent pointer-events-none" />
+      
+      {/* Overlay oscuro para mejor legibilidad del texto centrado */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60 pointer-events-none" />
+      
+      {/* Hero Text Overlay - Centrado */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+        <div className="text-center px-6 md:px-12 lg:px-16 xl:px-20 max-w-4xl">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-4 md:mb-6 drop-shadow-2xl tracking-tight">
+            Tus herramientas
+            <br />
+            al mejor precio
+          </h1>
+          <p className="text-lg md:text-xl lg:text-2xl text-white mb-6 md:mb-8 drop-shadow-2xl max-w-2xl mx-auto">
+            Calidad garantizada, envío rápido y atención personalizada
+          </p>
+          {/* Call to Action */}
+          <div className="pointer-events-auto flex justify-center">
+            <HeroButton
+              variant="white-orange"
+              icon={ArrowRight}
+              href="/tienda/productos"
+            >
+              Ver Catálogo
+            </HeroButton>
+          </div>
+        </div>
+      </div>
 
       {/* Previous Button */}
       <button

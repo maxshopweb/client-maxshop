@@ -1,50 +1,54 @@
-
-import TopHeader from "./components/Tienda/TopHeader";
-import NavigationBar from "./components/Tienda/NavigationBar";
 import Carousel from "./components/Tienda/Carousel";
 import TitleSection from "./components/Tienda/TitleSection";
 import ProductsCarousel from "./components/Tienda/ProductsCarousel";
 import SmallCarousel from "./components/Tienda/SmallCarousel";
 import ValueSection from "./components/Tienda/ValueSection";
-import Footer from "./components/Tienda/Footer";
+import BenefitsCards from "./components/Tienda/BenefitsCards";
+import ScrollAnimate from "./components/ui/ScrollAnimate";
+import AboutUs from "./components/Tienda/AboutUs";
 
 export default function TiendaHome() {
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Top Header - Logo, Búsqueda, Carrito */}
-      <TopHeader />
+    <div className="flex flex-col">
+      <section className="w-full h-screen md:h-screen min-h-[500px] -mt-[calc(3.5rem+3rem)] md:-mt-[calc(4rem+3.5rem)]">
+        <Carousel />
+      </section>
       
-      {/* Navigation Bar - Menú */}
-      <NavigationBar />
-      
-      {/* Carousel - Imágenes Rotativas */}
-      <Carousel />
-      
-      {/* Title Section - Título y Botón de Catálogo */}
-      <TitleSection />
+      <div className="flex flex-col">
+      {/* <TitleSection /> */}
 
-      {/* Products Carousel - PRODUCTOS EN OFERTA */}
-      <ProductsCarousel 
-        title="PRODUCTOS EN OFERTA" 
-        filter="ofertas"
-        showViewAllButton={true}
-      />
+      <ScrollAnimate direction="up" delay={0}>
+        <BenefitsCards />
+      </ScrollAnimate>
 
-      {/* Small Carousel - Carrusel pequeño */}
-      <SmallCarousel />
+      <ScrollAnimate direction="up" delay={0}>
+        <ProductsCarousel
+          title="Productos destacados"
+          filter="destacados"
+          showViewAllButton={true}
+        />
+      </ScrollAnimate>
 
-      {/* Products Carousel - PRODUCTOS DESTACADOS */}
-      <ProductsCarousel 
-        title="PRODUCTOS DESTACADOS" 
-        filter="destacados"
-        showViewAllButton={true}
-      />
+      <ScrollAnimate direction="up" delay={100}>
+        <SmallCarousel />
+      </ScrollAnimate>
 
-      {/* Value Section - VALOR AGREGADO */}
-      <ValueSection />
+      <ScrollAnimate direction="up" delay={0}>
+        <ProductsCarousel
+          title="Puede interesarte"
+          filter="destacados"
+          showViewAllButton={true}
+        />
+      </ScrollAnimate>
 
-      {/* Footer */}
-      <Footer />
+      <ScrollAnimate direction="up" delay={100}>
+        <ValueSection />
+      </ScrollAnimate>
+
+      <ScrollAnimate direction="up" delay={100}>
+        <AboutUs/>
+      </ScrollAnimate>
+      </div>
     </div>
   );
 }

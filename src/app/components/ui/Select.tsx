@@ -65,17 +65,21 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
                         onMouseDown={() => setIsOpen(!isOpen)}
                         onBlur={() => setIsOpen(false)}
                         className={clsx(
-                            'w-full px-6 py-4 pr-10 rounded-[20px] font-medium transition-all duration-200 appearance-none',
-                            'focus:outline-none focus:ring-2 focus:ring-[var(--green)] focus:shadow-lg',
-                            'bg-[var(--gray-400)] text-white',
-                            'hover:bg-[#2a2a2a]',
-                            disabled && 'opacity-50 cursor-not-allowed hover:bg-[var(--gray-400)]',
-                            error && 'ring-2 ring-[var(--red)] focus:ring-[var(--red)]',
+                            'w-full px-4 py-3 pr-10 rounded-lg text-sm font-medium transition-all duration-200 appearance-none',
+                            'focus:outline-none focus:ring-2 focus:ring-principal/20 focus:shadow-sm',
+                            'bg-background text-foreground border-2 border-input/70',
+                            'hover:border-principal/50 focus:border-principal',
+                            disabled && 'opacity-50 cursor-not-allowed',
+                            error && 'ring-2 ring-destructive focus:ring-destructive border-destructive',
                             className
                         )}
+                        style={{
+                            backgroundColor: 'var(--background)',
+                            color: 'var(--foreground)',
+                        }}
                         {...props}
                     >
-                        <option value="" className="bg-[#1e1e1e] text-white">
+                        <option value="" style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>
                             {placeholder}
                         </option>
                         {options.map((option) => (
@@ -83,7 +87,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
                                 key={option.value} 
                                 value={option.value}
                                 disabled={option.disabled}
-                                className="bg-[#1e1e1e] text-white hover:bg-[#333] py-2"
+                                style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}
                             >
                                 {option.label}
                             </option>
@@ -91,11 +95,11 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
                     </select>
                     
                     <div className={clsx(
-                        'absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-300',
+                        'absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-300',
                         isOpen && 'rotate-180',
                         disabled && 'opacity-50'
                     )}>
-                        <ChevronDown className="w-4 h-4 text-white" />
+                        <ChevronDown className="w-4 h-4 text-foreground" />
                     </div>
                 </div>
 

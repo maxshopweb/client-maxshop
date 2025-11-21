@@ -40,7 +40,7 @@ const ModalBase = ({
 
     return (
         <div
-            className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${isClosing || !shouldRender ? 'opacity-0' : 'opacity-100'
+            className={`fixed inset-0 z-[120] flex items-center justify-center p-4 transition-all duration-300 ${isClosing || !shouldRender ? 'opacity-0' : 'opacity-100'
                 }`}
             style={{
                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
