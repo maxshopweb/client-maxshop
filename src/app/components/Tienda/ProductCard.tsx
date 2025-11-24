@@ -27,7 +27,7 @@ export default function ProductCard({ producto }: ProductCardProps) {
   return (
     <Link 
       href={`/tienda/productos/${producto.id_prod}`}
-      className="group bg-card rounded-xl overflow-hidden transition-all duration-300 flex flex-col h-full shadow-sm hover:shadow-lg hover:-translate-y-1 max-h-full"
+      className="group bg-white rounded-xl overflow-hidden transition-all duration-300 flex flex-col h-full shadow-sm hover:shadow-lg hover:-translate-y-1 max-h-full"
     >
       {/* Imagen del Producto */}
       <div className="relative aspect-square bg-gradient-to-br from-background to-background/50 overflow-hidden">
@@ -74,13 +74,13 @@ export default function ProductCard({ producto }: ProductCardProps) {
       {/* Información del Producto */}
       <div className="p-3 sm:p-5 flex flex-col flex-1">
         {/* Nombre del Producto */}
-        <h3 className="text-sm sm:text-base md:text-lg font-medium text-foreground group-hover:text-principal transition-colors line-clamp-2 min-h-[2.5rem] mb-1 sm:mb-2 leading-tight capitalize">
+        <h3 className="text-sm sm:text-base md:text-lg font-medium text-terciario group-hover:text-principal transition-colors line-clamp-2 min-h-[2.5rem] mb-1 sm:mb-2 leading-tight capitalize">
           {producto.nombre || "Producto sin nombre"}
         </h3>
 
         {/* Marca */}
         {producto.marca && (
-          <p className="text-xs text-foreground/50 mb-2 sm:mb-4 capitalize">
+          <p className="text-xs text-terciario/50 mb-2 sm:mb-4 capitalize">
             {producto.marca.nombre}
           </p>
         )}
@@ -93,7 +93,7 @@ export default function ProductCard({ producto }: ProductCardProps) {
                 <span className="text-lg sm:text-xl md:text-2xl font-bold text-principal">
                   ${precioFinal.toFixed(2)}
                 </span>
-                <span className="text-xs sm:text-sm text-foreground/40 line-through">
+                <span className="text-xs sm:text-sm text-terciario/40 line-through">
                   ${precioMinorista.toFixed(2)}
                 </span>
               </div>
@@ -109,7 +109,7 @@ export default function ProductCard({ producto }: ProductCardProps) {
             <AddToCartButton
               producto={producto}
               variant="secondary"
-              size="sm"
+              size="lg"
               showIcon={true}
               className="w-full text-xs sm:text-sm"
             />

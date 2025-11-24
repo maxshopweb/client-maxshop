@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Search, User, ShoppingCart, Menu, X, Sun, Moon } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Search, User, ShoppingCart, Menu, X, Sun, Moon, LogOut } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useTheme } from "@/app/context/ThemeProvider";
 import { useAuth } from "@/app/context/AuthContext";
@@ -10,6 +11,8 @@ import { useCartStore } from "@/app/stores/cartStore";
 import { useCartSidebar } from "@/app/hooks/useCartSidebar";
 
 export default function TopHeader() {
+  const { logout } = useAuth();
+  const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState("");
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
@@ -20,6 +23,16 @@ export default function TopHeader() {
   const { user, isAuthenticated } = useAuth();
   const { items, summary } = useCartStore();
   const { isOpen, open, close } = useCartSidebar();
+
+  // Construir la URL de login con el redirect a la página actual
+  const getLoginUrl = () => {
+    // No redirigir si ya estamos en login o en otras rutas de auth
+    if (pathname?.startsWith('/login') || pathname?.startsWith('/register') || pathname?.startsWith('/forgot-password')) {
+      return '/login';
+    }
+    // Agregar la página actual como parámetro redirect
+    return `/login?redirect=${encodeURIComponent(pathname || '/')}`;
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -146,12 +159,20 @@ export default function TopHeader() {
                     >
                       Contacto
                     </Link>
+                    <Link
+                      href="/login"
+                      className="block px-4 py-2.5 hover:bg-white/10 transition-colors text-sm text-white font-medium flex items-center gap-2"
+                      onClick={() => logout()}
+                    >
+                      <LogOut size={18} />
+                      Cerrar sesión
+                    </Link>
                   </div>
                 )}
               </div>
             ) : (
               <Link
-                href="/cuenta"
+                href={getLoginUrl()}
                 className="relative p-2 hover:bg-white/10 transition-all duration-300 group opacity-50 rounded-lg"
                 aria-label="Iniciar sesión"
               >
@@ -266,7 +287,7 @@ export default function TopHeader() {
               </div>
             ) : (
               <Link
-                href="/cuenta"
+                href={getLoginUrl()}
                 className="p-2 hover:bg-white/10 transition-all duration-300 active:scale-95 opacity-50 rounded-lg"
                 aria-label="Iniciar sesión"
               >

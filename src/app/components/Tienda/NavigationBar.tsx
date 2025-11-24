@@ -12,9 +12,10 @@ const menuLinks = [
   { label: "Inicio", href: "/" },
   { label: "Tienda", href: "/tienda/productos" },
   // { label: "Categorías", href: "/categorias" },
-  { label: "Ofertas", href: "/ofertas" },
-  { label: "Nosotros", href: "/nosotros" },
-  { label: "Contacto", href: "/contacto" },
+  // { label: "Ofertas", href: "/tienda/productos" },
+  // { label: "Categorías", href: "/categoria" },
+  { label: "Nosotros", href: "#contacto" },
+  { label: "Contacto", href: "#contacto" },
 ];
 
 export default function NavigationBar() {
@@ -50,7 +51,9 @@ export default function NavigationBar() {
       <nav
         className={`transition-all duration-500 ${
           isScrolled 
-            ? "shadow-md bg-white text-terciario" 
+            ? actualTheme === 'dark'
+              ? "shadow-md bg-secundario text-white"
+              : "shadow-md bg-white text-terciario"
             : "bg-transparent"
         }`}
       >
@@ -63,7 +66,7 @@ export default function NavigationBar() {
                 
                 return (
                   <Link
-                    key={link.href}
+                    key={link.label}
                     href={link.href}
                     className={`relative text-sm lg:text-base group py-2 px-2 -mx-2 rounded-md transition-all duration-300 ease-out ${
                       isActive ? '-translate-y-1' : 'group-hover:-translate-y-1'
@@ -75,10 +78,14 @@ export default function NavigationBar() {
                       } ${
                         isActive
                           ? isScrolled
-                            ? "text-terciario font-medium"
+                            ? actualTheme === 'dark'
+                              ? "text-white font-medium"
+                              : "text-terciario font-medium"
                             : "text-white font-medium"
                           : isScrolled
-                          ? "text-terciario/70 group-hover:text-terciario"
+                          ? actualTheme === 'dark'
+                            ? "text-white/70 group-hover:text-white"
+                            : "text-terciario/70 group-hover:text-terciario"
                           : "text-white/70 group-hover:text-white"
                       }`}
                     >
@@ -89,10 +96,14 @@ export default function NavigationBar() {
                       className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-[3px] rounded-full transition-all duration-300 ease-out ${
                         isActive
                           ? isScrolled
-                            ? "w-[50%] bg-terciario"
+                            ? actualTheme === 'dark'
+                              ? "w-[50%] bg-principal"
+                              : "w-[50%] bg-terciario"
                             : "w-[50%] bg-white"
                           : isScrolled
-                          ? "w-0 group-hover:w-[50%] bg-terciario/60"
+                          ? actualTheme === 'dark'
+                            ? "w-0 group-hover:w-[50%] bg-principal"
+                            : "w-0 group-hover:w-[50%] bg-secundario"
                           : "w-0 group-hover:w-[50%] bg-white/60"
                       }`}
                     />
@@ -105,7 +116,9 @@ export default function NavigationBar() {
             <div className="hidden lg:flex items-center gap-5">
               <div className={`flex items-center gap-2 text-sm transition-colors duration-300 group ${
                 isScrolled
-                  ? "text-terciario/90 hover:text-terciario" 
+                  ? actualTheme === 'dark'
+                    ? "text-white/90 hover:text-white"
+                    : "text-terciario/90 hover:text-terciario"
                   : "text-white/90 hover:text-white"
               }`}>
                 <Truck size={18} className="transition-transform duration-300 group-hover:scale-110" />
@@ -115,7 +128,9 @@ export default function NavigationBar() {
                 href="/ayuda"
                 className={`flex items-center gap-2 text-sm transition-colors duration-300 group ${
                   isScrolled
-                    ? "text-terciario/90 hover:text-terciario" 
+                    ? actualTheme === 'dark'
+                      ? "text-white/90 hover:text-white"
+                      : "text-terciario/90 hover:text-terciario"
                     : "text-white/90 hover:text-white"
                 }`}
               >
@@ -129,7 +144,9 @@ export default function NavigationBar() {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className={`md:hidden p-2 hover:bg-white/10 rounded transition-all duration-300 active:scale-95 ml-auto ${
                 isScrolled
-                  ? "text-terciario"
+                  ? actualTheme === 'dark'
+                    ? "text-white"
+                    : "text-terciario"
                   : "text-white"
               }`}
               aria-label="Menú"
@@ -169,7 +186,7 @@ export default function NavigationBar() {
             const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
             return (
               <Link
-                key={link.href}
+                key={link.label}
                 href={link.href}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`group relative block text-base py-3 px-4 rounded-lg transition-all duration-300 ease-out ${

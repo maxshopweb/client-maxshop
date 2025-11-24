@@ -1,11 +1,11 @@
-import Carousel from "./components/Tienda/Carousel";
-import TitleSection from "./components/Tienda/TitleSection";
-import ProductsCarousel from "./components/Tienda/ProductsCarousel";
-import SmallCarousel from "./components/Tienda/SmallCarousel";
-import ValueSection from "./components/Tienda/ValueSection";
-import BenefitsCards from "./components/Tienda/BenefitsCards";
-import ScrollAnimate from "./components/ui/ScrollAnimate";
-import AboutUs from "./components/Tienda/AboutUs";
+import Carousel from "../components/Tienda/Carousel";
+import TitleSection from "../components/Tienda/TitleSection";
+import ProductsCarousel from "../components/Tienda/ProductsCarousel";
+import SmallCarousel from "../components/Tienda/SmallCarousel";
+import ValueSection from "../components/Tienda/ValueSection";
+import BenefitsCards from "../components/Tienda/BenefitsCards";
+import ScrollAnimate from "../components/ui/ScrollAnimate";
+import AboutUs from "../components/Tienda/AboutUs";
 
 export default function TiendaHome() {
   return (
@@ -52,3 +52,4 @@ export default function TiendaHome() {
     </div>
   );
 }
+

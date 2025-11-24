@@ -29,11 +29,8 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
 
   const handleVerCarrito = () => {
     onClose();
-    if (!isAuthenticated) {
-      router.push("/login?redirect=/tienda/carrito");
-    } else {
-      router.push("/tienda/carrito");
-    }
+    // Resetear checkout al step 1 y redirigir
+    router.push("/checkout?step=1");
   };
 
   const handleEliminarItem = (id_prod: number) => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef } from "react";
 import { productosService } from "@/app/services/producto.service";
@@ -19,6 +20,7 @@ export default function ProductsCarousel({
   filter = "all",
   showViewAllButton = true 
 }: ProductsCarouselProps) {
+  const router = useRouter();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Obtener productos según el filtro
@@ -45,6 +47,14 @@ export default function ProductsCarousel({
         left: newScrollPosition,
         behavior: "smooth",
       });
+    }
+  };
+
+  const handleViewAll = () => {
+    if (filter === "destacados") {
+      router.push("/tienda/productos?destacado=true");
+    } else {
+      router.push("/tienda/productos");
     }
   };
 
@@ -104,7 +114,13 @@ export default function ProductsCarousel({
       {/* Botón Ver Todos */}
       {showViewAllButton && productos.length > 0 && (
         <div className="flex justify-center mt-10">
-          <Button variant="primary" size="lg">Ver todos los productos {filter === "destacados" && "destacados"}</Button>
+          <Button 
+            variant="primary" 
+            size="lg"
+            onClick={handleViewAll}
+          >
+            Ver todos los productos {filter === "destacados" && "destacados"}
+          </Button>
         </div>
       )}
 

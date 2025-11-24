@@ -198,3 +198,24 @@ body {
   scrollbar-width: auto;
   scrollbar-color: rgba(0, 0, 0, 0.3) rgba(0, 0, 0, 0.1);
 }
+
+/* Scroll suave global */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
+}
+
+/* Animación de scroll infinito para banner promocional */
+@keyframes scroll-infinite {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll-infinite {
+  animation: scroll-infinite 30s linear infinite;
+  display: flex;
+}

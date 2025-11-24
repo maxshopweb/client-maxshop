@@ -5,9 +5,6 @@ import { ThemeProvider } from "@/app/context/ThemeProvider";
 import { Providers } from "@/app/context/Providers";
 import { Toaster } from "sonner";
 import { AuthProvider } from "./context/AuthContext";
-import TopHeader from "./components/Tienda/TopHeader";
-import NavigationBar from "./components/Tienda/NavigationBar";
-import Footer from "./components/Tienda/Footer";
 
 const fredoka = Fredoka({
   variable: "--font-fredoka",
@@ -124,15 +121,7 @@ export default function RootLayout({
         <Providers>
           <ThemeProvider>
             <AuthProvider>
-              {/* Navbars Container - Sticky Together - Fixed in all pages */}
-              <div className="sticky top-0 z-50">
-                <TopHeader />
-                <NavigationBar />
-              </div>
-              <div className="flex flex-col min-h-screen">
-                {children}
-                <Footer />
-              </div>
+              {children}
             </AuthProvider>
             <Toaster />
           </ThemeProvider>

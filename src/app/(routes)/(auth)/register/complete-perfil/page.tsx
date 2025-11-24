@@ -25,7 +25,7 @@ export default function CompletePerfilPage() {
     telefono?: string;
     nacimiento?: string;
   }>({});
-  const { completeProfile, user, role, firebaseUser, loading: authLoading } = useAuth();
+  const { completeProfile, user, role, firebaseUser, loading: authLoading, logout } = useAuth();
   const usuarioStore = useAuthStore((state) => state.usuario);
   const router = useRouter();
 
@@ -235,20 +235,42 @@ export default function CompletePerfilPage() {
 
       <p className="text-center text-gray-600 text-sm pt-2">
         <button
-          onClick={() => {
-            const currentUser = useAuthStore.getState().usuario;
-            const currentRole = currentUser?.rol || role;
-            if (currentUser?.estado === 3) {
-              // Si el perfil está completo, ir a home
-              router.replace(currentRole === 'ADMIN' ? '/admin/home' : '/');
-            } else {
-              // Si no está completo, ir a login
-              router.replace('/login');
+          onClick={async () => {
+            try {
+              // Hacer logout (limpia Firebase, store y cookies)
+              await logout();
+              
+              // Limpiar TODO el localStorage (excepto theme)
+              if (typeof window !== 'undefined') {
+                const theme = localStorage.getItem('theme');
+                localStorage.clear();
+                if (theme) {
+                  localStorage.setItem('theme', theme);
+                }
+                
+                // Limpiar sessionStorage
+                sessionStorage.clear();
+              }
+              
+              // Redirigir al login
+              router.push('/login');
+            } catch (error) {
+              console.error('Error al hacer logout:', error);
+              // Aunque haya error, limpiar storage y redirigir
+              if (typeof window !== 'undefined') {
+                const theme = localStorage.getItem('theme');
+                localStorage.clear();
+                if (theme) {
+                  localStorage.setItem('theme', theme);
+                }
+                sessionStorage.clear();
+              }
+              router.push('/login');
             }
           }}
           className="text-orange-600 hover:text-orange-700 font-semibold"
         >
-          Volver al inicio
+          Volver al login
         </button>
       </p>
     </AuthLayout>
