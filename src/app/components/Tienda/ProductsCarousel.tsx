@@ -61,12 +61,12 @@ export default function ProductsCarousel({
   return (
     <SectionTitle title={title}>
       {/* Carousel Container */}
-      <div className="relative group overflow-hidden">
+      <div className="relative group overflow-visible">
         {/* Botón Anterior */}
         {productos.length > 2 && (
           <button
             onClick={() => scroll("left")}
-            className="absolute left-0 md:-left-4 top-1/2 -translate-y-1/2 z-10 bg-background border border-input shadow-lg p-2 md:p-3 rounded-full hover:bg-principal hover:text-white transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 touch-manipulation hidden sm:flex"
+            className="absolute left-0 md:-left-4 top-1/2 -translate-y-1/2 z-50 bg-background border border-input shadow-lg p-2 md:p-3 rounded-full hover:bg-principal hover:text-white transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 touch-manipulation hidden sm:flex"
             aria-label="Anterior"
           >
             <ChevronLeft size={20} className="md:w-6 md:h-6" />
@@ -81,7 +81,7 @@ export default function ProductsCarousel({
         ) : (
           <div
             ref={scrollContainerRef}
-            className="flex gap-3 sm:gap-6 overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth pb-4 snap-x snap-mandatory"
+            className="flex gap-3 sm:gap-6 overflow-x-auto overflow-y-visible scrollbar-hide scroll-smooth pb-4 snap-x snap-mandatory"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
@@ -103,7 +103,7 @@ export default function ProductsCarousel({
         {productos.length > 2 && (
           <button
             onClick={() => scroll("right")}
-            className="absolute right-0 md:-right-4 top-1/2 -translate-y-1/2 z-10 bg-background border border-input shadow-lg p-2 md:p-3 rounded-full hover:bg-principal hover:text-white transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 touch-manipulation hidden sm:flex"
+            className="absolute right-0 md:-right-4 top-1/2 -translate-y-1/2 z-50 bg-background border border-input shadow-lg p-2 md:p-3 rounded-full hover:bg-principal hover:text-white transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 touch-manipulation hidden sm:flex"
             aria-label="Siguiente"
           >
             <ChevronRight size={20} className="md:w-6 md:h-6" />

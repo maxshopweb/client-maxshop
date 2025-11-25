@@ -8,8 +8,8 @@ export default function ProductCardSkeleton() {
       <div className="relative aspect-square bg-gradient-to-br from-background to-background/50 overflow-hidden">
         <Skeleton 
           height="100%" 
-          baseColor="#d1d5db" 
-          highlightColor="#e5e7eb"
+          baseColor="var(--skeleton-base)" 
+          highlightColor="var(--skeleton-highlight)"
           className="w-full h-full"
         />
       </div>
@@ -20,15 +20,15 @@ export default function ProductCardSkeleton() {
         <div className="mb-2">
           <Skeleton 
             height={24} 
-            baseColor="#d1d5db" 
-            highlightColor="#e5e7eb"
+            baseColor="var(--skeleton-base)" 
+            highlightColor="var(--skeleton-highlight)"
             className="mb-2"
           />
           <Skeleton 
             height={20} 
             width="60%" 
-            baseColor="#d1d5db" 
-            highlightColor="#e5e7eb"
+            baseColor="var(--skeleton-base)" 
+            highlightColor="var(--skeleton-highlight)"
           />
         </div>
 
@@ -37,8 +37,8 @@ export default function ProductCardSkeleton() {
           <Skeleton 
             height={14} 
             width="40%" 
-            baseColor="#d1d5db" 
-            highlightColor="#e5e7eb"
+            baseColor="var(--skeleton-base)" 
+            highlightColor="var(--skeleton-highlight)"
           />
         </div>
 
@@ -48,16 +48,16 @@ export default function ProductCardSkeleton() {
             <Skeleton 
               height={32} 
               width="50%" 
-              baseColor="#d1d5db" 
-              highlightColor="#e5e7eb"
+              baseColor="var(--skeleton-base)" 
+              highlightColor="var(--skeleton-highlight)"
             />
           </div>
           
           {/* Botón Agregar al Carrito */}
           <Skeleton 
             height={40} 
-            baseColor="#d1d5db" 
-            highlightColor="#e5e7eb"
+            baseColor="var(--skeleton-base)" 
+            highlightColor="var(--skeleton-highlight)"
             className="w-full rounded-md"
           />
         </div>

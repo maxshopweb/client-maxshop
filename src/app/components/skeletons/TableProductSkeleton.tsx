@@ -9,7 +9,7 @@ export default function TableSkeleton() {
                             <tr>
                                 {Array.from({ length: 10 }).map((_, i) => (
                                     <th key={i} className="px-4 py-3 text-left">
-                                        <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
+                                        <div className="h-4 rounded animate-pulse" style={{ backgroundColor: 'var(--skeleton-base)' }} />
                                     </th>
                                 ))}
                             </tr>
@@ -21,7 +21,7 @@ export default function TableSkeleton() {
                                 <tr key={i}>
                                     {Array.from({ length: 10 }).map((_, j) => (
                                         <td key={j} className="px-4 py-4 whitespace-nowrap">
-                                            <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
+                                            <div className="h-4 rounded animate-pulse" style={{ backgroundColor: 'var(--skeleton-base)' }} />
                                         </td>
                                     ))}
                                 </tr>

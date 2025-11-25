@@ -14,7 +14,7 @@ import CartSidebar from "@/app/components/cart/CartSidebar";
 const menuLinks = [
   { label: "Inicio", href: "/" },
   { label: "Tienda", href: "/tienda/productos" },
-  { label: "Nosotros", href: "#contacto" },
+  { label: "Nosotros", href: "#about-us" },
   { label: "Contacto", href: "#contacto" },
 ];
 
@@ -82,8 +82,28 @@ export default function UnifiedNavbar() {
         >
           <div className="container mx-auto px-4">
             <div className="relative flex items-center justify-between">
-              {/* Toggle Dark Mode - Izquierda */}
-              <div className="flex-shrink-0">
+              {/* Izquierda: User + Toggle Dark Mode */}
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {/* User Account */}
+                {isAuthenticated && user ? (
+                  <Link
+                    href="/mi-cuenta"
+                    className="p-2 hover:bg-white/10 transition-all duration-300 rounded-lg"
+                    aria-label="Mi cuenta"
+                  >
+                    <User size={22} className="text-white transition-transform duration-300 hover:scale-110" />
+                  </Link>
+                ) : (
+                  <Link
+                    href={getLoginUrl()}
+                    className="p-2 hover:bg-white/10 transition-all duration-300 rounded-lg opacity-50"
+                    aria-label="Iniciar sesión"
+                  >
+                    <User size={22} className="text-white transition-transform duration-300 hover:scale-110" />
+                  </Link>
+                )}
+
+                {/* Toggle Dark Mode */}
                 <button
                   onClick={() => setTheme(actualTheme === 'dark' ? 'light' : 'dark')}
                   className="p-2 hover:bg-white/10 transition-all duration-300 rounded-lg"
@@ -111,60 +131,8 @@ export default function UnifiedNavbar() {
                 />
               </Link>
 
-              {/* User & Cart - Derecha */}
+              {/* Derecha: Cart + Menu */}
               <div className="flex items-center gap-2 md:gap-3 flex-shrink-0 ml-auto">
-                {/* User Account */}
-                {isAuthenticated && user ? (
-                  <div ref={userMenuRef} className="relative">
-                    <button
-                      onClick={() => setShowUserMenu(!showUserMenu)}
-                      className="relative p-2 hover:bg-white/10 transition-all duration-300 rounded-lg"
-                      aria-label="Mi cuenta"
-                    >
-                      <User size={22} className="text-white transition-transform duration-300 hover:scale-110" />
-                    </button>
-                    {showUserMenu && (
-                      <div className="absolute top-full right-0 mt-2 w-48 bg-terciario border border-white/20 rounded-lg shadow-2xl py-2 animate-in fade-in slide-in-from-top-2 duration-200 z-[9999]">
-                        <div className="px-4 py-2 border-b border-white/10">
-                          <p className="text-sm font-medium text-white">
-                            {user.nombre || user.username || 'Usuario'}
-                          </p>
-                        </div>
-                        <Link
-                          href="/cuenta"
-                          className="block px-4 py-2.5 hover:bg-white/10 transition-colors text-sm text-white font-medium"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          Mi Cuenta
-                        </Link>
-                        <Link
-                          href="/contacto"
-                          className="block px-4 py-2.5 hover:bg-white/10 transition-colors text-sm text-white font-medium"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          Contacto
-                        </Link>
-                        <Link
-                          href="/login"
-                          className="block px-4 py-2.5 hover:bg-white/10 transition-colors text-sm text-white font-medium flex items-center gap-2"
-                          onClick={() => logout()}
-                        >
-                          <LogOut size={18} />
-                          Cerrar sesión
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <Link
-                    href={getLoginUrl()}
-                    className="p-2 hover:bg-white/10 transition-all duration-300 rounded-lg opacity-50"
-                    aria-label="Iniciar sesión"
-                  >
-                    <User size={22} className="text-white transition-transform duration-300 hover:scale-110" />
-                  </Link>
-                )}
-
                 {/* Shopping Cart */}
                 <button
                   onClick={open}

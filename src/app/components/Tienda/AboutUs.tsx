@@ -41,7 +41,7 @@ export default function AboutUs() {
   });
 
   return (
-    <section className="py-12 md:py-16 lg:py-20 bg-background">
+    <section className="py-12 md:py-16 lg:py-20 bg-background" id="about-us">
       <div className="container mx-auto px-4">
         {/* Contenedor principal: Imagen izquierda, Contenido derecha */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 lg:gap-16 mb-12 md:mb-16">

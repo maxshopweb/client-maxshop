@@ -14,18 +14,20 @@ export default function PromoBanner() {
   
   return (
     <div className="fixed top-0 left-0 right-0 z-[50] bg-secundario text-white h-10 overflow-hidden">
-      <div className="relative h-full flex items-center">
-        {/* Contenedor de animación infinita */}
-        <div className="flex animate-scroll-infinite whitespace-nowrap">
-          {/* Duplicar el mensaje combinado para animación continua */}
-          {[combinedMessage, combinedMessage].map((message, index) => (
-            <div
-              key={index}
-              className="flex items-center mx-8 text-xs md:text-sm font-medium uppercase"
-            >
-              <span>{message}</span>
-            </div>
-          ))}
+      <div className="container mx-auto px-4 h-full">
+        <div className="relative h-full flex items-center">
+          {/* Contenedor de animación infinita */}
+          <div className="flex animate-scroll-infinite whitespace-nowrap">
+            {/* Duplicar el mensaje combinado para animación continua */}
+            {[combinedMessage, combinedMessage].map((message, index) => (
+              <div
+                key={index}
+                className="flex items-center mx-8 text-xs md:text-sm font-medium uppercase"
+              >
+                <span>{message}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -1,29 +1,66 @@
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+
 export default function ProductCardSkeleton() {
   return (
-    <div className="group relative bg-gradient-to-br from-card via-card/95 to-card/90 rounded-xl border border-input/50 p-4 md:p-6 transition-all duration-300 hover:border-principal/30 hover:shadow-lg animate-pulse">
-      {/* Image Skeleton */}
-      <div className="relative w-full aspect-square mb-4 rounded-lg bg-input/50 overflow-hidden">
-        <div className="w-full h-full bg-gradient-to-br from-input/30 to-input/10" />
+    <div className="bg-card rounded-xl overflow-hidden flex flex-col h-full shadow-sm">
+      {/* Imagen del Producto */}
+      <div className="relative aspect-square bg-gradient-to-br from-background to-background/50 overflow-hidden">
+        <Skeleton 
+          height="100%" 
+          baseColor="var(--skeleton-base)" 
+          highlightColor="var(--skeleton-highlight)"
+          className="w-full h-full"
+        />
       </div>
 
-      {/* Content Skeleton */}
-      <div className="space-y-3">
-        {/* Brand Skeleton */}
-        <div className="h-3 w-20 bg-input/50 rounded" />
-
-        {/* Name Skeleton */}
-        <div className="space-y-2">
-          <div className="h-4 w-full bg-input/50 rounded" />
-          <div className="h-4 w-3/4 bg-input/50 rounded" />
+      {/* Información del Producto */}
+      <div className="p-5 flex flex-col flex-1">
+        {/* Nombre del Producto */}
+        <div className="mb-2">
+          <Skeleton 
+            height={24} 
+            baseColor="var(--skeleton-base)" 
+            highlightColor="var(--skeleton-highlight)"
+            className="mb-2"
+          />
+          <Skeleton 
+            height={20} 
+            width="60%" 
+            baseColor="var(--skeleton-base)" 
+            highlightColor="var(--skeleton-highlight)"
+          />
         </div>
 
-        {/* Price Skeleton */}
-        <div className="flex items-baseline gap-2">
-          <div className="h-6 w-24 bg-input/50 rounded" />
+        {/* Marca */}
+        <div className="mb-4">
+          <Skeleton 
+            height={14} 
+            width="40%" 
+            baseColor="var(--skeleton-base)" 
+            highlightColor="var(--skeleton-highlight)"
+          />
         </div>
 
-        {/* Button Skeleton */}
-        <div className="h-10 w-full bg-input/50 rounded-lg mt-4" />
+        {/* Precio y Botón */}
+        <div className="mt-auto space-y-3">
+          <div>
+            <Skeleton 
+              height={32} 
+              width="50%" 
+              baseColor="var(--skeleton-base)" 
+              highlightColor="var(--skeleton-highlight)"
+            />
+          </div>
+          
+          {/* Botón Agregar al Carrito */}
+          <Skeleton 
+            height={40} 
+            baseColor="var(--skeleton-base)" 
+            highlightColor="var(--skeleton-highlight)"
+            className="w-full rounded-md"
+          />
+        </div>
       </div>
     </div>
   );
