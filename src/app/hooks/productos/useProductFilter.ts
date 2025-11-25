@@ -5,6 +5,7 @@ import type { IProductoFilters } from '@/app/types/producto.type';
 import { EstadoGeneral } from '@/app/types/estados.type';
 import { useCategorias, useSubcategorias } from '@/app/hooks/categorias/useCategorias';
 import { useMarcas } from '@/app/hooks/marcas/useMarcas';
+import { useGrupos } from '@/app/hooks/grupos/useGrupos';
 
 const DEFAULT_FILTERS: IProductoFilters = {
     page: 1,
@@ -27,6 +28,7 @@ export function useProductosFilters() {
     // Obtener datos del backend
     const { data: categoriasResponse, isLoading: loadingCategorias } = useCategorias();
     const { data: marcasResponse, isLoading: loadingMarcas } = useMarcas();
+    const { data: gruposResponse, isLoading: loadingGrupos } = useGrupos();
 
     // Obtener subcategorías según la categoría seleccionada
     const idCatFromUrl = searchParams.get('id_cat');
@@ -38,6 +40,7 @@ export function useProductosFilters() {
     const categorias = categoriasResponse?.data || [];
     const subcategorias = subcategoriasResponse?.data || [];
     const marcas = marcasResponse?.data || [];
+    const grupos = gruposResponse?.data || [];
 
     const filters = useMemo<IProductoFilters>(() => {
         const params: IProductoFilters = { ...DEFAULT_FILTERS };
@@ -69,6 +72,9 @@ export function useProductosFilters() {
 
         const idMarca = searchParams.get('id_marca');
         if (idMarca) params.id_marca = Number(idMarca);
+
+        const codiGrupo = searchParams.get('codi_grupo');
+        if (codiGrupo) params.codi_grupo = codiGrupo;
 
         const precioMin = searchParams.get('precio_min');
         if (precioMin) params.precio_min = Number(precioMin);
@@ -239,9 +245,11 @@ export function useProductosFilters() {
         categorias,
         subcategorias,
         marcas,
+        grupos,
         // Estados de carga
         loadingCategorias,
         loadingSubcategorias,
         loadingMarcas,
+        loadingGrupos,
     };
 }

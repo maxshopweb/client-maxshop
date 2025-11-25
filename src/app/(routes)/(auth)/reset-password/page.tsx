@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/app/context/AuthContext';
@@ -12,7 +12,11 @@ import { Lock, CheckCircle2 } from 'lucide-react';
 import { passwordSchema } from '@/app/schemas/auth.schema';
 import PasswordRequirements from '@/app/components/ui/PasswordRequirements';
 
-export default function ResetPasswordPage() {
+// Hacer la página dinámica para evitar prerender
+export const dynamic = 'force-dynamic';
+
+// Componente interno que usa useSearchParams
+function ResetPasswordContent() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -239,6 +243,24 @@ export default function ResetPasswordPage() {
         </Link>
       </p>
     </AuthLayout>
+  );
+}
+
+// Componente principal con Suspense boundary
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <AuthLayout
+        title="Restablecer Contraseña"
+        subtitle="Cargando..."
+      >
+        <div className="flex justify-center items-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
+        </div>
+      </AuthLayout>
+    }>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }
 

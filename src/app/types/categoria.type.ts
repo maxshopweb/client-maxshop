@@ -2,12 +2,15 @@ import { IProductos } from "./producto.type";
 
 export interface ICategoria {
     id_cat: number;
+    codi_categoria: string;
     nombre?: string | null;
     descripcion?: string | null;
+    activo?: boolean | null;
+    creado_en?: Date | null;
+    actualizado_en?: Date | null;
     // Relaciones
-    subcategorias?: ISubcategoria[];
+    productos?: IProductos[];
 }
-
 export interface ISubcategoria {
     id_subcat: number;
     id_cat?: number | null;

@@ -4,13 +4,15 @@
   --principal: #e88a42;
   --secundario: #171c35;
   --terciario: #0e1023;
-  --white: #fff2e0;
+  --white: #ffffff;
+  --azul: #2563eb;
 
   /* RGB para opacidades */
   --principal-rgb: 232, 138, 66;
   --secundario-rgb: 23, 28, 53;
   --terciario-rgb: 14, 16, 35;
-  --white-rgb: 255, 242, 224;
+  --white-rgb: 255, 255, 255;
+  --azul-rgb: 37, 99, 235;
 
   /* Modo claro (default) */
   --background: var(--white);
@@ -25,6 +27,7 @@
   --input-border: rgba(var(--secundario-rgb), 0.2);
   --input-text: var(--terciario);
   --input-placeholder: rgba(var(--secundario-rgb), 0.5);
+  --sidebar-bg: rgba(var(--white-rgb), 1);
 
   /* Scrollbar - Modo Claro */
   --scrollbar-track: rgba(var(--white-rgb), 0.3);
@@ -46,6 +49,7 @@
     --input-border: rgba(var(--white-rgb), 0.1);
     --input-text: var(--white);
     --input-placeholder: rgba(var(--white-rgb), 0.4);
+    --sidebar-bg: rgba(var(--secundario-rgb), 1);
 
     /* Scrollbar - Modo Oscuro */
     --scrollbar-track: rgba(var(--white-rgb), 0.05);
@@ -66,6 +70,7 @@
   --input-border: rgba(var(--white-rgb), 0.1);
   --input-text: var(--white);
   --input-placeholder: rgba(var(--white-rgb), 0.4);
+  --sidebar-bg: rgba(var(--secundario-rgb), 1);
 
   --scrollbar-track: rgba(var(--white-rgb), 0.05);
   --scrollbar-thumb: rgba(var(--white-rgb), 0.2);
@@ -84,6 +89,7 @@
   --input-border: rgba(var(--secundario-rgb), 0.2);
   --input-text: var(--terciario);
   --input-placeholder: rgba(var(--secundario-rgb), 0.5);
+  --sidebar-bg: rgba(var(--white-rgb), 1);
 
   --scrollbar-track: rgba(var(--white-rgb), 0.3);
   --scrollbar-thumb: rgba(var(--secundario-rgb), 0.3);
@@ -106,16 +112,19 @@ body {
 .bg-secundario { background-color: var(--secundario); }
 .bg-terciario { background-color: var(--terciario); }
 .bg-white { background-color: var(--white); }
+.bg-azul { background-color: var(--azul); }
 
 .text-principal { color: var(--principal); }
 .text-secundario { color: var(--secundario); }
 .text-terciario { color: var(--terciario); }
 .text-white { color: var(--white); }
+.text-azul { color: var(--azul); }
 .text-error { color: rgb(239, 68, 68); }
 
 .border-principal { border-color: var(--principal); }
 .border-secundario { border-color: var(--secundario); }
 .border-terciario { border-color: var(--terciario); }
+.border-azul { border-color: var(--azul); }
 
 /* Variables de componentes UI */
 .bg-card { background-color: var(--card-bg); }
@@ -124,6 +133,7 @@ body {
 .border-input { border-color: var(--input-border); }
 .text-input { color: var(--input-text); }
 .placeholder-input::placeholder { color: var(--input-placeholder); }
+.bg-sidebar { background-color: var(--sidebar-bg); }
 
 /* ============================================ */
 /* SCROLLBAR PERSONALIZADO */
@@ -187,4 +197,25 @@ body {
 .scrollbar-visible {
   scrollbar-width: auto;
   scrollbar-color: rgba(0, 0, 0, 0.3) rgba(0, 0, 0, 0.1);
+}
+
+/* Scroll suave global */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
+}
+
+/* Animación de scroll infinito para banner promocional */
+@keyframes scroll-infinite {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll-infinite {
+  animation: scroll-infinite 30s linear infinite;
+  display: flex;
 }

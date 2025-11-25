@@ -34,10 +34,16 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401) {
       // Token inválido o expirado
       if (typeof window !== 'undefined') {
-        // Limpiar cookies y redirigir a login
+        // Limpiar cookies y redirigir a login con la página actual como redirect
         const { clearAuthCookies } = require('../utils/cookies');
         clearAuthCookies();
-        window.location.href = '/login';
+        const currentPath = window.location.pathname;
+        // No agregar redirect si ya estamos en una ruta de auth
+        if (currentPath.startsWith('/login') || currentPath.startsWith('/register') || currentPath.startsWith('/forgot-password')) {
+          window.location.href = '/login';
+        } else {
+          window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
+        }
       }
     }
     

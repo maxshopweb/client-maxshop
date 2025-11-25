@@ -1,39 +1,50 @@
-import { ISubcategoria } from "./categoria.type";
+import { ICategoria, ISubcategoria } from "./categoria.type";
 import { EstadoGeneral } from "./estados.type";
 import { IIva } from "./iva.type";
 import { IMarca } from "./marca.type";
 
 export interface IProductos {
     id_prod: number;
-    id_cat?: number | null;
-    id_subcat?: number | null;
+    codi_arti: string;
+    codi_categoria?: string | null;
+    codi_marca?: string | null;
+    codi_grupo?: string | null;
+    codi_impuesto?: string | null;
     id_interno?: string | null;
     cod_sku?: string | null;
     nombre?: string | null;
-    descripcion?: string | null; // ✅ Cambiar de "desc" a "descripcion"
+    descripcion?: string | null;
     modelo?: string | null;
-    id_marca?: number | null;
     precio_mayorista?: number | null;
     precio_minorista?: number | null;
     precio_evento?: number | null;
     precio?: number | null;
-    id_iva?: number | null;
+    precio_sin_iva?: number | null;
+    iva_monto?: number | null;
     stock?: number | null;
     stock_min?: number | null;
     stock_mayorista?: number | null;
+    unidad_medida?: string | null;
+    unidades_por_producto?: number | null;
+    codi_barras?: string | null;
     img_principal?: string | null;
-    imagenes?: string[] | null;
+    imagenes?: string[] | null; // JSONB
     destacado?: boolean | null;
     financiacion?: boolean | null;
+    activo?: string | null;
     creado_en?: Date | null;
     actualizado_en?: Date | null;
     estado?: EstadoGeneral | null;
+    id_cat?: number | null;
+    id_subcat?: number | null;
+    id_marca?: number | null;
     // Relaciones
+    categoria?: ICategoria | null;
     subcategoria?: ISubcategoria | null;
     marca?: IMarca | null;
+    grupo?: any | null; // IGrupo
     iva?: IIva | null;
 }
-
 // Filtros
 export interface IProductoFilters {
     // Paginación
@@ -52,6 +63,7 @@ export interface IProductoFilters {
     id_subcat?: number;
     id_cat?: number;
     id_marca?: number;
+    codi_grupo?: string;
 
     // Filtros por rango
     precio_min?: number;
