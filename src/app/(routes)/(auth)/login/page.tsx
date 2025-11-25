@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
@@ -12,7 +12,11 @@ import LogoGoogle from '@/app/components/icons/LogoGoogle';
 import { loginSchema, emailSchema } from '@/app/schemas/auth.schema';
 import { Mail, Lock } from 'lucide-react';
 
-export default function LoginPage() {
+// Hacer la página dinámica para evitar prerender
+export const dynamic = 'force-dynamic';
+
+// Componente interno que usa useSearchParams
+function LoginContent() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -139,69 +143,88 @@ export default function LoginPage() {
 
     return (
         <AuthLayout title="Iniciar Sesión" subtitle="Bienvenido a MaxShop – Accede a tu cuenta">
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                <Input
-                    id="email"
-                    type="email"
-                    label="Tu email"
-                    value={email}
-                    onChange={handleEmailChange}
-                    placeholder="tu@email.com"
-                    required
-                    disabled={loading}
-                    error={errors.email}
-                    schema={emailSchema}
-                    icon={Mail}
-                />
+            <div className="flex flex-col gap-6">
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                    <div className="flex flex-col gap-5">
+                        <Input
+                            id="email"
+                            type="email"
+                            label="Tu email"
+                            value={email}
+                            onChange={handleEmailChange}
+                            placeholder="tu@email.com"
+                            required
+                            disabled={loading}
+                            error={errors.email}
+                            schema={emailSchema}
+                            icon={Mail}
+                        />
 
-                <Input
-                    id="password"
-                    type="password"
-                    label="Contraseña"
-                    value={password}
-                    onChange={handlePasswordChange}
-                    placeholder="••••••••"
-                    required
-                    disabled={loading}
-                    error={errors.password}
-                    icon={Lock}
-                />
+                        <Input
+                            id="password"
+                            type="password"
+                            label="Contraseña"
+                            value={password}
+                            onChange={handlePasswordChange}
+                            placeholder="••••••••"
+                            required
+                            disabled={loading}
+                            error={errors.password}
+                            icon={Lock}
+                        />
+                    </div>
 
-                <div className="flex justify-end">
-                    <Link href="/forgot-password" className="text-sm text-orange-600 hover:text-orange-700 font-medium">
-                        ¿Olvidaste tu contraseña?
+                    <div className="flex justify-end">
+                        <Link href="/forgot-password" className="text-sm text-orange-600 hover:text-orange-700 font-medium">
+                            ¿Olvidaste tu contraseña?
+                        </Link>
+                    </div>
+
+                    <Button type="submit" variant="primary" size="lg" fullWidth disabled={loading}>
+                        {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+                    </Button>
+
+                    <div className="relative flex items-center gap-2 py-2">
+                        <div className="flex-1 border-t border-gray-300"></div>
+                        <span className="text-sm text-gray-500">O continúa con</span>
+                        <div className="flex-1 border-t border-gray-300"></div>
+                    </div>
+
+                    <Button
+                        type="button"
+                        variant="outline-primary"
+                        size="md"
+                        fullWidth
+                        onClick={handleGoogleLogin}
+                        disabled={loading}
+                        className="text-[var(--principal)] hover:text-[var(--principal)]/80 hover:bg-[var(--principal)]/10 rounded-md"
+                    >
+                        <LogoGoogle />
+                    </Button>
+                </form>
+
+                <p className="text-center text-gray-600 text-sm">
+                    ¿No tienes cuenta?{' '}
+                    <Link href="/register" className="text-orange-600 hover:text-orange-700 font-semibold">
+                        Regístrate
                     </Link>
-                </div>
-
-                <Button type="submit" variant="primary" size="md" fullWidth disabled={loading}>
-                    {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
-                </Button>
-
-                <div className="relative flex items-center gap-2 py-2">
-                    <div className="flex-1 border-t border-gray-300"></div>
-                    <span className="text-sm text-gray-500">O continúa con</span>
-                    <div className="flex-1 border-t border-gray-300"></div>
-                </div>
-
-                <Button
-                    type="button"
-                    variant="outline-primary"
-                    size="md"
-                    fullWidth
-                    onClick={handleGoogleLogin}
-                    disabled={loading}
-                    className="text-[var(--principal)] hover:text-[var(--principal)]/80 hover:bg-[var(--principal)]/10 rounded-md"
-                >
-                    <LogoGoogle />
-                </Button>
-            </form>
-
-            <p className="text-center text-gray-600 text-sm">
-                ¿No tienes cuenta?{' '}
-                <Link href="/register" className="text-orange-600 hover:text-orange-700 font-semibold">
-                    Regístrate
-                </Link>
-            </p>
+                </p>
+            </div>
         </AuthLayout>
+    );
+}
+
+// Componente principal con Suspense boundary
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <AuthLayout title="Iniciar Sesión" subtitle="Cargando...">
+                <div className="flex justify-center items-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
+                </div>
+            </AuthLayout>
+        }>
+            <LoginContent />
+        </Suspense>
     );
 }

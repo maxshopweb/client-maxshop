@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCartStore } from "@/app/stores/cartStore";
 import { useCheckoutStore } from "./hooks/useCheckoutStore";
 import CheckoutLayout from "./components/CheckoutLayout";
 
-export default function CheckoutPage() {
+// Hacer la página dinámica para evitar prerender
+export const dynamic = 'force-dynamic';
+
+// Componente interno que usa useSearchParams
+function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { items } = useCartStore();
@@ -53,5 +57,14 @@ export default function CheckoutPage() {
   }
 
   return <CheckoutLayout />;
+}
+
+// Componente principal con Suspense boundary
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <CheckoutContent />
+    </Suspense>
+  );
 }
 

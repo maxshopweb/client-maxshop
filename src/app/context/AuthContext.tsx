@@ -16,6 +16,7 @@ import { auth } from '../lib/firebase.config';
 import { useAuthStore } from '../stores/userStore';
 import { type IUsuario, type UserRole } from '../types/user';
 import { syncAuthCookies, clearAuthCookies } from '../utils/cookies';
+import { toast } from 'sonner';
 
 type AuthContextValue = {
   user: IUsuario | null;
@@ -317,6 +318,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setRole(null);
       
       setLoading(false);
+      toast.success('Sesión cerrada correctamente');
       return result.success;
     } catch (error) {
       // Aunque haya error, limpiar el estado local

@@ -1,4 +1,4 @@
-import { ICategoria } from "./categoria.type";
+import { ICategoria, ISubcategoria } from "./categoria.type";
 import { EstadoGeneral } from "./estados.type";
 import { IIva } from "./iva.type";
 import { IMarca } from "./marca.type";
@@ -35,8 +35,12 @@ export interface IProductos {
     creado_en?: Date | null;
     actualizado_en?: Date | null;
     estado?: EstadoGeneral | null;
+    id_cat?: number | null;
+    id_subcat?: number | null;
+    id_marca?: number | null;
     // Relaciones
     categoria?: ICategoria | null;
+    subcategoria?: ISubcategoria | null;
     marca?: IMarca | null;
     grupo?: any | null; // IGrupo
     iva?: IIva | null;

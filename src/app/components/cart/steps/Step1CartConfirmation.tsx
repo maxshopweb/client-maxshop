@@ -89,9 +89,10 @@ export default function Step1CartConfirmation() {
           {/* Lista de productos */}
           <div className="space-y-3">
             {items.map((item) => {
-              const tieneDescuento = item.descuento && item.descuento > 0;
+              const descuento = item.descuento || 0;
+              const tieneDescuento = descuento > 0;
               const porcentajeDescuento = tieneDescuento && item.precio_unitario
-                ? Math.round((item.descuento / (item.precio_unitario * item.cantidad + item.descuento)) * 100)
+                ? Math.round((descuento / (item.precio_unitario * item.cantidad + descuento)) * 100)
                 : 0;
 
               return (
@@ -133,7 +134,7 @@ export default function Step1CartConfirmation() {
                           ${item.subtotal.toFixed(2)}
                         </span>
                         <span className="text-sm text-foreground/40 line-through">
-                          ${(item.precio_unitario * item.cantidad + item.descuento).toFixed(2)}
+                          ${(item.precio_unitario * item.cantidad + descuento).toFixed(2)}
                         </span>
                         <span className="text-xs bg-principal/10 text-principal px-2 py-1 rounded-full font-semibold">
                           -{porcentajeDescuento}% OFF

@@ -92,7 +92,7 @@ export default function Step2ContactForm() {
           </p>
         </div>
         <Button variant="primary" size="lg" onClick={handleLogin} className="rounded-lg">
-          Iniciar Sesión
+          Iniciar sesión
         </Button>
       </motion.div>
     );

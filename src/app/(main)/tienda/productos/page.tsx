@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, Suspense } from "react";
 import { useProductos } from "@/app/hooks/productos/useProductos";
 import FiltersSidebar from "@/app/components/Tienda/FiltersSidebar";
 import ProductsHero from "@/app/components/Tienda/ProductsHero";
@@ -9,6 +9,9 @@ import ScrollAnimate from "@/app/components/ui/ScrollAnimate";
 import ProductCardSkeleton from "@/app/components/skeleton/product/ProductCardSkeleton";
 import { Filter, X, ChevronLeft, ChevronRight } from "lucide-react";
 import type { IProductos } from "@/app/types/producto.type";
+
+// Hacer la página dinámica para evitar prerender
+export const dynamic = 'force-dynamic';
 
 // Filtros locales (sin URL)
 interface LocalFilters {
@@ -20,7 +23,8 @@ interface LocalFilters {
   codi_grupo?: string;
 }
 
-export default function ProductosPage() {
+// Componente interno que puede usar hooks con useSearchParams
+function ProductosContent() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [localFilters, setLocalFilters] = useState<LocalFilters>({});
@@ -116,9 +120,9 @@ export default function ProductosPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section - Hero empieza desde arriba, navbar se superpone */}
-      <section className="w-full -mt-[calc(3.5rem+3rem)] md:-mt-[calc(4rem+3.5rem)]">
+      {/* <section className="w-full -mt-[calc(3.5rem+3rem)] md:-mt-[calc(4rem+3.5rem)]">
         <ProductsHero title="Tienda" categoryName="Productos Destacados" />
-      </section>
+      </section> */}
 
       {/* Contenido Principal - Ocupa 100vh y sigue el scroll normal */}
       <div className="container mx-auto px-4 flex flex-col lg:flex-row gap-6 py-6">
@@ -254,6 +258,19 @@ export default function ProductosPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Componente principal con Suspense boundary
+export default function ProductosPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
+      </div>
+    }>
+      <ProductosContent />
+    </Suspense>
   );
 }
 

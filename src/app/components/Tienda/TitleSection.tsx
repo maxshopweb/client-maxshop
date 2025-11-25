@@ -19,7 +19,7 @@ export default function TitleSection() {
         {/* Subtítulos */}
         <div className="space-y-1 md:space-y-2 mb-6 md:mb-10">
           <p className="text-xl sm:text-2xl md:text-3xl font-extrabold text-text tracking-wide">
-            Herramientas Profesionales
+            Herramientas profesionales
           </p>
           <p className="text-base sm:text-lg md:text-xl text-text/80 font-medium px-2">
             Soluciones integrales para construcción y ferretería

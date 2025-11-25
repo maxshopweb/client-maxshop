@@ -119,7 +119,7 @@ export default function ProductsCarousel({
             size="lg"
             onClick={handleViewAll}
           >
-            Ver todos los productos {filter === "destacados" && "destacados"}
+            Ver más
           </Button>
         </div>
       )}
