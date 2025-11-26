@@ -41,7 +41,7 @@ export default function AboutUs() {
   });
 
   return (
-    <section className="py-12 md:py-16 lg:py-20 bg-background">
+    <section className="py-12 md:py-16 lg:py-20 bg-background" id="about-us">
       <div className="container mx-auto px-4">
         {/* Contenedor principal: Imagen izquierda, Contenido derecha */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 lg:gap-16 mb-12 md:mb-16">
@@ -82,7 +82,7 @@ export default function AboutUs() {
               </span>
               <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 leading-tight">
                 Trabajamos para vos{" "}
-                <span className="text-principal">desde 1989</span>
+                <span className="text-principal">desde 2000</span>
               </h2>
               <div className="h-1 w-16 bg-principal rounded-full mt-4"></div>
             </div>

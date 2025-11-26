@@ -143,9 +143,9 @@ function LoginContent() {
 
     return (
         <AuthLayout title="Iniciar Sesión" subtitle="Bienvenido a MaxShop – Accede a tu cuenta">
-            <div className="flex flex-col gap-6">
-                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-                    <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-4 sm:gap-5">
+                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-4">
                         <Input
                             id="email"
                             type="email"
@@ -180,20 +180,20 @@ function LoginContent() {
                         </Link>
                     </div>
 
-                    <Button type="submit" variant="primary" size="lg" fullWidth disabled={loading}>
+                    <Button type="submit" variant="primary" size="md" fullWidth disabled={loading}>
                         {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
                     </Button>
 
-                    <div className="relative flex items-center gap-2 py-2">
+                    <div className="relative flex items-center gap-2 py-1.5">
                         <div className="flex-1 border-t border-gray-300"></div>
-                        <span className="text-sm text-gray-500">O continúa con</span>
+                        <span className="text-xs sm:text-sm text-gray-500">O continúa con</span>
                         <div className="flex-1 border-t border-gray-300"></div>
                     </div>
 
                     <Button
                         type="button"
                         variant="outline-primary"
-                        size="md"
+                        size="sm"
                         fullWidth
                         onClick={handleGoogleLogin}
                         disabled={loading}
@@ -203,7 +203,7 @@ function LoginContent() {
                     </Button>
                 </form>
 
-                <p className="text-center text-gray-600 text-sm">
+                <p className="text-center text-gray-600 text-xs sm:text-sm">
                     ¿No tienes cuenta?{' '}
                     <Link href="/register" className="text-orange-600 hover:text-orange-700 font-semibold">
                         Regístrate

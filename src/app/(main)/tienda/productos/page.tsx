@@ -118,7 +118,7 @@ function ProductosContent() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-10">
       {/* Hero Section - Hero empieza desde arriba, navbar se superpone */}
       {/* <section className="w-full -mt-[calc(3.5rem+3rem)] md:-mt-[calc(4rem+3.5rem)]">
         <ProductsHero title="Tienda" categoryName="Productos Destacados" />

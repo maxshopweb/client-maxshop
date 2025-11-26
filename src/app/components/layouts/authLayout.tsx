@@ -11,7 +11,18 @@ interface AuthLayoutProps {
 
 export default function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
     return (
-        <div className="min-h-screen relative flex items-end lg:items-center justify-center overflow-hidden" style={{ backgroundColor: '#fff5eb' }}>
+        <div 
+            className="h-screen relative flex items-end md:items-center justify-center overflow-hidden"
+            style={{ 
+                backgroundColor: '#fff5eb',
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 0
+            }}
+        >
             {/* Gradiente base suave - Naranja equilibrado a Blanco */}
             <div 
                 className="absolute inset-0 z-0"
@@ -94,22 +105,22 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
             />
 
             {/* Mobile: Sheet desde abajo con bordes redondeados arriba */}
-            <div className="lg:hidden w-full bg-white rounded-t-3xl shadow-2xl overflow-hidden flex flex-col min-h-[85vh] max-h-[95vh] mt-auto relative z-10">
+            <div className="md:hidden w-full bg-white rounded-t-3xl shadow-2xl overflow-hidden flex flex-col mt-auto relative z-20">
                 {/* Form content */}
-                <div className="flex-1 flex flex-col p-6 overflow-y-auto scrollbar-visible">
-                    <div className="flex-1 flex flex-col justify-center max-w-lg mx-auto w-full">
+                <div className="flex-1 flex flex-col px-4 sm:px-6 pt-4 sm:pt-6 pb-0 overflow-y-auto scrollbar-visible">
+                    <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full pb-4 sm:pb-6">
                         {/* Logo */}
-                        <div className="flex justify-center mb-6">
-                            <Image src="/logos/logo-negativo.svg" alt="logo" width={80} height={80} className="w-16 h-16" />
+                        <div className="flex justify-center mb-4">
+                            <Image src="/logos/logo-negativo.svg" alt="logo" width={80} height={80} className="w-14 h-14" />
                         </div>
 
                         {/* Title and Subtitle */}
-                        <div className="flex flex-col gap-2 mb-8 text-center">
-                            <h1 className="text-2xl font-bold text-gray-900">
+                        <div className="flex flex-col gap-1.5 mb-6 text-center">
+                            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
                                 {title}
                             </h1>
                             {subtitle && (
-                                <p className="text-sm text-gray-600">
+                                <p className="text-xs sm:text-sm text-gray-600">
                                     {subtitle}
                                 </p>
                             )}
@@ -124,9 +135,9 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
             </div>
 
             {/* Desktop: Layout tradicional centrado */}
-            <div className="hidden lg:flex w-full max-w-5xl bg-white rounded-2xl shadow-2xl overflow-hidden flex-row min-h-[700px] relative z-20">
+            <div className="hidden md:flex w-full max-w-md lg:max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden flex-row relative z-30 mx-4 max-h-[85vh] md:max-h-[90vh]">
                 {/* Left Section - Image background */}
-                <div className="lg:w-1/2 relative overflow-hidden">
+                <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
                     <Image
                         src="/imgs/login.jpg"
                         alt="MaxShop - Herramientas y tecnología"
@@ -148,21 +159,21 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
                 </div>
 
                 {/* Right Section - White with form */}
-                <div className="w-full lg:w-1/2 flex flex-col">
-                    <div className="flex-1 flex flex-col p-10 xl:p-12">
-                        <div className="flex-1 flex flex-col justify-center max-w-lg mx-auto w-full">
+                <div className="w-full md:w-full lg:w-1/2 flex flex-col">
+                    <div className="flex-1 flex flex-col p-4 md:p-6 xl:p-8 overflow-y-auto">
+                        <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full py-2 md:py-4">
                             {/* Logo */}
-                            <div className="flex justify-start mb-6">
-                                <Image src="/logos/logo-negativo.svg" alt="logo" width={80} height={80} className="w-20 h-20" />
+                            <div className="flex justify-start mb-4">
+                                <Image src="/logos/logo-negativo.svg" alt="logo" width={80} height={80} className="w-16 h-16" />
                             </div>
 
                             {/* Title and Subtitle */}
-                            <div className="flex flex-col gap-2 mb-8 text-left">
-                                <h1 className="text-3xl font-bold text-gray-900">
+                            <div className="flex flex-col gap-1.5 mb-6 text-left">
+                                <h1 className="text-2xl xl:text-3xl font-bold text-gray-900">
                                     {title}
                                 </h1>
                                 {subtitle && (
-                                    <p className="text-base text-gray-600">
+                                    <p className="text-sm xl:text-base text-gray-600">
                                         {subtitle}
                                     </p>
                                 )}

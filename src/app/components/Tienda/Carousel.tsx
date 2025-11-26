@@ -68,14 +68,14 @@ export default function Carousel() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60 pointer-events-none" />
       
       {/* Hero Text Overlay - Centrado */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-        <div className="text-center px-6 md:px-12 lg:px-16 xl:px-20 max-w-4xl">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-4 md:mb-6 drop-shadow-2xl tracking-tight">
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 mt-15">
+        <div className="text-center w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 max-w-6xl mx-auto">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-3 sm:mb-4 md:mb-5 lg:mb-6 drop-shadow-2xl tracking-tight leading-tight">
             Tus herramientas
             <br />
             al mejor precio
           </h1>
-          <p className="text-lg md:text-xl lg:text-2xl text-white mb-6 md:mb-8 drop-shadow-2xl max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white mb-4 sm:mb-5 md:mb-6 lg:mb-8 drop-shadow-2xl max-w-4xl mx-auto px-2">
             Calidad garantizada, envío rápido y atención personalizada
           </p>
           {/* Call to Action */}
