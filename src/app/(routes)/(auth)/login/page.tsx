@@ -143,9 +143,9 @@ function LoginContent() {
 
     return (
         <AuthLayout title="Iniciar Sesión" subtitle="Bienvenido a MaxShop – Accede a tu cuenta">
-            <div className="flex flex-col gap-4 sm:gap-5">
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                    <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3 sm:gap-4 md:gap-5">
+                <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:gap-4 md:gap-4">
+                    <div className="flex flex-col gap-3 sm:gap-4 md:gap-4">
                         <Input
                             id="email"
                             type="email"
@@ -174,19 +174,19 @@ function LoginContent() {
                         />
                     </div>
 
-                    <div className="flex justify-end">
-                        <Link href="/forgot-password" className="text-sm text-orange-600 hover:text-orange-700 font-medium">
+                    <div className="flex justify-end mt-1 sm:mt-2">
+                        <Link href="/forgot-password" className="text-sm sm:text-sm text-orange-600 hover:text-orange-700 font-medium">
                             ¿Olvidaste tu contraseña?
                         </Link>
                     </div>
 
-                    <Button type="submit" variant="primary" size="md" fullWidth disabled={loading}>
+                    <Button type="submit" variant="primary" size="md" fullWidth disabled={loading} className="text-sm sm:text-base">
                         {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
                     </Button>
 
-                    <div className="relative flex items-center gap-2 py-1.5">
+                    <div className="relative flex items-center gap-2 sm:gap-2 py-2 sm:py-2.5">
                         <div className="flex-1 border-t border-gray-300"></div>
-                        <span className="text-xs sm:text-sm text-gray-500">O continúa con</span>
+                        <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap px-1">O continúa con</span>
                         <div className="flex-1 border-t border-gray-300"></div>
                     </div>
 
@@ -197,13 +197,13 @@ function LoginContent() {
                         fullWidth
                         onClick={handleGoogleLogin}
                         disabled={loading}
-                        className="text-[var(--principal)] hover:text-[var(--principal)]/80 hover:bg-[var(--principal)]/10 rounded-md"
+                        className="text-[var(--principal)] hover:text-[var(--principal)]/80 hover:bg-[var(--principal)]/10 rounded-md text-sm sm:text-base"
                     >
                         <LogoGoogle />
                     </Button>
                 </form>
 
-                <p className="text-center text-gray-600 text-xs sm:text-sm">
+                <p className="text-center text-gray-600 text-sm sm:text-sm mt-2 sm:mt-3 px-2">
                     ¿No tienes cuenta?{' '}
                     <Link href="/register" className="text-orange-600 hover:text-orange-700 font-semibold">
                         Regístrate

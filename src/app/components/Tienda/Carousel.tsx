@@ -70,7 +70,7 @@ export default function Carousel() {
       {/* Hero Text Overlay - Centrado */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 mt-15">
         <div className="text-center w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 max-w-6xl mx-auto">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-3 sm:mb-4 md:mb-5 lg:mb-6 drop-shadow-2xl tracking-tight leading-tight">
+          <h1 className="text-4xl sm:text-4xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-3 sm:mb-4 md:mb-5 lg:mb-6 drop-shadow-2xl tracking-tight leading-tight">
             Tus herramientas
             <br />
             al mejor precio

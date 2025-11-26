@@ -8,6 +8,7 @@ import { productosService } from "@/app/services/producto.service";
 import ProductCard from "./ProductCard";
 import SectionTitle from "./SectionTitle";
 import { Button } from "../ui/Button";
+import ProductCardSkeleton from "@/app/components/skeleton/product/ProductCardSkeleton";
 
 interface ProductsCarouselProps {
   title: string;
@@ -24,7 +25,7 @@ export default function ProductsCarousel({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Obtener productos según el filtro
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["productos", filter],
     queryFn: () => {
       if (filter === "destacados") {
@@ -74,7 +75,25 @@ export default function ProductsCarousel({
         )}
 
         {/* Productos */}
-        {productos.length === 0 ? (
+        {isLoading ? (
+          <div
+            className="flex gap-3 sm:gap-6 overflow-x-auto overflow-y-visible scrollbar-hide scroll-smooth pb-4 snap-x snap-mandatory"
+            style={{
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+              WebkitOverflowScrolling: "touch",
+            }}
+          >
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={`skeleton-${index}`}
+                className="flex-shrink-0 w-[calc(50%-6px)] sm:w-[280px] md:w-[320px] snap-start"
+              >
+                <ProductCardSkeleton />
+              </div>
+            ))}
+          </div>
+        ) : productos.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-lg md:text-xl text-foreground/60">No hay productos disponibles</p>
           </div>

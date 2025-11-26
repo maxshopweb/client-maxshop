@@ -161,6 +161,25 @@ body {
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
+/* ============================================ */
+/* PREVENIR ZOOM EN INPUTS EN MOBILE */
+/* ============================================ */
+input,
+textarea,
+select {
+  font-size: 16px !important; /* iOS Safari hace zoom automático si es menor a 16px */
+  touch-action: manipulation; /* Previene gestos de zoom en touch */
+}
+
+/* Para pantallas más grandes, permitir tamaños más pequeños */
+@media (min-width: 768px) {
+  input,
+  textarea,
+  select {
+    font-size: inherit; /* Restaurar tamaño normal en desktop */
+  }
+}
+
 /* Para Webkit (Chrome, Safari, Edge) */
 *::-webkit-scrollbar {
   width: 8px;
@@ -234,4 +253,49 @@ html {
 .animate-scroll-infinite {
   animation: scroll-infinite 30s linear infinite;
   display: flex;
+}
+
+/* ============================================ */
+/* PREVENIR ZOOM EN INPUTS EN MOBILE */
+/* ============================================ */
+
+/* Prevenir zoom automático en iOS y otros navegadores móviles */
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="week"],
+textarea,
+select {
+  font-size: 16px !important;
+  touch-action: manipulation;
+}
+
+/* Media query para dispositivos móviles */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"],
+  input[type="month"],
+  input[type="week"],
+  textarea,
+  select {
+    font-size: 16px !important;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
 }

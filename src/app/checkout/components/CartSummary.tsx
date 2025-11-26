@@ -22,7 +22,7 @@ export default function CartSummary() {
 
   return (
     <div
-      className="rounded-xl p-6 sticky top-6"
+      className="rounded-xl p-6 md:sticky md:top-6"
       style={{
         backgroundColor: "var(--white)",
         boxShadow: "0 2px 8px rgba(0,0,0,0.08)",

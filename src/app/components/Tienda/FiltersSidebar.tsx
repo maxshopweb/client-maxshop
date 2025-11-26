@@ -5,6 +5,7 @@ import PriceSlider from "@/app/components/ui/PriceSlider";
 import { Star, Sparkles, X } from "lucide-react";
 import { useProductosFilters } from "@/app/hooks/productos/useProductFilter";
 import { useState, useMemo, useEffect } from "react";
+import { motion } from "framer-motion";
 
 interface LocalFilters {
   busqueda?: string;
@@ -125,38 +126,80 @@ export default function FiltersSidebar({ localFilters: externalFilters, onFilter
     );
   }, [filters]);
 
+  // Variantes de animación para el contenedor principal
+  const containerVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: 0.3,
+        ease: "easeOut",
+        staggerChildren: 0.05,
+      },
+    },
+  };
+
+  // Variantes para los elementos hijos
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.2,
+        ease: "easeOut",
+      },
+    },
+  };
+
   return (
-    <aside className="w-full lg:w-80 flex-shrink-0 bg-sidebar rounded-lg p-4 overflow-y-auto scrollbar-visible lg:sticky lg:top-28 lg:self-start">
-      <div className="space-y-4">
+    <motion.aside
+      className="w-full lg:w-80 flex-shrink-0 bg-sidebar rounded-lg p-4 overflow-y-auto scrollbar-visible lg:sticky lg:top-28 lg:self-start"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      <motion.div className="space-y-4" variants={containerVariants}>
         {/* Header con botón limpiar - Solo en desktop */}
-        <div className="hidden lg:flex items-center justify-between mb-2">
+        <motion.div
+          className="hidden lg:flex items-center justify-between mb-2"
+          variants={itemVariants}
+        >
           <h2 className="text-lg font-semibold text-foreground">Filtros</h2>
           {hasActiveFilters && (
-            <button
+            <motion.button
               onClick={handleClearFilters}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-destructive hover:text-destructive/80 hover:bg-destructive/10 rounded-lg transition-all duration-200 border border-transparent hover:border-destructive/20"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               <X className="w-3.5 h-3.5" />
               Limpiar
-            </button>
+            </motion.button>
           )}
-        </div>
+        </motion.div>
 
         {/* Botón limpiar en mobile */}
         {hasActiveFilters && (
-          <div className="lg:hidden flex justify-end mb-2">
-            <button
+          <motion.div
+            className="lg:hidden flex justify-end mb-2"
+            variants={itemVariants}
+          >
+            <motion.button
               onClick={handleClearFilters}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-destructive hover:text-destructive/80 hover:bg-destructive/10 rounded-lg transition-all duration-200 border border-transparent hover:border-destructive/20"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               <X className="w-3.5 h-3.5" />
               Limpiar filtros
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
         )}
 
         {/* Búsqueda */}
-        <div className="space-y-2">
+        <motion.div className="space-y-2" variants={itemVariants}>
           <label className="text-sm font-medium text-foreground">Buscar Productos</label>
           <div className="relative">
             <input
@@ -170,10 +213,13 @@ export default function FiltersSidebar({ localFilters: externalFilters, onFilter
               className="w-full pl-4 pr-4 py-2.5 border border-input rounded-lg bg-background text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-principal/20 focus:border-principal transition-all"
             />
           </div>
-        </div>
+        </motion.div>
 
         {/* Filtro por Precio */}
-        <div className="space-y-4 p-4 border border-input rounded-lg bg-card">
+        <motion.div
+          className="space-y-4 p-4 border border-input rounded-lg bg-card"
+          variants={itemVariants}
+        >
           <h3 className="text-base font-semibold text-foreground uppercase tracking-wide">Filtrar por Precio</h3>
           <PriceSlider
             min={0}
@@ -181,10 +227,13 @@ export default function FiltersSidebar({ localFilters: externalFilters, onFilter
             value={priceRange}
             onValueChange={handlePriceChange}
           />
-        </div>
+        </motion.div>
 
         {/* Categorías */}
-        <div className="space-y-4 p-4 border border-input rounded-lg bg-card">
+        <motion.div
+          className="space-y-4 p-4 border border-input rounded-lg bg-card"
+          variants={itemVariants}
+        >
           <h3 className="text-base font-semibold text-foreground uppercase tracking-wide">Categorías</h3>
           <div className="space-y-2">
             <FilterSelect
@@ -197,10 +246,13 @@ export default function FiltersSidebar({ localFilters: externalFilters, onFilter
               })}
             />
           </div>
-        </div>
+        </motion.div>
 
         {/* Marcas */}
-        <div className="space-y-4 p-4 border border-input rounded-lg bg-card">
+        <motion.div
+          className="space-y-4 p-4 border border-input rounded-lg bg-card"
+          variants={itemVariants}
+        >
           <h3 className="text-base font-semibold text-foreground uppercase tracking-wide">Marcas</h3>
           <div className="space-y-2">
             <FilterSelect
@@ -213,11 +265,14 @@ export default function FiltersSidebar({ localFilters: externalFilters, onFilter
               })}
             />
           </div>
-        </div>
+        </motion.div>
 
         {/* Grupos */}
         {gruposOptions.length > 0 && (
-          <div className="space-y-4 p-4 border border-input rounded-lg bg-card">
+          <motion.div
+            className="space-y-4 p-4 border border-input rounded-lg bg-card"
+            variants={itemVariants}
+          >
             <h3 className="text-base font-semibold text-foreground uppercase tracking-wide">Grupos</h3>
             <div className="space-y-2">
               <FilterSelect
@@ -230,15 +285,21 @@ export default function FiltersSidebar({ localFilters: externalFilters, onFilter
                 })}
               />
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Filtros Adicionales */}
-        <div className="space-y-4 p-4 border border-input rounded-lg bg-card">
+        <motion.div
+          className="space-y-4 p-4 border border-input rounded-lg bg-card"
+          variants={itemVariants}
+        >
           <h3 className="text-base font-semibold text-foreground uppercase tracking-wide">Filtros Adicionales</h3>
           <div className="space-y-3">
             {/* Destacados - Siempre marcado y no se puede desmarcar */}
-            <div className="flex items-center gap-2 opacity-75">
+            <motion.div
+              className="flex items-center gap-2 opacity-75"
+              whileHover={{ opacity: 0.9 }}
+            >
               <input
                 type="checkbox"
                 id="destacados"
@@ -251,10 +312,14 @@ export default function FiltersSidebar({ localFilters: externalFilters, onFilter
                 <Star className="w-4 h-4 text-principal fill-principal" />
                 <span>Productos destacados</span>
               </label>
-            </div>
+            </motion.div>
 
             {/* Ofertas */}
-            <div className="flex items-center gap-2">
+            <motion.div
+              className="flex items-center gap-2"
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.2 }}
+            >
               <input
                 type="checkbox"
                 id="ofertas"
@@ -265,11 +330,11 @@ export default function FiltersSidebar({ localFilters: externalFilters, onFilter
                 <Sparkles className="w-4 h-4 text-principal" />
                 <span>Productos en oferta</span>
               </label>
-            </div>
+            </motion.div>
           </div>
-        </div>
-      </div>
-    </aside>
+        </motion.div>
+      </motion.div>
+    </motion.aside>
   );
 }
 
