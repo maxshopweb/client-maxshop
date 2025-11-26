@@ -82,7 +82,7 @@ export default function AboutUs() {
               </span>
               <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 leading-tight">
                 Trabajamos para vos{" "}
-                <span className="text-principal">desde 1989</span>
+                <span className="text-principal">desde 2000</span>
               </h2>
               <div className="h-1 w-16 bg-principal rounded-full mt-4"></div>
             </div>
