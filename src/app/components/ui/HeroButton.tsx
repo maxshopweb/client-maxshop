@@ -65,13 +65,13 @@ export default function HeroButton({
         inline-flex
         items-center
         pr-0
-        pl-5
-        py-3
+        pl-3
+        py-2
         md:pl-6
         md:py-3
         rounded-full
         font-semibold
-        text-base
+        text-sm
         md:text-lg
         transition-all
         duration-300
@@ -84,13 +84,16 @@ export default function HeroButton({
       `}
       {...props}
     >
-      <span className="relative z-10 pr-14 md:pr-15">{children}</span>
+      <span className="relative z-10 pr-10 md:pr-15">{children}</span>
       {/* Icono con fondo circular con espacio del borde - mismo radio que el botón */}
       <div className={`
         absolute
-        right-1
-        top-1
-        bottom-1
+        right-0.5
+        top-0.5
+        bottom-0.5
+        md:right-1
+        md:top-1
+        md:bottom-1
         flex
         items-center
         justify-center
@@ -100,7 +103,7 @@ export default function HeroButton({
         transition-all
         duration-300
       `}>
-        <Icon className={`w-5 h-5 md:w-6 md:h-6 ${styles.iconColor} transition-transform duration-300 group-hover:-rotate-90`} />
+        <Icon className={`w-4 h-4 md:w-6 md:h-6 ${styles.iconColor} transition-transform duration-300 group-hover:-rotate-90`} />
       </div>
     </button>
   );

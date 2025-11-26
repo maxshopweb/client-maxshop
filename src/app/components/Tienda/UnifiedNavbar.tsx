@@ -119,7 +119,13 @@ export default function UnifiedNavbar() {
 
               {/* Logo - Centro Absoluto */}
               <Link
-                href="/"
+                href="/#"
+                onClick={(e) => {
+                  if (pathname === '/') {
+                    e.preventDefault();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
+                }}
                 className="absolute left-1/2 transform -translate-x-1/2 group"
               >
                 <Image

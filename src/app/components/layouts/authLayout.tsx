@@ -1,7 +1,9 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { ReactNode } from 'react';
+import { Home, ArrowLeft } from 'lucide-react';
 
 interface AuthLayoutProps {
     children: ReactNode;
@@ -12,7 +14,7 @@ interface AuthLayoutProps {
 export default function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
     return (
         <div 
-            className="h-screen relative flex items-end md:items-center justify-center overflow-hidden"
+            className="min-h-screen h-screen relative flex items-end md:items-center justify-center overflow-y-auto md:overflow-hidden"
             style={{ 
                 backgroundColor: '#fff5eb',
                 position: 'fixed',
@@ -105,29 +107,40 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
             />
 
             {/* Mobile: Sheet desde abajo con bordes redondeados arriba */}
-            <div className="md:hidden w-full bg-white rounded-t-3xl shadow-2xl overflow-hidden flex flex-col mt-auto relative z-20">
+            <div className="md:hidden w-full bg-white rounded-t-3xl shadow-2xl overflow-y-auto flex flex-col relative z-20" style={{ marginTop: 'auto', minHeight: '85vh', maxHeight: '100vh' }}>
                 {/* Form content */}
-                <div className="flex-1 flex flex-col px-4 sm:px-6 pt-4 sm:pt-6 pb-0 overflow-y-auto scrollbar-visible">
-                    <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full pb-4 sm:pb-6">
+                <div className="flex flex-col px-3 sm:px-4 pt-4 sm:pt-5 pb-6 sm:pb-8 min-h-0">
+                    <div className="flex flex-col max-w-md mx-auto w-full">
+                        {/* Botón volver al home - Mobile */}
+                        <div className="flex justify-start mb-3">
+                            <Link 
+                                href="/" 
+                                className="flex items-center gap-2 text-sm text-gray-600 hover:text-orange-600 transition-colors font-medium"
+                            >
+                                <ArrowLeft className="w-4 h-4" />
+                                <span>Volver al inicio</span>
+                            </Link>
+                        </div>
+                        
                         {/* Logo */}
-                        <div className="flex justify-center mb-4">
-                            <Image src="/logos/logo-negativo.svg" alt="logo" width={80} height={80} className="w-14 h-14" />
+                        <div className="flex justify-center mb-3 sm:mb-4">
+                            <Image src="/logos/logo-negativo.svg" alt="logo" width={80} height={80} className="w-12 h-12 sm:w-14 sm:h-14" />
                         </div>
 
                         {/* Title and Subtitle */}
-                        <div className="flex flex-col gap-1.5 mb-6 text-center">
-                            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+                        <div className="flex flex-col gap-1.5 sm:gap-2 mb-4 sm:mb-5 text-center">
+                            <h1 className="text-lg sm:text-xl font-bold text-gray-900">
                                 {title}
                             </h1>
                             {subtitle && (
-                                <p className="text-xs sm:text-sm text-gray-600">
+                                <p className="text-xs sm:text-sm text-gray-600 px-2">
                                     {subtitle}
                                 </p>
                             )}
                         </div>
 
                         {/* Form content */}
-                        <div className="flex-1 flex flex-col justify-center">
+                        <div className="flex flex-col">
                             {children}
                         </div>
                     </div>
@@ -162,6 +175,17 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
                 <div className="w-full md:w-full lg:w-1/2 flex flex-col">
                     <div className="flex-1 flex flex-col p-4 md:p-6 xl:p-8 overflow-y-auto">
                         <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full py-2 md:py-4">
+                            {/* Botón volver al home - Desktop */}
+                            <div className="flex justify-start mb-3">
+                                <Link 
+                                    href="/" 
+                                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-orange-600 transition-colors font-medium"
+                                >
+                                    <ArrowLeft className="w-4 h-4" />
+                                    <span>Volver al inicio</span>
+                                </Link>
+                            </div>
+                            
                             {/* Logo */}
                             <div className="flex justify-start mb-4">
                                 <Image src="/logos/logo-negativo.svg" alt="logo" width={80} height={80} className="w-16 h-16" />

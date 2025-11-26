@@ -1,8 +1,27 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { getAuthToken } from '../utils/cookies';
 
+// Determinar la URL base según el entorno
+const getBaseURL = (): string => {
+  // Si hay una variable de entorno definida, usarla (tiene prioridad)
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  
+  // Si no, usar según el entorno
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
+  if (isDevelopment) {
+    // Desarrollo local
+    return 'http://localhost:3001/api';
+  } else {
+    // Producción
+    return 'https://maxshop-deploy.onrender.com/api';
+  }
+};
+
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
+  baseURL: getBaseURL(),
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

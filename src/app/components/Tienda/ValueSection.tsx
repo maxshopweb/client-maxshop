@@ -38,7 +38,7 @@ export default function ValueSection() {
                   className="relative group overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500"
                 >
                   {/* Imagen */}
-                  <div className="relative h-64 sm:h-80 md:h-96 lg:h-[28rem] overflow-hidden">
+                  <div className="relative h-56 sm:h-64 md:h-80 lg:h-96 xl:h-[28rem] overflow-hidden">
                     <img
                       src={card.image}
                       alt={card.title}
@@ -49,18 +49,18 @@ export default function ValueSection() {
                   </div>
 
                   {/* Contenido */}
-                  <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 lg:p-10 text-white">
+                  <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 md:p-8 lg:p-10 text-white">
                     {/* Icono decorativo */}
-                    <div className="mb-4 md:mb-5">
-                      <div className="inline-flex items-center justify-center w-12 h-12 md:w-14 md:h-14 rounded-full bg-principal/20 backdrop-blur-sm border border-principal/30">
-                        <Icon className="w-6 h-6 md:w-7 md:h-7 text-principal" />
+                    <div className="mb-3 sm:mb-4 md:mb-5">
+                      <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-principal/20 backdrop-blur-sm border border-principal/30">
+                        <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-principal" />
                       </div>
                     </div>
                     
-                    <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold mb-3 md:mb-4 drop-shadow-2xl tracking-tight leading-tight">
+                    <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-semibold mb-2 sm:mb-3 md:mb-4 drop-shadow-2xl tracking-tight leading-tight">
                       {card.title}
                     </h3>
-                    <p className="text-white/90 mb-6 md:mb-8 text-base sm:text-lg md:text-xl leading-relaxed font-normal max-w-2xl">
+                    <p className="text-white/90 mb-4 sm:mb-5 md:mb-6 lg:mb-8 text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed font-normal max-w-2xl">
                       {card.description}
                     </p>
                     

@@ -9,6 +9,7 @@ import ScrollAnimate from "@/app/components/ui/ScrollAnimate";
 import ProductCardSkeleton from "@/app/components/skeleton/product/ProductCardSkeleton";
 import { Filter, X, ChevronLeft, ChevronRight } from "lucide-react";
 import type { IProductos } from "@/app/types/producto.type";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Hacer la página dinámica para evitar prerender
 export const dynamic = 'force-dynamic';
@@ -127,49 +128,72 @@ function ProductosContent() {
       {/* Contenido Principal - Ocupa 100vh y sigue el scroll normal */}
       <div className="container mx-auto px-4 flex flex-col lg:flex-row gap-6 py-6">
 
-        {/* Overlay para mobile */}
-        {isFiltersOpen && (
-          <div
-            className="lg:hidden fixed inset-0 bg-black/50 z-[100] transition-opacity"
-            onClick={() => setIsFiltersOpen(false)}
-          />
-        )}
+        {/* Overlay para mobile con animación */}
+        <AnimatePresence>
+          {isFiltersOpen && (
+            <motion.div
+              className="lg:hidden fixed inset-0 bg-black/50 z-[100]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setIsFiltersOpen(false)}
+            />
+          )}
+        </AnimatePresence>
 
         {/* Sidebar de Filtros - Modal en mobile, sticky en desktop */}
-        <div
-          className={`lg:w-80 flex-shrink-0 transition-transform duration-300 ${
-            isFiltersOpen
-              ? 'fixed inset-y-0 left-0 z-[110] w-80'
-              : 'hidden lg:block'
-          }`}
-        >
-          {/* Mobile: Contenedor con header */}
-          <div className="lg:hidden h-full bg-sidebar rounded-lg overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-input">
-              <h2 className="text-lg font-semibold text-foreground">Filtros</h2>
-              <button
-                onClick={() => setIsFiltersOpen(false)}
-                className="p-2 hover:bg-input rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5 text-foreground" />
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto">
-              <FiltersSidebar 
-                localFilters={localFilters}
-                onFilterChange={handleFilterChange}
-              />
-            </div>
-          </div>
-          
-          {/* Desktop: Directamente el sidebar con sticky */}
-          <div className="hidden lg:block">
-            <FiltersSidebar 
-              localFilters={localFilters}
-              onFilterChange={handleFilterChange}
-            />
-          </div>
+        {/* Desktop: Directamente el sidebar con sticky */}
+        <div className="hidden lg:block lg:w-80 flex-shrink-0">
+          <FiltersSidebar 
+            localFilters={localFilters}
+            onFilterChange={handleFilterChange}
+          />
         </div>
+
+        {/* Mobile: Sidebar con animación */}
+        <AnimatePresence>
+          {isFiltersOpen && (
+            <motion.div
+              className="lg:hidden fixed inset-y-0 left-0 z-[110] w-80"
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ 
+                type: "spring",
+                damping: 25,
+                stiffness: 200,
+                duration: 0.3
+              }}
+            >
+              <div className="h-full bg-sidebar rounded-lg overflow-hidden flex flex-col shadow-2xl">
+                <motion.div
+                  className="flex items-center justify-between p-4 border-b border-input"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1, duration: 0.2 }}
+                >
+                  <h2 className="text-lg font-semibold text-foreground">Filtros</h2>
+                  <motion.button
+                    onClick={() => setIsFiltersOpen(false)}
+                    className="p-2 hover:bg-input rounded-lg transition-colors"
+                    whileHover={{ scale: 1.1, rotate: 90 }}
+                    whileTap={{ scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <X className="w-5 h-5 text-foreground" />
+                  </motion.button>
+                </motion.div>
+                <div className="flex-1 overflow-y-auto">
+                  <FiltersSidebar 
+                    localFilters={localFilters}
+                    onFilterChange={handleFilterChange}
+                  />
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Grid de Productos - Sigue el scroll normal de la página */}
         <div className="flex-1 flex flex-col min-w-0">
@@ -212,7 +236,7 @@ function ProductosContent() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                   {paginatedProductos.map((producto, index) => (
                     <ScrollAnimate
                       key={producto.id_prod}
