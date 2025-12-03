@@ -8,16 +8,9 @@ const getBaseURL = (): string => {
     return process.env.NEXT_PUBLIC_API_URL;
   }
   
-  // Si no, usar según el entorno
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  
-  if (isDevelopment) {
-    // Desarrollo local
-    return 'http://localhost:3001/api';
-  } else {
-    // Producción
-    return 'https://maxshop-deploy.onrender.com/api';
-  }
+  // Por defecto: backend en puerto 3001
+  const baseURL = 'http://localhost:3001/api';
+  return baseURL;
 };
 
 const axiosInstance = axios.create({
@@ -76,6 +69,16 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 500) {
       // Error del servidor
       console.error('Error del servidor:', error.response.data);
+    }
+    
+    // Log para debugging
+    if (error.code === 'ECONNREFUSED' || error.message?.includes('Network Error')) {
+      console.error('❌ Error de conexión:', {
+        message: 'No se pudo conectar al servidor',
+        url: error.config?.url,
+        baseURL: error.config?.baseURL,
+        suggestion: 'Verifica que el backend esté corriendo en http://localhost:3001'
+      });
     }
     
     return Promise.reject(error);

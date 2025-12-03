@@ -3,13 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { User, ShoppingCart, Sun, Moon, LogOut, Menu, X } from "lucide-react";
+import { User, ShoppingCart, LogOut, Menu, X, Search, MapPin } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useTheme } from "@/app/context/ThemeProvider";
 import { useAuth } from "@/app/context/AuthContext";
 import { useCartStore } from "@/app/stores/cartStore";
 import { useCartSidebar } from "@/app/hooks/useCartSidebar";
 import CartSidebar from "@/app/components/cart/CartSidebar";
+import LocationModal from "@/app/components/modals/LocationModal";
 
 const menuLinks = [
   { label: "Inicio", href: "/" },
@@ -24,8 +25,13 @@ export default function UnifiedNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [localidad, setLocalidad] = useState("Córdoba");
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [selectedProvincia, setSelectedProvincia] = useState<string>("cordoba");
+  const [selectedCiudad, setSelectedCiudad] = useState<string>("cordoba-capital");
   const userMenuRef = useRef<HTMLDivElement>(null);
-  const { actualTheme, setTheme } = useTheme();
+  const { actualTheme } = useTheme();
   const { user, isAuthenticated } = useAuth();
   const { summary } = useCartStore();
   const { isOpen, open, close } = useCartSidebar();
@@ -69,6 +75,30 @@ export default function UnifiedNavbar() {
   const isHomePage = pathname === '/';
   const shouldShowBackground = !isHomePage || isScrolled;
 
+  // Manejar selección de ubicación
+  const handleLocationSelect = (provincia: string, ciudad: string, nombreCompleto: string) => {
+    setSelectedProvincia(provincia);
+    setSelectedCiudad(ciudad);
+    setLocalidad(nombreCompleto);
+    // Guardar en localStorage para persistencia
+    localStorage.setItem('ubicacion', JSON.stringify({ provincia, ciudad, nombreCompleto }));
+  };
+
+  // Cargar ubicación guardada al montar
+  useEffect(() => {
+    const ubicacionGuardada = localStorage.getItem('ubicacion');
+    if (ubicacionGuardada) {
+      try {
+        const { provincia, ciudad, nombreCompleto } = JSON.parse(ubicacionGuardada);
+        setSelectedProvincia(provincia);
+        setSelectedCiudad(ciudad);
+        setLocalidad(nombreCompleto);
+      } catch (error) {
+        console.error('Error al cargar ubicación guardada:', error);
+      }
+    }
+  }, []);
+
   return (
     <>
       <header className="sticky top-0 z-50">
@@ -81,43 +111,8 @@ export default function UnifiedNavbar() {
           }`}
         >
           <div className="container mx-auto px-4">
-            <div className="relative flex items-center justify-between">
-              {/* Izquierda: User + Toggle Dark Mode */}
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {/* User Account */}
-                {isAuthenticated && user ? (
-                  <Link
-                    href="/mi-cuenta"
-                    className="p-2 hover:bg-white/10 transition-all duration-300 rounded-lg"
-                    aria-label="Mi cuenta"
-                  >
-                    <User size={22} className="text-white transition-transform duration-300 hover:scale-110" />
-                  </Link>
-                ) : (
-                  <Link
-                    href={getLoginUrl()}
-                    className="p-2 hover:bg-white/10 transition-all duration-300 rounded-lg opacity-50"
-                    aria-label="Iniciar sesión"
-                  >
-                    <User size={22} className="text-white transition-transform duration-300 hover:scale-110" />
-                  </Link>
-                )}
-
-                {/* Toggle Dark Mode */}
-                <button
-                  onClick={() => setTheme(actualTheme === 'dark' ? 'light' : 'dark')}
-                  className="p-2 hover:bg-white/10 transition-all duration-300 rounded-lg"
-                  aria-label="Cambiar tema"
-                >
-                  {actualTheme === 'dark' ? (
-                    <Sun size={22} className="text-white transition-transform duration-300 hover:scale-110" />
-                  ) : (
-                    <Moon size={22} className="text-white transition-transform duration-300 hover:scale-110" />
-                  )}
-                </button>
-              </div>
-
-              {/* Logo - Centro Absoluto */}
+            <div className="flex items-center justify-between gap-4">
+              {/* Izquierda: Logo */}
               <Link
                 href="/#"
                 onClick={(e) => {
@@ -126,7 +121,7 @@ export default function UnifiedNavbar() {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }
                 }}
-                className="absolute left-1/2 transform -translate-x-1/2 group"
+                className="flex-shrink-0 group"
               >
                 <Image
                   src="/logos/logo-positivo.svg"
@@ -137,8 +132,46 @@ export default function UnifiedNavbar() {
                 />
               </Link>
 
-              {/* Derecha: Cart + Menu */}
-              <div className="flex items-center gap-2 md:gap-3 flex-shrink-0 ml-auto">
+              {/* Centro: Barra de Búsqueda */}
+              <div className="flex-1 max-w-2xl mx-4">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Busca productos..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full px-4 py-2 pl-10 pr-4 rounded-lg bg-white/10 text-white placeholder-white/60 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40 transition-all"
+                  />
+                  <Search 
+                    size={18} 
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60" 
+                  />
+                </div>
+              </div>
+
+              {/* Derecha: Login/Registro + Cart + Menu */}
+              <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+                {/* User Account / Login */}
+                {isAuthenticated && user ? (
+                  <Link
+                    href="/mi-cuenta"
+                    className="flex items-center gap-2 px-3 py-2 hover:bg-white/10 transition-all duration-300 rounded-lg"
+                    aria-label="Mi cuenta"
+                  >
+                    <User size={20} className="text-white" />
+                    <span className="hidden md:inline text-sm text-white">Mi cuenta</span>
+                  </Link>
+                ) : (
+                  <Link
+                    href={getLoginUrl()}
+                    className="flex items-center gap-2 px-3 py-2 hover:bg-white/10 transition-all duration-300 rounded-lg"
+                    aria-label="Iniciar sesión"
+                  >
+                    <User size={20} className="text-white" />
+                    <span className="hidden md:inline text-sm text-white">Inicia Sesión / Regístrate</span>
+                  </Link>
+                )}
+
                 {/* Shopping Cart */}
                 <button
                   onClick={open}
@@ -178,7 +211,7 @@ export default function UnifiedNavbar() {
           </div>
         </div>
 
-        {/* Parte Inferior: Links del Menú - Solo Desktop */}
+        {/* Parte Inferior: Localidad + Links del Menú - Solo Desktop */}
         <nav
           className={`hidden md:block transition-all duration-500 ${
             shouldShowBackground
@@ -189,7 +222,19 @@ export default function UnifiedNavbar() {
           }`}
         >
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-center h-12 md:h-14">
+            <div className="flex items-center justify-between h-12 md:h-14">
+              {/* Indicador de Ubicación */}
+              <button
+                onClick={() => setIsLocationModalOpen(true)}
+                className="flex items-center gap-2 text-sm hover:opacity-80 transition-opacity cursor-pointer"
+              >
+                <MapPin size={16} className={shouldShowBackground ? (actualTheme === 'dark' ? "text-white" : "text-terciario") : "text-white"} />
+                <span className={shouldShowBackground ? (actualTheme === 'dark' ? "text-white" : "text-terciario") : "text-white"}>
+                  Estás en: {localidad}
+                </span>
+              </button>
+
+              {/* Links del Menú */}
               <div className="flex items-center gap-4 lg:gap-6">
                 {menuLinks.map((link) => {
                   const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
@@ -287,7 +332,7 @@ export default function UnifiedNavbar() {
                   className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
                 >
                   <User size={20} />
-                  <span className="text-sm">Iniciar sesión</span>
+                  <span className="text-sm">Inicia Sesión / Regístrate</span>
                 </Link>
               )}
             </div>
@@ -297,6 +342,37 @@ export default function UnifiedNavbar() {
             >
               <X size={24} className="text-white" />
             </button>
+          </div>
+
+          {/* Indicador de Ubicación Mobile */}
+          <button
+            onClick={() => {
+              setIsLocationModalOpen(true);
+              setIsMobileMenuOpen(false);
+            }}
+            className="w-full px-4 py-3 border-b border-white/20 text-left hover:bg-white/5 transition-colors"
+          >
+            <div className="flex items-center gap-2 text-sm text-white">
+              <MapPin size={16} />
+              <span>Estás en: {localidad}</span>
+            </div>
+          </button>
+
+          {/* Barra de Búsqueda Mobile */}
+          <div className="px-4 py-3 border-b border-white/20">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Busca productos..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 pl-10 pr-4 rounded-lg bg-white/10 text-white placeholder-white/60 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40 transition-all"
+              />
+              <Search 
+                size={18} 
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60" 
+              />
+            </div>
           </div>
 
           {/* Menu Links */}
@@ -359,6 +435,15 @@ export default function UnifiedNavbar() {
 
       {/* Cart Sidebar */}
       <CartSidebar isOpen={isOpen} onClose={close} />
+
+      {/* Location Modal */}
+      <LocationModal
+        isOpen={isLocationModalOpen}
+        onClose={() => setIsLocationModalOpen(false)}
+        onLocationSelect={handleLocationSelect}
+        currentProvincia={selectedProvincia}
+        currentCiudad={selectedCiudad}
+      />
     </>
   );
 }

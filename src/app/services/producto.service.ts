@@ -145,6 +145,53 @@ class ProductosService {
 
     return response.data.data;
   }
+
+  async getRelatedProducts(id: number, limit: number = 4): Promise<IProductos[]> {
+    try {
+      // Obtener el producto actual para usar su categoría/marca
+      const currentProduct = await this.getById(id);
+      
+      // Buscar productos relacionados por categoría o marca
+      const filters: IProductoFilters = {
+        limit,
+        estado: 1, // EstadoGeneral.ACTIVO
+      };
+
+      // Priorizar productos de la misma categoría
+      if (currentProduct.id_cat) {
+        filters.id_cat = currentProduct.id_cat;
+      }
+
+      // Si no hay suficientes, buscar por marca
+      const response = await this.getAll(filters);
+      
+      // Filtrar el producto actual y limitar resultados
+      const related = response.data
+        .filter(p => p.id_prod !== id)
+        .slice(0, limit);
+
+      // Si no hay suficientes por categoría, buscar por marca
+      if (related.length < limit && currentProduct.id_marca) {
+        const marcaFilters: IProductoFilters = {
+          limit: limit - related.length,
+          id_marca: currentProduct.id_marca,
+          estado: 1, // EstadoGeneral.ACTIVO
+        };
+        
+        const marcaResponse = await this.getAll(marcaFilters);
+        const marcaProducts = marcaResponse.data
+          .filter(p => p.id_prod !== id && !related.some(r => r.id_prod === p.id_prod))
+          .slice(0, limit - related.length);
+        
+        related.push(...marcaProducts);
+      }
+
+      return related;
+    } catch (error) {
+      console.error('Error al obtener productos relacionados:', error);
+      return [];
+    }
+  }
 }
 
 export const productosService = new ProductosService();
