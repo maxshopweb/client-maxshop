@@ -1,9 +1,10 @@
 /* eslint-disable no-console */
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
+import { getUserRole, getAuthToken } from '../utils/cookies';
 import { type UserRole } from '../types/user';
 
 type UseAuthGuardOptions = {
@@ -20,7 +21,23 @@ export const useAuthGuard = ({
   skipRedirect = false
 }: UseAuthGuardOptions = {}) => {
   const router = useRouter();
-  const { role, isAuthenticated, loading } = useAuth();
+  const { role: contextRole, isAuthenticated: contextIsAuthenticated, loading } = useAuth();
+  
+  // Leer de cookies como fallback mientras el contexto carga
+  const [cookieRole, setCookieRole] = useState<string | null>(null);
+  const [cookieToken, setCookieToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Leer de cookies inmediatamente
+    const roleFromCookie = getUserRole();
+    const tokenFromCookie = getAuthToken();
+    setCookieRole(roleFromCookie);
+    setCookieToken(tokenFromCookie);
+  }, []);
+
+  // Usar el role del contexto si está disponible, sino usar el de las cookies
+  const role = contextRole || (cookieRole as UserRole | null);
+  const isAuthenticated = contextIsAuthenticated || !!cookieToken;
 
   const isAuthorized = useMemo(() => {
     if (!roles || roles.length === 0) {
@@ -35,7 +52,12 @@ export const useAuthGuard = ({
   }, [isAuthenticated, role, roles]);
 
   useEffect(() => {
-    if (loading || skipRedirect) {
+    // Esperar un poco más si está cargando para dar tiempo al contexto
+    if (loading && !cookieToken) {
+      return;
+    }
+
+    if (skipRedirect) {
       return;
     }
 
@@ -44,13 +66,14 @@ export const useAuthGuard = ({
       return;
     }
 
-    if (!isAuthorized) {
+    if (!isAuthorized && role !== null) {
+      // Solo redirigir si tenemos certeza del role (no es null)
       router.replace(redirectUnauthorizedTo ?? redirectTo);
     }
-  }, [isAuthenticated, isAuthorized, loading, redirectTo, redirectUnauthorizedTo, router, skipRedirect]);
+  }, [isAuthenticated, isAuthorized, loading, redirectTo, redirectUnauthorizedTo, router, skipRedirect, role, cookieToken]);
 
   return {
-    loading,
+    loading: loading && !cookieToken, // Solo mostrar loading si no hay cookie
     isAuthenticated,
     isAuthorized,
     role

@@ -33,27 +33,27 @@ export default function ProductBreadcrumbs({ producto }: ProductBreadcrumbsProps
 
   return (
     <nav aria-label="Breadcrumb" className="w-full">
-      <ol className="flex items-center gap-2 flex-wrap text-sm">
+      <ol className="flex items-center gap-1.5 sm:gap-2 flex-wrap text-xs sm:text-sm">
         {breadcrumbs.map((crumb, index) => {
           const Icon = crumb.icon;
           const isLast = crumb.isLast || index === breadcrumbs.length - 1;
 
           return (
-            <li key={index} className="flex items-center gap-2">
+            <li key={index} className="flex items-center gap-1.5 sm:gap-2">
               {index > 0 && (
-                <ChevronRight className="w-4 h-4 text-foreground/40" />
+                <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-terciario/30" />
               )}
               {isLast ? (
-                <span className="text-foreground font-medium truncate max-w-[200px]">
-                  {Icon && <Icon className="w-4 h-4 inline mr-1" />}
+                <span className="text-terciario font-medium truncate max-w-[150px] sm:max-w-[200px]">
+                  {Icon && <Icon className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1" />}
                   {crumb.label}
                 </span>
               ) : (
                 <Link
                   href={crumb.href}
-                  className="text-foreground/70 hover:text-principal transition-colors flex items-center gap-1"
+                  className="text-terciario/60 hover:text-principal transition-colors flex items-center gap-1"
                 >
-                  {Icon && <Icon className="w-4 h-4" />}
+                  {Icon && <Icon className="w-3 h-3 sm:w-4 sm:h-4" />}
                   <span>{crumb.label}</span>
                 </Link>
               )}

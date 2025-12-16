@@ -102,11 +102,11 @@ export default function ProductGallery({ producto }: ProductGalleryProps) {
 
   return (
     <>
-      <div className="w-full space-y-4">
+      <div className="w-full space-y-3 sm:space-y-4">
         {/* Imagen principal */}
         <motion.div
-          className="relative aspect-square w-full bg-white rounded-lg overflow-hidden border border-card-border cursor-pointer group"
-          whileHover={{ scale: 1.02 }}
+          className="relative aspect-square w-full bg-white rounded-lg overflow-hidden cursor-pointer group"
+          whileHover={{ scale: 1.01 }}
           transition={{ duration: 0.2 }}
           onClick={() => setLightboxOpen(true)}
         >
@@ -157,12 +157,12 @@ export default function ProductGallery({ producto }: ProductGalleryProps) {
               <motion.button
                 key={index}
                 onClick={() => handleThumbnailClick(image)}
-                className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                className={`relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden transition-all ${
                   selectedImage === image
-                    ? "border-principal scale-105"
-                    : "border-transparent hover:border-principal/50"
+                    ? "ring-2 ring-principal scale-105"
+                    : "ring-1 ring-card-border/30 hover:ring-principal/50"
                 }`}
-                whileHover={{ scale: 1.1 }}
+                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 aria-label={`Ver imagen ${index + 1}`}
               >

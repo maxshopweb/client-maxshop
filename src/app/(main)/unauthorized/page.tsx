@@ -1,24 +1,31 @@
 'use client';
 
-import Link from 'next/link';
 import { Button } from '@/app/components/ui/Button';
-import { useAuth } from '@/app/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { getUserRole, getAuthToken } from '@/app/utils/cookies';
 
 export default function UnauthorizedPage() {
-  const { isAuthenticated, role } = useAuth();
   const router = useRouter();
+  const [role, setRole] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    // Si el usuario no está autenticado, redirigir a login
-    if (!isAuthenticated) {
+    // Leer el rol y token directamente de las cookies (más rápido que esperar al AuthContext)
+    const userRole = getUserRole();
+    const authToken = getAuthToken();
+    
+    setRole(userRole);
+    setToken(authToken);
+
+    // Si no hay token, redirigir a login
+    if (!authToken) {
       router.push('/login');
     }
-  }, [isAuthenticated, router]);
+  }, [router]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex items-center justify-center min-h-screen bg-white">
       <div className="text-center px-4">
         <div className="mb-6">
           <svg
@@ -36,15 +43,15 @@ export default function UnauthorizedPage() {
           </svg>
         </div>
         
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-          Acceso Denegado
+        <h1 className="text-4xl font-bold text-terciario mb-4">
+          Acceso denegado
         </h1>
         
-        <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+        <p className="text-lg text-terciario/70 mb-8 max-w-md mx-auto">
           No tienes permisos para acceder a esta sección. 
           {role && (
             <span className="block mt-2 text-sm">
-              Tu rol actual: <span className="font-semibold">{role}</span>
+              Tu rol actual: <span className="font-semibold text-terciario">{role}</span>
             </span>
           )}
         </p>
@@ -66,7 +73,7 @@ export default function UnauthorizedPage() {
         </div>
         
         {role === 'ADMIN' && (
-          <p className="mt-8 text-sm text-gray-500 dark:text-gray-500">
+          <p className="mt-8 text-sm text-terciario/60">
             Si crees que esto es un error, contacta al administrador del sistema.
           </p>
         )}

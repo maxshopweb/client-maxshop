@@ -103,20 +103,20 @@ export default function AddToCartSection({ producto }: AddToCartSectionProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
-      className="space-y-4 p-6 bg-card rounded-lg border border-card-border"
+      className="space-y-3 sm:space-y-4"
     >
       {/* Selector de cantidad */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">Cantidad</label>
-        <div className="flex items-center gap-3">
+        <label className="text-xs sm:text-sm font-medium text-terciario">Cantidad</label>
+        <div className="flex items-center gap-2 sm:gap-3">
           <motion.button
             onClick={handleDecrease}
             disabled={quantity <= 1 || isOutOfStock}
-            className="w-10 h-10 rounded-full border-2 border-card-border flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:bg-principal/10 hover:border-principal transition-colors"
-            whileHover={{ scale: quantity > 1 ? 1.1 : 1 }}
-            whileTap={{ scale: quantity > 1 ? 0.9 : 1 }}
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-card-border/50 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:bg-principal/10 hover:border-principal transition-colors"
+            whileHover={{ scale: quantity > 1 ? 1.05 : 1 }}
+            whileTap={{ scale: quantity > 1 ? 0.95 : 1 }}
           >
-            <Minus className="w-5 h-5 text-foreground" />
+            <Minus className="w-4 h-4 sm:w-5 sm:h-5 text-terciario" />
           </motion.button>
 
           <motion.input
@@ -133,21 +133,21 @@ export default function AddToCartSection({ producto }: AddToCartSectionProps) {
                 toast.error(`Solo hay ${maxQuantity} unidades disponibles`);
               }
             }}
-            className="w-20 text-center text-lg font-semibold border-2 border-card-border rounded-lg py-2 focus:outline-none focus:border-principal bg-input text-input-text"
+            className="w-16 sm:w-20 text-center text-base sm:text-lg font-semibold border border-card-border/50 rounded-lg py-1.5 sm:py-2 focus:outline-none focus:border-principal bg-input text-input-text"
             disabled={isOutOfStock}
           />
 
           <motion.button
             onClick={handleIncrease}
             disabled={quantity >= maxQuantity || isOutOfStock}
-            className="w-10 h-10 rounded-full border-2 border-card-border flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:bg-principal/10 hover:border-principal transition-colors"
-            whileHover={{ scale: quantity < maxQuantity ? 1.1 : 1 }}
-            whileTap={{ scale: quantity < maxQuantity ? 0.9 : 1 }}
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-card-border/50 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:bg-principal/10 hover:border-principal transition-colors"
+            whileHover={{ scale: quantity < maxQuantity ? 1.05 : 1 }}
+            whileTap={{ scale: quantity < maxQuantity ? 0.95 : 1 }}
           >
-            <Plus className="w-5 h-5 text-foreground" />
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-terciario" />
           </motion.button>
         </div>
-        <p className="text-xs text-foreground/60">
+        <p className="text-xs text-terciario/50">
           Máximo: {maxQuantity} unidades
         </p>
       </div>
@@ -157,9 +157,9 @@ export default function AddToCartSection({ producto }: AddToCartSectionProps) {
         <motion.div
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm"
+          className="flex items-center gap-2 p-2 sm:p-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-xs sm:text-sm"
         >
-          <AlertCircle className="w-5 h-5" />
+          <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5" />
           <span>Este producto no tiene stock disponible</span>
         </motion.div>
       )}
@@ -169,18 +169,19 @@ export default function AddToCartSection({ producto }: AddToCartSectionProps) {
         <motion.div
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-sm"
+          className="flex items-center gap-2 p-2 sm:p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-xs sm:text-sm"
         >
-          <AlertCircle className="w-5 h-5" />
+          <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5" />
           <span>Este producto no está disponible actualmente</span>
         </motion.div>
       )}
 
       {/* Botones de acción */}
-      <div className="space-y-3">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
         <motion.div
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
+          className="flex-1"
         >
           <Button
             onClick={handleAddToCart}
@@ -188,46 +189,48 @@ export default function AddToCartSection({ producto }: AddToCartSectionProps) {
             variant="primary"
             size="lg"
             fullWidth
-            className="relative overflow-hidden"
+            className="relative overflow-hidden text-xs sm:text-sm"
           >
             {isAdding ? (
               <span className="flex items-center gap-2">
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                  className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                  className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
                 />
                 Agregando...
               </span>
             ) : added ? (
               <span className="flex items-center gap-2">
-                <Check className="w-5 h-5" />
+                <Check className="w-4 h-4" />
                 Agregado
               </span>
             ) : (
               <span className="flex items-center gap-2">
-                <ShoppingCart className="w-5 h-5" />
+                <ShoppingCart className="w-4 h-4" />
                 Agregar al Carrito
               </span>
             )}
           </Button>
         </motion.div>
 
-        <Button
-          onClick={handleBuyNow}
-          disabled={isOutOfStock || isInactive || isAdding}
-          variant="outline-primary"
-          size="lg"
-          fullWidth
-        >
-          Comprar Ahora
-        </Button>
+        <div className="flex-1">
+          <Button
+            onClick={handleBuyNow}
+            disabled={isOutOfStock || isInactive || isAdding}
+            variant="outline-primary"
+            size="lg"
+            fullWidth
+            className="text-xs sm:text-sm"
+          >
+            Comprar Ahora
+          </Button>
+        </div>
       </div>
 
       {/* Información adicional */}
-      <div className="pt-4 border-t border-dotted border-card-border space-y-2 text-sm text-foreground/70">
+      <div className="pt-3 sm:pt-4 space-y-1 text-xs sm:text-sm text-terciario/60">
         <p>✓ Envío gratis en compras superiores a $50.000</p>
-        <p>✓ Devolución garantizada en 30 días</p>
         <p>✓ Soporte técnico incluido</p>
       </div>
     </motion.div>

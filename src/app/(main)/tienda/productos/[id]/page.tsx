@@ -34,7 +34,7 @@ export default function ProductPage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-7xl pt-16 sm:pt-20">
         <ProductPageSkeleton />
       </div>
     );
@@ -43,7 +43,7 @@ export default function ProductPage() {
   // Error state
   if (isError || !producto) {
     return (
-      <div className="container mx-auto px-4 py-16 max-w-7xl">
+      <div className="container mx-auto px-3 sm:px-4 py-8 sm:py-16 max-w-7xl pt-16 sm:pt-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -86,7 +86,7 @@ export default function ProductPage() {
   const isActive = producto.activo === "S" || producto.estado === 1;
   if (!isActive && producto.stock === 0) {
     return (
-      <div className="container mx-auto px-4 py-16 max-w-7xl">
+      <div className="container mx-auto px-3 sm:px-4 py-8 sm:py-16 max-w-7xl pt-16 sm:pt-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -116,18 +116,18 @@ export default function ProductPage() {
 
   // Main content
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-7xl pt-16 sm:pt-20">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="space-y-8"
+          className="space-y-4 sm:space-y-6"
         >
           {/* Breadcrumbs */}
           <ProductBreadcrumbs producto={producto} />
 
           {/* Main Product Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
             {/* Gallery */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -142,7 +142,7 @@ export default function ProductPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
-              className="space-y-6"
+              className="space-y-4 sm:space-y-6"
             >
               <ProductInfo producto={producto} />
               <AddToCartSection producto={producto} />
@@ -154,7 +154,7 @@ export default function ProductPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="pt-8 border-t border-dotted border-card-border"
+            className="pt-4 sm:pt-6"
           >
             <ProductTabs producto={producto} />
           </motion.div>
@@ -165,7 +165,7 @@ export default function ProductPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="pt-8 border-t border-dotted border-card-border"
+              className="pt-4 sm:pt-6"
             >
               <RelatedProducts
                 productos={relatedProducts}

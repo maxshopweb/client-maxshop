@@ -104,13 +104,14 @@ export function ProductosFilters() {
                                     options={[
                                         { value: '', label: 'Todas las categorías' },
                                         ...(categorias?.map((cat: ICategoria) => ({
-                                            value: cat.id_cat,
+                                            value: cat.codi_categoria || cat.id_cat?.toString() || '',
                                             label: cat.nombre || 'Sin nombre',
                                         })) || [])
                                     ]}
-                                    value={filters.id_cat || ''}
+                                    value={filters.id_cat?.toString() || ''}
                                     onChange={(value) => {
-                                        setFilter('id_cat', value ? Number(value) : undefined);
+                                        // El backend acepta códigos o IDs
+                                        setFilter('id_cat', value || undefined);
                                         // Limpiar subcategoría al cambiar categoría
                                         if (filters.id_subcat) {
                                             setFilter('id_subcat', undefined);
@@ -150,13 +151,14 @@ export function ProductosFilters() {
                                     options={[
                                         { value: '', label: 'Todas las marcas' },
                                         ...(marcas?.map((marca: IMarca) => ({
-                                            value: marca.id_marca,
+                                            value: marca.codi_marca || marca.id_marca?.toString() || '',
                                             label: marca.nombre || 'Sin nombre',
                                         })) || [])
                                     ]}
-                                    value={filters.id_marca || ''}
+                                    value={filters.id_marca?.toString() || ''}
                                     onChange={(value) => {
-                                        setFilter('id_marca', value ? Number(value) : undefined);
+                                        // El backend acepta códigos o IDs
+                                        setFilter('id_marca', value || undefined);
                                     }}
                                     disabled={loadingMarcas}
                                     placeholder={loadingMarcas ? "Cargando..." : "Seleccionar marca"}

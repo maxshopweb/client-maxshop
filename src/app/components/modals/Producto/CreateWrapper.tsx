@@ -36,7 +36,7 @@ export function CreateProductoModal({ onClose }: CreateProductoModalProps) {
     });
 
     const validateStepOne = async () => {
-        const fields = ['nombre'];
+        const fields = ['codi_arti', 'nombre'];
         const isValid = await form.trigger(fields as any);
         console.log('Step 1 validation:', isValid);
         return isValid;
@@ -63,14 +63,39 @@ export function CreateProductoModal({ onClose }: CreateProductoModalProps) {
 
         const rawData = form.getValues();
 
-        // Transformar los valores string a number para los selects
-        const data = {
-            ...rawData,
+        // Preparar datos para el backend - usar códigos cuando estén disponibles
+        const data: any = {
+            codi_arti: rawData.codi_arti,
+            nombre: rawData.nombre,
+            precio: rawData.precio,
+            descripcion: rawData.descripcion,
+            cod_sku: rawData.cod_sku,
+            id_interno: rawData.id_interno,
+            modelo: rawData.modelo,
+            precio_mayorista: rawData.precio_mayorista,
+            precio_minorista: rawData.precio_minorista,
+            precio_evento: rawData.precio_evento,
+            precio_sin_iva: rawData.precio_sin_iva,
+            stock: rawData.stock,
+            stock_min: rawData.stock_min,
+            stock_mayorista: rawData.stock_mayorista,
+            codi_barras: rawData.codi_barras,
+            unidad_medida: rawData.unidad_medida,
+            unidades_por_producto: rawData.unidades_por_producto,
+            img_principal: rawData.img_principal,
+            imagenes: rawData.imagenes,
+            destacado: rawData.destacado,
+            financiacion: rawData.financiacion,
+            // Usar códigos cuando estén disponibles, sino usar IDs (legacy)
+            codi_categoria: rawData.codi_categoria,
+            codi_marca: rawData.codi_marca,
+            codi_grupo: rawData.codi_grupo,
+            codi_impuesto: rawData.codi_impuesto,
+            // Campos legacy para compatibilidad
             id_cat: rawData.id_cat ? Number(rawData.id_cat) : undefined,
             id_subcat: rawData.id_subcat ? Number(rawData.id_subcat) : undefined,
             id_marca: rawData.id_marca ? Number(rawData.id_marca) : undefined,
             id_iva: rawData.id_iva ? Number(rawData.id_iva) : undefined,
-            estado: rawData.estado ? Number(rawData.estado) : undefined,
         };
 
         console.log('📦 Datos del formulario:', data);

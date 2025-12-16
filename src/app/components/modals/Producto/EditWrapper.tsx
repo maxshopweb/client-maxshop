@@ -21,13 +21,21 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
         resolver: zodResolver(createProductoSchema),
         mode: 'onChange',
         defaultValues: {
+            codi_arti: producto.codi_arti || '',
             nombre: producto.nombre || '',
             id_interno: producto.id_interno || '',
             cod_sku: producto.cod_sku || '',
             modelo: producto.modelo || '',
+            codi_categoria: producto.codi_categoria || '',
+            codi_marca: producto.codi_marca || '',
+            codi_grupo: producto.codi_grupo || '',
+            codi_impuesto: producto.codi_impuesto || '',
+            codi_barras: producto.codi_barras || '',
+            unidad_medida: producto.unidad_medida || '',
+            unidades_por_producto: producto.unidades_por_producto || undefined,
+            descripcion: producto.descripcion || '',
             id_cat: producto.id_cat?.toString() || '',
             id_subcat: producto.id_subcat?.toString() || '',
-            descripcion: producto.descripcion || '',
             id_marca: producto.id_marca?.toString() || '',
             destacado: producto.destacado || false,
             financiacion: producto.financiacion || false,
@@ -35,6 +43,7 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
             precio_mayorista: producto.precio_mayorista || undefined,
             precio_minorista: producto.precio_minorista || undefined,
             precio_evento: producto.precio_evento || undefined,
+            precio_sin_iva: producto.precio_sin_iva || undefined,
             stock: producto.stock || 0,
             stock_min: producto.stock_min || undefined,
             stock_mayorista: producto.stock_mayorista || undefined,
@@ -78,14 +87,40 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
 
         const rawData = form.getValues();
 
-        // Transformar los valores string a number para los selects
-        const data = {
-            ...rawData,
+        // Preparar datos para el backend - usar códigos cuando estén disponibles
+        const data: any = {
+            codi_arti: rawData.codi_arti,
+            nombre: rawData.nombre,
+            precio: rawData.precio,
+            descripcion: rawData.descripcion,
+            cod_sku: rawData.cod_sku,
+            id_interno: rawData.id_interno,
+            modelo: rawData.modelo,
+            precio_mayorista: rawData.precio_mayorista,
+            precio_minorista: rawData.precio_minorista,
+            precio_evento: rawData.precio_evento,
+            precio_sin_iva: rawData.precio_sin_iva,
+            stock: rawData.stock,
+            stock_min: rawData.stock_min,
+            stock_mayorista: rawData.stock_mayorista,
+            codi_barras: rawData.codi_barras,
+            unidad_medida: rawData.unidad_medida,
+            unidades_por_producto: rawData.unidades_por_producto,
+            img_principal: rawData.img_principal,
+            imagenes: rawData.imagenes,
+            destacado: rawData.destacado,
+            financiacion: rawData.financiacion,
+            estado: rawData.estado ? Number(rawData.estado) : undefined,
+            // Usar códigos cuando estén disponibles, sino usar IDs (legacy)
+            codi_categoria: rawData.codi_categoria,
+            codi_marca: rawData.codi_marca,
+            codi_grupo: rawData.codi_grupo,
+            codi_impuesto: rawData.codi_impuesto,
+            // Campos legacy para compatibilidad
             id_cat: rawData.id_cat ? Number(rawData.id_cat) : undefined,
             id_subcat: rawData.id_subcat ? Number(rawData.id_subcat) : undefined,
             id_marca: rawData.id_marca ? Number(rawData.id_marca) : undefined,
             id_iva: rawData.id_iva ? Number(rawData.id_iva) : undefined,
-            estado: rawData.estado ? Number(rawData.estado) : undefined,
         };
 
         console.log('📦 Datos transformados:', data);
@@ -93,7 +128,7 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
         // Ejecutar la mutación de actualización
         updateProducto({
             id: producto.id_prod,
-            data: data as any
+            data: data
         });
     };
 

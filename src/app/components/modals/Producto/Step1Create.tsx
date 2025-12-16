@@ -36,25 +36,26 @@ export function StepOneBasicInfo({ form }: StepOneProps) {
             {/* FILA 1 */}
             <div className="grid grid-cols-2 gap-3">
                 <Input
+                    label="Código de Artículo *"
+                    placeholder="Ej: ART-001"
+                    icon={Tag}
+                    {...register('codi_arti')}
+                    error={errors.codi_arti?.message}
+                />
+                <Input
                     label="Nombre del Producto *"
                     placeholder="Ej: Taladro Inalámbrico 20V"
                     icon={Package}
                     {...register('nombre')}
                     error={errors.nombre?.message}
                 />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
                 <Input
                     label="ID Interno"
                     placeholder="INT-001"
                     {...register('id_interno')}
-                />
-            </div>
-
-            <div className='grid grid-cols-2 gap-3'>
-                <Input
-                    label="Código SKU"
-                    placeholder="SKU-001"
-                    icon={Tag}
-                    {...register('cod_sku')}
                 />
                 <Input
                     label="Modelo"
@@ -64,12 +65,25 @@ export function StepOneBasicInfo({ form }: StepOneProps) {
                 />
             </div>
 
+            <div className='grid grid-cols-2 gap-3'>
+                <Input
+                    label="Código SKU"
+                    placeholder="SKU-001"
+                    {...register('cod_sku')}
+                />
+                <Input
+                    label="Código de Barras"
+                    placeholder="1234567890123"
+                    {...register('codi_barras')}
+                />
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
                 <SelectWithCreate
                     label="Categoría"
                     options={categorias?.data?.map((cat: ICategoria) => ({
-                        value: cat.id_cat,
-                        label: cat.nombre || ''
+                        value: cat.codi_categoria || cat.id_cat?.toString() || '',
+                        label: `${cat.nombre || ''} ${cat.codi_categoria ? `(${cat.codi_categoria})` : ''}`
                     })) || []}
                     placeholder="Seleccionar"
                     disabled={loadingCategorias}
@@ -77,9 +91,15 @@ export function StepOneBasicInfo({ form }: StepOneProps) {
                     createLabel="+ Crear Categoría"
                     onCreateSubmit={createCategoria.mutateAsync}
                     isCreating={createCategoria.isPending}
-                    {...register('id_cat')}
+                    {...register('codi_categoria')}
                     onChange={(e) => {
-                        setValue('id_cat', e.target.value || undefined);
+                        const selectedCat = categorias?.data?.find((cat: ICategoria) => 
+                            cat.codi_categoria === e.target.value || cat.id_cat?.toString() === e.target.value
+                        );
+                        if (selectedCat) {
+                            setValue('codi_categoria', selectedCat.codi_categoria || undefined);
+                            setValue('id_cat', selectedCat.id_cat || undefined);
+                        }
                         setValue('id_subcat', undefined);
                     }}
                 />
@@ -122,8 +142,8 @@ export function StepOneBasicInfo({ form }: StepOneProps) {
                 <SelectWithCreate
                     label="Marca"
                     options={marcas?.data?.map((marca: IMarca) => ({
-                        value: marca.id_marca,
-                        label: marca.nombre || ''
+                        value: marca.codi_marca || marca.id_marca?.toString() || '',
+                        label: `${marca.nombre || ''} ${marca.codi_marca ? `(${marca.codi_marca})` : ''}`
                     })) || []}
                     placeholder="Seleccionar marca"
                     disabled={loadingMarcas}
@@ -131,7 +151,16 @@ export function StepOneBasicInfo({ form }: StepOneProps) {
                     createLabel="+ Crear Marca"
                     onCreateSubmit={createMarca.mutateAsync}
                     isCreating={createMarca.isPending}
-                    {...register('id_marca')}
+                    {...register('codi_marca')}
+                    onChange={(e) => {
+                        const selectedMarca = marcas?.data?.find((marca: IMarca) => 
+                            marca.codi_marca === e.target.value || marca.id_marca?.toString() === e.target.value
+                        );
+                        if (selectedMarca) {
+                            setValue('codi_marca', selectedMarca.codi_marca || undefined);
+                            setValue('id_marca', selectedMarca.id_marca || undefined);
+                        }
+                    }}
                 />
 
                 {/* Checkboxes */}

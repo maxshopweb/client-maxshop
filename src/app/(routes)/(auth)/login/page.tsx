@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import LogoGoogle from '@/app/components/icons/LogoGoogle';
 import { loginSchema, emailSchema } from '@/app/schemas/auth.schema';
 import { Mail, Lock } from 'lucide-react';
+import { getUserRole } from '@/app/utils/cookies';
 
 // Hacer la página dinámica para evitar prerender
 export const dynamic = 'force-dynamic';
@@ -36,14 +37,19 @@ function LoginContent() {
                 return;
             }
             
+            // Leer el role de las cookies directamente (más confiable que el contexto)
+            const userRole = getUserRole();
+            console.log(userRole);
             // Si el estado es 3 o no hay estado, redirigir según rol
-            if (redirect) {
-                router.push(redirect);
-            } else {
-                router.push(role === 'ADMIN' ? '/admin/home' : '/');
-            }
+            // if (redirect) {
+            //     router.push(redirect);
+            // } else {
+            //     router.push(userRole === 'ADMIN' ? '/admin/home' : '/');
+            // }
+
+            router.push(userRole === 'ADMIN' ? '/admin' : '/');
         }
-    }, [isAuthenticated, role, user, redirect, router, loading]);
+    }, [isAuthenticated, user, redirect, router, loading]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -74,11 +80,17 @@ function LoginContent() {
                     return;
                 }
                 
+                // Esperar un momento para que las cookies se guarden
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                // Leer el role de las cookies directamente (más confiable que el contexto)
+                const userRole = getUserRole();
+                
                 // Estado 3 = perfil completo -> redirigir según rol
                 if (redirect) {
                     router.push(redirect);
                 } else {
-                    router.push(role === 'ADMIN' ? '/admin/home' : '/');
+                    router.push(userRole === 'ADMIN' ? '/admin' : '/');
                 }
             } else {
                 toast.error(loginResult.message || 'Error al iniciar sesión. Verifica tus credenciales.');
@@ -104,11 +116,17 @@ function LoginContent() {
                     return;
                 }
                 
+                // Esperar un momento para que las cookies se guarden
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                // Leer el role de las cookies directamente (más confiable que el contexto)
+                const userRole = getUserRole();
+                
                 // Estado 3 = perfil completo -> redirigir según rol
                 if (redirect) {
                     router.push(redirect);
                 } else {
-                    router.push(role === 'ADMIN' ? '/admin/home' : '/');
+                    router.push(userRole === 'ADMIN' ? '/admin' : '/');
                 }
             } else {
                 toast.error(result.message || 'Error al iniciar sesión con Google');

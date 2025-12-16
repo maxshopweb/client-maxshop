@@ -4,9 +4,9 @@ import { getAuthToken } from '../utils/cookies';
 // Determinar la URL base según el entorno
 const getBaseURL = (): string => {
   // Si hay una variable de entorno definida, usarla (tiene prioridad)
-  if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL;
-  }
+  // if (process.env.NEXT_PUBLIC_API_URL) {
+  //   return process.env.NEXT_PUBLIC_API_URL;
+  // }
   
   // Por defecto: backend en puerto 3001
   const baseURL = 'http://localhost:3001/api';
