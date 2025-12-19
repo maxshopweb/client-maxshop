@@ -55,10 +55,17 @@ export function StepTwoVentaDetalles({ form }: StepTwoProps) {
             // Usar las propiedades del producto directamente del tipo IProductos
             form.setValue(`detalles.${index}.id_prod`, productoId);
             
-            // Priorizar precio según tipo de venta (si está disponible)
-            // Por defecto usar precio principal
-            const precioBase = producto.precio || producto.precio_sin_iva || producto.precio_minorista || 0;
-            form.setValue(`detalles.${index}.precio_unitario`, Number(precioBase));
+            // Usar el precio de lista del producto (precio principal)
+            // Prioridad: precio > precio_sin_iva > precio_minorista
+            const precioBase = producto.precio 
+                ? Number(producto.precio) 
+                : producto.precio_sin_iva 
+                    ? Number(producto.precio_sin_iva) 
+                    : producto.precio_minorista 
+                        ? Number(producto.precio_minorista) 
+                        : 0;
+            
+            form.setValue(`detalles.${index}.precio_unitario`, precioBase);
             
             // Si hay stock disponible, podemos mostrar una advertencia si la cantidad excede el stock
             // pero no limitamos automáticamente para permitir ventas futuras
@@ -73,7 +80,7 @@ export function StepTwoVentaDetalles({ form }: StepTwoProps) {
         <div className="space-y-4 max-h-[400px] overflow-y-auto px-2">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-input">
-                    Productos de la Venta
+                    Productos de la venta
                 </h3>
                 <Button
                     type="button"
@@ -82,7 +89,7 @@ export function StepTwoVentaDetalles({ form }: StepTwoProps) {
                     size="sm"
                 >
                     <Plus className="w-4 h-4" />
-                    Agregar Producto
+                    Agregar producto
                 </Button>
             </div>
 
@@ -90,7 +97,7 @@ export function StepTwoVentaDetalles({ form }: StepTwoProps) {
                 <div className="text-center py-8 text-gray-400">
                     <Package className="w-12 h-12 mx-auto mb-2 opacity-50" />
                     <p>No hay productos agregados</p>
-                    <p className="text-sm">Haz clic en "Agregar Producto" para comenzar</p>
+                    <p className="text-sm">Haz clic en "Agregar producto" para comenzar</p>
                 </div>
             ) : (
                 <div className="space-y-4">
@@ -166,7 +173,7 @@ export function StepTwoVentaDetalles({ form }: StepTwoProps) {
 
                                 {/* Precio Unitario */}
                                 <Input
-                                    label="Precio Unitario *"
+                                    label="Precio unitario *"
                                     type="number"
                                     min="0.01"
                                     step="0.01"

@@ -149,7 +149,7 @@ function ResetPasswordContent() {
   if (success) {
     return (
       <AuthLayout
-        title="Contraseña Restablecida"
+        title="Contraseña restablecida"
         subtitle="Tu contraseña ha sido cambiada exitosamente"
       >
         <div className="flex flex-col gap-4 items-center text-center">
@@ -172,7 +172,7 @@ function ResetPasswordContent() {
   if (!oobCode) {
     return (
       <AuthLayout
-        title="Enlace Inválido"
+        title="Enlace inválido"
         subtitle="El enlace de recuperación no es válido o ha expirado"
       >
         <div className="flex flex-col gap-4 items-center text-center">
@@ -191,7 +191,7 @@ function ResetPasswordContent() {
 
   return (
     <AuthLayout
-      title="Restablecer Contraseña"
+      title="Restablecer contraseña"
       subtitle="Ingresa tu nueva contraseña"
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">

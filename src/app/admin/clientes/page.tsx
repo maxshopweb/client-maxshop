@@ -32,15 +32,15 @@ export default function ClientesPage() {
                 {/* Estadísticas */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
                     <div className="bg-card border border-card p-6 rounded-xl shadow">
-                        <h3 className="font-semibold text-text mb-2">Total Clientes</h3>
+                        <h3 className="font-semibold text-text mb-2">Total clientes</h3>
                         <p className="text-3xl font-bold text-principal">{totalClientes}</p>
                     </div>
                     <div className="bg-card border border-card p-6 rounded-xl shadow">
-                        <h3 className="font-semibold text-text mb-2">Clientes Activos</h3>
+                        <h3 className="font-semibold text-text mb-2">Clientes activos</h3>
                         <p className="text-3xl font-bold text-principal">{clientesActivos}</p>
                     </div>
                     <div className="bg-card border border-card p-6 rounded-xl shadow">
-                        <h3 className="font-semibold text-text mb-2">Página Actual</h3>
+                        <h3 className="font-semibold text-text mb-2">Página actual</h3>
                         <p className="text-3xl font-bold text-principal">
                             {pagination?.page || 1} / {pagination?.totalPages || 1}
                         </p>

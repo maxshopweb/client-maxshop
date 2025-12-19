@@ -1,12 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useCartStore } from "@/app/stores/cartStore";
 import { IDatosPago } from "@/app/types/cart.type";
 import { cartFormsConfig } from "@/app/config/cartForms.config";
 import Input from "@/app/components/ui/Input";
 import Select from "@/app/components/ui/Select";
+import { Button } from "@/app/components/ui/Button";
 import CartSummary from "../CartSummary";
+import MercadoPagoLogo from "@/app/components/icons/MercadoPagoLogo";
 import { CreditCard, Wallet, Banknote, Smartphone } from "lucide-react";
 
 const paymentIcons = {
@@ -17,11 +20,13 @@ const paymentIcons = {
 };
 
 export default function Step3Payment() {
+  const router = useRouter();
   const { checkoutState, setDatosPago } = useCartStore();
   const [formData, setFormData] = useState<Partial<IDatosPago>>(
     checkoutState.datosPago || { metodo: 'efectivo' }
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     // Guardar datos cuando cambian
@@ -89,6 +94,40 @@ export default function Step3Payment() {
     );
   };
 
+  const handleMercadoPago = async () => {
+    setIsProcessing(true);
+    try {
+      // TODO: Integrar con Mercado Pago SDK
+      // Por ahora, simular redirección
+      console.log("Iniciando pago con Mercado Pago...");
+      // Aquí iría la lógica de Mercado Pago
+      // router.push(mercadoPagoUrl);
+    } catch (error) {
+      console.error("Error al procesar pago con Mercado Pago:", error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleConfirmLocalPayment = async () => {
+    if (!formData.metodo || (formData.metodo !== 'efectivo' && formData.metodo !== 'transferencia')) {
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      // TODO: Crear la venta en el backend
+      // Por ahora, simular ID de venta
+      const idVenta = Math.floor(Math.random() * 10000);
+      
+      // Redirigir a la página de resultado
+      router.push(`/checkout/resultado?metodo=${formData.metodo}&id_venta=${idVenta}`);
+    } catch (error) {
+      console.error("Error al confirmar pago:", error);
+      setIsProcessing(false);
+    }
+  };
+
   const PaymentIcon = formData.metodo ? paymentIcons[formData.metodo] : Wallet;
 
   return (
@@ -102,6 +141,40 @@ export default function Step3Payment() {
             <h3 className="text-xl font-semibold text-foreground">
               Método de pago
             </h3>
+          </div>
+
+          {/* Botón de Mercado Pago */}
+          <div className="mb-6">
+            <button
+              onClick={handleMercadoPago}
+              disabled={isProcessing}
+              className="w-full p-4 rounded-xl border-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: "var(--white)",
+                borderColor: "var(--principal)",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+              }}
+            >
+              <div className="flex items-center justify-center gap-3">
+                <MercadoPagoLogo className="w-8 h-8" style={{ color: "var(--principal)" }} />
+                <span className="text-lg font-semibold" style={{ color: "var(--principal)" }}>
+                  Pagar con Mercado Pago
+                </span>
+              </div>
+            </button>
+            <p className="text-xs text-foreground/60 mt-2 text-center">
+              Pagá con tarjeta, dinero en cuenta o en efectivo
+            </p>
+          </div>
+
+          {/* Separador */}
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t" style={{ borderColor: "rgba(23, 28, 53, 0.1)" }}></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-card text-foreground/60">O</span>
+            </div>
           </div>
 
           <div className="space-y-5">
@@ -193,6 +266,27 @@ export default function Step3Payment() {
               <p className="text-sm text-foreground/80">
                 <strong>Nota:</strong> La integración con la pasarela de pago se implementará próximamente. 
                 Por ahora, este formulario es solo una vista previa.
+              </p>
+            </div>
+          )}
+
+          {/* Botones de confirmación para efectivo y transferencia */}
+          {(formData.metodo === 'efectivo' || formData.metodo === 'transferencia') && (
+            <div className="mt-6 pt-6 border-t" style={{ borderColor: "rgba(23, 28, 53, 0.1)" }}>
+              <Button
+                variant="primary"
+                size="lg"
+                fullWidth
+                onClick={handleConfirmLocalPayment}
+                disabled={isProcessing || !formData.metodo}
+                className="rounded-lg"
+              >
+                {isProcessing ? "Procesando..." : `Confirmar Pedido - ${formData.metodo === 'efectivo' ? 'Efectivo' : 'Transferencia'}`}
+              </Button>
+              <p className="text-xs text-foreground/60 mt-2 text-center">
+                {formData.metodo === 'transferencia' 
+                  ? "Recibirás los datos bancarios para realizar la transferencia"
+                  : "El pago se realizará al momento de la entrega"}
               </p>
             </div>
           )}

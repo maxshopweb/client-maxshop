@@ -110,7 +110,7 @@ export const getVentasColumns = (
         },
         {
             accessorKey: 'metodo_pago',
-            header: 'Método de Pago',
+            header: 'Método de pago',
             cell: ({ row }) => {
                 const metodo = row.getValue('metodo_pago') as string | null;
                 const option = METODO_PAGO_OPTIONS.find(opt => opt.value === metodo);
@@ -123,7 +123,7 @@ export const getVentasColumns = (
         },
         {
             accessorKey: 'estado_pago',
-            header: 'Estado Pago',
+            header: 'Estado pago',
             cell: ({ row }) => {
                 const estado = row.getValue('estado_pago') as string | null;
                 if (!estado) return <span className="text-gray-400">-</span>;
@@ -144,7 +144,7 @@ export const getVentasColumns = (
         },
         {
             accessorKey: 'estado_envio',
-            header: 'Estado Envío',
+            header: 'Estado envío',
             cell: ({ row }) => {
                 const estado = row.getValue('estado_envio') as string | null;
                 if (!estado) return <span className="text-gray-400">-</span>;
@@ -218,7 +218,7 @@ export const getVentasColumns = (
                                     onClick={() => actions.onView(venta)}
                                 >
                                     <Eye className="mr-2 h-4 w-4" />
-                                    Ver Detalles
+                                    Ver detalles
                                 </DropdownMenu.Item>
 
                                 <DropdownMenu.Item

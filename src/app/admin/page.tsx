@@ -4,10 +4,10 @@ export default function AdminPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Stats Cards */}
                 {[
-                    { label: "Total Productos", value: "1,234", color: "principal" },
+                    { label: "Total productos", value: "1,234", color: "principal" },
                     { label: "Clientes", value: "856", color: "secundario" },
-                    { label: "Eventos Activos", value: "12", color: "principal" },
-                    { label: "Ventas Hoy", value: "$45,678", color: "secundario" },
+                    { label: "Eventos activos", value: "12", color: "principal" },
+                    { label: "Ventas hoy", value: "$45,678", color: "secundario" },
                 ].map((stat, i) => (
                     <div
                         key={i}
@@ -25,7 +25,7 @@ export default function AdminPage() {
 
             <div className="bg-white dark:bg-secundario p-6 rounded-2xl shadow-lg border border-principal/10 dark:border-white/10">
                 <h2 className="text-xl font-bold text-secundario dark:text-white mb-4">
-                    Actividad Reciente
+                    Actividad reciente
                 </h2>
                 <div className="space-y-3">
                     {/* Lista de actividades */}

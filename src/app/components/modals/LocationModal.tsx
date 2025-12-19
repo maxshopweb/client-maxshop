@@ -98,7 +98,7 @@ export default function LocationModal({
     <SimpleModal
       isOpen={isOpen}
       onClose={onClose}
-      title="Seleccionar Ubicación"
+      title="Seleccionar ubicación"
       maxWidth="max-w-lg"
     >
       <div className="space-y-6">

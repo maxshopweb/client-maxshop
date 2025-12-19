@@ -121,6 +121,33 @@ class VentasService {
   async getByUsuario(idUsuario: string, filters: IVentaFilters = {}): Promise<IPaginatedResponse<IVenta>> {
     return this.getAll({ ...filters, id_usuario: idUsuario });
   }
+
+  /**
+   * Crea un pedido desde el checkout
+   * Endpoint específico para el flujo de checkout
+   */
+  async createFromCheckout(data: {
+    id_cliente?: string;
+    metodo_pago: string;
+    detalles: Array<{
+      id_prod: number;
+      cantidad: number;
+      precio_unitario: number;
+      descuento_aplicado?: number;
+    }>;
+    observaciones?: string;
+  }): Promise<IVenta> {
+    const response = await axiosInstance.post<IApiResponse<IVenta>>(
+      '/ventas/checkout',
+      data
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.error || 'Error al crear pedido');
+    }
+
+    return response.data.data;
+  }
 }
 
 export const ventasService = new VentasService();

@@ -223,7 +223,7 @@ export default function Sidebar() {
                     <User size={18} className="relative z-10 flex-shrink-0" />
                     {!isCollapsed && (
                         <span className="relative z-10 font-medium text-sm">
-                            Mi Perfil
+                            Mi perfil
                         </span>
                     )}
                 </Link>
@@ -254,7 +254,7 @@ export default function Sidebar() {
                     <LogOut size={18} className="relative z-10 flex-shrink-0" />
                     {!isCollapsed && (
                         <span className="relative z-10 font-medium text-sm">
-                            Cerrar Sesión
+                            Cerrar sesión
                         </span>
                     )}
                 </button>
@@ -297,7 +297,7 @@ export default function Sidebar() {
                                     color: 'var(--foreground)'
                                 }}
                             >
-                                {actualTheme === 'dark' ? 'Modo Oscuro' : 'Modo Claro'}
+                                {actualTheme === 'dark' ? 'Modo oscuro' : 'Modo claro'}
                             </span>
                         )}
                     </div>

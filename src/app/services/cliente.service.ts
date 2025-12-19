@@ -6,6 +6,7 @@ import type {
   IApiResponse,
   IClienteStats
 } from '@/app/types/cliente.type';
+import type { IVenta, IVentaFilters } from '@/app/types/ventas.type';
 
 class ClientesService {
 
@@ -63,6 +64,22 @@ class ClientesService {
 
     const response = await axiosInstance.get<IPaginatedResponse<any>>(
       `/clientes/${id}/ventas?${params.toString()}`
+    );
+
+    return response.data;
+  }
+
+  async getMyPedidos(filters: IVentaFilters = {}): Promise<IPaginatedResponse<IVenta>> {
+    const params = new URLSearchParams();
+    if (filters.page) params.append('page', filters.page.toString());
+    if (filters.limit) params.append('limit', filters.limit.toString());
+    if (filters.order_by) params.append('order_by', filters.order_by);
+    if (filters.order) params.append('order', filters.order);
+    if (filters.estado_pago) params.append('estado_pago', filters.estado_pago);
+    if (filters.estado_envio) params.append('estado_envio', filters.estado_envio);
+
+    const response = await axiosInstance.get<IPaginatedResponse<IVenta>>(
+      `/ventas/mis-pedidos?${params.toString()}`
     );
 
     return response.data;

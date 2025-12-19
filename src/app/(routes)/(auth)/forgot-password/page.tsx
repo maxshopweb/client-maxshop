@@ -67,7 +67,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <AuthLayout
-      title="Recuperar Contraseña"
+      title="Recuperar contraseña"
       subtitle="Ingresa tu email para recibir las instrucciones"
     >
       {!sent ? (

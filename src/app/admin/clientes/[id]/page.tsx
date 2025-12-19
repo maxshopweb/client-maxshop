@@ -55,7 +55,7 @@ export default function ClienteDetailPage() {
                         Volver
                     </Button>
                     <h1 className="text-2xl font-bold text-text">
-                        Perfil del Cliente
+                        Perfil del cliente
                     </h1>
                     <div className="w-24" /> {/* Spacer */}
                 </div>
@@ -133,23 +133,23 @@ export default function ClienteDetailPage() {
             ) : stats && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="bg-card border border-card p-6 rounded-xl shadow">
-                        <h3 className="text-sm font-semibold text-gray-600 mb-2">Total Ventas</h3>
+                        <h3 className="text-sm font-semibold text-gray-600 mb-2">Total ventas</h3>
                         <p className="text-2xl font-bold text-principal">{stats.totalVentas || 0}</p>
                     </div>
                     <div className="bg-card border border-card p-6 rounded-xl shadow">
-                        <h3 className="text-sm font-semibold text-gray-600 mb-2">Total Gastado</h3>
+                        <h3 className="text-sm font-semibold text-gray-600 mb-2">Total gastado</h3>
                         <p className="text-2xl font-bold text-principal">
                             {formatPrecio(stats.totalGastado || 0)}
                         </p>
                     </div>
                     <div className="bg-card border border-card p-6 rounded-xl shadow">
-                        <h3 className="text-sm font-semibold text-gray-600 mb-2">Promedio Venta</h3>
+                        <h3 className="text-sm font-semibold text-gray-600 mb-2">Promedio venta</h3>
                         <p className="text-2xl font-bold text-principal">
                             {formatPrecio(stats.promedioVenta || 0)}
                         </p>
                     </div>
                     <div className="bg-card border border-card p-6 rounded-xl shadow">
-                        <h3 className="text-sm font-semibold text-gray-600 mb-2">Productos Comprados</h3>
+                        <h3 className="text-sm font-semibold text-gray-600 mb-2">Productos comprados</h3>
                         <p className="text-2xl font-bold text-principal">{stats.productosComprados || 0}</p>
                     </div>
                 </div>
@@ -158,7 +158,7 @@ export default function ClienteDetailPage() {
             {/* Historial de Ventas */}
             <div className="bg-white dark:bg-secundario p-6 rounded-2xl shadow-lg border border-principal/10 dark:border-white/10">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-text">Historial de Ventas</h2>
+                    <h2 className="text-xl font-bold text-text">Historial de ventas</h2>
                     <Link
                         href={`/admin/ventas?cliente=${id}`}
                         className="text-sm text-principal hover:underline flex items-center gap-1"
@@ -189,7 +189,7 @@ export default function ClienteDetailPage() {
                                         Total
                                     </th>
                                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                                        Estado Pago
+                                        Estado pago
                                     </th>
                                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
                                         Acciones

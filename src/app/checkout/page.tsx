@@ -45,14 +45,23 @@ function CheckoutContent() {
     }
   }, [items, setCartItems]);
 
-  // Redirigir si no hay items
+  // Redirigir si no hay items SOLO si no hay datos de checkout guardados
+  // Esto evita que redirija cuando recargas la página durante el checkout
   useEffect(() => {
-    if (items.length === 0 && cartItems.length === 0) {
-      router.push("/tienda/productos");
+    const checkoutData = useCheckoutStore.getState();
+    const hasCheckoutData = checkoutData.contactData || checkoutData.paymentMethod || checkoutData.completedSteps.length > 0;
+    
+    // Solo redirigir si no hay items Y no hay datos de checkout guardados
+    if (items.length === 0 && cartItems.length === 0 && !hasCheckoutData) {
+      router.push("/");
     }
   }, [items.length, cartItems.length, router]);
 
-  if (items.length === 0 && cartItems.length === 0) {
+  // No renderizar nada mientras se verifica, pero no redirigir inmediatamente
+  const checkoutData = useCheckoutStore.getState();
+  const hasCheckoutData = checkoutData.contactData || checkoutData.paymentMethod || checkoutData.completedSteps.length > 0;
+  
+  if (items.length === 0 && cartItems.length === 0 && !hasCheckoutData) {
     return null; // El useEffect redirigirá
   }
 

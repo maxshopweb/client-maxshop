@@ -160,7 +160,7 @@ function LoginContent() {
     };
 
     return (
-        <AuthLayout title="Iniciar Sesión" subtitle="Bienvenido a MaxShop – Accede a tu cuenta">
+        <AuthLayout title="Iniciar sesión" subtitle="Bienvenido a MaxShop – Accede a tu cuenta">
             <div className="flex flex-col gap-3 sm:gap-4 md:gap-5">
                 <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:gap-4 md:gap-4">
                     <div className="flex flex-col gap-3 sm:gap-4 md:gap-4">
@@ -236,7 +236,7 @@ function LoginContent() {
 export default function LoginPage() {
     return (
         <Suspense fallback={
-            <AuthLayout title="Iniciar Sesión" subtitle="Cargando...">
+            <AuthLayout title="Iniciar sesión" subtitle="Cargando...">
                 <div className="flex justify-center items-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
                 </div>

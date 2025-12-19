@@ -83,7 +83,7 @@ export function CreateVentaModal({ onClose }: CreateVentaModalProps) {
             title="Crear nueva venta"
             steps={[
                 {
-                    title: 'Información de Venta',
+                    title: 'Información de venta',
                     content: <StepOneVentaInfo form={form} />,
                     onNext: validateStepOne,
                 },

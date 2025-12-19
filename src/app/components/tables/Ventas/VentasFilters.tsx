@@ -58,7 +58,7 @@ export function VentasFilters() {
                         >
                             <div className="flex items-center justify-between">
                                 <h3 className="text-sm font-semibold text-input">
-                                    Filtros Avanzados
+                                    Filtros avanzados
                                 </h3>
                                 {hasActiveFilters && (
                                     <button
@@ -73,7 +73,7 @@ export function VentasFilters() {
                             {/* ESTADO DE PAGO */}
                             <div>
                                 <Select
-                                    label="Estado de Pago"
+                                    label="Estado de pago"
                                     options={[
                                         { value: '', label: 'Todos los estados' },
                                         ...ESTADO_PAGO_OPTIONS.map(opt => ({
@@ -92,7 +92,7 @@ export function VentasFilters() {
                             {/* ESTADO DE ENVÍO */}
                             <div>
                                 <Select
-                                    label="Estado de Envío"
+                                    label="Estado de envío"
                                     options={[
                                         { value: '', label: 'Todos los estados' },
                                         ...ESTADO_ENVIO_OPTIONS.map(opt => ({
@@ -111,7 +111,7 @@ export function VentasFilters() {
                             {/* MÉTODO DE PAGO */}
                             <div>
                                 <Select
-                                    label="Método de Pago"
+                                    label="Método de pago"
                                     options={[
                                         { value: '', label: 'Todos los métodos' },
                                         ...METODO_PAGO_OPTIONS.map(opt => ({
@@ -130,7 +130,7 @@ export function VentasFilters() {
                             {/* TIPO DE VENTA */}
                             <div>
                                 <Select
-                                    label="Tipo de Venta"
+                                    label="Tipo de venta"
                                     options={[
                                         { value: '', label: 'Todos los tipos' },
                                         ...TIPO_VENTA_OPTIONS.map(opt => ({

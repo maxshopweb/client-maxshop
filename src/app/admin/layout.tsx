@@ -43,7 +43,7 @@ export default function AdminLayout({
                         <header className="sticky top-0 z-40 dark:bg-secundario/80 backdrop-blur-md border-b border-principal/10 dark:border-white/10">
                             <div className="px-14 py-5">
                                 <h1 className="text-xl font-ligth text-text">
-                                    Panel de Administración
+                                    Panel de administración
                                 </h1>
                             </div>
                         </header>

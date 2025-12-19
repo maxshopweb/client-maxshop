@@ -66,7 +66,7 @@ export function ClientesFilters() {
                         >
                             <div className="flex items-center justify-between">
                                 <h3 className="text-sm font-semibold text-input">
-                                    Filtros Avanzados
+                                    Filtros avanzados
                                 </h3>
                                 {hasActiveFilters && (
                                     <button

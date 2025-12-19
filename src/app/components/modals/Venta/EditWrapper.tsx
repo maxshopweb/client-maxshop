@@ -69,7 +69,7 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
                         variant="primary"
                         disabled={isUpdating}
                     >
-                        {isUpdating ? 'Guardando...' : 'Guardar Cambios'}
+                        {isUpdating ? 'Guardando...' : 'Guardar cambios'}
                     </Button>
                 </>
             )}
@@ -78,7 +78,7 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
                 {/* Estado de Pago */}
                 <div>
                     <Select
-                        label="Estado de Pago"
+                        label="Estado de pago"
                         options={[
                             { value: '', label: 'Seleccionar estado' },
                             ...ESTADO_PAGO_OPTIONS.map(opt => ({
@@ -95,7 +95,7 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
                 {/* Estado de Envío */}
                 <div>
                     <Select
-                        label="Estado de Envío"
+                        label="Estado de envío"
                         options={[
                             { value: '', label: 'Seleccionar estado' },
                             ...ESTADO_ENVIO_OPTIONS.map(opt => ({
@@ -112,7 +112,7 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
                 {/* Método de Pago */}
                 <div>
                     <Select
-                        label="Método de Pago"
+                        label="Método de pago"
                         options={[
                             { value: '', label: 'Seleccionar método' },
                             ...METODO_PAGO_OPTIONS.map(opt => ({

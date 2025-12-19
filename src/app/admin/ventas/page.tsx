@@ -10,6 +10,7 @@ import { DeleteVentaModal } from '@/app/components/modals/Venta/DeleteVenta';
 import { BulkDeleteVentasModal } from '@/app/components/modals/Venta/BulkDeleteVentasModal';
 import { CreateVentaModal } from '@/app/components/modals/Venta/CreateWrapper';
 import { EditVentaModal } from '@/app/components/modals/Venta/EditWrapper';
+import { ViewVentaModal } from '@/app/components/modals/Venta/ViewVentaModal';
 
 type ModalType = 'create' | 'edit' | 'delete' | 'view' | 'bulk-delete' | null;
 
@@ -51,7 +52,7 @@ export default function VentasPage() {
 
                         <Button onClick={openCreateModal}>
                             <Plus className="h-5 w-5" />
-                            Nueva Venta
+                            Nueva venta
                         </Button>
                     </div>
                 </div>
@@ -87,6 +88,14 @@ export default function VentasPage() {
                 <BulkDeleteVentasModal
                     ventaIds={bulkDeleteIds}
                     onClose={closeModal}
+                />
+            )}
+
+            {modal.type === 'view' && modal.venta && (
+                <ViewVentaModal
+                    venta={modal.venta}
+                    onClose={closeModal}
+                    isOpen={true}
                 />
             )}
         </div>

@@ -11,7 +11,7 @@ interface ProfileInfoProps {
 
 export default function ProfileInfo({ user }: ProfileInfoProps) {
   return (
-    <ProfileCard title="Información Personal" icon={User}>
+    <ProfileCard title="Información personal" icon={User}>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         {/* Nombre */}
         <div>
