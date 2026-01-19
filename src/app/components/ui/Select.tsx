@@ -1,8 +1,7 @@
 'use client';
 
 import React, { forwardRef, SelectHTMLAttributes, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
-import clsx from 'clsx';
+import { ChevronDown, LucideIcon } from 'lucide-react';
 
 export interface SelectOption {
     value: string | number;
@@ -18,7 +17,9 @@ interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'onC
     placeholder?: string;
     label?: string;
     error?: string;
-    showImages?: boolean;
+    helperText?: string;
+    icon?: LucideIcon;
+    iconPosition?: 'left' | 'right';
 }
 
 const Select = forwardRef<HTMLSelectElement, SelectProps>(
@@ -31,10 +32,13 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
         className = "",
         label,
         error,
-        showImages = false,
+        helperText,
+        icon: Icon,
+        iconPosition = 'left',
         ...props 
     }, ref) => {
         const [isOpen, setIsOpen] = useState(false);
+        const hasIcon = !!Icon;
 
         const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
             if (onChange) {
@@ -48,63 +52,127 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
             setIsOpen(false);
         };
 
+        const displayError = error;
+
         return (
-            <div className="w-full">
+            <div className="flex flex-col gap-1.5 w-full">
                 {label && (
-                    <label className="block text-sm font-medium text-[var(--white)] mb-2">
+                    <label
+                        className="text-sm font-medium transition-colors"
+                        style={{
+                            color: displayError
+                                ? 'rgb(239, 68, 68)'
+                                : 'rgb(55, 65, 81)'
+                        }}
+                    >
                         {label}
                     </label>
                 )}
                 
-                <div className="relative group">
+                <div className="relative">
+                    {hasIcon && iconPosition === 'left' && (
+                        <div
+                            className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10"
+                            style={{
+                                color: displayError
+                                    ? 'rgb(239, 68, 68)'
+                                    : disabled
+                                        ? 'rgba(107, 114, 128, 0.4)'
+                                        : 'rgba(107, 114, 128, 0.7)'
+                            }}
+                        >
+                            <Icon size={18} strokeWidth={2} />
+                        </div>
+                    )}
+
                     <select
                         ref={ref}
-                        value={value ?? ''}
+                        value={value != null ? String(value) : ''}
                         onChange={handleChange}
                         disabled={disabled}
                         onMouseDown={() => setIsOpen(!isOpen)}
                         onBlur={() => setIsOpen(false)}
-                        className={clsx(
-                            'w-full px-4 py-3 pr-10 rounded-lg text-sm font-medium transition-all duration-200 appearance-none',
-                            'focus:outline-none focus:ring-2 focus:ring-principal/20 focus:shadow-sm',
-                            'bg-background text-foreground border-2 border-input/70',
-                            'hover:border-principal/50 focus:border-principal',
-                            disabled && 'opacity-50 cursor-not-allowed',
-                            error && 'ring-2 ring-destructive focus:ring-destructive border-destructive',
-                            className
-                        )}
+                        className={`
+                            w-full px-3 py-2.5 rounded-2xl
+                            bg-transparent
+                            text-sm
+                            transition-all duration-200
+                            placeholder:text-sm
+                            focus:outline-none
+                            appearance-none
+                            ${hasIcon && iconPosition === 'left' ? 'pl-10' : ''}
+                            pr-10
+                            ${disabled ? 'cursor-not-allowed' : ''}
+                            ${className}
+                        `}
                         style={{
-                            backgroundColor: 'var(--background)',
-                            color: 'var(--foreground)',
+                            color: disabled
+                                ? 'rgba(0, 0, 0, 0.4)'
+                                : 'rgb(17, 24, 39)',
+                            border: displayError
+                                ? '1.5px solid rgb(239, 68, 68)'
+                                : '1.5px solid rgba(0, 0, 0, 0.15)',
+                            backgroundColor: disabled
+                                ? 'rgba(0, 0, 0, 0.02)'
+                                : 'rgba(255, 255, 255, 1)'
+                        }}
+                        onFocus={(e) => {
+                            if (!displayError && !disabled) {
+                                e.target.style.borderColor = 'rgba(var(--principal-rgb), 0.6)';
+                            }
+                        }}
+                        onBlur={(e) => {
+                            if (!displayError) {
+                                e.target.style.borderColor = 'rgba(0, 0, 0, 0.15)';
+                            }
                         }}
                         {...props}
                     >
-                        <option value="" style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>
+                        <option value="" style={{ backgroundColor: 'rgba(255, 255, 255, 1)', color: 'rgb(107, 114, 128)' }}>
                             {placeholder}
                         </option>
                         {options.map((option) => (
                             <option 
-                                key={option.value} 
-                                value={option.value}
+                                key={String(option.value)} 
+                                value={String(option.value)}
                                 disabled={option.disabled}
-                                style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}
+                                style={{ backgroundColor: 'rgba(255, 255, 255, 1)', color: 'rgb(17, 24, 39)' }}
                             >
                                 {option.label}
                             </option>
                         ))}
                     </select>
                     
-                    <div className={clsx(
-                        'absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-300',
-                        isOpen && 'rotate-180',
-                        disabled && 'opacity-50'
-                    )}>
-                        <ChevronDown className="w-4 h-4 text-foreground" />
+                    <div
+                        className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-300 z-10"
+                        style={{
+                            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                            opacity: disabled ? 0.5 : 1
+                        }}
+                    >
+                        <ChevronDown 
+                            size={18} 
+                            strokeWidth={2}
+                            style={{
+                                color: displayError
+                                    ? 'rgb(239, 68, 68)'
+                                    : disabled
+                                        ? 'rgba(0, 0, 0, 0.3)'
+                                        : 'rgba(0, 0, 0, 0.5)'
+                            }}
+                        />
                     </div>
                 </div>
 
-                {error && (
-                    <p className="text-[var(--red)] text-xs mt-1.5 ml-1">{error}</p>
+                {displayError && (
+                    <span className="text-xs text-error mt-0.5">
+                        {displayError}
+                    </span>
+                )}
+                {!displayError && helperText && (
+                    <span className="text-xs text-foreground/60 mt-0.5">
+                        {helperText}
+                    </span>
                 )}
             </div>
         );

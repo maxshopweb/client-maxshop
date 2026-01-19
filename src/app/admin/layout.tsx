@@ -2,12 +2,18 @@
 
 import Sidebar from "@/app/components/Admin/SideBar";
 import { AuthGuard } from "@/app/components/auth/AuthGuard";
+import AccesDenied from "@/app/components/auth/AccesDenied";
+import { useWebSocket } from "@/app/hooks/useWebSocket";
+import { AdminHeader } from "@/app/components/Admin/AdminHeader";
 
 export default function AdminLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    // Inicializar WebSocket para admins
+    useWebSocket();
+
     return (
         <AuthGuard
             roles={['ADMIN']}
@@ -22,15 +28,8 @@ export default function AdminLayout({
                 </div>
             }
             unauthorizedFallback={
-                <div className="flex items-center justify-center h-screen">
-                    <div className="text-center">
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                            Acceso denegado
-                        </h1>
-                        <p className="text-gray-600 dark:text-gray-400">
-                            No tienes permisos para acceder a esta sección.
-                        </p>
-                    </div>
+                <div className="flex items-center justify-center min-h-screen bg-white">
+                    <AccesDenied />
                 </div>
             }
         >
@@ -39,14 +38,8 @@ export default function AdminLayout({
 
                 <main className="flex-1 overflow-y-auto">
                     <div className="h-full">
-                        {/* Header opcional */}
-                        <header className="sticky top-0 z-40 dark:bg-secundario/80 backdrop-blur-md border-b border-principal/10 dark:border-white/10">
-                            <div className="px-14 py-5">
-                                <h1 className="text-xl font-ligth text-text">
-                                    Panel de Administración
-                                </h1>
-                            </div>
-                        </header>
+                        {/* Header con notificaciones */}
+                        <AdminHeader />
 
                         {/* Contenido */}
                         <div className="p-6">

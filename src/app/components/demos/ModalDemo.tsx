@@ -91,7 +91,6 @@ export default function ModalDemo() {
                     isOpen={showConfirm}
                     onClose={() => setShowConfirm(false)}
                     onConfirm={() => {
-                        console.log('Confirmado!');
                         setShowConfirm(false);
                     }}
                     type="success"
@@ -104,7 +103,6 @@ export default function ModalDemo() {
                     isOpen={showStep}
                     onClose={() => setShowStep(false)}
                     onComplete={() => {
-                        console.log('Completado!');
                         setShowStep(false);
                     }}
                     title="Proceso con Pasos"
@@ -132,7 +130,6 @@ export default function ModalDemo() {
                             </button>
                             <button
                                 onClick={() => {
-                                    console.log('Guardado!');
                                     handleClose();
                                 }}
                                 className="flex-1 py-3 px-6 rounded-2xl font-medium transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg"

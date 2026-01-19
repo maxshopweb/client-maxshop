@@ -1,11 +1,12 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Edit, Trash2, Star, Package } from 'lucide-react';
+import { MoreHorizontal, Edit, Trash2, Star } from 'lucide-react';
 import * as Checkbox from '@radix-ui/react-checkbox';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { Check } from 'lucide-react';
 import type { IProductos } from '@/app/types/producto.type';
 import { formatearPrecio, getStockInfo } from '@/app/utils/producto.utils';
 import { EstadoGeneral } from '@/app/types/estados.type';
+import ProductImage from '../shared/ProductImage';
 
 interface ProductosTableActions {
     onEdit: (producto: IProductos) => void;
@@ -58,19 +59,21 @@ export const getProductosColumns = (
 
                 return (
                     <div className="w-12 h-12 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center">
-                        {imagen ? (
-                            <img
-                                src={imagen}
-                                alt={nombre}
-                                className="w-full h-full object-cover"
-                            />
-                        ) : (
-                            <Package className="w-6 h-6 text-gray-400" />
-                        )}
+                    <ProductImage imgPrincipal={imagen} nombre={nombre} />
                     </div>
                 );
             },
             enableSorting: false,
+        },
+        {
+            accessorKey: 'codi_arti',
+            header: 'Código Artículo',
+            cell: ({ row }) => {
+                const codi_arti = row.getValue('codi_arti') as string;
+                return (
+                    <span className="text-sm font-mono text-gray-600">{codi_arti}</span>
+                );
+            },
         },
         {
             accessorKey: 'nombre',
@@ -84,9 +87,9 @@ export const getProductosColumns = (
                     <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
                             <span className="font-medium text-text">{nombre}</span>
-                            {destacado && (
+                            {/* {destacado && (
                                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                            )}
+                            )} */}
                         </div>
                         {sku && (
                             <span className="text-xs text-gray-400">SKU: {sku}</span>
@@ -97,26 +100,38 @@ export const getProductosColumns = (
         },
         {
             id: 'categoria',
-            accessorKey: 'id_cat',
+            accessorKey: 'codi_categoria',
             header: 'Categoría',
             cell: ({ row }) => {
                 const producto = row.original;
-                const subcategoria = producto.subcategoria;
-                const categoria = subcategoria?.categoria;
+                const categoria = producto.categoria;
 
-                // Si tiene subcategoría poblada, mostrarla
-                if (subcategoria?.nombre) {
+                // Si tiene categoría poblada, mostrarla
+                if (categoria?.nombre) {
                     return (
                         <div className="flex flex-col gap-1">
-                            <span className="text-sm font-medium">{subcategoria.nombre}</span>
-                            {categoria?.nombre && (
-                                <span className="text-xs text-text">{categoria.nombre}</span>
+                            <span className="text-sm font-medium">{categoria.nombre}</span>
+                            {categoria.codi_categoria && (
+                                <span className="text-xs text-gray-400">Cód: {categoria.codi_categoria}</span>
                             )}
                         </div>
                     );
                 }
 
-                // Si no, buscar por ID en la lista de categorías
+                // Buscar por código en la lista de categorías
+                if (producto.codi_categoria && actions.categorias) {
+                    const cat = actions.categorias.find((c: any) => c.codi_categoria === producto.codi_categoria);
+                    if (cat?.nombre) {
+                        return (
+                            <div className="flex flex-col gap-1">
+                                <span className="text-sm font-medium">{cat.nombre}</span>
+                                <span className="text-xs text-gray-400">Cód: {producto.codi_categoria}</span>
+                            </div>
+                        );
+                    }
+                }
+
+                // Fallback: buscar por ID (legacy)
                 if (producto.id_cat && actions.categorias) {
                     const cat = actions.categorias.find((c: any) => c.id_cat === producto.id_cat);
                     if (cat?.nombre) {
@@ -129,26 +144,49 @@ export const getProductosColumns = (
         },
         {
             id: 'marca',
-            accessorKey: 'id_marca',
+            accessorKey: 'codi_marca',
             header: 'Marca',
             cell: ({ row }) => {
                 const producto = row.original;
                 const marca = producto.marca;
                 let nombreMarca = marca?.nombre;
 
-                // Si no tiene marca poblada, buscar por ID
-                if (!nombreMarca && producto.id_marca && actions.marcas) {
-                    const marcaFound = actions.marcas.find((m: any) => m.id_marca === producto.id_marca);
-                    nombreMarca = marcaFound?.nombre;
+                // Si tiene marca poblada, mostrarla
+                if (nombreMarca) {
+                    return (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-text border border-input-border">
+                            {nombreMarca}
+                        </span>
+                    );
                 }
 
-                return nombreMarca ? (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-text border border-input-border">
-                        {nombreMarca}
-                    </span>
-                ) : (
-                    <span className="text-gray-400">-</span>
-                );
+                // Buscar por código en la lista de marcas
+                if (producto.codi_marca && actions.marcas) {
+                    const marcaFound = actions.marcas.find((m: any) => m.codi_marca === producto.codi_marca);
+                    nombreMarca = marcaFound?.nombre;
+                    if (nombreMarca) {
+                        return (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-text border border-input-border">
+                                {nombreMarca}
+                            </span>
+                        );
+                    }
+                }
+
+                // Fallback: buscar por ID (legacy)
+                if (producto.id_marca && actions.marcas) {
+                    const marcaFound = actions.marcas.find((m: any) => m.id_marca === producto.id_marca);
+                    nombreMarca = marcaFound?.nombre;
+                    if (nombreMarca) {
+                        return (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-text border border-input-border">
+                                {nombreMarca}
+                            </span>
+                        );
+                    }
+                }
+
+                return <span className="text-gray-400">-</span>;
             },
         },
         {

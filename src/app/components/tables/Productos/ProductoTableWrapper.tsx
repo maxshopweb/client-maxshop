@@ -4,7 +4,7 @@ import { ProductosTable } from './ProductoTable';
 import { ProductosPagination } from './ProductoPaginacion';
 import { BulkActions } from './BulkActions';
 import { useProductos } from '@/app/hooks/productos/useProductos';
-import { useProductosFilters } from '@/app/hooks/productos/useProductFilter';
+import { useProductFilters } from '@/app/hooks/productos/useProductFilters';
 import { useProductosTable } from '@/app/hooks/productos/useProductosTable';
 import type { IProductos } from '@/app/types/producto.type';
 
@@ -17,7 +17,7 @@ interface ProductosTableWrapperProps {
 }
 
 export function ProductosTableWrapper(props: ProductosTableWrapperProps) {
-    const { filters } = useProductosFilters();
+    const { backendFilters: filters } = useProductFilters();
     const { pagination } = useProductos({ filters });
     const tableState = useProductosTable();
 
@@ -33,7 +33,7 @@ export function ProductosTableWrapper(props: ProductosTableWrapperProps) {
 
             <ProductosTable
                 {...props}
-                tableState={tableState} // ✅ Pasar el estado
+                tableState={tableState}
             />
 
             {pagination && <ProductosPagination pagination={pagination} />}

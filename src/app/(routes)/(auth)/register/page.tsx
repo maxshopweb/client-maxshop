@@ -1,227 +1,164 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/app/context/AuthContext';
 import AuthLayout from '@/app/components/layouts/authLayout';
 import Input from '@/app/components/ui/Input';
 import { Button } from '@/app/components/ui/Button';
-import { toast } from 'sonner';
 import LogoGoogle from '@/app/components/icons/LogoGoogle';
-import { registerSchema, emailSchema, passwordSchema } from '@/app/schemas/auth.schema';
+import { emailSchema } from '@/app/schemas/auth.schema';
 import PasswordRequirements from '@/app/components/ui/PasswordRequirements';
-import { Mail, Lock } from 'lucide-react';
+import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useHandleFlowRegister } from '@/app/hooks/auth/useHandleFlowRegister';
 
 export default function RegisterPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{
-    email?: string;
-    password?: string;
-    confirmPassword?: string;
-  }>({});
-  const { register, registerWithGoogle, isAuthenticated, user, role, loading: authLoading } = useAuth();
-  const router = useRouter();
 
-  // Redirigir si ya está autenticado con estado 3
-  useEffect(() => {
-    if (isAuthenticated && !authLoading) {
-      // Si el estado es 2, redirigir a completar perfil
-      if (user?.estado === 2) {
-        router.replace('/register/complete-perfil');
-        return;
-      }
-      
-      // Si el estado es 3 (perfil completo), redirigir según rol
-      if (user?.estado === 3) {
-        if (role === 'ADMIN') {
-          router.replace('/admin/home');
-        } else {
-          router.replace('/');
-        }
-        return;
-      }
-    }
-  }, [isAuthenticated, user, role, authLoading, router]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setErrors({});
-
-    try {
-      const validationResult = registerSchema.safeParse({ email, password, confirmPassword });
-      if (!validationResult.success) {
-        const fieldErrors: typeof errors = {};
-        validationResult.error.issues.forEach((err) => {
-          const path = err.path[0] as keyof typeof fieldErrors;
-          if (path) fieldErrors[path] = err.message;
-        });
-        setErrors(fieldErrors);
-        setLoading(false);
-        return;
-      }
-
-      const registerResult = await register(email, password);
-      if (registerResult.success) {
-        toast.success(registerResult.message || '¡Cuenta creada exitosamente!');
-        toast.info('Te hemos enviado un email de verificación. Por favor, verifica tu email antes de continuar.');
-        router.push('/register/verify-email');
-      } else {
-        toast.error(registerResult.message || 'Error al crear la cuenta');
-      }
-    } catch (error: any) {
-      toast.error(error?.message || 'Error al crear la cuenta');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleRegister = async () => {
-    setLoading(true);
-    try {
-      const result = await registerWithGoogle();
-      if (result.success) {
-        toast.success(result.message || '¡Cuenta creada exitosamente!');
-        
-        // Google ya verifica el email, así que estado 2 -> completar perfil
-        if (result.estado === 2) {
-          window.location.href = '/register/complete-perfil';
-        } else {
-          router.push('/');
-        }
-      } else {
-        toast.error(result.message || 'Error al registrarse con Google');
-      }
-    } catch (error: any) {
-      toast.error(error?.message || 'Error al registrarse con Google');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setEmail(value);
-    if (errors.email) {
-      const result = emailSchema.safeParse(value);
-      if (result.success) {
-        setErrors((prev) => ({ ...prev, email: undefined }));
-      } else {
-        setErrors((prev) => ({ ...prev, email: result.error.issues[0]?.message }));
-      }
-    }
-  };
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setPassword(value);
-    if (errors.password) {
-      const result = passwordSchema.safeParse(value);
-      if (result.success) {
-        setErrors((prev) => ({ ...prev, password: undefined }));
-      } else {
-        setErrors((prev) => ({ ...prev, password: result.error.issues[0]?.message }));
-      }
-    }
-    if (confirmPassword && errors.confirmPassword) {
-      if (value === confirmPassword) {
-        setErrors((prev) => ({ ...prev, confirmPassword: undefined }));
-      }
-    }
-  };
-
-  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setConfirmPassword(value);
-    if (errors.confirmPassword || password) {
-      if (value === password) {
-        setErrors((prev) => ({ ...prev, confirmPassword: undefined }));
-      } else if (value) {
-        setErrors((prev) => ({ ...prev, confirmPassword: 'Las contraseñas no coinciden' }));
-      }
-    }
-  };
+  const { email, password, confirmPassword, loading, errors, isEmailExpanded, handleSubmit, handleGoogleRegister, handleEmailChange, handlePasswordChange, handleConfirmPasswordChange, setIsEmailExpanded } = useHandleFlowRegister();
 
   return (
-    <AuthLayout title="Comenzar" subtitle="Bienvenido a MaxShop – Comencemos">
-      <div className="flex flex-col gap-4">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <Input
-            id="email"
-            type="email"
-            label="Tu email"
-            value={email}
-            onChange={handleEmailChange}
-            placeholder="tu@email.com"
-            required
-            disabled={loading}
-            error={errors.email}
-            schema={emailSchema}
-            icon={Mail}
-          />
+    <AuthLayout title="Crear cuenta" subtitle="Únete a MaxShop hoy mismo">
+      <div className="flex flex-col h-full justify-between w-full">
+        <div className="flex flex-col gap-6 flex-1 justify-center">
 
-          <div>
-            <Input
-              id="password"
-              type="password"
-              label="Crear nueva contraseña"
-              value={password}
-              onChange={handlePasswordChange}
-              placeholder="••••••••"
-              required
-              disabled={loading}
-              error={errors.password}
-              icon={Lock}
-            />
-            <PasswordRequirements password={password} />
-          </div>
-
-          <Input
-            id="confirmPassword"
-            type="password"
-            label="Confirmar contraseña"
-            value={confirmPassword}
-            onChange={handleConfirmPasswordChange}
-            placeholder="••••••••"
-            required
-            disabled={loading}
-            error={errors.confirmPassword}
-            icon={Lock}
-          />
-
-          <Button type="submit" variant="primary" size="md" fullWidth disabled={loading}>
-            {loading ? 'Creando cuenta...' : 'Crear nueva cuenta'}
-          </Button>
-
-          <div className="relative flex items-center gap-2 py-2">
-            <div className="flex-1 border-t border-gray-300"></div>
-            <span className="text-sm text-gray-500">O continúa con</span>
-            <div className="flex-1 border-t border-gray-300"></div>
-          </div>
-
+        {/* 1. Primary CTA: Google Register */}
+        <motion.div
+          initial={{ y: 0, opacity: 1 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="w-full px-1"
+        >
           <Button
             type="button"
-            variant="outline-primary"
-            size="md"
+            variant="white-primary"
+            size="lg"
             fullWidth
             onClick={handleGoogleRegister}
             disabled={loading}
-            className="text-[var(--principal)] hover:text-[var(--principal)]/80 hover:bg-[var(--principal)]/10 rounded-md"
+            className="relative group h-14 sm:h-16 text-base sm:text-lg shadow-sm border border-gray-200 hover:border-orange-200 hover:bg-orange-50/50 transition-all duration-300"
           >
-            <LogoGoogle />
+            <div className="absolute left-4 sm:left-6 flex items-center justify-center bg-white p-1 rounded-full shadow-sm">
+              <LogoGoogle />
+            </div>
+            <span className="text-gray-700 font-semibold group-hover:text-orange-700 transition-colors pl-8">
+              Registrarse con Google
+            </span>
           </Button>
-        </form>
+        </motion.div>
 
-        <p className="text-center text-gray-600 text-sm pt-2">
-          ¿Ya tienes cuenta?{' '}
-          <Link href="/login" className="text-orange-600 hover:text-orange-700 font-semibold">
-            Inicia sesión
-          </Link>
-        </p>
+        {/* Separator */}
+        <div className="relative flex items-center gap-4 py-4 opacity-60 flex-shrink-0">
+          <div className="flex-1 border-t border-gray-200"></div>
+          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">o</span>
+          <div className="flex-1 border-t border-gray-200"></div>
+        </div>
+
+        {/* 2. Secondary Option: Email Register */}
+        <AnimatePresence mode="wait">
+          {!isEmailExpanded ? (
+            <motion.button
+              key="expand-btn-reg"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
+              onClick={() => setIsEmailExpanded(true)}
+              className="w-full py-4 flex items-center justify-between px-6 rounded-2xl border border-gray-200 hover:border-orange-300 hover:shadow-md hover:bg-white bg-gray-50/50 transition-all duration-300 group text-left cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 group-hover:scale-110 transition-transform">
+                  <Mail size={20} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-semibold text-gray-800">Registrarse con email</span>
+                  <span className="text-xs text-gray-500">Crea una cuenta con tu correo</span>
+                </div>
+              </div>
+              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm text-gray-400 group-hover:text-orange-500 transition-colors">
+                <ArrowRight size={16} />
+              </div>
+            </motion.button>
+          ) : (
+            <motion.form
+              key="email-form-reg"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              onSubmit={handleSubmit}
+              className="flex flex-col gap-6"
+            >
+              <div className="flex flex-col gap-5 p-1">
+                <Input
+                  id="email"
+                  type="email"
+                  label="Tu email"
+                  value={email}
+                  onChange={handleEmailChange}
+                  placeholder="tu@email.com"
+                  required
+                  disabled={loading}
+                  error={errors.email}
+                  schema={emailSchema}
+                  icon={Mail}
+                />
+
+                <div>
+                  <Input
+                    id="password"
+                    type="password"
+                    label="Crear contraseña"
+                    value={password}
+                    onChange={handlePasswordChange}
+                    placeholder="••••••••"
+                    required
+                    disabled={loading}
+                    error={errors.password}
+                    icon={Lock}
+                  />
+                  <div className="mt-2">
+                    <PasswordRequirements password={password} />
+                  </div>
+                </div>
+
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  label="Confirmar contraseña"
+                  value={confirmPassword}
+                  onChange={handleConfirmPasswordChange}
+                  placeholder="••••••••"
+                  required
+                  disabled={loading}
+                  error={errors.confirmPassword}
+                  icon={Lock}
+                />
+              </div>
+
+              <div className="pt-5 flex flex-col gap-4 px-1">
+                <Button type="submit" variant="primary" size="lg" fullWidth disabled={loading} className="h-12 shadow-lg shadow-orange-500/20">
+                  {loading ? 'Creando cuenta...' : 'Crear cuenta'}
+                </Button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsEmailExpanded(false)}
+                  className="text-sm text-gray-400 hover:text-gray-600 font-medium py-2 text-center transition-colors"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </motion.form>
+          )}
+        </AnimatePresence>
+        </div>
+
+        {/* Footer Links */}
+        <div className="text-center flex-shrink-0 py-6">
+          <p className="text-sm text-gray-600">
+            ¿Ya tienes cuenta?{' '}
+            <Link href="/login" className="font-semibold text-orange-600 hover:text-orange-700 hover:underline transition-all">
+              Inicia sesión
+            </Link>
+          </p>
+        </div>
       </div>
     </AuthLayout>
   );

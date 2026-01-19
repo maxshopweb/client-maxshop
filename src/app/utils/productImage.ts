@@ -80,10 +80,10 @@ export function getProductImageUrl(
   }
 
   // Si no, intentar construir desde codi_arti
-  const articleCode = extractArticleCode(imgPrincipal, codiArti);
-  if (articleCode) {
+  const codeAndExt = extractArticleCodeAndExtension(imgPrincipal, codiArti);
+  if (codeAndExt) {
     // Retornar la primera variación (sin sufijo)
-    return `/imgs/productos/${articleCode}.jpg`;
+    return `/imgs/productos/${codeAndExt.code}${codeAndExt.extension}`;
   }
 
   return null;

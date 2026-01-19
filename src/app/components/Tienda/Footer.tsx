@@ -15,7 +15,6 @@ export default function Footer() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Formulario enviado:", formData);
     // Aquí iría la lógica de envío
     setFormData({ nombre: "", apellido: "", email: "" });
   };
@@ -175,7 +174,7 @@ export default function Footer() {
       {/* Footer Inferior - Full Width Azul Más Oscuro */}
       <div className="w-full text-white/60 py-4 md:py-5" style={{ backgroundColor: '#05060f' }}>
         <div className="container mx-auto px-4">
-          <p className="text-center text-sm md:text-base capitalize">
+          <p className="text-center text-sm md:text-base">
             &copy; {new Date().getFullYear()} MaxShop. Todos los derechos reservados.
           </p>
         </div>

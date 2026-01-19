@@ -1,35 +1,60 @@
+'use client';
+
+import { DashboardHeader } from '../components/dashboard/DashboardHeader';
+import { KpiGrid } from '../components/dashboard/KpiGrid';
+import { SalesChart } from '../components/dashboard/SalesChart';
+import { OrderStatusChart } from '../components/dashboard/OrderStatusChart';
+import { TopProductsChart } from '../components/dashboard/TopProductsChart';
+import { SalesCategoryChart } from '../components/dashboard/SalesCategoryChart';
+import { CustomersChart } from '../components/dashboard/CustomersChart';
+import { AlertsPanel } from '../components/dashboard/AlertsPanel';
+import { useNotificationsStore } from '@/app/stores/notificationsStore';
+import { useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { dashboardKeys } from '../hooks/dashboard/dashboardKeys';
+import { toast } from 'sonner';
+
 export default function AdminPage() {
+    // Manejo de eventos en tiempo real
+    const { lastSaleEvent } = useNotificationsStore();
+    const queryClient = useQueryClient();
+
+    useEffect(() => {
+        if (lastSaleEvent) {
+            // Invalidar queries relevantes cuando llega una nueva venta
+            queryClient.invalidateQueries({ queryKey: dashboardKeys.kpis({}) });
+            queryClient.invalidateQueries({ queryKey: dashboardKeys.salesOverTime({}) });
+            queryClient.invalidateQueries({ queryKey: dashboardKeys.orderStatus({}) });
+            queryClient.invalidateQueries({ queryKey: dashboardKeys.alerts() });
+
+            toast.success(`Nueva venta recibida!`, {
+                description: `Orden #${lastSaleEvent.id_venta}`
+            });
+        }
+    }, [lastSaleEvent, queryClient]);
+
     return (
-        <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {/* Stats Cards */}
-                {[
-                    { label: "Total Productos", value: "1,234", color: "principal" },
-                    { label: "Clientes", value: "856", color: "secundario" },
-                    { label: "Eventos Activos", value: "12", color: "principal" },
-                    { label: "Ventas Hoy", value: "$45,678", color: "secundario" },
-                ].map((stat, i) => (
-                    <div
-                        key={i}
-                        className="bg-white dark:bg-secundario p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border border-principal/10 dark:border-white/10"
-                    >
-                        <p className="text-sm text-secundario/60 dark:text-white/60 mb-2">
-                            {stat.label}
-                        </p>
-                        <p className={`text-3xl font-bold text-${stat.color} dark:text-white`}>
-                            {stat.value}
-                        </p>
-                    </div>
-                ))}
+        <div className="space-y-6 pb-10">
+            <DashboardHeader />
+
+            <KpiGrid />
+
+            <div className="grid grid-cols-12 gap-6">
+                <SalesChart />
+                <OrderStatusChart />
             </div>
 
-            <div className="bg-white dark:bg-secundario p-6 rounded-2xl shadow-lg border border-principal/10 dark:border-white/10">
-                <h2 className="text-xl font-bold text-secundario dark:text-white mb-4">
-                    Actividad Reciente
-                </h2>
-                <div className="space-y-3">
-                    {/* Lista de actividades */}
-                </div>
+            <div className="grid grid-cols-12 gap-6">
+                <TopProductsChart />
+                <SalesCategoryChart />
+                <CustomersChart />
+            </div>
+
+            <div className="pt-4">
+                <h3 className="text-xl font-bold text-secundario dark:text-white mb-4">
+                    Alertas Operativas
+                </h3>
+                <AlertsPanel />
             </div>
         </div>
     );

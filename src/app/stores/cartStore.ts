@@ -100,7 +100,8 @@ export const useCartStore = create<CartState>()(
             // Calcular summary con los items actualizados
             const subtotal = updatedItems.reduce((sum, item) => sum + item.subtotal, 0);
             const descuentos = updatedItems.reduce((sum, item) => sum + (item.descuento || 0), 0);
-            const envio = subtotal > 50000 ? 0 : 2000;
+            // El costo de envío ahora se calcula dinámicamente en el checkout, no aquí
+            const envio = 0; // Removido: se calcula dinámicamente en checkout
             const total = subtotal - descuentos + envio;
             const cantidadItems = updatedItems.reduce((sum, item) => sum + item.cantidad, 0);
             
@@ -134,7 +135,8 @@ export const useCartStore = create<CartState>()(
             // Calcular summary con los items actualizados
             const subtotal = updatedItems.reduce((sum, item) => sum + item.subtotal, 0);
             const descuentos = updatedItems.reduce((sum, item) => sum + (item.descuento || 0), 0);
-            const envio = subtotal > 50000 ? 0 : 2000;
+            // El costo de envío ahora se calcula dinámicamente en el checkout, no aquí
+            const envio = 0; // Removido: se calcula dinámicamente en checkout
             const total = subtotal - descuentos + envio;
             const cantidadItems = updatedItems.reduce((sum, item) => sum + item.cantidad, 0);
             
@@ -300,8 +302,8 @@ export const useCartStore = create<CartState>()(
         const subtotal = state.items.reduce((sum, item) => sum + item.subtotal, 0);
         const descuentos = state.items.reduce((sum, item) => sum + (item.descuento || 0), 0);
         
-        // Calcular envío (por ahora fijo, luego se puede hacer dinámico)
-        const envio = subtotal > 50000 ? 0 : 2000; // Envío gratis sobre $50.000
+        // El costo de envío ahora se calcula dinámicamente en el checkout mediante cotización de Andreani
+        const envio = 0; // Removido: se calcula dinámicamente en checkout
         
         const total = subtotal - descuentos + envio;
         const cantidadItems = state.items.reduce((sum, item) => sum + item.cantidad, 0);

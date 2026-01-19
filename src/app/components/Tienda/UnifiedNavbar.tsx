@@ -1,184 +1,92 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { User, ShoppingCart, Sun, Moon, LogOut, Menu, X } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
-import { useTheme } from "@/app/context/ThemeProvider";
-import { useAuth } from "@/app/context/AuthContext";
-import { useCartStore } from "@/app/stores/cartStore";
-import { useCartSidebar } from "@/app/hooks/useCartSidebar";
 import CartSidebar from "@/app/components/cart/CartSidebar";
-
-const menuLinks = [
-  { label: "Inicio", href: "/" },
-  { label: "Tienda", href: "/tienda/productos" },
-  { label: "Nosotros", href: "#about-us" },
-  { label: "Contacto", href: "#contacto" },
-];
+import LocationModal from "@/app/components/modals/LocationModal";
+import { MENU_LINKS } from "@/app/components/navbar/navbar.constants";
+import { useNavbarScroll } from "@/app/components/navbar/hooks/useNavbarScroll";
+import { useNavbarAuth } from "@/app/components/navbar/hooks/useNavbarAuth";
+import { useNavbarSearch } from "@/app/components/navbar/hooks/useNavbarSearch";
+import { useNavbarLocation } from "@/app/components/navbar/hooks/useNavbarLocation";
+import { useNavbarMobileMenu } from "@/app/components/navbar/hooks/useNavbarMobileMenu";
+import { useNavbarCart } from "@/app/components/navbar/hooks/useNavbarCart";
+import { useProductos } from "@/app/hooks/productos/useProductos";
+import NavbarHeader from "@/app/components/navbar/desktop/NavbarHeader";
+import NavbarLogo from "@/app/components/navbar/desktop/NavbarLogo";
+import NavbarSearchBar from "@/app/components/navbar/desktop/NavbarSearchBar";
+import NavbarUserActions from "@/app/components/navbar/desktop/NavbarUserActions";
+import NavbarLocationIndicator from "@/app/components/navbar/desktop/NavbarLocationIndicator";
+import NavbarDesktopMenu from "@/app/components/navbar/desktop/NavbarDesktopMenu";
+import MobileMenuOverlay from "@/app/components/navbar/mobile/MobileMenuOverlay";
+import MobileMenuHeader from "@/app/components/navbar/mobile/MobileMenuHeader";
+import MobileMenuSearch from "@/app/components/navbar/mobile/MobileMenuSearch";
+import MobileMenuLinks from "@/app/components/navbar/mobile/MobileMenuLinks";
+import MobileMenuFooter from "@/app/components/navbar/mobile/MobileMenuFooter";
+import MobileLocationButton from "@/app/components/navbar/mobile/MobileLocationButton";
+import NavbarSearchContainer from "@/app/components/search/NavbarSearchContainer";
 
 export default function UnifiedNavbar() {
-  const { logout } = useAuth();
   const pathname = usePathname();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const userMenuRef = useRef<HTMLDivElement>(null);
-  const { actualTheme, setTheme } = useTheme();
-  const { user, isAuthenticated } = useAuth();
-  const { summary } = useCartStore();
-  const { isOpen, open, close } = useCartSidebar();
+  const actualTheme = "light";
 
-  // Construir la URL de login con el redirect
-  const getLoginUrl = () => {
-    if (pathname?.startsWith('/login') || pathname?.startsWith('/register') || pathname?.startsWith('/forgot-password')) {
-      return '/login';
-    }
-    return `/login?redirect=${encodeURIComponent(pathname || '/')}`;
+  // Hooks
+  const { shouldShowBackground } = useNavbarScroll();
+  const { user, isAuthenticated, loginUrl, logout } = useNavbarAuth();
+  const { searchQuery, setSearchQuery } = useNavbarSearch();
+  const {
+    localidad,
+    selectedProvincia,
+    selectedCiudad,
+    isLocationModalOpen,
+    openLocationModal,
+    closeLocationModal,
+    handleLocationSelect,
+  } = useNavbarLocation();
+  const { isOpen: isMobileMenuOpen, toggle: toggleMobileMenu, close: closeMobileMenu } = useNavbarMobileMenu();
+  const { cantidadItems, openCart, closeCart, isCartOpen } = useNavbarCart();
+  
+  // Obtener productos para la búsqueda
+  const { productos } = useProductos({
+    filters: { limit: 1000 },
+    enabled: true,
+  });
+
+  const handleLocationClick = () => {
+    openLocationModal();
   };
 
-  // Detectar scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Cerrar menú al hacer click fuera
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
-        setShowUserMenu(false);
-      }
-    };
-    if (showUserMenu) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showUserMenu]);
-
-  // Cerrar mobile menu al cambiar de ruta
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [pathname]);
-
-  // Determinar si debe mostrar background siempre (páginas que no sean home)
-  const isHomePage = pathname === '/';
-  const shouldShowBackground = !isHomePage || isScrolled;
+  const handleMobileLocationClick = () => {
+    openLocationModal();
+    closeMobileMenu();
+  };
 
   return (
     <>
       <header className="sticky top-0 z-50">
         {/* Parte Superior: Logo, Toggle, User, Cart */}
-        <div
-          className={`transition-all duration-500 ${
-            shouldShowBackground
-              ? "py-2 shadow-lg bg-principal text-white"
-              : "py-4 bg-principal text-white"
-          }`}
-        >
-          <div className="container mx-auto px-4">
-            <div className="relative flex items-center justify-between">
-              {/* Izquierda: User + Toggle Dark Mode */}
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {/* User Account */}
-                {isAuthenticated && user ? (
-                  <Link
-                    href="/mi-cuenta"
-                    className="p-2 hover:bg-white/10 transition-all duration-300 rounded-lg"
-                    aria-label="Mi cuenta"
-                  >
-                    <User size={22} className="text-white transition-transform duration-300 hover:scale-110" />
-                  </Link>
-                ) : (
-                  <Link
-                    href={getLoginUrl()}
-                    className="p-2 hover:bg-white/10 transition-all duration-300 rounded-lg opacity-50"
-                    aria-label="Iniciar sesión"
-                  >
-                    <User size={22} className="text-white transition-transform duration-300 hover:scale-110" />
-                  </Link>
-                )}
-
-                {/* Toggle Dark Mode */}
-                <button
-                  onClick={() => setTheme(actualTheme === 'dark' ? 'light' : 'dark')}
-                  className="p-2 hover:bg-white/10 transition-all duration-300 rounded-lg"
-                  aria-label="Cambiar tema"
-                >
-                  {actualTheme === 'dark' ? (
-                    <Sun size={22} className="text-white transition-transform duration-300 hover:scale-110" />
-                  ) : (
-                    <Moon size={22} className="text-white transition-transform duration-300 hover:scale-110" />
-                  )}
-                </button>
-              </div>
-
-              {/* Logo - Centro Absoluto */}
-              <Link
-                href="/#"
-                onClick={(e) => {
-                  if (pathname === '/') {
-                    e.preventDefault();
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }
-                }}
-                className="absolute left-1/2 transform -translate-x-1/2 group"
-              >
-                <Image
-                  src="/logos/logo-positivo.svg"
-                  alt="MaxShop"
-                  width={120}
-                  height={40}
-                  className="h-8 md:h-10 w-auto transition-transform duration-300 group-hover:scale-105 brightness-0 invert"
-                />
-              </Link>
-
-              {/* Derecha: Cart + Menu */}
-              <div className="flex items-center gap-2 md:gap-3 flex-shrink-0 ml-auto">
-                {/* Shopping Cart */}
-                <button
-                  onClick={open}
-                  className="relative p-2 hover:bg-white/10 transition-all duration-300 rounded-lg"
-                >
-                  <ShoppingCart size={22} className="text-white transition-transform duration-300 hover:scale-110" />
-                  {summary.cantidadItems > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-white text-principal text-xs font-bold rounded-full min-w-[20px] h-[20px] px-1.5 flex items-center justify-center shadow-lg border-2 border-principal">
-                      {summary.cantidadItems}
-                    </span>
-                  )}
-                </button>
-
-                {/* Mobile Menu Button */}
-                <button
-                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="md:hidden p-2 hover:bg-white/10 transition-all duration-300 rounded-lg"
-                  aria-label="Menú"
-                >
-                  <div className="relative w-6 h-6">
-                    <Menu
-                      size={24}
-                      className={`absolute inset-0 transition-all duration-300 ${
-                        isMobileMenuOpen ? "opacity-0 rotate-90" : "opacity-100 rotate-0"
-                      }`}
-                    />
-                    <X
-                      size={24}
-                      className={`absolute inset-0 transition-all duration-300 ${
-                        isMobileMenuOpen ? "opacity-100 rotate-0" : "opacity-0 -rotate-90"
-                      }`}
-                    />
-                  </div>
-                </button>
-              </div>
-            </div>
+        <NavbarHeader shouldShowBackground={shouldShowBackground}>
+          <NavbarLogo pathname={pathname || ''} />
+          <div className="hidden md:block flex-1">
+            <NavbarSearchContainer
+              products={productos || []}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+            >
+              <NavbarSearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+            </NavbarSearchContainer>
           </div>
-        </div>
+          <NavbarUserActions
+            isAuthenticated={isAuthenticated}
+            loginUrl={loginUrl}
+            user={user}
+            cantidadItems={cantidadItems}
+            isMobileMenuOpen={isMobileMenuOpen}
+            onCartClick={openCart}
+            onMobileMenuToggle={toggleMobileMenu}
+          />
+        </NavbarHeader>
 
-        {/* Parte Inferior: Links del Menú - Solo Desktop */}
+        {/* Parte Inferior: Localidad + Links del Menú - Solo Desktop */}
         <nav
           className={`hidden md:block transition-all duration-500 ${
             shouldShowBackground
@@ -189,177 +97,73 @@ export default function UnifiedNavbar() {
           }`}
         >
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-center h-12 md:h-14">
-              <div className="flex items-center gap-4 lg:gap-6">
-                {menuLinks.map((link) => {
-                  const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
-                  
-                  return (
-                    <Link
-                      key={link.label}
-                      href={link.href}
-                      className={`relative text-sm lg:text-base group py-2 px-2 -mx-2 rounded-md transition-all duration-300 ease-out ${
-                        isActive ? '-translate-y-1' : 'group-hover:-translate-y-1'
-                      }`}
-                    >
-                      <span
-                        className={`relative z-10 inline-block transition-all duration-300 ease-out ${
-                          isActive ? '-translate-y-1' : 'group-hover:-translate-y-1'
-                        } ${
-                          isActive
-                            ? shouldShowBackground
-                              ? actualTheme === 'dark'
-                                ? "text-white font-medium"
-                                : "text-terciario font-medium"
-                              : "text-white font-medium"
-                            : shouldShowBackground
-                            ? actualTheme === 'dark'
-                              ? "text-white/70 group-hover:text-white"
-                              : "text-terciario/70 group-hover:text-terciario"
-                            : "text-white/70 group-hover:text-white"
-                        }`}
-                      >
-                        {link.label}
-                      </span>
-                      {/* Barrita debajo del link */}
-                      <span
-                        className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-[3px] rounded-full transition-all duration-300 ease-out ${
-                          isActive
-                            ? shouldShowBackground
-                              ? actualTheme === 'dark'
-                                ? "w-[50%] bg-principal"
-                                : "w-[50%] bg-terciario"
-                              : "w-[50%] bg-white"
-                            : shouldShowBackground
-                            ? actualTheme === 'dark'
-                              ? "w-0 group-hover:w-[50%] bg-principal"
-                              : "w-0 group-hover:w-[50%] bg-secundario"
-                            : "w-0 group-hover:w-[50%] bg-white/60"
-                        }`}
-                      />
-                    </Link>
-                  );
-                })}
-              </div>
+            <div className="flex items-center justify-between h-12 md:h-14">
+              <NavbarLocationIndicator
+                localidad={localidad}
+                shouldShowBackground={shouldShowBackground}
+                actualTheme={actualTheme}
+                onLocationClick={handleLocationClick}
+              />
+
+              <NavbarDesktopMenu
+                links={MENU_LINKS}
+                pathname={pathname || ''}
+                shouldShowBackground={shouldShowBackground}
+                actualTheme={actualTheme}
+              />
             </div>
           </div>
         </nav>
       </header>
 
       {/* Mobile Menu - Full Screen Overlay */}
-      <div
-        className={`md:hidden fixed inset-0 z-[100] transition-all duration-300 ease-out ${
-          isMobileMenuOpen
-            ? "opacity-100 visible"
-            : "opacity-0 invisible"
-        }`}
-      >
-        {/* Backdrop */}
-        <div
-          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-          onClick={() => setIsMobileMenuOpen(false)}
+      <MobileMenuOverlay isOpen={isMobileMenuOpen} onClose={closeMobileMenu}>
+        <MobileMenuHeader
+          isAuthenticated={isAuthenticated}
+          user={user}
+          loginUrl={loginUrl}
+          onClose={closeMobileMenu}
+          onLoginClick={closeMobileMenu}
         />
 
-        {/* Menu Panel */}
-        <div
-          className={`absolute right-0 top-0 bottom-0 w-80 max-w-[85vw] bg-principal shadow-2xl transform transition-transform duration-300 ease-out ${
-            isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
-          }`}
+        <MobileLocationButton
+          localidad={localidad}
+          onClick={handleMobileLocationClick}
+        />
+
+        <NavbarSearchContainer
+          products={productos || []}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
         >
-          {/* Header del Menu Mobile */}
-          <div className="flex items-center justify-between p-4 border-b border-white/20">
-            <div className="flex items-center gap-3">
-              {isAuthenticated && user ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                    <User size={20} className="text-white" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">
-                      {user.nombre || user.username || 'Usuario'}
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <Link
-                  href={getLoginUrl()}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
-                >
-                  <User size={20} />
-                  <span className="text-sm">Iniciar sesión</span>
-                </Link>
-              )}
-            </div>
-            <button
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-            >
-              <X size={24} className="text-white" />
-            </button>
-          </div>
+          <MobileMenuSearch searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+        </NavbarSearchContainer>
 
-          {/* Menu Links */}
-          <div className="p-4 space-y-2">
-            {menuLinks.map((link, index) => {
-              const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
-              return (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block py-4 px-4 rounded-lg transition-all duration-300 ${
-                    isActive
-                      ? "bg-white/20 text-white font-medium"
-                      : "text-white/80 hover:bg-white/10 hover:text-white"
-                  }`}
-                  style={{
-                    animationDelay: isMobileMenuOpen ? `${index * 50}ms` : '0ms'
-                  }}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-          </div>
+        <MobileMenuLinks
+          links={MENU_LINKS}
+          pathname={pathname || ''}
+          isOpen={isMobileMenuOpen}
+          onLinkClick={closeMobileMenu}
+        />
 
-          {/* Footer del Menu Mobile */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/20">
-            {isAuthenticated && user && (
-              <div className="space-y-2">
-                <Link
-                  href="/cuenta"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block py-3 px-4 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-all"
-                >
-                  Mi Cuenta
-                </Link>
-                <Link
-                  href="/contacto"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block py-3 px-4 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-all"
-                >
-                  Contacto
-                </Link>
-                <button
-                  onClick={() => {
-                    logout();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full flex items-center gap-2 py-3 px-4 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-all"
-                >
-                  <LogOut size={18} />
-                  <span>Cerrar sesión</span>
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+        <MobileMenuFooter
+          isAuthenticated={isAuthenticated}
+          onClose={closeMobileMenu}
+          onLogout={logout}
+        />
+      </MobileMenuOverlay>
 
       {/* Cart Sidebar */}
-      <CartSidebar isOpen={isOpen} onClose={close} />
+      <CartSidebar isOpen={isCartOpen} onClose={closeCart} />
+
+      {/* Location Modal */}
+      <LocationModal
+        isOpen={isLocationModalOpen}
+        onClose={closeLocationModal}
+        onLocationSelect={handleLocationSelect}
+        currentProvincia={selectedProvincia}
+        currentCiudad={selectedCiudad}
+      />
     </>
   );
 }
-

@@ -38,7 +38,7 @@ export function Button({
 
         cancel: "bg-terciario text-white hover:bg-terciario/90 hover:shadow-lg hover:shadow-terciario/30 hover:scale-105 before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent before:translate-x-[-200%] hover:before:translate-x-[200%] before:transition-transform before:duration-700 dark:bg-white/10 dark:text-white dark:hover:bg-white/20 dark:hover:shadow-white/10",
 
-        "outline-primary": "border-2 border-principal !text-principal bg-transparent hover:!bg-principal hover:!text-white hover:shadow-lg hover:shadow-principal/30 hover:scale-105",
+        "outline-primary": "border-2 border-principal !text-principal bg-transparent hover:!bg-principal/10 hover:!text-principal hover:shadow-lg hover:shadow-principal/30 hover:scale-105",
 
         "outline-secondary": "border-2 border-secundario !text-secundario bg-transparent hover:!bg-secundario hover:!text-white hover:shadow-lg hover:shadow-secundario/30 hover:scale-105 dark:border-white dark:!text-white dark:hover:!bg-white dark:hover:!text-secundario",
 

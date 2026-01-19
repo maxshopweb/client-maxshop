@@ -35,15 +35,16 @@ export interface IProductos {
     creado_en?: Date | null;
     actualizado_en?: Date | null;
     estado?: EstadoGeneral | null;
-    id_cat?: number | null;
-    id_subcat?: number | null;
-    id_marca?: number | null;
     // Relaciones
     categoria?: ICategoria | null;
-    subcategoria?: ISubcategoria | null;
     marca?: IMarca | null;
     grupo?: any | null; // IGrupo
     iva?: IIva | null;
+    // Campos legacy para compatibilidad (deprecated, usar códigos)
+    id_cat?: number | null;
+    id_subcat?: number | null;
+    id_marca?: number | null;
+    subcategoria?: ISubcategoria | null;
 }
 // Filtros
 export interface IProductoFilters {
@@ -56,14 +57,16 @@ export interface IProductoFilters {
     order?: 'asc' | 'desc';
 
     // Filtros básicos
-    estado?: EstadoGeneral;
+    estado?: EstadoGeneral; // Solo para admin ver activos/inactivos (1 o 2, nunca 0)
+    activo?: string; // Filtro por publicar/despublicar: "A" = publicado, "I" = despublicado
     busqueda?: string;
 
-    // Filtros por relaciones
-    id_subcat?: number;
-    id_cat?: number;
-    id_marca?: number;
-    codi_grupo?: string;
+    // Filtros por relaciones - acepta códigos o IDs
+    id_subcat?: number; // Deprecated - mantener por compatibilidad
+    id_cat?: number | string; // Puede ser ID o código
+    id_marca?: number | string; // Puede ser ID o código
+    codi_grupo?: string; // Código de grupo
+    codi_impuesto?: string | number; // Código de IVA o ID
 
     // Filtros por rango
     precio_min?: number;
@@ -80,51 +83,41 @@ export interface IProductoFilters {
 // DTOs
 export interface ICreateProductoDTO {
     // Requeridos
+    codi_arti: string;
     nombre: string;
     precio: number;
-    stock: number;
 
-    // Opcionales
-    id_cat?: number;
-    id_subcat?: number; // ✅ Hacer opcional
-    descripcion?: string; // ✅ Cambiar de "desc" a "descripcion"
-    cod_sku?: string;
-    id_interno?: string;
-    modelo?: string;
-    id_marca?: number;
-    precio_mayorista?: number;
-    precio_minorista?: number;
-    precio_evento?: number;
-    id_iva?: number;
-    stock_min?: number;
-    stock_mayorista?: number;
-    img_principal?: string;
-    imagenes?: string[];
-    destacado?: boolean;
-    financiacion?: boolean;
-}
-
-export interface IUpdateProductoDTO {
-    nombre?: string;
+    // Opcionales - usar códigos
+    codi_categoria?: string;
+    codi_marca?: string;
+    codi_grupo?: string;
+    codi_impuesto?: string;
     descripcion?: string;
     cod_sku?: string;
     id_interno?: string;
     modelo?: string;
-    id_cat?: number;
-    id_subcat?: number;
-    id_marca?: number;
-    precio?: number;
     precio_mayorista?: number;
     precio_minorista?: number;
     precio_evento?: number;
-    id_iva?: number;
+    precio_sin_iva?: number;
     stock?: number;
     stock_min?: number;
     stock_mayorista?: number;
+    unidad_medida?: string;
+    unidades_por_producto?: number;
+    codi_barras?: string;
     img_principal?: string;
     imagenes?: string[];
     destacado?: boolean;
     financiacion?: boolean;
+    // Campos legacy para compatibilidad
+    id_cat?: number;
+    id_subcat?: number;
+    id_marca?: number;
+    id_iva?: number;
+}
+
+export interface IUpdateProductoDTO extends Partial<ICreateProductoDTO> {
     estado?: EstadoGeneral;
 }
 
@@ -142,6 +135,10 @@ export interface IPaginatedResponse<T = any> {
     page: number;
     limit: number;
     totalPages: number;
+    priceRange?: {
+        min: number;
+        max: number;
+    };
 }
 
 // =======================================

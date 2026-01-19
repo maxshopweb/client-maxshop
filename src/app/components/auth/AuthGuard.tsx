@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { useAuthGuard } from '../../hooks/useAuthGuard';
+import { useAuthGuard } from '../../hooks/auth/useAuthGuard';
 import { type UserRole } from '../../types/user';
 
 type AuthGuardProps = {

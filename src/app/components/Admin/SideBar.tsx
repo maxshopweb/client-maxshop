@@ -10,13 +10,17 @@ import {
     Users,
     Settings,
     Moon,
-    Sun
+    Sun,
+    User,
+    LogOut,
+    ShoppingCart
 } from "lucide-react";
-import { useTheme } from "@/app/context/ThemeProvider";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Image from "next/image";
 import Logo from "../ui/Logo";
+import { useAuth } from "@/app/context/AuthContext";
+import { useRouter } from "next/navigation";
+import { useNotificationsStore } from "@/app/stores/notificationsStore";
 
 interface NavItem {
     icon: React.ElementType;
@@ -27,6 +31,7 @@ interface NavItem {
 const navItems: NavItem[] = [
     { icon: Home, label: "Inicio", path: "/admin" },
     { icon: Package, label: "Productos", path: "/admin/productos" },
+    { icon: ShoppingCart, label: "Ventas", path: "/admin/ventas" },
     { icon: Calendar, label: "Eventos", path: "/admin/eventos" },
     { icon: Users, label: "Clientes", path: "/admin/clientes" },
     { icon: Settings, label: "Config", path: "/admin/config" },
@@ -34,11 +39,15 @@ const navItems: NavItem[] = [
 
 export default function Sidebar() {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const { theme, setTheme, actualTheme } = useTheme();
+    const { user, logout } = useAuth();
+    const router = useRouter();
     const pathname = usePathname();
+    const unreadCount = useNotificationsStore((state) => state.unreadCount());
+    const hasNewSales = unreadCount > 0;
 
-    const toggleTheme = () => {
-        setTheme(theme === 'light' ? 'dark' : 'light');
+    const handleLogout = async () => {
+        await logout();
+        router.push('/');
     };
 
     return (
@@ -97,8 +106,8 @@ export default function Sidebar() {
                     </div>
                     {!isCollapsed && (
                         <div className="flex items-start flex-col ">
-                            <p className="text-sm">
-                                Cristhian
+                            <p className="text-sm uppercase">
+                                {user?.nombre}
                             </p>
                             <h3
                                 className="text-xl font-bold"
@@ -106,7 +115,7 @@ export default function Sidebar() {
                                     color: 'var(--foreground)'
                                 }}
                             >
-                                Requena
+                                {user?.apellido}
                             </h3>   
                         </div>
                     )}
@@ -118,6 +127,53 @@ export default function Sidebar() {
                 {navItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = pathname === item.path;
+                    const isDisabled = item.path === '/admin/eventos';
+
+                    // Mostrar badge solo en "Ventas" si hay nuevas ventas
+                    const showBadge = item.path === '/admin/ventas' && hasNewSales;
+
+                    // Si está deshabilitado, renderizar como div en lugar de Link
+                    if (isDisabled) {
+                        return (
+                            <div
+                                key={item.path}
+                                className={`
+                                    flex items-center gap-3 px-3 py-3 rounded-xl
+                                    transition-all duration-300
+                                    relative overflow-hidden
+                                    ${isCollapsed ? 'justify-center' : 'justify-between'}
+                                    cursor-not-allowed
+                                    opacity-60
+                                `}
+                                style={{
+                                    backgroundColor: 'rgba(var(--foreground-rgb), 0.03)',
+                                    color: 'rgba(var(--foreground-rgb), 0.5)',
+                                }}
+                                title="Próximamente"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="relative z-10 flex-shrink-0">
+                                        <Icon size={20} />
+                                    </div>
+                                    {!isCollapsed && (
+                                        <div className="flex flex-col">
+                                            <span className="relative z-10 font-medium text-sm">
+                                                {item.label}
+                                            </span>
+                                            <span
+                                                className="text-xs font-normal italic"
+                                                style={{
+                                                    color: 'rgba(var(--foreground-rgb), 0.4)',
+                                                }}
+                                            >
+                                                Próximamente
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    }
 
                     return (
                         <Link
@@ -158,7 +214,18 @@ export default function Sidebar() {
                                 }
                             }}
                         >
-                            <Icon size={20} className="relative z-10 flex-shrink-0" />
+                            <div className="relative z-10 flex-shrink-0">
+                                <Icon size={20} />
+                                {showBadge && (
+                                    <span
+                                        className="absolute -top-1 -right-1 w-3 h-3 rounded-full animate-pulse"
+                                        style={{
+                                            backgroundColor: '#ef4444',
+                                            boxShadow: '0 0 0 2px var(--background)',
+                                        }}
+                                    />
+                                )}
+                            </div>
                             {!isCollapsed && (
                                 <span className="relative z-10 font-medium text-sm">
                                     {item.label}
@@ -169,15 +236,85 @@ export default function Sidebar() {
                 })}
             </nav>
 
-            {/* Theme Toggle & Version */}
+            {/* User Actions & Theme Toggle */}
             <div
-                className="p-4 space-y-3"
+                className="p-4 space-y-2"
                 style={{
                     borderTop: '1px solid rgba(var(--foreground-rgb), 0.1)'
                 }}
             >
-                {/* Theme Switch */}
+                {/* Ver Perfil */}
+                <Link
+                    href="/admin/perfil"
+                    className={`
+                        w-full flex items-center gap-3 px-3 py-2.5 rounded-xl
+                        transition-all duration-300
+                        group relative overflow-hidden
+                        ${isCollapsed ? 'justify-center' : ''}
+                        hover:scale-105
+                    `}
+                    style={{
+                        backgroundColor: pathname === '/admin/perfil'
+                            ? 'var(--principal)'
+                            : 'transparent',
+                        color: pathname === '/admin/perfil'
+                            ? 'white'
+                            : 'var(--foreground)',
+                    }}
+                    onMouseEnter={(e) => {
+                        if (pathname !== '/admin/perfil') {
+                            e.currentTarget.style.backgroundColor = 'rgba(var(--foreground-rgb), 0.05)';
+                            e.currentTarget.style.color = 'var(--principal)';
+                        }
+                    }}
+                    onMouseLeave={(e) => {
+                        if (pathname !== '/admin/perfil') {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.color = 'var(--foreground)';
+                        }
+                    }}
+                >
+                    <User size={18} className="relative z-10 flex-shrink-0" />
+                    {!isCollapsed && (
+                        <span className="relative z-10 font-medium text-sm">
+                            Mi perfil
+                        </span>
+                    )}
+                </Link>
+
+                {/* Logout */}
                 <button
+                    onClick={handleLogout}
+                    className={`
+                        w-full flex items-center gap-3 px-3 py-2.5 rounded-xl
+                        transition-all duration-300
+                        group relative overflow-hidden
+                        ${isCollapsed ? 'justify-center' : ''}
+                        hover:scale-105
+                    `}
+                    style={{
+                        backgroundColor: 'transparent',
+                        color: 'var(--foreground)',
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                        e.currentTarget.style.color = '#ef4444';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                        e.currentTarget.style.color = 'var(--foreground)';
+                    }}
+                >
+                    <LogOut size={18} className="relative z-10 flex-shrink-0" />
+                    {!isCollapsed && (
+                        <span className="relative z-10 font-medium text-sm">
+                            Cerrar sesión
+                        </span>
+                    )}
+                </button>
+
+                {/* Theme Switch */}
+                {/* <button
                     onClick={toggleTheme}
                     className={`
                         w-full flex items-center gap-3 px-3 py-2.5 rounded-xl
@@ -214,7 +351,7 @@ export default function Sidebar() {
                                     color: 'var(--foreground)'
                                 }}
                             >
-                                {actualTheme === 'dark' ? 'Modo Oscuro' : 'Modo Claro'}
+                                {actualTheme === 'dark' ? 'Modo oscuro' : 'Modo claro'}
                             </span>
                         )}
                     </div>
@@ -236,11 +373,11 @@ export default function Sidebar() {
                             }}
                         />
                     </div>
-                </button>
+                </button> */}
 
                 {/* Version Info */}
                 {!isCollapsed && (
-                    <div className="text-center pt-2">
+                    <div className="text-center pt-3">
                         <p
                             className="text-xs font-medium"
                             style={{

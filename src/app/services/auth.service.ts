@@ -6,6 +6,7 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInAnonymously,
   signOut,
   confirmPasswordReset,
   type User,
@@ -204,6 +205,20 @@ class AuthService {
       return { success: true, data: null, error: null };
     } catch (error) {
       const message = this.mapFirebaseError(error, 'Error al cerrar sesión.');
+      return { success: false, data: null, error: message };
+    }
+  }
+
+  async signInAnonymously(): Promise<AuthResult<AuthPayload>> {
+    try {
+      const credential = await signInAnonymously(auth);
+      return {
+        success: true,
+        data: await this.buildAuthPayload(credential),
+        error: null
+      };
+    } catch (error) {
+      const message = this.mapFirebaseError(error, 'Error al iniciar sesión como invitado.');
       return { success: false, data: null, error: message };
     }
   }

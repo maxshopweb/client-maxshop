@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useProductosFilters } from '@/app/hooks/productos/useProductFilter';
+import { useProductFilters } from '@/app/hooks/productos/useProductFilters';
 
 interface PaginationProps {
     pagination: {
@@ -13,7 +13,7 @@ interface PaginationProps {
 }
 
 export function ProductosPagination({ pagination }: PaginationProps) {
-    const { nextPage, prevPage, goToPage, setFilter } = useProductosFilters();
+    const { nextPage, prevPage, goToPage, setFilter } = useProductFilters();
 
     const { total, page, limit, totalPages, hasNextPage, hasPrevPage } = pagination;
 
