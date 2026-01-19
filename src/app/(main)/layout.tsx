@@ -27,7 +27,16 @@ export default function MainLayout({
       return;
     }
 
-    // Verificar estado del usuario - si no es 3, redirigir a complete-perfil
+    // Solo aplicar redirecciones en rutas protegidas
+    // Las rutas protegidas son: /mi-cuenta y /admin
+    const isProtectedRoute = pathname?.startsWith('/mi-cuenta') || pathname?.startsWith('/admin');
+    
+    // Si no es una ruta protegida, permitir acceso sin restricciones
+    if (!isProtectedRoute) {
+      return;
+    }
+
+    // Verificar estado del usuario solo en rutas protegidas
     const currentUser = usuarioStore || user;
     if (currentUser && currentUser.estado !== 3 && currentUser.estado !== null) {
       // Si el estado es 1 o 2, debe completar perfil
@@ -43,17 +52,16 @@ export default function MainLayout({
     const role = contextRole || (cookieRole as UserRole | null);
 
     // Si el usuario es ADMIN y está en una ruta no-admin, redirigir a /admin
-    if (role === 'ADMIN' && pathname && !pathname.startsWith('/admin')) {
+    // Solo aplicar esta regla si está en una ruta protegida
+    if (isProtectedRoute && role === 'ADMIN' && pathname && !pathname.startsWith('/admin')) {
       setIsRedirecting(true);
       router.replace('/admin');
     }
   }, [contextRole, user, usuarioStore, loading, pathname, router]);
 
-  // Si es admin, no renderizar nada mientras redirige
-  const cookieRole = typeof window !== 'undefined' ? getUserRole() : null;
-  const role = contextRole || (cookieRole as UserRole | null);
-  
-  if (isRedirecting || (role === 'ADMIN' && pathname && !pathname.startsWith('/admin'))) {
+  // Solo mostrar spinner si realmente está redirigiendo
+  // NO redirigir ADMIN desde rutas públicas
+  if (isRedirecting) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
