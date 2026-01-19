@@ -59,11 +59,9 @@ export default function MainLayout({
     }
   }, [contextRole, user, usuarioStore, loading, pathname, router]);
 
-  // Si es admin, no renderizar nada mientras redirige
-  const cookieRole = typeof window !== 'undefined' ? getUserRole() : null;
-  const role = contextRole || (cookieRole as UserRole | null);
-  
-  if (isRedirecting || (role === 'ADMIN' && pathname && !pathname.startsWith('/admin'))) {
+  // Solo mostrar spinner si realmente está redirigiendo
+  // NO redirigir ADMIN desde rutas públicas
+  if (isRedirecting) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">

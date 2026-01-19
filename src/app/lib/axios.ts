@@ -10,7 +10,7 @@ const getBaseURL = (): string => {
   // }
   
   // Por defecto: backend en puerto 3001
-  const baseURL = 'http://localhost:3001/api';
+  const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
   return baseURL;
 };
 
