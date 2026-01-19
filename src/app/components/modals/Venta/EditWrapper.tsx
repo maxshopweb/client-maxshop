@@ -46,6 +46,13 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
         if (!isValid) return;
 
         const data = form.getValues();
+        
+        // Si hay un envío de Andreani (id_envio existe), no enviar estado_envio
+        // porque Andreani lo maneja automáticamente
+        if (venta.id_envio) {
+            delete data.estado_envio;
+        }
+        
         updateVenta({ id: venta.id_venta, data });
     };
 
@@ -53,7 +60,7 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
         <SimpleModal
             isOpen={true}
             onClose={onClose}
-            title={`Editar Venta #${venta.id_venta}`}
+            title={`Editar venta #${venta.id_venta}`}
             maxWidth="max-w-2xl"
             actions={(handleClose) => (
                 <>
@@ -93,7 +100,7 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
                 </div>
 
                 {/* Estado de Envío */}
-                <div>
+                {/* <div>
                     <Select
                         label="Estado de envío"
                         options={[
@@ -106,8 +113,10 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
                         value={form.watch('estado_envio') || ''}
                         onChange={(value) => form.setValue('estado_envio', value as any)}
                         error={form.formState.errors.estado_envio?.message}
+                        disabled={!!venta.id_envio}
+                        helperText={venta.id_envio ? 'El estado de envío lo maneja Andreani automáticamente' : undefined}
                     />
-                </div>
+                </div> */}
 
                 {/* Método de Pago */}
                 <div>

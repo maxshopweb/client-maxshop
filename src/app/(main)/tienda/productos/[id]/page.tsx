@@ -29,12 +29,12 @@ export default function ProductPage() {
   const {
     data: relatedProducts,
     isLoading: isLoadingRelated,
-  } = useRelatedProducts(productId, 4);
+  } = useRelatedProducts(productId, 5);
 
   // Loading state
   if (isLoading) {
     return (
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-7xl pt-16 sm:pt-20">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 pt-16 sm:pt-20">
         <ProductPageSkeleton />
       </div>
     );
@@ -43,7 +43,7 @@ export default function ProductPage() {
   // Error state
   if (isError || !producto) {
     return (
-      <div className="container mx-auto px-3 sm:px-4 py-8 sm:py-16 max-w-7xl pt-16 sm:pt-20">
+      <div className="container mx-auto px-3 sm:px-4 py-8 sm:py-16 pt-16 sm:pt-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -86,7 +86,7 @@ export default function ProductPage() {
   const isActive = producto.activo === "S" || producto.estado === 1;
   if (!isActive && producto.stock === 0) {
     return (
-      <div className="container mx-auto px-3 sm:px-4 py-8 sm:py-16 max-w-7xl pt-16 sm:pt-20">
+      <div className="container mx-auto px-3 sm:px-4 py-8 sm:py-16 pt-16 sm:pt-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -116,7 +116,7 @@ export default function ProductPage() {
 
   // Main content
   return (
-    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-7xl pt-16 sm:pt-20">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 pt-16 sm:pt-20">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

@@ -15,8 +15,8 @@ export default function ProductBreadcrumbs({ producto }: ProductBreadcrumbsProps
     ...(producto.categoria?.nombre
       ? [
           {
-            label: producto.categoria.nombre,
-            href: `/tienda?categoria=${producto.categoria.id_cat}`,
+            label: "Catálogo",
+            href: `/tienda/productos?categoria=${producto.categoria.id_cat}`,
           },
         ]
       : []),
@@ -24,7 +24,7 @@ export default function ProductBreadcrumbs({ producto }: ProductBreadcrumbsProps
       ? [
           {
             label: producto.subcategoria.nombre,
-            href: `/tienda?subcategoria=${producto.subcategoria.id_subcat}`,
+            href: `/tienda/productos?subcategoria=${producto.subcategoria.id_subcat}`,
           },
         ]
       : []),

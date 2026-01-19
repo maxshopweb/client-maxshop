@@ -30,20 +30,20 @@ export function StepOneBasicInfo({ form }: StepOneProps) {
     return (
         <div className="space-y-4 max-h-[350px] overflow-y-auto px-2">
             <h3 className="text-lg font-semibold text-input mb-4">
-                Información Básica del Producto
+                Información básica del producto
             </h3>
 
             {/* FILA 1 */}
             <div className="grid grid-cols-2 gap-3">
                 <Input
-                    label="Código de Artículo *"
+                    label="Codigo de articulo *"
                     placeholder="Ej: ART-001"
                     icon={Tag}
                     {...register('codi_arti')}
                     error={errors.codi_arti?.message}
                 />
                 <Input
-                    label="Nombre del Producto *"
+                    label="Nombre del producto *"
                     placeholder="Ej: Taladro Inalámbrico 20V"
                     icon={Package}
                     {...register('nombre')}
@@ -53,7 +53,7 @@ export function StepOneBasicInfo({ form }: StepOneProps) {
 
             <div className="grid grid-cols-2 gap-3">
                 <Input
-                    label="ID Interno"
+                    label="Id interno"
                     placeholder="INT-001"
                     {...register('id_interno')}
                 />
@@ -67,12 +67,12 @@ export function StepOneBasicInfo({ form }: StepOneProps) {
 
             <div className='grid grid-cols-2 gap-3'>
                 <Input
-                    label="Código SKU"
+                    label="Codigo sku"
                     placeholder="SKU-001"
                     {...register('cod_sku')}
                 />
                 <Input
-                    label="Código de Barras"
+                    label="Codigo de barras"
                     placeholder="1234567890123"
                     {...register('codi_barras')}
                 />
@@ -80,7 +80,7 @@ export function StepOneBasicInfo({ form }: StepOneProps) {
 
             <div className="grid grid-cols-2 gap-3">
                 <SelectWithCreate
-                    label="Categoría"
+                    label="Categoria"
                     options={categorias?.data?.map((cat: ICategoria) => ({
                         value: cat.codi_categoria || cat.id_cat?.toString() || '',
                         label: `${cat.nombre || ''} ${cat.codi_categoria ? `(${cat.codi_categoria})` : ''}`
@@ -105,7 +105,7 @@ export function StepOneBasicInfo({ form }: StepOneProps) {
                 />
 
                 <SelectWithCreate
-                    label="Subcategoría"
+                    label="Subcategoria"
                     options={subcategorias?.data?.map((sub: ISubcategoria) => ({
                         value: sub.id_subcat,
                         label: sub.nombre || ''
@@ -126,7 +126,7 @@ export function StepOneBasicInfo({ form }: StepOneProps) {
             <div>
                 <div className="col-span-2">
                     <label className="block text-sm font-medium text-input mb-1.5">
-                        Descripción
+                        Descripcion
                     </label>
                     <textarea
                         {...register('descripcion')}
@@ -163,12 +163,12 @@ export function StepOneBasicInfo({ form }: StepOneProps) {
                     }}
                 />
 
-                {/* Checkboxes */}
+                {/* Checkbox */}
                 <div className="flex items-center gap-6 pt-6">
                     <label className="flex items-center gap-2 cursor-pointer group">
                         <Checkbox.Root
-                            checked={watch('destacado') || false}
-                            onCheckedChange={(checked) => setValue('destacado', checked as boolean)}
+                            checked={watch('financiacion') ?? false}
+                            onCheckedChange={(checked) => setValue('financiacion', checked === true)}
                             className="flex h-5 w-5 items-center justify-center rounded border-2 border-input group-hover:border-principal data-[state=checked]:bg-principal data-[state=checked]:border-principal transition-all"
                         >
                             <Checkbox.Indicator>
@@ -176,22 +176,7 @@ export function StepOneBasicInfo({ form }: StepOneProps) {
                             </Checkbox.Indicator>
                         </Checkbox.Root>
                         <span className="text-sm text-input group-hover:text-principal transition-colors whitespace-nowrap">
-                            Destacado
-                        </span>
-                    </label>
-
-                    <label className="flex items-center gap-2 cursor-pointer group">
-                        <Checkbox.Root
-                            checked={watch('financiacion') || false}
-                            onCheckedChange={(checked) => setValue('financiacion', checked as boolean)}
-                            className="flex h-5 w-5 items-center justify-center rounded border-2 border-input group-hover:border-principal data-[state=checked]:bg-principal data-[state=checked]:border-principal transition-all"
-                        >
-                            <Checkbox.Indicator>
-                                <Check className="h-3.5 w-3.5 text-white" />
-                            </Checkbox.Indicator>
-                        </Checkbox.Root>
-                        <span className="text-sm text-input group-hover:text-principal transition-colors whitespace-nowrap">
-                            Financiación
+                            Financiacion
                         </span>
                     </label>
                 </div>

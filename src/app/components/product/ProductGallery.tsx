@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
 import { IProductos } from "@/app/types/producto.type";
 import { extractArticleCodeAndExtension, generateImageVariations } from "@/app/utils/productImage";
+import ProductImage from "@/app/components/shared/ProductImage";
 
 interface ProductGalleryProps {
   producto: IProductos;
@@ -94,8 +95,14 @@ export default function ProductGallery({ producto }: ProductGalleryProps) {
 
   if (images.length === 0) {
     return (
-      <div className="w-full aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
-        <span className="text-6xl opacity-20">🛠️</span>
+      <div className="w-full aspect-square bg-gradient-to-br from-background to-background/50 rounded-lg overflow-hidden">
+        <ProductImage
+          imgPrincipal={producto.img_principal}
+          codiArti={producto.codi_arti}
+          nombre={producto.nombre}
+          className="p-4"
+          size="lg"
+        />
       </div>
     );
   }
@@ -105,16 +112,28 @@ export default function ProductGallery({ producto }: ProductGalleryProps) {
       <div className="w-full space-y-3 sm:space-y-4">
         {/* Imagen principal */}
         <motion.div
-          className="relative aspect-square w-full bg-white rounded-lg overflow-hidden cursor-pointer group"
+          className="relative aspect-square w-full bg-gradient-to-br from-background to-background/50 rounded-lg overflow-hidden cursor-pointer group"
           whileHover={{ scale: 1.01 }}
           transition={{ duration: 0.2 }}
           onClick={() => setLightboxOpen(true)}
         >
-          {selectedImage && (
+          {selectedImage ? (
             <img
               src={selectedImage}
               alt={producto.nombre || "Producto"}
               className="w-full h-full object-contain"
+              onError={() => {
+                // Si la imagen falla, usar ProductImage como fallback
+                setImages([]);
+              }}
+            />
+          ) : (
+            <ProductImage
+              imgPrincipal={producto.img_principal}
+              codiArti={producto.codi_arti}
+              nombre={producto.nombre}
+              className="p-4"
+              size="lg"
             />
           )}
           

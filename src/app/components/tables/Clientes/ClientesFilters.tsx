@@ -21,6 +21,7 @@ export function ClientesFilters() {
         clearFilters,
         hasActiveFilters,
         activeFiltersCount,
+        localBusqueda,
     } = useClientesFilters();
 
     const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
@@ -34,7 +35,7 @@ export function ClientesFilters() {
                     <Input
                         type="text"
                         placeholder="Buscar por nombre, email, teléfono..."
-                        value={filters.busqueda || ''}
+                        value={localBusqueda || ''}
                         onChange={(e) => setFilter('busqueda', e.target.value)}
                         icon={Search}
                         iconPosition="left"

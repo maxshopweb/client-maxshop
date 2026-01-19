@@ -6,7 +6,7 @@ import {
 } from '@tanstack/react-table';
 import { ChevronUp, ChevronDown, ChevronsUpDown, Package } from 'lucide-react';
 import { useProductos } from '@/app/hooks/productos/useProductos';
-import { useProductosFilters } from '@/app/hooks/productos/useProductFilter';
+import { useProductFilters } from '@/app/hooks/productos/useProductFilters';
 import { useProductosTable } from '@/app/hooks/productos/useProductosTable';
 import { getProductosColumns } from '../../columns/ProductosColumns';
 import type { IProductos } from '@/app/types/producto.type';
@@ -28,7 +28,7 @@ export function ProductosTable({
     tableState,
 }: ProductosTableProps) {
     // Hooks
-    const { filters, setSort, categorias, marcas } = useProductosFilters();
+    const { backendFilters: filters, setSort, categorias, marcas } = useProductFilters();
     const { productos, isLoading, isError, error } = useProductos({ filters });
 
     const {
@@ -100,80 +100,74 @@ export function ProductosTable({
     }
 
     return (
-        <div className="w-full">
-            <div className="rounded-lg bg-card border border-card p-4 overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        {/* HEADER */}
-                        <thead className="bg-input border border-input p-4">
-                            {table.getHeaderGroups().map((headerGroup) => (
-                                <tr key={headerGroup.id}>
-                                    {headerGroup.headers.map((header) => (
+        <div className="bg-card border border-card rounded-lg shadow-lg overflow-hidden">
+            <div className="overflow-x-auto">
+                <table className="w-full">
+                    <thead>
+                        {table.getHeaderGroups().map((headerGroup) => (
+                            <tr
+                                key={headerGroup.id}
+                                className="border-b border-gray-200 bg-gray-50"
+                            >
+                                {headerGroup.headers.map((header) => {
+                                    const canSort = header.column.getCanSort();
+                                    const isSorted = header.column.getIsSorted();
+
+                                    return (
                                         <th
                                             key={header.id}
-                                            className={`px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider ${header.column.getCanSort() ? 'cursor-pointer select-none' : ''
-                                                }`}
-                                            onClick={header.column.getToggleSortingHandler()}
+                                            className={`px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider ${densityClass} ${
+                                                canSort ? 'cursor-pointer select-none hover:bg-gray-100' : ''
+                                            }`}
+                                            style={{ width: header.getSize() !== 150 ? header.getSize() : undefined }}
+                                            onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
                                         >
-                                            {header.isPlaceholder ? null : (
-                                                <div className="flex items-center gap-2">
-                                                    {flexRender(
-                                                        header.column.columnDef.header,
-                                                        header.getContext()
-                                                    )}
-
-                                                    {/* Indicador de ordenamiento */}
-                                                    {header.column.getCanSort() && (
-                                                        <span className="inline-flex">
-                                                            {header.column.getIsSorted() === 'asc' ? (
-                                                                <ChevronUp className="w-4 h-4" />
-                                                            ) : header.column.getIsSorted() === 'desc' ? (
-                                                                <ChevronDown className="w-4 h-4" />
-                                                            ) : (
-                                                                <ChevronsUpDown className="w-4 h-4 text-gray-400" />
-                                                            )}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            )}
+                                            <div className="flex items-center gap-2">
+                                                {header.isPlaceholder
+                                                    ? null
+                                                    : flexRender(
+                                                          header.column.columnDef.header,
+                                                          header.getContext()
+                                                      )}
+                                                {canSort && (
+                                                    <span className="flex flex-col">
+                                                        {isSorted === 'asc' ? (
+                                                            <ChevronUp className="w-3 h-3" />
+                                                        ) : isSorted === 'desc' ? (
+                                                            <ChevronDown className="w-3 h-3" />
+                                                        ) : (
+                                                            <ChevronsUpDown className="w-3 h-3 opacity-50" />
+                                                        )}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </th>
-                                    ))}
-                                </tr>
-                            ))}
-                        </thead>
-
-                        {/* BODY */}
-                        <tbody className="divide-y divide-[var(--input-bg)]">
-                            {table.getRowModel().rows.map((row) => (
-                                <tr
-                                    key={row.id}
-                                    className="transition-colors"
-                                    style={{
-                                        backgroundColor: 'transparent'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.backgroundColor = 'var(--input-bg)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.backgroundColor = 'transparent';
-                                    }}
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <td
-                                            key={cell.id}
-                                            className={`px-4 whitespace-nowrap ${densityClass}`}
-                                        >
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </td>
-                                    ))}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                                    );
+                                })}
+                            </tr>
+                        ))}
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                        {table.getRowModel().rows.map((row) => (
+                            <tr
+                                key={row.id}
+                                className="hover:bg-gray-50 transition-colors"
+                            >
+                                {row.getVisibleCells().map((cell) => (
+                                    <td
+                                        key={cell.id}
+                                        className={`px-4 text-text ${densityClass}`}
+                                    >
+                                        {flexRender(
+                                            cell.column.columnDef.cell,
+                                            cell.getContext()
+                                        )}
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
         </div>
     );

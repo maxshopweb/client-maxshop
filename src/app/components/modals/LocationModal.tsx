@@ -67,7 +67,7 @@ export default function LocationModal({
   };
 
   // Función para confirmar selección
-  const handleConfirmar = () => {
+  const handleConfirmar = (handleClose: () => void) => {
     setError("");
     
     if (modoBusqueda === "codigo") {
@@ -91,7 +91,7 @@ export default function LocationModal({
       onLocationSelect(selectedProvincia, selectedCiudad, nombreCompleto);
     }
     
-    onClose();
+    handleClose();
   };
 
   return (
@@ -100,6 +100,25 @@ export default function LocationModal({
       onClose={onClose}
       title="Seleccionar ubicación"
       maxWidth="max-w-lg"
+      actions={(handleClose) => (
+        <>
+          <button
+            onClick={handleClose}
+            className="flex-1 px-4 py-3 rounded-lg border-2 border-input/70 text-foreground font-medium hover:bg-input/20 transition-all duration-200"
+            style={{
+              borderColor: 'var(--input)',
+            }}
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={() => handleConfirmar(handleClose)}
+            className="flex-1 px-4 py-3 rounded-lg bg-principal text-white font-medium hover:bg-principal/90 transition-all duration-200"
+          >
+            Confirmar
+          </button>
+        </>
+      )}
     >
       <div className="space-y-6">
         {/* Tabs para cambiar modo de búsqueda */}
@@ -213,25 +232,6 @@ export default function LocationModal({
             <p className="text-sm text-red-500">{error}</p>
           </div>
         )}
-
-        {/* Botones de acción */}
-        <div className="flex gap-3 pt-4">
-          <button
-            onClick={onClose}
-            className="flex-1 px-4 py-3 rounded-lg border-2 border-input/70 text-foreground font-medium hover:bg-input/20 transition-all duration-200"
-            style={{
-              borderColor: 'var(--input)',
-            }}
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleConfirmar}
-            className="flex-1 px-4 py-3 rounded-lg bg-principal text-white font-medium hover:bg-principal/90 transition-all duration-200"
-          >
-            Confirmar
-          </button>
-        </div>
       </div>
     </SimpleModal>
   );

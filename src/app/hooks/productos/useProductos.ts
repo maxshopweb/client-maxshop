@@ -19,6 +19,8 @@ interface UseProductosOptions {
     filters?: IProductoFilters;
     enabled?: boolean; // Para controlar cuando se ejecuta la query
     keepPreviousData?: boolean; // Para mantener datos mientras carga nuevos
+    filterByImage?: boolean; // Filtrar productos sin imagen (solo para tienda, NO admin)
+    useTiendaEndpoint?: boolean; // Usar endpoint específico de tienda (marca 051 con imágenes)
 }
 
 export function useProductos(options: UseProductosOptions = {}) {
@@ -26,17 +28,24 @@ export function useProductos(options: UseProductosOptions = {}) {
         filters = {},
         enabled = true,
         keepPreviousData = true,
+        filterByImage = false, // Por defecto NO filtrar (para admin)
+        useTiendaEndpoint = false, // Por defecto usar endpoint normal (admin)
     } = options;
 
     const queryClient = useQueryClient();
 
     const query = useQuery({
-        queryKey: productosKeys.list(filters),
-        queryFn: () => productosService.getAll(filters),
+        queryKey: useTiendaEndpoint 
+            ? [...productosKeys.lists(), 'tienda', filters] 
+            : productosKeys.list(filters),
+        queryFn: () => useTiendaEndpoint 
+            ? productosService.getProductosTienda(filters)
+            : productosService.getAll(filters, filterByImage),
         enabled,
         placeholderData: keepPreviousData ? (previousData) => previousData : undefined,
         staleTime: 1000 * 60 * 5, // 5 minutos
         gcTime: 1000 * 60 * 10, // 10 minutos (antes era cacheTime)
+        refetchOnMount: false, // No refetchear si hay datos en caché
     });
 
     // Helper para invalidar y refetch
@@ -70,6 +79,7 @@ export function useProductos(options: UseProductosOptions = {}) {
             hasNextPage: query.data.page < query.data.totalPages,
             hasPrevPage: query.data.page > 1,
         } : null,
+        priceRange: query.data?.priceRange,
 
         // Estados
         isLoading: query.isLoading,

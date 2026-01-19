@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import {
     useReactTable,
     getCoreRowModel,
@@ -17,6 +18,7 @@ interface VentasTableProps {
     onDelete: (venta: IVenta) => void;
     onView: (venta: IVenta) => void;
     tableState: ReturnType<typeof useVentasTable>;
+    highlightId?: number;
 }
 
 export function VentasTable({
@@ -24,6 +26,7 @@ export function VentasTable({
     onDelete,
     onView,
     tableState,
+    highlightId,
 }: VentasTableProps) {
     // Hooks
     const { filters } = useVentasFilters();
@@ -38,6 +41,7 @@ export function VentasTable({
         setSorting,
         densityClass,
     } = tableState;
+    const highlightRowRef = useRef<HTMLTableRowElement>(null);
 
     // Columnas con acciones
     const columns = getVentasColumns({
@@ -62,6 +66,18 @@ export function VentasTable({
         },
         getRowId: (row) => row.id_venta.toString(),
     });
+
+    // Scroll to highlighted row
+    useEffect(() => {
+        if (highlightId && highlightRowRef.current && !isLoading) {
+            setTimeout(() => {
+                highlightRowRef.current?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center',
+                });
+            }, 100);
+        }
+    }, [highlightId, isLoading]);
 
     if (isLoading) {
         return <TableSkeleton />;
@@ -98,9 +114,12 @@ export function VentasTable({
         <div className="bg-card border border-card rounded-lg shadow-lg overflow-hidden">
             <div className="overflow-x-auto">
                 <table className="w-full">
-                    <thead className="bg-input border-b border-card">
+                    <thead>
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <tr key={headerGroup.id}>
+                            <tr
+                                key={headerGroup.id}
+                                className="border-b border-gray-200 bg-gray-50"
+                            >
                                 {headerGroup.headers.map((header) => {
                                     const canSort = header.column.getCanSort();
                                     const isSorted = header.column.getIsSorted();
@@ -108,16 +127,19 @@ export function VentasTable({
                                     return (
                                         <th
                                             key={header.id}
-                                            className={`px-4 ${densityClass} text-left font-semibold text-input uppercase tracking-wider ${
-                                                canSort ? 'cursor-pointer select-none hover:bg-input/80' : ''
+                                            className={`px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider ${densityClass} ${
+                                                canSort ? 'cursor-pointer select-none hover:bg-gray-100' : ''
                                             }`}
+                                            style={{ width: header.getSize() !== 150 ? header.getSize() : undefined }}
                                             onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
                                         >
                                             <div className="flex items-center gap-2">
-                                                {flexRender(
-                                                    header.column.columnDef.header,
-                                                    header.getContext()
-                                                )}
+                                                {header.isPlaceholder
+                                                    ? null
+                                                    : flexRender(
+                                                          header.column.columnDef.header,
+                                                          header.getContext()
+                                                      )}
                                                 {canSort && (
                                                     <span className="flex flex-col">
                                                         {isSorted === 'asc' ? (
@@ -136,27 +158,40 @@ export function VentasTable({
                             </tr>
                         ))}
                     </thead>
-                    <tbody className="divide-y divide-card">
-                        {table.getRowModel().rows.map((row) => (
-                            <tr
-                                key={row.id}
-                                className={`hover:bg-input/50 transition-colors ${
-                                    row.getIsSelected() ? 'bg-input/30' : ''
-                                }`}
-                            >
-                                {row.getVisibleCells().map((cell) => (
-                                    <td
-                                        key={cell.id}
-                                        className={`px-4 ${densityClass} text-text`}
-                                    >
-                                        {flexRender(
-                                            cell.column.columnDef.cell,
-                                            cell.getContext()
-                                        )}
-                                    </td>
-                                ))}
-                            </tr>
-                        ))}
+                    <tbody className="bg-white divide-y divide-gray-200">
+                        {table.getRowModel().rows.map((row) => {
+                            const isHighlighted = highlightId === row.original.id_venta;
+                            return (
+                                <tr
+                                    key={row.id}
+                                    ref={isHighlighted ? highlightRowRef : null}
+                                    className={`
+                                        hover:bg-gray-50 transition-all duration-300
+                                        ${isHighlighted 
+                                            ? 'bg-principal/10 dark:bg-principal/20 border-l-4 border-principal' 
+                                            : ''
+                                        }
+                                    `}
+                                >
+                                    {row.getVisibleCells().map((cell) => (
+                                        <td
+                                            key={cell.id}
+                                            className={`px-4 text-text ${densityClass} ${isHighlighted ? 'font-medium' : ''}`}
+                                        >
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                            {isHighlighted && cell.column.id === 'id_venta' && (
+                                                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-principal text-white">
+                                                    Nueva
+                                                </span>
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             </div>

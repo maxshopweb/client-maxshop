@@ -17,6 +17,7 @@ interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'onC
     placeholder?: string;
     label?: string;
     error?: string;
+    helperText?: string;
     icon?: LucideIcon;
     iconPosition?: 'left' | 'right';
 }
@@ -31,6 +32,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
         className = "",
         label,
         error,
+        helperText,
         icon: Icon,
         iconPosition = 'left',
         ...props 
@@ -85,7 +87,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
 
                     <select
                         ref={ref}
-                        value={value ?? ''}
+                        value={value != null ? String(value) : ''}
                         onChange={handleChange}
                         disabled={disabled}
                         onMouseDown={() => setIsOpen(!isOpen)}
@@ -131,8 +133,8 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
                         </option>
                         {options.map((option) => (
                             <option 
-                                key={option.value} 
-                                value={option.value}
+                                key={String(option.value)} 
+                                value={String(option.value)}
                                 disabled={option.disabled}
                                 style={{ backgroundColor: 'rgba(255, 255, 255, 1)', color: 'rgb(17, 24, 39)' }}
                             >
@@ -165,6 +167,11 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
                 {displayError && (
                     <span className="text-xs text-error mt-0.5">
                         {displayError}
+                    </span>
+                )}
+                {!displayError && helperText && (
+                    <span className="text-xs text-foreground/60 mt-0.5">
+                        {helperText}
                     </span>
                 )}
             </div>

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { User } from 'firebase/auth';
 import AuthService from './auth.service';
+import EmailValidationService from './emailValidation.service';
 import axiosInstance from '../lib/axios';
 import { auth } from '../lib/firebase.config';
 import { BackendAuthOperationResult, BackendAuthenticatedUser, BackendAuthResponse } from '../types/auth';
@@ -70,7 +71,20 @@ class AuthIntegrationService {
     });
 
     if (!response.data?.success) {
-      throw new Error(response.data?.error ?? 'Error en la sincronización con el backend.');
+      const errorMessage = response.data?.error ?? 'Error en la sincronización con el backend.';
+      console.error(`❌ [postAuthEndpoint] ${path} - success: false`, { error: errorMessage, response: response.data });
+      throw new Error(errorMessage);
+    }
+
+    if (!response.data?.data) {
+      console.error(`❌ [postAuthEndpoint] ${path} - data es undefined`, { response: response.data });
+      throw new Error('El backend no devolvió datos en la respuesta.');
+    }
+
+    // Verificar que data tenga la estructura correcta
+    if (!response.data.data.user) {
+      console.error(`❌ [postAuthEndpoint] ${path} - data.user es undefined`, { data: response.data.data });
+      throw new Error('El backend no devolvió los datos del usuario en la respuesta.');
     }
 
     return {
@@ -299,16 +313,18 @@ class AuthIntegrationService {
 
     try {
       const profilePayload = {
-        nombre: profile.nombre,
-        apellido: profile.apellido ?? null,
-        telefono: profile.telefono ?? null,
-        nacimiento: profile.nacimiento ?? null
+        // NO enviar idToken en el body, solo los datos del perfil
+        // El token se envía en el header Authorization
+        data: {
+          nombre: profile.nombre,
+          apellido: profile.apellido ?? null,
+          telefono: profile.telefono ?? null,
+          nacimiento: profile.nacimiento ?? null
+        }
       };
 
-      const { data: backendResult, message } = await this.postAuthEndpoint('/auth/complete-profile', token, {
-        idToken: token,
-        data: profilePayload
-      });
+      // El token se envía en el header Authorization, NO en el body
+      const { data: backendResult, message } = await this.postAuthEndpoint('/auth/complete-profile', token, profilePayload);
       const usuario = this.mapBackendUserToUsuario(backendResult.user, backendResult.estado);
 
       // Intentar obtener el usuario de Firebase, pero si no está disponible, usar el token que tenemos
@@ -343,6 +359,71 @@ class AuthIntegrationService {
     }
   }
 
+  // SINCRONIZAR DESPUÉS DE VERIFICAR EMAIL: Usa login/token para actualizar estado
+  async syncAfterEmailVerification(): Promise<CombinedAuthResult> {
+    let currentUser = auth.currentUser;
+    if (!currentUser) {
+      return {
+        success: false,
+        data: null,
+        error: 'No hay usuario autenticado.'
+      };
+    }
+
+    try {
+      // Forzar reload del usuario para obtener el estado más reciente
+      console.log('[syncAfterEmailVerification] Recargando usuario de Firebase...');
+      await currentUser.reload();
+      currentUser = auth.currentUser;
+      
+      if (!currentUser) {
+        return {
+          success: false,
+          data: null,
+          error: 'No se pudo recargar el usuario de Firebase.'
+        };
+      }
+
+      // Verificar que el email esté verificado antes de continuar
+      if (!currentUser.emailVerified) {
+        console.warn('[syncAfterEmailVerification] Email no está verificado aún después del reload');
+        return {
+          success: false,
+          data: null,
+          error: 'El email aún no está verificado.'
+        };
+      }
+
+      // Forzar refresh del token para que tenga el estado actualizado de email verificado
+      console.log('[syncAfterEmailVerification] Email verificado, refrescando token...');
+      const token = await currentUser.getIdToken(true);
+      console.log('[syncAfterEmailVerification] Token refrescado, llamando a /auth/login/token');
+      
+      // Usar login/token para actualizar el estado de null a 2
+      const { data: backendResult, message } = await this.postAuthEndpoint('/auth/login/token', token, { idToken: token });
+      console.log('[syncAfterEmailVerification] Respuesta del backend:', { estado: backendResult.estado, user: backendResult.user?.email });
+      const usuario = this.mapBackendUserToUsuario(backendResult.user, backendResult.estado);
+
+      return {
+        success: true,
+        data: {
+          firebaseUser: currentUser,
+          firebaseToken: token,
+          backend: backendResult,
+          usuario
+        },
+        error: null,
+        message: message ?? null
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: null,
+        error: this.extractErrorMessage(error, 'No se pudo sincronizar después de verificar el email.')
+      };
+    }
+  }
+
   // SINCRONIZAR USUARIO ACTUAL
   async syncCurrentUser(): Promise<CombinedAuthResult> {
     const currentUser = auth.currentUser;
@@ -360,7 +441,7 @@ class AuthIntegrationService {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      if (!response.data?.success || !response.data.data.user) {
+      if (!response.data?.success || !response.data?.data?.user) {
         return {
           success: false,
           data: null,
@@ -369,7 +450,8 @@ class AuthIntegrationService {
       }
 
       // Mapear el usuario con el estado del backend (importante preservar el estado)
-      const backendUser = response.data.data.user;
+      // Después de la verificación, sabemos que response.data.data.user existe
+      const backendUser = response.data.data!.user;
       const usuario = this.mapBackendUserToUsuario(backendUser, backendUser.estado ?? null);
 
       return {
@@ -386,13 +468,164 @@ class AuthIntegrationService {
           usuario
         },
         error: null,
-        needsTokenRefresh: response.data.data.needsTokenRefresh ?? false
+        needsTokenRefresh: response.data?.data?.needsTokenRefresh ?? false
       };
     } catch (error) {
       return {
         success: false,
         data: null,
         error: this.extractErrorMessage(error, 'No se pudo sincronizar la sesión.')
+      };
+    }
+  }
+
+  // SIGN IN AS GUEST: Autenticación anónima para checkout
+  async signInAsGuest(guestData: {
+    email: string;
+    nombre: string;
+    apellido?: string;
+    telefono?: string;
+  }): Promise<CombinedAuthResult> {
+    try {
+      // 1. Verificar que el email no exista (o que sea un invitado previo)
+      const emailCheck = await EmailValidationService.checkEmailExists(guestData.email);
+      
+      if (emailCheck.exists && !emailCheck.canLoginAsGuest) {
+        return {
+          success: false,
+          data: null,
+          error: 'Este email ya está registrado. ¿Deseas iniciar sesión?'
+        };
+      }
+
+      // 2. Iniciar sesión anónima en Firebase
+      const firebaseResult = await AuthService.signInAnonymously();
+      if (!firebaseResult.success || !firebaseResult.data) {
+        return {
+          success: false,
+          data: null,
+          error: firebaseResult.error ?? 'No se pudo iniciar sesión como invitado.'
+        };
+      }
+
+      const { user: firebaseUser, token } = firebaseResult.data;
+
+      // 3. Registrar invitado en backend
+      try {
+        const { data: backendResult, message } = await this.postAuthEndpoint('/auth/guest-register', token, {
+          idToken: token,
+          email: guestData.email,
+          nombre: guestData.nombre,
+          apellido: guestData.apellido ?? null,
+          telefono: guestData.telefono ?? null
+        });
+
+        // Verificar que backendResult y backendResult.user existan
+        if (!backendResult) {
+          console.error('❌ [signInAsGuest] backendResult es undefined');
+          throw new Error('El backend no devolvió datos en la respuesta.');
+        }
+
+        if (!backendResult.user) {
+          console.error('❌ [signInAsGuest] backendResult.user es undefined', { backendResult });
+          throw new Error('El backend no devolvió los datos del usuario correctamente.');
+        }
+
+        const usuario = this.mapBackendUserToUsuario(backendResult.user, backendResult.estado);
+
+        return {
+          success: true,
+          data: { firebaseUser, firebaseToken: token, backend: backendResult, usuario },
+          error: null,
+          message: message ?? null
+        };
+      } catch (error) {
+        console.error('❌ [signInAsGuest] Error al registrar invitado:', error);
+        // Si falla el backend, limpiar sesión de Firebase
+        await AuthService.logout();
+        return {
+          success: false,
+          data: null,
+          error: this.extractErrorMessage(error, 'Error al registrar usuario invitado en el backend.')
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        data: null,
+        error: this.extractErrorMessage(error, 'Error al iniciar sesión como invitado.')
+      };
+    }
+  }
+
+  // CONVERT GUEST TO USER: Convertir invitado a usuario permanente
+  async convertGuestToUser(password: string, email: string): Promise<CombinedAuthResult> {
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      return {
+        success: false,
+        data: null,
+        error: 'No hay usuario autenticado.'
+      };
+    }
+
+    try {
+      // 1. Vincular cuenta anónima con email/password usando linkWithCredential
+      const { linkWithCredential, EmailAuthProvider } = await import('firebase/auth');
+      
+      // Crear credencial con email/password
+      const credential = EmailAuthProvider.credential(email, password);
+      
+      // Vincular la cuenta anónima con email/password
+      const linkedCredential = await linkWithCredential(currentUser, credential);
+
+      // 2. Obtener nuevo token después del link
+      const newToken = await linkedCredential.user.getIdToken(true);
+
+      // 3. Convertir en backend
+      try {
+        const { data: backendResult, message } = await this.postAuthEndpoint('/auth/convert-guest', newToken, {
+          idToken: newToken,
+          password,
+          email
+        });
+
+        const usuario = this.mapBackendUserToUsuario(backendResult.user, backendResult.estado);
+
+        return {
+          success: true,
+          data: {
+            firebaseUser: linkedCredential.user,
+            firebaseToken: newToken,
+            backend: backendResult,
+            usuario
+          },
+          error: null,
+          message: message ?? null
+        };
+      } catch (error) {
+        return {
+          success: false,
+          data: null,
+          error: this.extractErrorMessage(error, 'Error al convertir usuario invitado.')
+        };
+      }
+    } catch (error) {
+      const errorMessage = this.extractErrorMessage(error, 'Error al vincular la cuenta con email y contraseña.');
+      
+      // Si el error es que el email ya está en uso, dar mensaje más claro
+      if (errorMessage.includes('email-already-in-use') || errorMessage.includes('already exists')) {
+        return {
+          success: false,
+          data: null,
+          error: 'Este email ya está registrado. Por favor, inicia sesión en su lugar.'
+        };
+      }
+      
+      return {
+        success: false,
+        data: null,
+        error: errorMessage
       };
     }
   }

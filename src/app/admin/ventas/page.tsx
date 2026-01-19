@@ -1,42 +1,35 @@
 'use client';
 
-import { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, RefreshCw, ShoppingCart, DollarSign, TrendingUp, CheckCircle2 } from 'lucide-react';
 import { VentasFilters } from '@/app/components/tables/Ventas/VentasFilters';
 import { VentasTableWrapper } from '@/app/components/tables/Ventas/VentasTableWrapper';
-import type { IVenta } from '@/app/types/ventas.type';
 import { Button } from '@/app/components/ui/Button';
 import { DeleteVentaModal } from '@/app/components/modals/Venta/DeleteVenta';
 import { BulkDeleteVentasModal } from '@/app/components/modals/Venta/BulkDeleteVentasModal';
 import { CreateVentaModal } from '@/app/components/modals/Venta/CreateWrapper';
 import { EditVentaModal } from '@/app/components/modals/Venta/EditWrapper';
 import { ViewVentaModal } from '@/app/components/modals/Venta/ViewVentaModal';
-
-type ModalType = 'create' | 'edit' | 'delete' | 'view' | 'bulk-delete' | null;
-
-interface ModalState {
-    type: ModalType;
-    venta?: IVenta;
-}
+import { useVentasPage } from '@/app/hooks/ventas/useVentasPage';
+import { useVentasStats } from '@/app/hooks/ventas/useVentasStats';
+import { AnimatedStatCard } from '@/app/components/ui/AnimatedStatCard';
+import { formatPrecio } from '@/app/types/ventas.type';
 
 export default function VentasPage() {
-    const [modal, setModal] = useState<ModalState>({ type: null });
-    const [bulkDeleteIds, setBulkDeleteIds] = useState<number[]>([]);
+    const {
+        modal,
+        bulkDeleteIds,
+        highlightId,
+        isFetching,
+        openCreateModal,
+        openEditModal,
+        openDeleteDialog,
+        openViewDialog,
+        openBulkDeleteDialog,
+        closeModal,
+        refetch,
+    } = useVentasPage();
 
-    const openCreateModal = () => setModal({ type: 'create' });
-    const openEditModal = (venta: IVenta) => setModal({ type: 'edit', venta });
-    const openDeleteDialog = (venta: IVenta) => setModal({ type: 'delete', venta });
-    const openViewDialog = (venta: IVenta) => setModal({ type: 'view', venta });
-
-    const closeModal = () => {
-        setModal({ type: null });
-        setBulkDeleteIds([]);
-    };
-
-    const openBulkDeleteDialog = (ids: number[]) => {
-        setBulkDeleteIds(ids);
-        setModal({ type: 'bulk-delete' });
-    };
+    const stats = useVentasStats();
 
     return (
         <div className="min-h-screen">
@@ -50,16 +43,57 @@ export default function VentasPage() {
                             </p>
                         </div>
 
-                        <Button onClick={openCreateModal}>
-                            <Plus className="h-5 w-5" />
-                            Nueva venta
-                        </Button>
+                        <div className="flex items-center gap-3">
+                            <Button
+                                onClick={refetch}
+                                disabled={isFetching}
+                                variant="outline-primary"
+                                className="flex items-center gap-2 justify-center"
+                            >
+                                <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+                                Refrescar
+                            </Button>
+                            <Button onClick={openCreateModal}>
+                                <Plus className="h-5 w-5" />
+                                Nueva venta
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="space-y-6">
+                    {/* Estadísticas */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <AnimatedStatCard
+                            title="Total ventas"
+                            value={stats.totalVentas}
+                            icon={ShoppingCart}
+                            iconColor="text-blue-500"
+                        />
+                        <AnimatedStatCard
+                            title="Total vendido"
+                            value={stats.totalVendido}
+                            icon={DollarSign}
+                            iconColor="text-green-500"
+                            formatValue={(val) => formatPrecio(val)}
+                        />
+                        <AnimatedStatCard
+                            title="Promedio por venta"
+                            value={stats.promedioVenta}
+                            icon={TrendingUp}
+                            iconColor="text-purple-500"
+                            formatValue={(val) => formatPrecio(val)}
+                        />
+                        <AnimatedStatCard
+                            title="Ventas aprobadas"
+                            value={stats.ventasAprobadas}
+                            icon={CheckCircle2}
+                            iconColor="text-green-600"
+                        />
+                    </div>
+
                     <VentasFilters />
 
                     <VentasTableWrapper
@@ -67,6 +101,7 @@ export default function VentasPage() {
                         onDelete={openDeleteDialog}
                         onView={openViewDialog}
                         onBulkDelete={openBulkDeleteDialog}
+                        highlightId={highlightId}
                     />
                 </div>
             </div>

@@ -9,8 +9,8 @@ interface StepIndicatorProps {
 
 export default function StepIndicator({ currentStep, steps }: StepIndicatorProps) {
   return (
-    <div className="bg-card rounded-2xl p-8 shadow-sm">
-      <div className="flex items-center justify-between">
+    <div className="bg-card rounded-2xl p-8 shadow-sm w-full">
+      <div className="flex items-center justify-between w-full mx-auto">
         {steps.map((step, index) => {
           const isCompleted = step.number < currentStep;
           const isCurrent = step.number === currentStep;
@@ -19,7 +19,7 @@ export default function StepIndicator({ currentStep, steps }: StepIndicatorProps
           return (
             <div key={step.number} className="flex items-center flex-1">
               {/* Step Circle */}
-              <div className="flex flex-col items-center flex-1 relative">
+              <div className="flex flex-col items-center flex-1 relative w-full">
                 <div
                   className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-base transition-all duration-300 ${
                     isCompleted
@@ -51,7 +51,7 @@ export default function StepIndicator({ currentStep, steps }: StepIndicatorProps
               {/* Connector Line */}
               {index < steps.length - 1 && (
                 <div
-                  className={`h-1 flex-1 mx-4 rounded-full transition-all duration-300 ${
+                  className={`h-1 flex-1 mx-2 md:mx-4 rounded-full transition-all duration-300 ${
                     isCompleted ? "bg-principal" : "bg-input/50"
                   }`}
                 />

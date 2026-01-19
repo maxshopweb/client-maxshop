@@ -26,7 +26,6 @@ export function CreateProductoModal({ onClose }: CreateProductoModalProps) {
 
     const { createProducto, isCreating } = useCreateProducto({
         onSuccess: (data) => {
-            console.log('✅ Producto creado exitosamente:', data);
             form.reset();
             onClose();
         },
@@ -38,26 +37,21 @@ export function CreateProductoModal({ onClose }: CreateProductoModalProps) {
     const validateStepOne = async () => {
         const fields = ['codi_arti', 'nombre'];
         const isValid = await form.trigger(fields as any);
-        console.log('Step 1 validation:', isValid);
         return isValid;
     };
 
     const validateStepTwo = async () => {
         const fields = ['precio', 'stock'];
         const isValid = await form.trigger(fields as any);
-        console.log('Step 2 validation:', isValid);
         return isValid;
     };
 
     const handleComplete = async () => {
-        console.log('🚀 handleComplete iniciado');
 
         // Validar todo el formulario
         const isValid = await form.trigger();
-        console.log('Formulario válido:', isValid);
 
         if (!isValid) {
-            console.log('Errores de validación:', form.formState.errors);
             return;
         }
 
@@ -98,8 +92,6 @@ export function CreateProductoModal({ onClose }: CreateProductoModalProps) {
             id_iva: rawData.id_iva ? Number(rawData.id_iva) : undefined,
         };
 
-        console.log('📦 Datos del formulario:', data);
-        console.log('🔄 Llamando a createProducto...');
 
         // Ejecutar la mutación
         createProducto(data);

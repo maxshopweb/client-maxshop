@@ -5,7 +5,6 @@ import { Download } from "lucide-react";
 export default function TitleSection() {
   const handleDownloadCatalog = () => {
     // Por ahora no hace nada
-    console.log("Descargar catálogo");
   };
 
   return (

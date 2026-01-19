@@ -194,8 +194,21 @@ export function useClientesFilters() {
         [filters.order_by, filters.order, setFilter, setFilters]
     );
 
+    // Construir filtros finales: solo incluir busqueda si tiene valor
+    const finalFilters = useMemo(() => {
+        const result = { ...filters };
+        // Solo incluir busqueda si tiene valor (no string vacío)
+        if (localBusqueda && localBusqueda.trim()) {
+            result.busqueda = localBusqueda;
+        } else {
+            // Si no hay búsqueda, asegurarse de que no esté en los filtros
+            delete result.busqueda;
+        }
+        return result;
+    }, [filters, localBusqueda]);
+
     return {
-        filters: { ...filters, busqueda: localBusqueda }, // Retornar búsqueda local para el input
+        filters: finalFilters,
         setFilter,
         setFilters,
         clearFilters,
@@ -206,6 +219,8 @@ export function useClientesFilters() {
         prevPage,
         goToPage,
         setSort,
+        // También retornar localBusqueda para el input
+        localBusqueda,
     };
 }
 

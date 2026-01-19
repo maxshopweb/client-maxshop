@@ -1,11 +1,12 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Edit, Trash2, Star, Package } from 'lucide-react';
+import { MoreHorizontal, Edit, Trash2, Star } from 'lucide-react';
 import * as Checkbox from '@radix-ui/react-checkbox';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { Check } from 'lucide-react';
 import type { IProductos } from '@/app/types/producto.type';
 import { formatearPrecio, getStockInfo } from '@/app/utils/producto.utils';
 import { EstadoGeneral } from '@/app/types/estados.type';
+import ProductImage from '../shared/ProductImage';
 
 interface ProductosTableActions {
     onEdit: (producto: IProductos) => void;
@@ -58,15 +59,7 @@ export const getProductosColumns = (
 
                 return (
                     <div className="w-12 h-12 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center">
-                        {imagen ? (
-                            <img
-                                src={imagen}
-                                alt={nombre}
-                                className="w-full h-full object-cover"
-                            />
-                        ) : (
-                            <Package className="w-6 h-6 text-gray-400" />
-                        )}
+                    <ProductImage imgPrincipal={imagen} nombre={nombre} />
                     </div>
                 );
             },
@@ -94,9 +87,9 @@ export const getProductosColumns = (
                     <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
                             <span className="font-medium text-text">{nombre}</span>
-                            {destacado && (
+                            {/* {destacado && (
                                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                            )}
+                            )} */}
                         </div>
                         {sku && (
                             <span className="text-xs text-gray-400">SKU: {sku}</span>

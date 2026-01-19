@@ -1,14 +1,14 @@
 import { UseFormReturn } from 'react-hook-form';
-import { motion } from 'framer-motion';
-import Input from '@/app/components/ui/Input';
 import Select from '@/app/components/ui/Select';
 import { Combobox } from '@/app/components/ui/Combobox';
 import Textarea from '@/app/components/ui/Textarea';
-import MercadoPagoLogo from '@/app/components/icons/MercadoPagoLogo';
-import { CreditCard, ShoppingCart, FileText, Banknote, Smartphone, User } from 'lucide-react';
+import { ShoppingCart, FileText, User } from 'lucide-react';
 import type { CreateVentaData } from '@/app/schemas/venta.schema';
 import { TIPO_VENTA_OPTIONS } from '@/app/types/ventas.type';
 import { useClientes } from '@/app/hooks/clientes/useClientes';
+import { MetodoPagoEfectivo } from './MetodoPagoEfectivo';
+import { MetodoPagoTransferencia } from './MetodoPagoTransferencia';
+import { MetodoPagoMercadoPago } from './MetodoPagoMercadoPago';
 
 interface StepOneProps {
     form: UseFormReturn<CreateVentaData>;
@@ -65,41 +65,10 @@ export function StepOneVentaInfo({ form }: StepOneProps) {
                 </label>
 
                 {/* Botón Mercado Pago */}
-                <motion.button
-                    type="button"
+                <MetodoPagoMercadoPago
+                    isSelected={watch('metodo_pago') === 'mercadopago'}
                     onClick={() => form.setValue('metodo_pago', 'mercadopago' as any)}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className={`w-full p-4 rounded-xl border-2 transition-all duration-300 ${
-                        watch('metodo_pago') === 'mercadopago'
-                            ? 'border-principal bg-principal/10'
-                            : 'border-input/50 bg-white hover:border-principal/50'
-                    }`}
-                    style={{
-                        boxShadow: watch('metodo_pago') === 'mercadopago'
-                            ? "0 4px 12px rgba(var(--principal-rgb), 0.2)"
-                            : "0 2px 8px rgba(0,0,0,0.08)",
-                    }}
-                >
-                    <div className="flex items-center justify-center gap-3">
-                        <div 
-                            className="w-6 h-6"
-                            style={{ color: watch('metodo_pago') === 'mercadopago' ? "var(--principal)" : "var(--foreground)" }}
-                        >
-                            <MercadoPagoLogo className="w-full h-full" />
-                        </div>
-                        <span 
-                            className="text-base font-semibold"
-                            style={{ 
-                                color: watch('metodo_pago') === 'mercadopago' 
-                                    ? "var(--principal)" 
-                                    : "var(--foreground)" 
-                            }}
-                        >
-                            Mercado Pago
-                        </span>
-                    </div>
-                </motion.button>
+                />
 
                 {/* Separador */}
                 <div className="relative my-4">
@@ -112,78 +81,15 @@ export function StepOneVentaInfo({ form }: StepOneProps) {
                 </div>
 
                 {/* Botones Efectivo y Transferencia */}
-                <div className="grid grid-cols-2 gap-3">
-                    {/* Botón Efectivo */}
-                    <motion.button
-                        type="button"
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <MetodoPagoEfectivo
+                        isSelected={watch('metodo_pago') === 'efectivo'}
                         onClick={() => form.setValue('metodo_pago', 'efectivo' as any)}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className={`p-4 rounded-xl border-2 transition-all duration-300 ${
-                            watch('metodo_pago') === 'efectivo'
-                                ? 'border-principal bg-principal/10'
-                                : 'border-input/50 bg-white hover:border-principal/50'
-                        }`}
-                        style={{
-                            boxShadow: watch('metodo_pago') === 'efectivo'
-                                ? "0 4px 12px rgba(var(--principal-rgb), 0.2)"
-                                : "0 2px 8px rgba(0,0,0,0.08)",
-                        }}
-                    >
-                        <div className="flex flex-col items-center gap-2">
-                            <Banknote 
-                                className={`w-6 h-6 ${
-                                    watch('metodo_pago') === 'efectivo' ? 'text-principal' : 'text-foreground/60'
-                                }`}
-                            />
-                            <span 
-                                className="text-sm font-semibold"
-                                style={{ 
-                                    color: watch('metodo_pago') === 'efectivo' 
-                                        ? "var(--principal)" 
-                                        : "var(--foreground)" 
-                                }}
-                            >
-                                Efectivo
-                            </span>
-                        </div>
-                    </motion.button>
-
-                    {/* Botón Transferencia */}
-                    <motion.button
-                        type="button"
+                    />
+                    <MetodoPagoTransferencia
+                        isSelected={watch('metodo_pago') === 'transferencia'}
                         onClick={() => form.setValue('metodo_pago', 'transferencia' as any)}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className={`p-4 rounded-xl border-2 transition-all duration-300 ${
-                            watch('metodo_pago') === 'transferencia'
-                                ? 'border-principal bg-principal/10'
-                                : 'border-input/50 bg-white hover:border-principal/50'
-                        }`}
-                        style={{
-                            boxShadow: watch('metodo_pago') === 'transferencia'
-                                ? "0 4px 12px rgba(var(--principal-rgb), 0.2)"
-                                : "0 2px 8px rgba(0,0,0,0.08)",
-                        }}
-                    >
-                        <div className="flex flex-col items-center gap-2">
-                            <Smartphone 
-                                className={`w-6 h-6 ${
-                                    watch('metodo_pago') === 'transferencia' ? 'text-principal' : 'text-foreground/60'
-                                }`}
-                            />
-                            <span 
-                                className="text-sm font-semibold"
-                                style={{ 
-                                    color: watch('metodo_pago') === 'transferencia' 
-                                        ? "var(--principal)" 
-                                        : "var(--foreground)" 
-                                }}
-                            >
-                                Transferencia
-                            </span>
-                        </div>
-                    </motion.button>
+                    />
                 </div>
             </div>
 

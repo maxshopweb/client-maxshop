@@ -57,7 +57,8 @@ export interface IProductoFilters {
     order?: 'asc' | 'desc';
 
     // Filtros básicos
-    estado?: EstadoGeneral;
+    estado?: EstadoGeneral; // Solo para admin ver activos/inactivos (1 o 2, nunca 0)
+    activo?: string; // Filtro por publicar/despublicar: "A" = publicado, "I" = despublicado
     busqueda?: string;
 
     // Filtros por relaciones - acepta códigos o IDs
@@ -134,6 +135,10 @@ export interface IPaginatedResponse<T = any> {
     page: number;
     limit: number;
     totalPages: number;
+    priceRange?: {
+        min: number;
+        max: number;
+    };
 }
 
 // =======================================

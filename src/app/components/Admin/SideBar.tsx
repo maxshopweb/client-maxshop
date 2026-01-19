@@ -15,13 +15,12 @@ import {
     LogOut,
     ShoppingCart
 } from "lucide-react";
-import { useTheme } from "@/app/context/ThemeProvider";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Image from "next/image";
 import Logo from "../ui/Logo";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { useNotificationsStore } from "@/app/stores/notificationsStore";
 
 interface NavItem {
     icon: React.ElementType;
@@ -42,12 +41,9 @@ export default function Sidebar() {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const { user, logout } = useAuth();
     const router = useRouter();
-    const { theme, setTheme, actualTheme } = useTheme();
     const pathname = usePathname();
-
-    const toggleTheme = () => {
-        setTheme(theme === 'light' ? 'dark' : 'light');
-    };
+    const unreadCount = useNotificationsStore((state) => state.unreadCount());
+    const hasNewSales = unreadCount > 0;
 
     const handleLogout = async () => {
         await logout();
@@ -131,6 +127,53 @@ export default function Sidebar() {
                 {navItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = pathname === item.path;
+                    const isDisabled = item.path === '/admin/eventos';
+
+                    // Mostrar badge solo en "Ventas" si hay nuevas ventas
+                    const showBadge = item.path === '/admin/ventas' && hasNewSales;
+
+                    // Si está deshabilitado, renderizar como div en lugar de Link
+                    if (isDisabled) {
+                        return (
+                            <div
+                                key={item.path}
+                                className={`
+                                    flex items-center gap-3 px-3 py-3 rounded-xl
+                                    transition-all duration-300
+                                    relative overflow-hidden
+                                    ${isCollapsed ? 'justify-center' : 'justify-between'}
+                                    cursor-not-allowed
+                                    opacity-60
+                                `}
+                                style={{
+                                    backgroundColor: 'rgba(var(--foreground-rgb), 0.03)',
+                                    color: 'rgba(var(--foreground-rgb), 0.5)',
+                                }}
+                                title="Próximamente"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="relative z-10 flex-shrink-0">
+                                        <Icon size={20} />
+                                    </div>
+                                    {!isCollapsed && (
+                                        <div className="flex flex-col">
+                                            <span className="relative z-10 font-medium text-sm">
+                                                {item.label}
+                                            </span>
+                                            <span
+                                                className="text-xs font-normal italic"
+                                                style={{
+                                                    color: 'rgba(var(--foreground-rgb), 0.4)',
+                                                }}
+                                            >
+                                                Próximamente
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    }
 
                     return (
                         <Link
@@ -171,7 +214,18 @@ export default function Sidebar() {
                                 }
                             }}
                         >
-                            <Icon size={20} className="relative z-10 flex-shrink-0" />
+                            <div className="relative z-10 flex-shrink-0">
+                                <Icon size={20} />
+                                {showBadge && (
+                                    <span
+                                        className="absolute -top-1 -right-1 w-3 h-3 rounded-full animate-pulse"
+                                        style={{
+                                            backgroundColor: '#ef4444',
+                                            boxShadow: '0 0 0 2px var(--background)',
+                                        }}
+                                    />
+                                )}
+                            </div>
                             {!isCollapsed && (
                                 <span className="relative z-10 font-medium text-sm">
                                     {item.label}
@@ -260,7 +314,7 @@ export default function Sidebar() {
                 </button>
 
                 {/* Theme Switch */}
-                <button
+                {/* <button
                     onClick={toggleTheme}
                     className={`
                         w-full flex items-center gap-3 px-3 py-2.5 rounded-xl
@@ -319,7 +373,7 @@ export default function Sidebar() {
                             }}
                         />
                     </div>
-                </button>
+                </button> */}
 
                 {/* Version Info */}
                 {!isCollapsed && (

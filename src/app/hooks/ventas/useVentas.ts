@@ -43,6 +43,11 @@ export function useVentas(options: UseVentasOptions = {}) {
     const refetch = () => {
         return queryClient.invalidateQueries({
             queryKey: ventasKeys.lists(),
+        }).then(() => {
+            // También invalidar estadísticas cuando se refrescan las ventas
+            return queryClient.invalidateQueries({
+                queryKey: [...ventasKeys.all, 'stats'],
+            });
         });
     };
 

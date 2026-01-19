@@ -12,12 +12,14 @@ interface VentasTableWrapperProps {
     onDelete: (venta: IVenta) => void;
     onView: (venta: IVenta) => void;
     onBulkDelete: (ids: number[]) => void;
+    highlightId?: number;
 }
 
 export function VentasTableWrapper(props: VentasTableWrapperProps) {
     const { filters } = useVentasFilters();
     const { pagination } = useVentas({ filters });
     const tableState = useVentasTable();
+    const { highlightId, ...tableProps } = props;
 
     return (
         <div className="space-y-4">
@@ -30,8 +32,9 @@ export function VentasTableWrapper(props: VentasTableWrapperProps) {
             )}
 
             <VentasTable
-                {...props}
+                {...tableProps}
                 tableState={tableState}
+                highlightId={highlightId}
             />
 
             {pagination && <VentasPagination pagination={pagination} />}

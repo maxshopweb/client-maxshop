@@ -25,7 +25,6 @@ export function CreateVentaModal({ onClose }: CreateVentaModalProps) {
 
     const { createVenta, isCreating } = useCreateVenta({
         onSuccess: (data) => {
-            console.log('✅ Venta creada exitosamente:', data);
             form.reset();
             onClose();
         },
@@ -49,7 +48,6 @@ export function CreateVentaModal({ onClose }: CreateVentaModalProps) {
     const handleComplete = async () => {
         const isValid = await form.trigger();
         if (!isValid) {
-            console.log('Errores de validación:', form.formState.errors);
             return;
         }
 
@@ -70,7 +68,6 @@ export function CreateVentaModal({ onClose }: CreateVentaModalProps) {
             })),
         };
 
-        console.log('📦 Datos de la venta:', data);
         createVenta(data);
     };
 

@@ -6,6 +6,8 @@ export function useGrupos() {
     queryKey: ['grupos'],
     queryFn: () => grupoService.getAll(),
     staleTime: 1000 * 60 * 10, // 10 minutos
+    refetchOnMount: false, // No refetchear si hay datos en caché
+    refetchOnWindowFocus: false, // No refetchear al enfocar ventana
   });
 }
 

@@ -66,6 +66,15 @@ export interface IEnvios {
     fecha_envio?: Date | null;
     fecha_entrega?: Date | null;
     observaciones?: string | null;
+    // Códigos de seguimiento (agregados en el servicio)
+    codigoTracking?: string | null;
+    numeroSeguimiento?: string | null;
+    // URLs de consulta (agregadas en el servicio)
+    consultaUrl?: string | null;
+    trackingUrl?: string | null;
+    preEnvioUrl?: string | null;
+    envioUrl?: string | null;
+    trazasUrl?: string | null;
     // Relaciones
     venta?: IVenta | null;
 }

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Fredoka } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/app/context/ThemeProvider";
 import { Providers } from "@/app/context/Providers";
 import { Toaster } from "sonner";
 import { AuthProvider } from "./context/AuthContext";
@@ -137,12 +136,10 @@ export default function RootLayout({
       </head>
       <body className={`${fredoka.variable} antialiased`}>
         <Providers>
-          <ThemeProvider>
-            <AuthProvider>
-              {children}
-            </AuthProvider>
-            <Toaster />
-          </ThemeProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+          <Toaster />
         </Providers>
       </body>
     </html>

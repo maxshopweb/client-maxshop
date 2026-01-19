@@ -114,9 +114,54 @@ export const getVentasColumns = (
             cell: ({ row }) => {
                 const metodo = row.getValue('metodo_pago') as string | null;
                 const option = METODO_PAGO_OPTIONS.find(opt => opt.value === metodo);
+                
+                if (!metodo) {
+                    return <span className="text-gray-400">-</span>;
+                }
+
+                // Determinar el color según el método de pago
+                let backgroundColor: string;
+                let borderColor: string;
+                let textColor: string;
+                let boxShadow: string;
+
+                switch (metodo) {
+                    case 'efectivo':
+                        backgroundColor = 'rgba(var(--efectivo-rgb), 0.15)';
+                        borderColor = 'var(--efectivo)';
+                        textColor = 'var(--efectivo)';
+                        boxShadow = '0 2px 4px rgba(var(--efectivo-rgb), 0.1)';
+                        break;
+                    case 'transferencia':
+                        backgroundColor = 'rgba(var(--principal-rgb), 0.15)';
+                        borderColor = 'var(--principal)';
+                        textColor = 'var(--principal)';
+                        boxShadow = '0 2px 4px rgba(var(--principal-rgb), 0.1)';
+                        break;
+                    case 'mercadopago':
+                        backgroundColor = 'rgba(var(--mercadopago-rgb), 0.15)';
+                        borderColor = 'var(--mercadopago)';
+                        textColor = 'var(--mercadopago)';
+                        boxShadow = '0 2px 4px rgba(var(--mercadopago-rgb), 0.1)';
+                        break;
+                    default:
+                        backgroundColor = 'rgba(var(--secundario-rgb), 0.1)';
+                        borderColor = 'rgba(var(--secundario-rgb), 0.3)';
+                        textColor = 'var(--foreground)';
+                        boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
+                }
+
                 return (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-text border border-input-border">
-                        {option?.label || metodo || '-'}
+                    <span 
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border"
+                        style={{
+                            backgroundColor,
+                            borderColor,
+                            color: textColor,
+                            boxShadow,
+                        }}
+                    >
+                        {option?.label || metodo}
                     </span>
                 );
             },

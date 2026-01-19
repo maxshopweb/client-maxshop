@@ -18,12 +18,21 @@ import { type IUsuario, type UserRole } from '../types/user';
 import { syncAuthCookies, clearAuthCookies } from '../utils/cookies';
 import { toast } from 'sonner';
 
+type GuestData = {
+  email: string;
+  nombre: string;
+  apellido?: string;
+  telefono?: string;
+};
+
 type AuthContextValue = {
   user: IUsuario | null;
   firebaseUser: User | null;
   role: UserRole | null;
   token: string | null;
   isAuthenticated: boolean;
+  isGuest: boolean;
+  guestEmail: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; estado?: number | null; message?: string }>;
   loginWithGoogle: () => Promise<{ success: boolean; estado?: number | null; message?: string }>;
@@ -31,9 +40,11 @@ type AuthContextValue = {
   registerWithGoogle: () => Promise<{ success: boolean; message?: string; estado?: number | null }>;
   completeProfile: (profile: RegisterProfileInput) => Promise<{ success: boolean; message?: string }>;
   forgotPassword: (email: string) => Promise<boolean>;
-  logout: () => Promise<boolean>;
+  logout: (silent?: boolean) => Promise<boolean>;
   resendEmailVerification: () => Promise<boolean>;
   resetPassword: (oobCode: string, newPassword: string) => Promise<{ success: boolean; message: string | null }>;
+  signInAsGuest: (guestData: GuestData) => Promise<{ success: boolean; message?: string }>;
+  convertGuestToUser: (password: string, email: string) => Promise<{ success: boolean; message?: string }>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -55,6 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     let isInitialLoad = true;
     let lastSyncedUid: string | null = null;
+    let lastEmailVerified: boolean | null = null;
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setLoading(true);
@@ -64,17 +76,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await user.reload();
           setFirebaseUser(user);
 
-          // Si el usuario ya está en el store y es el mismo, no sobrescribir
+          // Obtener usuario del store para verificar estado
           const currentUsuario = useAuthStore.getState().usuario;
-          if (currentUsuario && currentUsuario.uid === user.uid && lastSyncedUid === user.uid) {
-            // Ya está sincronizado, solo actualizar firebaseUser
+          
+          // Detectar si el email se acaba de verificar o necesita actualización de estado
+          // 1. Si cambió de false a true (detectado por lastEmailVerified)
+          // 2. Si el email está verificado pero el estado en el store es 1 o null (no se ha actualizado)
+          const emailChangedToVerified = user.emailVerified && lastEmailVerified === false;
+          const needsStateUpdate = user.emailVerified && (currentUsuario?.estado === 1 || currentUsuario?.estado === null);
+          const emailJustVerified = emailChangedToVerified || needsStateUpdate;
+          
+          // Actualizar lastEmailVerified
+          if (lastEmailVerified === null) {
+            lastEmailVerified = user.emailVerified;
+          } else if (lastEmailVerified !== user.emailVerified) {
+            lastEmailVerified = user.emailVerified;
+          }
+
+          // Si el usuario ya está en el store y es el mismo, y el email no se acaba de verificar, no sobrescribir
+          if (currentUsuario && currentUsuario.uid === user.uid && lastSyncedUid === user.uid && !emailJustVerified) {
+            // Ya está sincronizado y no hay cambios, solo actualizar firebaseUser
             setLoading(false);
             return;
           }
 
-          // Sincronizar con backend solo si el email está verificado
-          if (user.emailVerified) {
-            const syncResult = await AuthIntegrationService.syncCurrentUser();
+          // Para usuarios anónimos (invitados), sincronizar sin verificar email
+          const isAnonymous = !user.email || user.isAnonymous;
+          
+          // Sincronizar con backend si el email está verificado O si es usuario anónimo (invitado)
+          if (user.emailVerified || isAnonymous) {
+            let syncResult;
+            if (emailJustVerified && !isAnonymous) {
+              // Email se acaba de verificar o necesita actualización de estado, usar syncAfterEmailVerification
+              console.log('📧 [AuthContext] Email verificado detectado, actualizando estado a 2', { 
+                emailChangedToVerified, 
+                needsStateUpdate,
+                currentEstado: currentUsuario?.estado 
+              });
+              syncResult = await AuthIntegrationService.syncAfterEmailVerification();
+            } else {
+              // Email ya estaba verificado o es anónimo, solo sincronizar
+              syncResult = await AuthIntegrationService.syncCurrentUser();
+            }
+            
             if (syncResult.success && syncResult.data && syncResult.data.usuario) {
               // Preservar el estado si ya existe en el store y el nuevo no lo tiene
               const existingEstado = currentUsuario?.estado;
@@ -110,7 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               }
             }
           } else {
-            // Email no verificado, no sincronizar con backend
+            // Email no verificado y no es anónimo, no sincronizar con backend
             // Pero mantener el usuario si ya está en el store
             if (!currentUsuario || currentUsuario.uid !== user.uid) {
               logoutStore();
@@ -131,24 +175,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } else {
         // No hay usuario de Firebase
-        // Verificar si hay usuario en el store antes de limpiar (puede ser una redirección temporal)
+        // IMPORTANTE: Si hay token en el store, NO limpiar NUNCA
+        // El token en el store significa que el usuario está autenticado
+        // Firebase puede no tener usuario temporalmente durante sincronización
         const currentUsuario = useAuthStore.getState().usuario;
         const currentToken = useAuthStore.getState().token;
         
-        // Si hay usuario y token en el store, mantenerlo (puede ser una redirección del middleware)
-        if (currentUsuario && currentToken) {
-          // No limpiar, solo actualizar firebaseUser
+        // Si hay token en el store, mantener TODO (usuario, token, cookies)
+        // NO limpiar aunque Firebase no tenga usuario
+        if (currentToken) {
+          // Mantener el estado del store, solo actualizar firebaseUser
           setFirebaseUser(null);
           setLoading(false);
           return;
         }
         
-        // Solo limpiar si realmente no hay usuario en el store
-        logoutStore();
-        clearAuthCookies();
-        setFirebaseUser(null);
-        setRole(null);
-        lastSyncedUid = null;
+        // Solo limpiar si NO hay token en el store (usuario realmente deslogueado)
+        if (!currentToken && !currentUsuario) {
+          console.warn('⚠️ [AuthContext] Limpiando estado - No hay token ni usuario en store');
+          logoutStore();
+          clearAuthCookies();
+          setFirebaseUser(null);
+          setRole(null);
+          lastSyncedUid = null;
+        } else {
+          // Hay usuario pero no token - mantener usuario pero no limpiar
+          setFirebaseUser(null);
+          setLoading(false);
+        }
       }
 
       isInitialLoad = false;
@@ -162,7 +216,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     const result = await AuthIntegrationService.login(email, password);
 
-    if (result.success && result.data) {
+    if (result.success && result.data && result.data.usuario) {
       loginStore(result.data.firebaseToken, result.data.usuario);
       setFirebaseUser(result.data.firebaseUser);
       setRole(result.data.usuario.rol);
@@ -187,7 +241,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     const result = await AuthIntegrationService.loginWithGoogle();
 
-    if (result.success && result.data) {
+    if (result.success && result.data && result.data.usuario) {
       // Guardar en store primero
       loginStore(result.data.firebaseToken, result.data.usuario);
       setFirebaseUser(result.data.firebaseUser);
@@ -217,8 +271,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const result = await AuthIntegrationService.register(email, password);
 
     if (result.success && result.data) {
-      // No hacer login completo aún, el email debe ser verificado primero
+      // Guardar token y usuario en el store INMEDIATAMENTE después del registro
+      // Esto es necesario para que el guard no redirija al login
+      // El email aún no está verificado, pero el usuario está registrado
+      loginStore(result.data.firebaseToken, result.data.usuario);
       setFirebaseUser(result.data.firebaseUser);
+      setRole(result.data.usuario.rol);
+      // No sincronizar cookies aún porque el email no está verificado
+      // Las cookies se sincronizarán cuando se verifique el email
       setLoading(false);
       return {
         success: true,
@@ -233,13 +293,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       message: result.error ?? undefined,
       estado: null
     };
-  }, []);
+  }, [loginStore]);
 
   const registerWithGoogle = useCallback(async () => {
     setLoading(true);
     const result = await AuthIntegrationService.registerWithGoogle();
 
-    if (result.success && result.data) {
+    if (result.success && result.data && result.data.usuario) {
       // Google ya verifica el email, así que hacer login completo
       loginStore(result.data.firebaseToken, result.data.usuario);
       setFirebaseUser(result.data.firebaseUser);
@@ -267,7 +327,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const storeToken = useAuthStore.getState().token;
     const result = await AuthIntegrationService.completeProfile(profile, storeToken || token);
 
-    if (result.success && result.data) {
+    if (result.success && result.data && result.data.usuario) {
       // Actualizar el store con el nuevo estado (estado 3 = perfil completo)
       loginStore(result.data.firebaseToken, result.data.usuario);
       
@@ -303,7 +363,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return result.success;
   }, []);
 
-  const logout = useCallback(async () => {
+  const logout = useCallback(async (silent: boolean = false) => {
     setLoading(true);
     
     try {
@@ -318,7 +378,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setRole(null);
       
       setLoading(false);
-      toast.success('Sesión cerrada correctamente');
+      
+      // Solo mostrar toast si no es silencioso (para usuarios invitados después del checkout)
+      if (!silent) {
+        toast.success('Sesión cerrada correctamente');
+      }
+      
+      // SIEMPRE redirigir a / después del logout
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
+      
       return result.success;
     } catch (error) {
       // Aunque haya error, limpiar el estado local
@@ -328,6 +398,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setFirebaseUser(null);
       setRole(null);
       setLoading(false);
+      
+      // SIEMPRE redirigir a / después del logout, incluso si hay error
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
+      
       return false;
     }
   }, [logoutStore]);
@@ -342,6 +418,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { success: result.success, message: result.error };
   }, []);
 
+  const signInAsGuest = useCallback(async (guestData: GuestData) => {
+    setLoading(true);
+    const result = await AuthIntegrationService.signInAsGuest(guestData);
+
+    if (result.success && result.data && result.data.usuario) {
+      loginStore(result.data.firebaseToken, result.data.usuario);
+      setFirebaseUser(result.data.firebaseUser);
+      setRole(result.data.usuario.rol);
+      await syncAuthCookies(result.data.firebaseToken, result.data.usuario.rol, result.data.usuario.estado);
+      setLoading(false);
+      return {
+        success: true,
+        message: result.message ?? undefined
+      };
+    }
+
+    setLoading(false);
+    return {
+      success: false,
+      message: result.error ?? undefined
+    };
+  }, [loginStore]);
+
+  const convertGuestToUser = useCallback(async (password: string, email: string) => {
+    setLoading(true);
+    const result = await AuthIntegrationService.convertGuestToUser(password, email);
+
+    if (result.success && result.data && result.data.usuario) {
+      loginStore(result.data.firebaseToken, result.data.usuario);
+      setFirebaseUser(result.data.firebaseUser);
+      setRole(result.data.usuario.rol);
+      await syncAuthCookies(result.data.firebaseToken, result.data.usuario.rol, result.data.usuario.estado);
+      setLoading(false);
+      toast.success('Cuenta convertida exitosamente');
+      return {
+        success: true,
+        message: result.message ?? undefined
+      };
+    }
+
+    setLoading(false);
+    return {
+      success: false,
+      message: result.error ?? undefined
+    };
+  }, [loginStore]);
+
+  // Determinar si es invitado (estado 1 = invitado)
+  const isGuest = useMemo(() => usuario?.estado === 1, [usuario]);
+  const guestEmail = useMemo(() => {
+    // Para invitados, el email puede estar en email_temporal
+    // Por ahora, usamos el email del usuario si existe
+    return isGuest ? (usuario?.email ?? null) : null;
+  }, [usuario, isGuest]);
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user: usuario,
@@ -349,6 +480,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       role,
       token,
       isAuthenticated,
+      isGuest,
+      guestEmail,
       loading,
       login,
       loginWithGoogle,
@@ -358,7 +491,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       forgotPassword,
       logout,
       resendEmailVerification,
-      resetPassword
+      resetPassword,
+      signInAsGuest,
+      convertGuestToUser
     }),
     [
       usuario,
@@ -366,6 +501,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       role,
       token,
       isAuthenticated,
+      isGuest,
+      guestEmail,
       loading,
       login,
       loginWithGoogle,
@@ -375,7 +512,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       forgotPassword,
       logout,
       resendEmailVerification,
-      resetPassword
+      resetPassword,
+      signInAsGuest,
+      convertGuestToUser
     ]
   );
 

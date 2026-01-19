@@ -32,12 +32,21 @@ export function useClientes(options: UseClientesOptions = {}) {
 
     const query = useQuery({
         queryKey: clientesKeys.list(filters),
-        queryFn: () => clientesService.getAll(filters),
+        queryFn: () => {
+            if (process.env.NODE_ENV === 'development') {
+            }
+            return clientesService.getAll(filters);
+        },
         enabled,
         placeholderData: keepPreviousData ? (previousData) => previousData : undefined,
         staleTime: 1000 * 60 * 5, // 5 minutos
         gcTime: 1000 * 60 * 10, // 10 minutos
+        retry: 1,
     });
+
+    // Debug logs
+    if (process.env.NODE_ENV === 'development') {
+    }
 
     // Helper para invalidar y refetch
     const refetch = () => {

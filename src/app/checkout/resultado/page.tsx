@@ -1,15 +1,31 @@
 "use client";
 
-import { Suspense } from "react";
-import { useCheckoutResult } from "../hooks/useCheckoutResult";
-import CheckoutResultContainer from "../components/resultado/CheckoutResultContainer";
+import { Suspense, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useCheckoutResult } from "../../hooks/checkout/useCheckoutResult";
+import CheckoutResultContainer from "../../components/checkout/CheckoutResultContainer";
 import { motion } from "framer-motion";
 
 export const dynamic = 'force-dynamic';
 
 // Componente interno que usa useSearchParams
 function CheckoutResultContent() {
+  const router = useRouter();
   const result = useCheckoutResult();
+
+  // Validar acceso: solo verificar que hay id_venta o está en estado de procesamiento
+  useEffect(() => {
+    // Si no hay id_venta y no está en estado de procesamiento, redirigir
+    // (acceso inválido o página recargada sin contexto)
+    if (!result.id_venta && result.status !== 'processing') {
+      router.push('/checkout');
+    }
+  }, [result.id_venta, result.status, router]);
+
+  // Si no hay datos válidos, no renderizar (o mostrar loading)
+  if (!result.id_venta && result.status !== 'processing') {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -19,7 +35,7 @@ function CheckoutResultContent() {
         style={{ backgroundColor: "var(--secundario)" }}
       >
         <div className="container mx-auto px-4 max-w-4xl">
-          <h1 className="text-2xl font-bold text-white">Resultado del Pedido</h1>
+          <h1 className="text-2xl font-bold text-white">Resultado del pedido</h1>
         </div>
       </div>
 

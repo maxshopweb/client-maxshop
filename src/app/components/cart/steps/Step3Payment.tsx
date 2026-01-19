@@ -3,14 +3,14 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/app/stores/cartStore";
+import { useCheckoutStore } from "@/app/hooks/checkout/useCheckoutStore";
 import { IDatosPago } from "@/app/types/cart.type";
 import { cartFormsConfig } from "@/app/config/cartForms.config";
-import Input from "@/app/components/ui/Input";
 import Select from "@/app/components/ui/Select";
 import { Button } from "@/app/components/ui/Button";
 import CartSummary from "../CartSummary";
 import MercadoPagoLogo from "@/app/components/icons/MercadoPagoLogo";
-import { CreditCard, Wallet, Banknote, Smartphone } from "lucide-react";
+import { CreditCard, Wallet, Banknote, Smartphone, ArrowLeft } from "lucide-react";
 
 const paymentIcons = {
   efectivo: Banknote,
@@ -22,6 +22,7 @@ const paymentIcons = {
 export default function Step3Payment() {
   const router = useRouter();
   const { checkoutState, setDatosPago } = useCartStore();
+  const { setCurrentStep } = useCheckoutStore();
   const [formData, setFormData] = useState<Partial<IDatosPago>>(
     checkoutState.datosPago || { metodo: 'efectivo' }
   );
@@ -99,7 +100,6 @@ export default function Step3Payment() {
     try {
       // TODO: Integrar con Mercado Pago SDK
       // Por ahora, simular redirección
-      console.log("Iniciando pago con Mercado Pago...");
       // Aquí iría la lógica de Mercado Pago
       // router.push(mercadoPagoUrl);
     } catch (error) {
@@ -136,11 +136,19 @@ export default function Step3Payment() {
       <div className="lg:col-span-2">
         <div className="bg-card rounded-xl p-8 space-y-6 shadow-sm">
           {/* Header con icono */}
-          <div className="flex items-center gap-3 mb-6 pb-6 border-b border-input/30">
-            <PaymentIcon className="w-6 h-6 text-principal" />
-            <h3 className="text-xl font-semibold text-foreground">
-              Método de pago
-            </h3>
+          <div className="flex items-center gap-4 mb-6">
+            <button
+              onClick={() => setCurrentStep(3)}
+              className="p-2 hover:bg-foreground/5 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div className="flex items-center gap-3 pb-6 border-b flex-1">
+              <PaymentIcon className="w-6 h-6 text-principal" />
+              <h3 className="text-xl font-semibold text-foreground/90">
+                Método de pago
+              </h3>
+            </div>
           </div>
 
           {/* Botón de Mercado Pago */}
@@ -156,8 +164,8 @@ export default function Step3Payment() {
               }}
             >
               <div className="flex items-center justify-center gap-3">
-                <MercadoPagoLogo className="w-8 h-8" style={{ color: "var(--principal)" }} />
-                <span className="text-lg font-semibold" style={{ color: "var(--principal)" }}>
+                <MercadoPagoLogo className="w-8 h-8 text-principal" />
+                <span className="text-lg font-semibold text-principal">
                   Pagar con Mercado Pago
                 </span>
               </div>
@@ -182,7 +190,7 @@ export default function Step3Payment() {
               if (field.type === 'select') {
                 return (
                   <div key={field.name} className="space-y-2">
-                    <label className="block text-sm font-semibold text-foreground">
+                    <label className="block text-sm font-semibold text-foreground/90">
                       {field.label}
                       {field.required && <span className="text-principal ml-1">*</span>}
                     </label>
@@ -202,7 +210,7 @@ export default function Step3Payment() {
               if (field.type === 'file') {
                 return (
                   <div key={field.name} className="space-y-2">
-                    <label className="block text-sm font-semibold text-foreground">
+                    <label className="block text-sm font-semibold text-foreground/90">
                       {field.label}
                       {field.required && <span className="text-principal ml-1">*</span>}
                     </label>
@@ -272,7 +280,7 @@ export default function Step3Payment() {
 
           {/* Botones de confirmación para efectivo y transferencia */}
           {(formData.metodo === 'efectivo' || formData.metodo === 'transferencia') && (
-            <div className="mt-6 pt-6 border-t" style={{ borderColor: "rgba(23, 28, 53, 0.1)" }}>
+            <div className="mt-6 pt-6 border-t">
               <Button
                 variant="primary"
                 size="lg"
@@ -281,7 +289,7 @@ export default function Step3Payment() {
                 disabled={isProcessing || !formData.metodo}
                 className="rounded-lg"
               >
-                {isProcessing ? "Procesando..." : `Confirmar Pedido - ${formData.metodo === 'efectivo' ? 'Efectivo' : 'Transferencia'}`}
+                {isProcessing ? "Procesando..." : `Confirmar pedido - ${formData.metodo === 'efectivo' ? 'Efectivo' : 'Transferencia'}`}
               </Button>
               <p className="text-xs text-foreground/60 mt-2 text-center">
                 {formData.metodo === 'transferencia' 
@@ -290,6 +298,20 @@ export default function Step3Payment() {
               </p>
             </div>
           )}
+
+          {/* Botón Volver - Siempre visible */}
+          <div className="pt-4 flex gap-4">
+            <Button
+              type="button"
+              variant="outline-primary"
+              size="lg"
+              onClick={() => setCurrentStep(3)}
+              className="rounded-lg flex-1"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Volver
+            </Button>
+          </div>
         </div>
       </div>
 

@@ -1,10 +1,14 @@
 import { z } from 'zod';
 
 const optionalNumberField = z
-  .union([z.string(), z.number()])
-  .optional()
+  .preprocess((val) => {
+    // Si el valor es NaN, string vacío, null o undefined, retornar undefined
+    if (val === undefined || val === null || val === '') return undefined;
+    if (typeof val === 'number' && isNaN(val)) return undefined;
+    return val;
+  }, z.union([z.string(), z.number()]).optional())
   .transform((val) => {
-    if (!val || val === '') return undefined;
+    if (val === undefined || val === null || val === '') return undefined;
     const num = Number(val);
     return isNaN(num) ? undefined : num;
   });

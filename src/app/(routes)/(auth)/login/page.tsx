@@ -1,232 +1,175 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '@/app/context/AuthContext';
 import AuthLayout from '@/app/components/layouts/authLayout';
 import Input from '@/app/components/ui/Input';
 import { Button } from '@/app/components/ui/Button';
-import { toast } from 'sonner';
 import LogoGoogle from '@/app/components/icons/LogoGoogle';
-import { loginSchema, emailSchema } from '@/app/schemas/auth.schema';
-import { Mail, Lock } from 'lucide-react';
-import { getUserRole } from '@/app/utils/cookies';
+import { emailSchema } from '@/app/schemas/auth.schema';
+import { Mail, Lock, ChevronDown, ArrowRight, User } from 'lucide-react';
+import { useLogin } from '@/app/hooks/auth/useLogin';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Hacer la página dinámica para evitar prerender
 export const dynamic = 'force-dynamic';
 
-// Componente interno que usa useSearchParams
 function LoginContent() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-    
-    const { login, loginWithGoogle, isAuthenticated, role, user } = useAuth();
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const redirect = searchParams.get('redirect');
+    const {
+        email,
+        password,
+        loading,
+        errors,
+        handleSubmit,
+        handleGoogleLogin,
+        handleEmailChange,
+        handlePasswordChange,
+    } = useLogin();
 
-    // Redirigir si ya está autenticado (solo si no está en proceso de login)
-    useEffect(() => {
-        if (isAuthenticated && !loading) {
-            // Si el estado es 2, redirigir a completar perfil
-            if (user?.estado === 2) {
-                router.replace('/register/complete-perfil');
-                return;
-            }
-            
-            // Leer el role de las cookies directamente (más confiable que el contexto)
-            const userRole = getUserRole();
-            console.log(userRole);
-            // Si el estado es 3 o no hay estado, redirigir según rol
-            // if (redirect) {
-            //     router.push(redirect);
-            // } else {
-            //     router.push(userRole === 'ADMIN' ? '/admin/home' : '/');
-            // }
-
-            router.push(userRole === 'ADMIN' ? '/admin' : '/');
-        }
-    }, [isAuthenticated, user, redirect, router, loading]);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setErrors({});
-
-        try {
-            const result = loginSchema.safeParse({ email, password });
-            if (!result.success) {
-                const fieldErrors: typeof errors = {};
-                result.error.issues.forEach((err) => {
-                    const path = err.path[0] as keyof typeof fieldErrors;
-                    if (path) fieldErrors[path] = err.message;
-                });
-                setErrors(fieldErrors);
-                setLoading(false);
-                return;
-            }
-
-            const loginResult = await login(email, password);
-            if (loginResult.success) {
-                toast.success(loginResult.message || '¡Bienvenido de nuevo!');
-                
-                // Estado 2 = perfil incompleto -> completar perfil
-                if (loginResult.estado === 2) {
-                    // Las cookies ya están guardadas, usar router
-                    router.replace('/register/complete-perfil');
-                    return;
-                }
-                
-                // Esperar un momento para que las cookies se guarden
-                await new Promise(resolve => setTimeout(resolve, 300));
-                
-                // Leer el role de las cookies directamente (más confiable que el contexto)
-                const userRole = getUserRole();
-                
-                // Estado 3 = perfil completo -> redirigir según rol
-                if (redirect) {
-                    router.push(redirect);
-                } else {
-                    router.push(userRole === 'ADMIN' ? '/admin' : '/');
-                }
-            } else {
-                toast.error(loginResult.message || 'Error al iniciar sesión. Verifica tus credenciales.');
-            }
-        } catch (error: any) {
-            toast.error(error?.message || 'Error al iniciar sesión');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleGoogleLogin = async () => {
-        setLoading(true);
-        try {
-            const result = await loginWithGoogle();
-            if (result.success) {
-                toast.success(result.message || '¡Bienvenido!');
-                
-                // Estado 2 = perfil incompleto -> completar perfil
-                if (result.estado === 2) {
-                    // Las cookies ya están guardadas, usar router para evitar recarga completa
-                    router.replace('/register/complete-perfil');
-                    return;
-                }
-                
-                // Esperar un momento para que las cookies se guarden
-                await new Promise(resolve => setTimeout(resolve, 300));
-                
-                // Leer el role de las cookies directamente (más confiable que el contexto)
-                const userRole = getUserRole();
-                
-                // Estado 3 = perfil completo -> redirigir según rol
-                if (redirect) {
-                    router.push(redirect);
-                } else {
-                    router.push(userRole === 'ADMIN' ? '/admin' : '/');
-                }
-            } else {
-                toast.error(result.message || 'Error al iniciar sesión con Google');
-            }
-        } catch (error: any) {
-            toast.error(error?.message || 'Error al iniciar sesión con Google');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setEmail(value);
-        if (errors.email) {
-            const result = emailSchema.safeParse(value);
-            if (result.success) {
-                setErrors((prev) => ({ ...prev, email: undefined }));
-            } else {
-                setErrors((prev) => ({ ...prev, email: result.error.issues[0]?.message }));
-            }
-        }
-    };
-
-    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setPassword(value);
-        if (errors.password && value) {
-            setErrors((prev) => ({ ...prev, password: undefined }));
-        }
-    };
+    const [isEmailExpanded, setIsEmailExpanded] = useState(false);
 
     return (
-        <AuthLayout title="Iniciar sesión" subtitle="Bienvenido a MaxShop – Accede a tu cuenta">
-            <div className="flex flex-col gap-3 sm:gap-4 md:gap-5">
-                <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:gap-4 md:gap-4">
-                    <div className="flex flex-col gap-3 sm:gap-4 md:gap-4">
-                        <Input
-                            id="email"
-                            type="email"
-                            label="Tu email"
-                            value={email}
-                            onChange={handleEmailChange}
-                            placeholder="tu@email.com"
-                            required
-                            disabled={loading}
-                            error={errors.email}
-                            schema={emailSchema}
-                            icon={Mail}
-                        />
-
-                        <Input
-                            id="password"
-                            type="password"
-                            label="Contraseña"
-                            value={password}
-                            onChange={handlePasswordChange}
-                            placeholder="••••••••"
-                            required
-                            disabled={loading}
-                            error={errors.password}
-                            icon={Lock}
-                        />
-                    </div>
-
-                    <div className="flex justify-end mt-1 sm:mt-2">
-                        <Link href="/forgot-password" className="text-sm sm:text-sm text-orange-600 hover:text-orange-700 font-medium">
-                            ¿Olvidaste tu contraseña?
-                        </Link>
-                    </div>
-
-                    <Button type="submit" variant="primary" size="md" fullWidth disabled={loading} className="text-sm sm:text-base">
-                        {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
-                    </Button>
-
-                    <div className="relative flex items-center gap-2 sm:gap-2 py-2 sm:py-2.5">
-                        <div className="flex-1 border-t border-gray-300"></div>
-                        <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap px-1">O continúa con</span>
-                        <div className="flex-1 border-t border-gray-300"></div>
-                    </div>
-
-                    <Button
-                        type="button"
-                        variant="outline-primary"
-                        size="sm"
-                        fullWidth
-                        onClick={handleGoogleLogin}
-                        disabled={loading}
-                        className="text-[var(--principal)] hover:text-[var(--principal)]/80 hover:bg-[var(--principal)]/10 rounded-md text-sm sm:text-base"
+        <AuthLayout title="¡Hola de nuevo!" subtitle="Elige cómo quieres iniciar sesión">
+            <div className="flex flex-col h-full justify-between w-full">
+                <div className="flex flex-col gap-6 flex-1 justify-center">
+                    {/* 1. Primary CTA: Google Login */}
+                    <motion.div
+                        initial={{ y: 0, opacity: 1 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        className="w-full px-1"
                     >
-                        <LogoGoogle />
-                    </Button>
-                </form>
+                        <Button
+                            type="button"
+                            variant="white-primary"
+                            size="lg"
+                            fullWidth
+                            onClick={handleGoogleLogin}
+                            disabled={loading}
+                            className="relative group h-14 sm:h-16 text-base sm:text-lg shadow-sm border border-gray-200 hover:border-orange-200 hover:bg-orange-50/50 transition-all duration-300"
+                        >
+                            <div className="absolute left-4 sm:left-6 flex items-center justify-center bg-white p-1 rounded-full shadow-sm">
+                                <LogoGoogle />
+                            </div>
+                            <span className="text-gray-700 font-semibold group-hover:text-orange-700 transition-colors pl-8">
+                                Continuar con Google
+                            </span>
+                        </Button>
+                    </motion.div>
 
-                <p className="text-center text-gray-600 text-sm sm:text-sm mt-2 sm:mt-3 px-2">
-                    ¿No tienes cuenta?{' '}
-                    <Link href="/register" className="text-orange-600 hover:text-orange-700 font-semibold">
-                        Regístrate
-                    </Link>
-                </p>
+                    {/* Separator / Divider */}
+                    <div className="relative flex items-center gap-4 py-4 opacity-60 flex-shrink-0">
+                        <div className="flex-1 border-t border-gray-200"></div>
+                        <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">o</span>
+                        <div className="flex-1 border-t border-gray-200"></div>
+                    </div>
+
+                    {/* 2. Secondary Option: Email Login */}
+                    <AnimatePresence mode="wait">
+                    {!isEmailExpanded ? (
+                        <motion.button
+                            key="expand-btn"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
+                            onClick={() => setIsEmailExpanded(true)}
+                            className="w-full py-4 flex items-center justify-between px-6 rounded-2xl border border-gray-200 hover:border-orange-300 hover:shadow-md hover:bg-white bg-gray-50/50 transition-all duration-300 group text-left cursor-pointer"
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 group-hover:scale-110 transition-transform">
+                                    <Mail size={20} />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="font-semibold text-gray-800">Continuar con email</span>
+                                    <span className="text-xs text-gray-500">Ingresa tu correo y contraseña</span>
+                                </div>
+                            </div>
+                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm text-gray-400 group-hover:text-orange-500 transition-colors">
+                                <ArrowRight size={16} />
+                            </div>
+                        </motion.button>
+                    ) : (
+                        <motion.form
+                            key="email-form"
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3, ease: 'easeOut' }}
+                            onSubmit={handleSubmit}
+                            className="flex flex-col gap-6"
+                        >
+                            <div className="flex flex-col gap-5">
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    label="Tu correo electrónico"
+                                    value={email}
+                                    onChange={handleEmailChange}
+                                    placeholder="ejemplo@correo.com"
+                                    required
+                                    disabled={loading}
+                                    error={errors.email}
+                                    schema={emailSchema}
+                                    icon={Mail}
+                                />
+
+                                <div>
+                                    <Input
+                                        id="password"
+                                        type="password"
+                                        label="Contraseña"
+                                        value={password}
+                                        onChange={handlePasswordChange}
+                                        placeholder="••••••••"
+                                        required
+                                        disabled={loading}
+                                        error={errors.password}
+                                        icon={Lock}
+                                    />
+                                    <div className="flex justify-end mt-2">
+                                        <Link
+                                            href="/forgot-password"
+                                            className="text-xs font-medium text-gray-500 hover:text-orange-600 transition-colors"
+                                        >
+                                            ¿Olvidaste tu contraseña?
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="pt-5 flex flex-col gap-4 px-1">
+                                <Button
+                                    type="submit"
+                                    variant="primary"
+                                    size="lg"
+                                    fullWidth
+                                    disabled={loading}
+                                    className="h-12 shadow-lg shadow-orange-500/20"
+                                >
+                                    {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+                                </Button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setIsEmailExpanded(false)}
+                                    className="text-sm text-gray-400 hover:text-gray-600 font-medium py-2 text-center transition-colors"
+                                >
+                                    Cancelar
+                                </button>
+                            </div>
+                        </motion.form>
+                    )}
+                    </AnimatePresence>
+                </div>
+
+                {/* Footer Links */}
+                <div className="text-center flex-shrink-0 py-6">
+                    <p className="text-sm text-gray-600">
+                        ¿Aún no tienes cuenta?{' '}
+                        <Link href="/register" className="font-semibold text-orange-600 hover:text-orange-700 hover:underline transition-all">
+                            Regístrate gratis
+                        </Link>
+                    </p>
+                </div>
             </div>
         </AuthLayout>
     );
@@ -236,9 +179,9 @@ function LoginContent() {
 export default function LoginPage() {
     return (
         <Suspense fallback={
-            <AuthLayout title="Iniciar sesión" subtitle="Cargando...">
-                <div className="flex justify-center items-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
+            <AuthLayout title="Iniciando..." subtitle="Por favor espere">
+                <div className="flex justify-center items-center py-12">
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-600"></div>
                 </div>
             </AuthLayout>
         }>

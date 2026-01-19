@@ -6,6 +6,11 @@
   --terciario: #0e1023;
   --white: #ffffff;
   --azul: #2563eb;
+  
+  /* Colores métodos de pago */
+  --efectivo: #22c55e;
+  --transferencia: var(--principal);
+  --mercadopago: #009EE3;
 
   /* RGB para opacidades */
   --principal-rgb: 232, 138, 66;
@@ -13,11 +18,13 @@
   --terciario-rgb: 14, 16, 35;
   --white-rgb: 255, 255, 255;
   --azul-rgb: 37, 99, 235;
+  --efectivo-rgb: 34, 197, 94;
+  --mercadopago-rgb: 0, 158, 227;
 
   /* Modo claro (default) */
   --background: var(--white);
-  --foreground: var(--terciario);
-  --foreground-rgb: var(--terciario-rgb);
+  --foreground: #1e1f20;
+  --foreground-rgb: 30, 31, 32;
   --text: var(--secundario);
   
   /* Componentes UI - Modo Claro */
@@ -91,8 +98,8 @@
 
 .light {
   --background: var(--white);
-  --foreground: var(--terciario);
-  --foreground-rgb: var(--terciario-rgb);
+  --foreground: #1e1f20;
+  --foreground-rgb: 30, 31, 32;
   --text: var(--secundario);
   
   --card-bg: rgba(var(--white-rgb), 0.6);

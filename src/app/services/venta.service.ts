@@ -122,6 +122,40 @@ class VentasService {
     return this.getAll({ ...filters, id_usuario: idUsuario });
   }
 
+  async getStats(filters: IVentaFilters = {}): Promise<{
+    totalVentas: number;
+    totalVendido: number;
+    promedioVenta: number;
+    ventasAprobadas: number;
+  }> {
+    const params = new URLSearchParams();
+
+    if (filters.busqueda) params.append('busqueda', filters.busqueda);
+    if (filters.id_cliente) params.append('id_cliente', filters.id_cliente);
+    if (filters.id_usuario) params.append('id_usuario', filters.id_usuario);
+    if (filters.fecha_desde) params.append('fecha_desde', filters.fecha_desde);
+    if (filters.fecha_hasta) params.append('fecha_hasta', filters.fecha_hasta);
+    if (filters.estado_pago) params.append('estado_pago', filters.estado_pago);
+    if (filters.estado_envio) params.append('estado_envio', filters.estado_envio);
+    if (filters.metodo_pago) params.append('metodo_pago', filters.metodo_pago);
+    if (filters.tipo_venta) params.append('tipo_venta', filters.tipo_venta);
+    if (filters.total_min !== undefined) params.append('total_min', filters.total_min.toString());
+    if (filters.total_max !== undefined) params.append('total_max', filters.total_max.toString());
+
+    const response = await axiosInstance.get<IApiResponse<{
+      totalVentas: number;
+      totalVendido: number;
+      promedioVenta: number;
+      ventasAprobadas: number;
+    }>>(`/ventas/stats?${params.toString()}`);
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.error || 'Error al obtener estadísticas');
+    }
+
+    return response.data.data;
+  }
+
   /**
    * Crea un pedido desde el checkout
    * Endpoint específico para el flujo de checkout
@@ -136,14 +170,31 @@ class VentasService {
       descuento_aplicado?: number;
     }>;
     observaciones?: string;
+    costo_envio?: number; // Costo del envío calculado
+    id_direccion?: string; // ID de dirección guardada (opcional)
+    // Datos de dirección para actualizar el cliente (si no se usa id_direccion)
+    direccion?: {
+      direccion?: string;
+      altura?: string;
+      piso?: string;
+      dpto?: string;
+      ciudad?: string;
+      provincia?: string;
+      cod_postal?: number | null;
+      telefono?: string;
+    };
   }): Promise<IVenta> {
     const response = await axiosInstance.post<IApiResponse<IVenta>>(
       '/ventas/checkout',
       data
     );
 
-    if (!response.data.success || !response.data.data) {
+    if (!response.data.success) {
       throw new Error(response.data.error || 'Error al crear pedido');
+    }
+
+    if (!response.data.data) {
+      throw new Error('El pedido se creó exitosamente pero no se recibieron los datos de la venta');
     }
 
     return response.data.data;

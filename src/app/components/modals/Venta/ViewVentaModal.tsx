@@ -1,4 +1,4 @@
-import { Package, DollarSign, User, Truck, CreditCard, FileText } from 'lucide-react';
+import { Package, DollarSign, User, Truck, CreditCard, FileText, ExternalLink, Search } from 'lucide-react';
 import type { IVenta } from '@/app/types/ventas.type';
 import { formatPrecio, formatFecha, getEstadoPagoColor, getEstadoEnvioColor } from '@/app/types/ventas.type';
 import { ESTADO_PAGO_OPTIONS, ESTADO_ENVIO_OPTIONS, METODO_PAGO_OPTIONS, TIPO_VENTA_OPTIONS } from '@/app/types/ventas.type';
@@ -45,7 +45,7 @@ export function ViewVentaModal({ venta, onClose, isOpen }: ViewVentaModalProps) 
                             </div>
                             <div>
                                 <h2 className="text-2xl font-bold text-foreground">
-                                    Detalles de Venta #{venta.id_venta}
+                                    Detalles de venta #{venta.id_venta}
                                 </h2>
                                 <p className="text-sm text-foreground/60 mt-1">
                                     {formatFecha(venta.fecha)}
@@ -232,18 +232,54 @@ export function ViewVentaModal({ venta, onClose, isOpen }: ViewVentaModalProps) 
                                 <Truck className="w-4 h-4 text-foreground/60" />
                                 <h3 className="text-sm font-semibold text-foreground/60 uppercase">Información de envío</h3>
                             </div>
-                            <div className="mt-2 space-y-1 text-sm">
+                            <div className="mt-2 space-y-2 text-sm">
                                 {venta.envio.empresa_envio && (
                                     <p className="text-foreground">
                                         <span className="text-foreground/60">Empresa: </span>
                                         {venta.envio.empresa_envio}
                                     </p>
                                 )}
-                                {venta.envio.cod_seguimiento && (
+                                {venta.envio.estado_envio && (
                                     <p className="text-foreground">
-                                        <span className="text-foreground/60">Código de seguimiento: </span>
-                                        {venta.envio.cod_seguimiento}
+                                        <span className="text-foreground/60">Estado del envío: </span>
+                                        <span className={`font-medium capitalize ${getEstadoEnvioColor(venta.envio.estado_envio) === 'green' ? 'text-green-600' : getEstadoEnvioColor(venta.envio.estado_envio) === 'yellow' ? 'text-yellow-600' : 'text-foreground'}`}>
+                                            {venta.envio.estado_envio.replace('_', ' ')}
+                                        </span>
                                     </p>
+                                )}
+                                {venta.envio.cod_seguimiento && (
+                                    <div className="space-y-1">
+                                        <p className="text-foreground">
+                                            <span className="text-foreground/60">Código de seguimiento: </span>
+                                            <span className="font-mono font-semibold">{venta.envio.cod_seguimiento}</span>
+                                        </p>
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                            {venta.envio.consultaUrl && (
+                                                <a
+                                                    href={venta.envio.consultaUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-principal/10 hover:bg-principal/20 text-principal rounded-md text-xs font-medium transition-colors"
+                                                >
+                                                    <Search className="w-3.5 h-3.5" />
+                                                    Consultar Estado
+                                                    <ExternalLink className="w-3 h-3" />
+                                                </a>
+                                            )}
+                                            {venta.envio.trackingUrl && (
+                                                <a
+                                                    href={venta.envio.trackingUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 rounded-md text-xs font-medium transition-colors"
+                                                >
+                                                    <Truck className="w-3.5 h-3.5" />
+                                                    Ver Tracking
+                                                    <ExternalLink className="w-3 h-3" />
+                                                </a>
+                                            )}
+                                        </div>
+                                    </div>
                                 )}
                                 {venta.envio.direccion_envio && (
                                     <p className="text-foreground">

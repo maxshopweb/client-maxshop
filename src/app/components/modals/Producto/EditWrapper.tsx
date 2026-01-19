@@ -37,8 +37,8 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
             id_cat: producto.id_cat?.toString() || '',
             id_subcat: producto.id_subcat?.toString() || '',
             id_marca: producto.id_marca?.toString() || '',
-            destacado: producto.destacado || false,
-            financiacion: producto.financiacion || false,
+            destacado: producto.destacado === true || producto.destacado === 1,
+            financiacion: producto.financiacion === true || producto.financiacion === 1,
             precio: producto.precio || 0,
             precio_mayorista: producto.precio_mayorista || undefined,
             precio_minorista: producto.precio_minorista || undefined,
@@ -78,10 +78,8 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
 
     const handleComplete = async () => {
         const isValid = await form.trigger();
-        console.log(isValid);
 
         if (!isValid) {
-            console.log('Errores de validación:', form.formState.errors);
             return;
         }
 
@@ -123,7 +121,6 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
             id_iva: rawData.id_iva ? Number(rawData.id_iva) : undefined,
         };
 
-        console.log('📦 Datos transformados:', data);
 
         // Ejecutar la mutación de actualización
         updateProducto({

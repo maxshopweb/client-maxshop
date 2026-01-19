@@ -1,6 +1,6 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { getAuthToken } from '../utils/cookies';
-import { refreshFirebaseToken, isTokenExpiredError, isTokenNearExpiry, isTokenExpired } from '../utils/tokenRefresh';
+import { refreshFirebaseToken, isTokenExpiredError } from '../utils/tokenRefresh';
 
 // Determinar la URL base según el entorno
 const getBaseURL = (): string => {
@@ -22,12 +22,33 @@ const axiosInstance = axios.create({
   },
 });
 
+// Endpoints públicos que no requieren autenticación
+const PUBLIC_ENDPOINTS = [
+  '/auth/check-email',
+  '/auth/login',
+  '/auth/register',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+  '/auth/verify-email',
+];
+
+// Verifica si un endpoint es público (no requiere token)
+const isPublicEndpoint = (url: string | undefined): boolean => {
+  if (!url) return false;
+  return PUBLIC_ENDPOINTS.some(endpoint => url.includes(endpoint));
+};
+
 // Interceptor para agregar token en cada request
 axiosInstance.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     if (typeof window !== 'undefined') {
+      const currentPath = window.location.pathname;
+      const requestUrl = config.url || '';
+      const isPublic = isPublicEndpoint(requestUrl);
+      
       // Intentar obtener token de las cookies primero
       let token = getAuthToken();
+      let tokenSource = 'cookies';
       
       // Si no hay token en cookies, intentar obtenerlo del store de Zustand como respaldo
       if (!token) {
@@ -36,6 +57,7 @@ axiosInstance.interceptors.request.use(
           const storeToken = useAuthStore.getState().token;
           if (storeToken) {
             token = storeToken;
+            tokenSource = 'store';
             // Intentar guardar en cookies para futuras peticiones
             const { setAuthToken } = require('../utils/cookies');
             setAuthToken(storeToken);
@@ -46,34 +68,62 @@ axiosInstance.interceptors.request.use(
         }
       }
       
-      // Si hay token, verificar si está próximo a expirar o ya expiró y refrescarlo
-      if (token) {
-        const needsRefresh = isTokenNearExpiry(token);
-        const alreadyExpired = isTokenExpired(token);
+      // Verificar si ya hay un header de Authorization establecido (por ejemplo, por los servicios)
+      const hasExistingAuthHeader = config.headers?.Authorization;
+      
+      // Logs detallados para debugging solo en rutas específicas, endpoints no públicos, y cuando no hay header ya establecido
+      if (!isPublic && !hasExistingAuthHeader && (currentPath.startsWith('/mi-cuenta') || currentPath.startsWith('/checkout'))) {
+        // Verificar también el store para comparar
+        let storeToken = null;
+        try {
+          const { useAuthStore } = require('../stores/userStore');
+          storeToken = useAuthStore.getState().token;
+        } catch (e) {
+          // Ignorar
+        }
         
-        if (needsRefresh || alreadyExpired) {
-          try {
-            console.log(`🔄 [Axios] Token ${alreadyExpired ? 'expirado' : 'próximo a expirar'}, refrescando...`);
-            
-            // Refrescar el token
-            const newToken = await refreshFirebaseToken();
-            if (newToken) {
-              token = newToken;
-              console.log('✅ [Axios] Token refrescado exitosamente');
-            } else {
-              console.warn('⚠️ [Axios] No se pudo obtener nuevo token');
-            }
-          } catch (error) {
-            // Si falla el refresh, usar el token actual (aunque esté expirado)
-            // El interceptor de respuesta lo manejará
-            console.warn('⚠️ [Axios] Error al refrescar el token:', error);
-          }
+        
+        // Si no hay token pero hay en el store, intentar sincronizar
+        if (!token && storeToken) {
+          console.warn('⚠️ [Axios] Token no encontrado en cookies pero sí en store - sincronizando...');
+          const { setAuthToken } = require('../utils/cookies');
+          setAuthToken(storeToken);
+          token = storeToken;
+          tokenSource = 'store (sincronizado)';
         }
       }
       
-      if (token && config.headers) {
+      // NO refrescar el token preventivamente en el interceptor de request
+      // Esto causa problemas porque:
+      // 1. Puede detectar incorrectamente que el token está expirado
+      // 2. Genera múltiples refreshes simultáneos
+      // 3. Ralentiza cada request innecesariamente
+      // 
+      // En su lugar, solo refrescar cuando realmente falle (401 en el interceptor de response)
+      // Esto es más seguro y eficiente
+      
+      // Solo agregar token si existe, el endpoint no es público, y no hay header ya establecido
+      if (token && config.headers && !isPublic && !hasExistingAuthHeader) {
         config.headers.Authorization = `Bearer ${token}`;
+        
+        // Log adicional para verificar que se está agregando
+        if (typeof window !== 'undefined') {
+          const currentPath = window.location.pathname;
+          if (currentPath.startsWith('/mi-cuenta') || currentPath.startsWith('/checkout')) {}
+        }
+      } else if (!token && !isPublic && !hasExistingAuthHeader) {
+        // Si no hay token, el endpoint NO es público, y no hay header ya establecido, log de advertencia
+        if (typeof window !== 'undefined') {
+          const currentPath = window.location.pathname;
+          if (currentPath.startsWith('/mi-cuenta') || currentPath.startsWith('/checkout')) {
+            console.error('❌ [Axios] NO HAY TOKEN para agregar al header', {
+              'URL': config.url,
+              'Método': config.method?.toUpperCase(),
+            });
+          }
+        }
       }
+      // Si es endpoint público o ya tiene header de Authorization, no hacer nada
     }
     
     return config;
@@ -91,45 +141,121 @@ axiosInstance.interceptors.response.use(
     
     // Manejar errores comunes
     if (error.response?.status === 401) {
-      // Siempre intentar refrescar el token en un 401 (no solo cuando detectamos el mensaje específico)
-      // Esto cubre casos donde el token expiró pero el mensaje puede variar
-      if (!originalRequest._retry) {
-        originalRequest._retry = true;
-        
-        try {
-          console.log('🔄 [Axios] Token expirado o inválido, intentando refrescar...');
-          
-          // Intentar refrescar el token
-          const newToken = await refreshFirebaseToken();
-          
-          if (newToken && originalRequest.headers) {
-            console.log('✅ [Axios] Token refrescado, reintentando petición...');
-            
-            // Actualizar el header con el nuevo token
-            originalRequest.headers.Authorization = `Bearer ${newToken}`;
-            
-            // Reintentar la petición original con el nuevo token
-            return axiosInstance(originalRequest);
-          } else {
-            console.warn('⚠️ [Axios] No se pudo refrescar el token');
-          }
-        } catch (refreshError) {
-          console.error('❌ [Axios] Error al refrescar token:', refreshError);
-          // Si falla el refresh, continuar con el flujo normal de error 401
-        }
-      }
+      // Verificar si el error es por token expirado
+      const isExpired = isTokenExpiredError(error);
       
-      // Token inválido o expirado (y no se pudo refrescar)
       if (typeof window !== 'undefined') {
         const currentPath = window.location.pathname;
+        const requestUrl = error.config?.url || 'unknown';
         
-        // NO redirigir automáticamente si estamos en checkout
-        // El componente manejará el error y mostrará un mensaje apropiado
-        if (currentPath.startsWith('/checkout')) {
-          // Solo limpiar cookies si realmente el token es inválido
-          // Pero NO redirigir, dejar que el componente maneje el error
+        // Obtener información del token actual
+        let currentToken = null;
+        let tokenFromStore = null;
+        try {
+          currentToken = getAuthToken();
+          const { useAuthStore } = require('../stores/userStore');
+          tokenFromStore = useAuthStore.getState().token;
+        } catch (e) {
+          // Ignorar
+        }
+        
+        // Verificar si el token está expirado
+        let tokenExpired = false;
+        let tokenExpiryTime = null;
+        if (currentToken || tokenFromStore) {
+          try {
+            const tokenToCheck = currentToken || tokenFromStore;
+            const payload = JSON.parse(atob(tokenToCheck.split('.')[1]));
+            const now = Math.floor(Date.now() / 1000);
+            tokenExpired = payload.exp < now;
+            tokenExpiryTime = new Date(payload.exp * 1000).toISOString();
+          } catch (e) {
+            // Ignorar si no se puede decodificar
+          }
+        }
+        
+        console.error('🚨 [Axios] Error 401 recibido:', {
+          'Ruta actual': currentPath,
+          'URL del request': requestUrl,
+          'Método': error.config?.method?.toUpperCase(),
+          'Timestamp': new Date().toISOString(),
+          'Token en cookies': !!currentToken,
+          'Token en store': !!tokenFromStore,
+          'Token expirado': tokenExpired,
+          'Token expira en': tokenExpiryTime,
+          'Header Authorization enviado': error.config?.headers?.Authorization ? 'SÍ' : 'NO',
+          'Error del servidor': error.response?.data,
+          'Es error de token expirado': isExpired,
+        });
+        
+        // Si es error de token expirado y no se ha reintentado, intentar refrescar el token
+        if (isExpired && !originalRequest._retry) {
+          try {
+            originalRequest._retry = true;
+            
+            // Refrescar el token
+            const newToken = await refreshFirebaseToken(true);
+            
+            if (newToken) {
+              
+              // Actualizar el header con el nuevo token
+              if (originalRequest.headers) {
+                originalRequest.headers.Authorization = `Bearer ${newToken}`;
+              }
+              
+              // Reintentar la petición original
+              return axiosInstance(originalRequest);
+            } else {
+              // No se pudo refrescar el token - la sesión expiró completamente
+              // Limpiar estado y redirigir al login silenciosamente
+              console.warn('⚠️ [Axios] No se pudo refrescar el token - sesión expirada, limpiando estado...');
+              
+              const { clearAuthCookies } = require('../utils/cookies');
+              const { useAuthStore } = require('../stores/userStore');
+              
+              // Limpiar cookies y store
+              clearAuthCookies();
+              useAuthStore.getState().logout();
+              
+              // Redirigir al login solo si no estamos ya en una ruta de auth
+              if (!currentPath.startsWith('/login') && !currentPath.startsWith('/register') && !currentPath.startsWith('/forgot-password')) {
+                const redirectUrl = `/login?redirect=${encodeURIComponent(currentPath)}`;
+                window.location.href = redirectUrl;
+              }
+              
+              // Rechazar el error sin mostrar mensajes al usuario
+              return Promise.reject(new Error('Sesión expirada'));
+            }
+          } catch (refreshError) {
+            // Error al refrescar - limpiar estado y redirigir
+            console.warn('⚠️ [Axios] Error al refrescar token - limpiando estado...');
+            
+            const { clearAuthCookies } = require('../utils/cookies');
+            const { useAuthStore } = require('../stores/userStore');
+            
+            // Limpiar cookies y store
+            clearAuthCookies();
+            useAuthStore.getState().logout();
+            
+            // Redirigir al login solo si no estamos ya en una ruta de auth
+            if (!currentPath.startsWith('/login') && !currentPath.startsWith('/register') && !currentPath.startsWith('/forgot-password')) {
+              const redirectUrl = `/login?redirect=${encodeURIComponent(currentPath)}`;
+              window.location.href = redirectUrl;
+            }
+            
+            // Rechazar el error sin mostrar mensajes al usuario
+            return Promise.reject(new Error('Sesión expirada'));
+          }
+        }
+        
+        // NO redirigir automáticamente si estamos en checkout o mi-cuenta
+        // Estos componentes manejarán el error y mostrarán un mensaje apropiado
+        // o simplemente mostrarán skeleton/loading sin redirigir
+        if (currentPath.startsWith('/checkout') || currentPath.startsWith('/mi-cuenta')) {
           return Promise.reject(error);
         }
+        
+        console.warn('⚠️ [Axios] Redirigiendo a /login desde', currentPath);
         
         // Limpiar cookies y redirigir a login con la página actual como redirect
         const { clearAuthCookies } = require('../utils/cookies');
@@ -139,7 +265,8 @@ axiosInstance.interceptors.response.use(
         if (currentPath.startsWith('/login') || currentPath.startsWith('/register') || currentPath.startsWith('/forgot-password')) {
           window.location.href = '/login';
         } else {
-          window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
+          const redirectUrl = `/login?redirect=${encodeURIComponent(currentPath)}`;
+          window.location.href = redirectUrl;
         }
       }
     }

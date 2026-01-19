@@ -1,8 +1,8 @@
 "use client";
 
-import { useScrollAnimation } from "@/app/hooks/useScrollAnimation";
 import { Building2, Users, Award } from "lucide-react";
 import Image from "next/image";
+import { useState, useEffect, useRef } from "react";
 
 const features = [
   {
@@ -22,19 +22,110 @@ const features = [
   },
 ];
 
+// Sistema compartido para limitar animaciones
+const animationManager = {
+  activeCount: 0,
+  maxActive: 3,
+  queue: [] as Array<() => void>,
+  
+  requestActivation(callback: () => void) {
+    if (this.activeCount < this.maxActive) {
+      this.activeCount++;
+      callback();
+    } else {
+      this.queue.push(callback);
+    }
+  },
+  
+  release() {
+    this.activeCount = Math.max(0, this.activeCount - 1);
+    if (this.queue.length > 0 && this.activeCount < this.maxActive) {
+      const next = this.queue.shift();
+      if (next) {
+        this.activeCount++;
+        next();
+      }
+    }
+  }
+};
+
+// Hook para animaciones limitadas
+function useLimitedScrollAnimation(options: {
+  threshold?: number;
+  triggerOnce?: boolean;
+  delay?: number;
+}) {
+  const { threshold = 0.2, triggerOnce = true, delay = 0 } = options;
+  const [isVisible, setIsVisible] = useState(false);
+  const elementRef = useRef<HTMLDivElement>(null);
+  const hasActivatedRef = useRef(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const releaseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const element = elementRef.current;
+    if (!element || hasActivatedRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasActivatedRef.current) {
+          hasActivatedRef.current = true;
+          
+          const activate = () => {
+            timeoutRef.current = setTimeout(() => {
+              setIsVisible(true);
+            }, delay);
+            
+            // Liberar después de que termine la animación (700ms + delay)
+            releaseTimeoutRef.current = setTimeout(() => {
+              animationManager.release();
+            }, delay + 700);
+          };
+
+          animationManager.requestActivation(activate);
+
+          if (triggerOnce) {
+            observer.unobserve(element);
+          }
+        } else if (!triggerOnce && !entry.isIntersecting) {
+          setIsVisible(false);
+        }
+      },
+      { threshold }
+    );
+
+    observer.observe(element);
+
+    return () => {
+      if (element) {
+        observer.unobserve(element);
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      if (releaseTimeoutRef.current) {
+        clearTimeout(releaseTimeoutRef.current);
+      }
+    };
+  }, [threshold, triggerOnce, delay]);
+
+  return { elementRef, isVisible };
+}
+
 export default function AboutUs() {
-  const { elementRef: imageRef, isVisible: imageVisible } = useScrollAnimation({
+  const { elementRef: imageRef, isVisible: imageVisible } = useLimitedScrollAnimation({
     threshold: 0.2,
     triggerOnce: true,
+    delay: 0,
   });
 
-  const { elementRef: titleRef, isVisible: titleVisible } = useScrollAnimation({
+  const { elementRef: titleRef, isVisible: titleVisible } = useLimitedScrollAnimation({
     threshold: 0.2,
     triggerOnce: true,
     delay: 100,
   });
 
-  const { elementRef: textRef, isVisible: textVisible } = useScrollAnimation({
+  const { elementRef: textRef, isVisible: textVisible } = useLimitedScrollAnimation({
     threshold: 0.2,
     triggerOnce: true,
     delay: 200,
@@ -139,7 +230,7 @@ function FeatureCard({
   feature: typeof features[0];
   index: number;
 }) {
-  const { elementRef, isVisible } = useScrollAnimation({
+  const { elementRef, isVisible } = useLimitedScrollAnimation({
     threshold: 0.1,
     triggerOnce: true,
     delay: 400 + index * 100,
@@ -168,4 +259,3 @@ function FeatureCard({
     </div>
   );
 }
-

@@ -1,5 +1,5 @@
 import { Search, X, SlidersHorizontal } from 'lucide-react';
-import { useProductosFilters } from '@/app/hooks/productos/useProductFilter';
+import { useProductFilters } from '@/app/hooks/productos/useProductFilters';
 import { useState } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import * as Checkbox from '@radix-ui/react-checkbox';
@@ -16,15 +16,93 @@ export function ProductosFilters() {
         clearFilters,
         hasActiveFilters,
         activeFiltersCount,
+        localSearch,
+        localPriceRange,
         categorias,
         subcategorias,
         marcas,
         loadingCategorias,
         loadingSubcategorias,
         loadingMarcas,
-    } = useProductosFilters();
+    } = useProductFilters();
 
     const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+
+    // Helper para encontrar el valor correcto de categoría/marca (priorizar código sobre ID)
+    const findCategoryValue = (cat: ICategoria) => {
+        // Siempre usar código si existe, sino usar ID
+        return String(cat.codi_categoria || cat.id_cat || '');
+    };
+
+    const findMarcaValue = (marca: IMarca) => {
+        // Siempre usar código si existe, sino usar ID
+        return String(marca.codi_marca || marca.id_marca || '');
+    };
+
+    // Helper para normalizar el valor del filtro para que coincida con las opciones
+    const normalizeFilterValue = (
+        filterValue: string | number | undefined, 
+        items: any[], 
+        getValue: (item: any) => string,
+        getAlternateValue?: (item: any) => string | number | undefined
+    ) => {
+        if (!filterValue) {
+            return '';
+        }
+        
+        const filterStr = String(filterValue);
+        
+        // Buscar el item que coincida (por código o ID)
+        const found = items?.find((item) => {
+            const itemValue = getValue(item);
+            const alternateValue = getAlternateValue ? String(getAlternateValue(item) || '') : '';
+            
+            // Comparar con el valor principal (código) o con el valor alternativo (ID)
+            return itemValue === filterStr || alternateValue === filterStr;
+        });
+        
+        // Si lo encontramos, devolver su valor normalizado (siempre usar el código como valor principal)
+        return found ? getValue(found) : filterStr;
+    };
+
+    // Helper para encontrar categoría/marca seleccionada (por código O por ID)
+    const findSelectedCategory = () => {
+        if (!filters.id_cat) return null;
+        const idCatStr = String(filters.id_cat);
+        
+        return categorias?.find((cat: ICategoria) => {
+            const codiMatch = String(cat.codi_categoria || '') === idCatStr;
+            const idMatch = String(cat.id_cat || '') === idCatStr;
+            return codiMatch || idMatch;
+        }) || null;
+    };
+
+    const findSelectedMarca = () => {
+        if (!filters.id_marca) return null;
+        const idMarcaStr = String(filters.id_marca);
+        
+        return marcas?.find((marca: IMarca) => {
+            const codiMatch = String(marca.codi_marca || '') === idMarcaStr;
+            const idMatch = String(marca.id_marca || '') === idMarcaStr;
+            return codiMatch || idMatch;
+        }) || null;
+    };
+
+    // Normalizar valores para que coincidan con las opciones
+    const normalizedCategoryValue = normalizeFilterValue(
+        filters.id_cat,
+        categorias || [],
+        (cat) => findCategoryValue(cat),
+        (cat) => cat.id_cat // Valor alternativo: ID numérico
+    );
+
+    const normalizedMarcaValue = normalizeFilterValue(
+        filters.id_marca,
+        marcas || [],
+        (marca) => findMarcaValue(marca), // Valor principal: código (ej: '048')
+        (marca) => marca.id_marca // Valor alternativo: ID numérico (ej: 48)
+    );
+
 
     return (
         <div className="bg-card border border-card p-4 rounded-lg shadow-lg space-y-4">
@@ -34,8 +112,8 @@ export function ProductosFilters() {
                 <div className="flex-1">
                     <Input
                         type="text"
-                        placeholder="Buscar por nombre, SKU o descripción..."
-                        value={filters.busqueda || ''}
+                        placeholder="Buscar por nombre, código, ID, SKU o descripción..."
+                        value={localSearch}
                         onChange={(e) => setFilter('busqueda', e.target.value)}
                         icon={Search}
                         iconPosition="left"
@@ -85,7 +163,7 @@ export function ProductosFilters() {
 
                             <div className="flex items-center justify-between">
                                 <h3 className="text-sm font-semibold text-input">
-                                    Filtros Avanzados
+                                    Filtros avanzados
                                 </h3>
                                 {hasActiveFilters && (
                                     <button
@@ -99,27 +177,33 @@ export function ProductosFilters() {
 
                             {/* CATEGORÍA */}
                             <div>
-                                <Select
-                                    label="Categoría"
-                                    options={[
+                                {(() => {
+                                    const categoriaOptions = [
                                         { value: '', label: 'Todas las categorías' },
                                         ...(categorias?.map((cat: ICategoria) => ({
-                                            value: cat.codi_categoria || cat.id_cat?.toString() || '',
+                                            value: findCategoryValue(cat),
                                             label: cat.nombre || 'Sin nombre',
                                         })) || [])
-                                    ]}
-                                    value={filters.id_cat?.toString() || ''}
-                                    onChange={(value) => {
-                                        // El backend acepta códigos o IDs
-                                        setFilter('id_cat', value || undefined);
-                                        // Limpiar subcategoría al cambiar categoría
-                                        if (filters.id_subcat) {
-                                            setFilter('id_subcat', undefined);
-                                        }
-                                    }}
-                                    disabled={loadingCategorias}
-                                    placeholder={loadingCategorias ? "Cargando..." : "Seleccionar categoría"}
-                                />
+                                    ];
+                                    
+                                    return (
+                                        <Select
+                                            label="Categoría"
+                                            options={categoriaOptions}
+                                            value={normalizedCategoryValue}
+                                            onChange={(value) => {
+                                                // El backend acepta códigos o IDs
+                                                setFilter('id_cat', value ? String(value) : undefined);
+                                                // Limpiar subcategoría al cambiar categoría
+                                                if (filters.id_subcat) {
+                                                    setFilter('id_subcat', undefined);
+                                                }
+                                            }}
+                                            disabled={loadingCategorias}
+                                            placeholder={loadingCategorias ? "Cargando..." : "Seleccionar categoría"}
+                                        />
+                                    );
+                                })()}
                             </div>
 
                             {/* SUBCATEGORÍA */}
@@ -130,11 +214,11 @@ export function ProductosFilters() {
                                         options={[
                                             { value: '', label: 'Todas las subcategorías' },
                                             ...(subcategorias?.map((subcat: any) => ({
-                                                value: subcat.id_subcat,
+                                                value: String(subcat.id_subcat || ''),
                                                 label: subcat.nombre || 'Sin nombre',
                                             })) || [])
                                         ]}
-                                        value={filters.id_subcat || ''}
+                                        value={filters.id_subcat ? String(filters.id_subcat) : ''}
                                         onChange={(value) => {
                                             setFilter('id_subcat', value ? Number(value) : undefined);
                                         }}
@@ -146,23 +230,29 @@ export function ProductosFilters() {
 
                             {/* MARCA */}
                             <div>
-                                <Select
-                                    label="Marca"
-                                    options={[
+                                {(() => {
+                                    const marcaOptions = [
                                         { value: '', label: 'Todas las marcas' },
                                         ...(marcas?.map((marca: IMarca) => ({
-                                            value: marca.codi_marca || marca.id_marca?.toString() || '',
+                                            value: findMarcaValue(marca),
                                             label: marca.nombre || 'Sin nombre',
                                         })) || [])
-                                    ]}
-                                    value={filters.id_marca?.toString() || ''}
-                                    onChange={(value) => {
-                                        // El backend acepta códigos o IDs
-                                        setFilter('id_marca', value || undefined);
-                                    }}
-                                    disabled={loadingMarcas}
-                                    placeholder={loadingMarcas ? "Cargando..." : "Seleccionar marca"}
-                                />
+                                    ];
+                                    
+                                    return (
+                                        <Select
+                                            label="Marca"
+                                            options={marcaOptions}
+                                            value={normalizedMarcaValue}
+                                            onChange={(value) => {
+                                                // El backend acepta códigos o IDs
+                                                setFilter('id_marca', value ? String(value) : undefined);
+                                            }}
+                                            disabled={loadingMarcas}
+                                            placeholder={loadingMarcas ? "Cargando..." : "Seleccionar marca"}
+                                        />
+                                    );
+                                })()}
                             </div>
 
                             {/* RANGO DE PRECIOS */}
@@ -174,7 +264,7 @@ export function ProductosFilters() {
                                     <Input
                                         type="number"
                                         placeholder="Mínimo"
-                                        value={filters.precio_min || ''}
+                                        value={localPriceRange[0] || ''}
                                         onChange={(e) =>
                                             setFilter('precio_min', e.target.value ? Number(e.target.value) : undefined)
                                         }
@@ -182,7 +272,7 @@ export function ProductosFilters() {
                                     <Input
                                         type="number"
                                         placeholder="Máximo"
-                                        value={filters.precio_max || ''}
+                                        value={localPriceRange[1] || ''}
                                         onChange={(e) =>
                                             setFilter('precio_max', e.target.value ? Number(e.target.value) : undefined)
                                         }
@@ -190,21 +280,21 @@ export function ProductosFilters() {
                                 </div>
                             </div>
 
-                            {/* ESTADO */}
+                            {/* ACTIVO (Activo/Inactivo) */}
                             <div>
                                 <label className="block text-sm font-medium text-input mb-1.5">
-                                    Estado
+                                    Estado de publicación
                                 </label>
                                 <select
-                                    value={filters.estado !== undefined ? filters.estado.toString() : ''}
+                                    value={filters.activo || ''}
                                     onChange={(e) =>
-                                        setFilter('estado', e.target.value ? Number(e.target.value) as 0 | 1 : undefined)
+                                        setFilter('activo', e.target.value || undefined)
                                     }
                                     className="w-full px-3 py-2.5 bg-input border border-input rounded-2xl text-input text-sm focus:outline-none focus:ring-2 focus:ring-principal transition-all"
                                 >
                                     <option value="">Todos</option>
-                                    <option value="1">Activos</option>
-                                    <option value="0">Inactivos</option>
+                                    <option value="A">Activo</option>
+                                    <option value="I">Inactivo</option>
                                 </select>
                             </div>
 
@@ -293,19 +383,40 @@ export function ProductosFilters() {
                         />
                     )}
 
-                    {filters.id_cat && (
-                        <FilterChip
-                            label="Categoría seleccionada"
-                            onRemove={() => setFilter('id_cat', undefined)}
-                        />
-                    )}
+                    {filters.id_cat && (() => {
+                        const categoriaSeleccionada = findSelectedCategory();
+                        return (
+                            <FilterChip
+                                key="categoria-chip"
+                                label={`Categoría: ${categoriaSeleccionada?.nombre || filters.id_cat}`}
+                                onRemove={() => setFilter('id_cat', undefined)}
+                            />
+                        );
+                    })()}
 
-                    {filters.id_marca && (
-                        <FilterChip
-                            label="Marca seleccionada"
-                            onRemove={() => setFilter('id_marca', undefined)}
-                        />
-                    )}
+                    {filters.id_subcat && (() => {
+                        const subcategoriaSeleccionada = subcategorias?.find((subcat: any) => 
+                            String(subcat.id_subcat) === String(filters.id_subcat)
+                        );
+                        return (
+                            <FilterChip
+                                key="subcategoria-chip"
+                                label={`Subcategoría: ${subcategoriaSeleccionada?.nombre || filters.id_subcat}`}
+                                onRemove={() => setFilter('id_subcat', undefined)}
+                            />
+                        );
+                    })()}
+
+                    {filters.id_marca && (() => {
+                        const marcaSeleccionada = findSelectedMarca();
+                        return (
+                            <FilterChip
+                                key="marca-chip"
+                                label={`Marca: ${marcaSeleccionada?.nombre || filters.id_marca}`}
+                                onRemove={() => setFilter('id_marca', undefined)}
+                            />
+                        );
+                    })()}
 
                     {(filters.precio_min || filters.precio_max) && (
                         <FilterChip
@@ -335,6 +446,13 @@ export function ProductosFilters() {
                         <FilterChip
                             label="Stock bajo"
                             onRemove={() => setFilter('stock_bajo', undefined)}
+                        />
+                    )}
+
+                    {filters.activo && (
+                        <FilterChip
+                            label={filters.activo === 'A' ? 'Activos' : 'Inactivos'}
+                            onRemove={() => setFilter('activo', undefined)}
                         />
                     )}
                 </div>

@@ -5,7 +5,9 @@ export function useCategorias() {
     return useQuery({
         queryKey: ['categorias'],
         queryFn: () => categoriaService.getAll(),
-        staleTime: 1000 * 60 * 10,
+        staleTime: 1000 * 60 * 10, // 10 minutos
+        refetchOnMount: false, // No refetchear si hay datos en caché
+        refetchOnWindowFocus: false, // No refetchear al enfocar ventana
     });
 }
 
@@ -14,6 +16,8 @@ export function useSubcategorias(idCat?: number) {
         queryKey: ['subcategorias', idCat],
         queryFn: () => categoriaService.getSubCategoriesByCategory(idCat!),
         enabled: !!idCat,
-        staleTime: 1000 * 60 * 10,
+        staleTime: 1000 * 60 * 10, // 10 minutos
+        refetchOnMount: false, // No refetchear si hay datos en caché
+        refetchOnWindowFocus: false, // No refetchear al enfocar ventana
     });
 }

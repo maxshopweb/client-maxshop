@@ -26,11 +26,29 @@ class ClientesService {
     if (filters.ultimo_login_desde) params.append('ultimo_login_desde', filters.ultimo_login_desde);
     if (filters.ultimo_login_hasta) params.append('ultimo_login_hasta', filters.ultimo_login_hasta);
 
-    const response = await axiosInstance.get<IPaginatedResponse<ICliente>>(
-      `/clientes?${params.toString()}`
-    );
+    const url = `/clientes?${params.toString()}`;
+    
+    if (process.env.NODE_ENV === 'development') {
+    }
 
-    return response.data;
+    try {
+      const response = await axiosInstance.get<IPaginatedResponse<ICliente>>(url);
+
+      if (process.env.NODE_ENV === 'development') {
+      }
+
+      return response.data;
+    } catch (error: any) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('❌ [ClientesService] Error fetching clientes:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status,
+          url
+        });
+      }
+      throw error;
+    }
   }
 
   async getById(id: string): Promise<ICliente> {

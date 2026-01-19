@@ -33,21 +33,30 @@ export function StepTwoPricing({ form }: StepTwoProps) {
                     type="number"
                     step="0.01"
                     placeholder="0.00"
-                    {...register('precio_mayorista', { valueAsNumber: true })}
+                    {...register('precio_mayorista', { 
+                        valueAsNumber: true,
+                        setValueAs: (v) => v === '' || isNaN(v) ? undefined : Number(v)
+                    })}
                 />
                 <Input
                     label="Precio Minorista"
                     type="number"
                     step="0.01"
                     placeholder="0.00"
-                    {...register('precio_minorista', { valueAsNumber: true })}
+                    {...register('precio_minorista', { 
+                        valueAsNumber: true,
+                        setValueAs: (v) => v === '' || isNaN(v) ? undefined : Number(v)
+                    })}
                 />
                 <Input
                     label="Precio Evento"
                     type="number"
                     step="0.01"
                     placeholder="0.00"
-                    {...register('precio_evento', { valueAsNumber: true })}
+                    {...register('precio_evento', { 
+                        valueAsNumber: true,
+                        setValueAs: (v) => v === '' || isNaN(v) ? undefined : Number(v)
+                    })}
                 />
             </div>
 
@@ -65,13 +74,19 @@ export function StepTwoPricing({ form }: StepTwoProps) {
                     label="Stock Mínimo"
                     type="number"
                     placeholder="0"
-                    {...register('stock_min', { valueAsNumber: true })}
+                    {...register('stock_min', { 
+                        valueAsNumber: true,
+                        setValueAs: (v) => v === '' || isNaN(v) ? undefined : Number(v)
+                    })}
                 />
                 <Input
                     label="Stock Mayorista"
                     type="number"
                     placeholder="0"
-                    {...register('stock_mayorista', { valueAsNumber: true })}
+                    {...register('stock_mayorista', { 
+                        valueAsNumber: true,
+                        setValueAs: (v) => v === '' || isNaN(v) ? undefined : Number(v)
+                    })}
                 />
             </div>
 

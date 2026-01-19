@@ -5,7 +5,6 @@ import { Star, Sparkles } from "lucide-react";
 import type { IProductos } from "@/app/types/producto.type";
 import AddToCartButton from "@/app/components/cart/AddToCartButton";
 import ProductImage from "@/app/components/shared/ProductImage";
-import ProductCardSkeleton from "@/app/components/skeleton/product/ProductCardSkeleton";
 
 interface ProductCardProps {
   producto: IProductos;
