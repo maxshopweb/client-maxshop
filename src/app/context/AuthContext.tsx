@@ -217,10 +217,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const result = await AuthIntegrationService.login(email, password);
 
     if (result.success && result.data && result.data.usuario) {
+      console.log('🔐 [AuthContext] Login exitoso, guardando datos:', {
+        rol: result.data.usuario.rol,
+        estado: result.data.usuario.estado,
+        uid: result.data.usuario.uid
+      });
       loginStore(result.data.firebaseToken, result.data.usuario);
       setFirebaseUser(result.data.firebaseUser);
       setRole(result.data.usuario.rol);
+      console.log('🔐 [AuthContext] Role actualizado en contexto:', result.data.usuario.rol);
       await syncAuthCookies(result.data.firebaseToken, result.data.usuario.rol, result.data.usuario.estado);
+      console.log('🔐 [AuthContext] Cookies sincronizadas, role en contexto después:', role);
       setLoading(false);
       return {
         success: true,
@@ -242,13 +249,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const result = await AuthIntegrationService.loginWithGoogle();
 
     if (result.success && result.data && result.data.usuario) {
+      console.log('🔐 [AuthContext] Login con Google exitoso, guardando datos:', {
+        rol: result.data.usuario.rol,
+        estado: result.data.usuario.estado,
+        uid: result.data.usuario.uid
+      });
       // Guardar en store primero
       loginStore(result.data.firebaseToken, result.data.usuario);
       setFirebaseUser(result.data.firebaseUser);
       setRole(result.data.usuario.rol);
+      console.log('🔐 [AuthContext] Role actualizado en contexto (Google):', result.data.usuario.rol);
       
       // Esperar a que las cookies se guarden completamente
       await syncAuthCookies(result.data.firebaseToken, result.data.usuario.rol, result.data.usuario.estado);
+      console.log('🔐 [AuthContext] Cookies sincronizadas (Google), role en contexto después:', role);
       
       setLoading(false);
       return {
@@ -359,7 +373,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [loginStore, token]);
 
   const forgotPassword = useCallback(async (email: string) => {
+    console.log('📧 [AuthContext] forgotPassword llamado para:', email);
     const result = await AuthService.forgotPassword(email);
+    console.log('📧 [AuthContext] Resultado de forgotPassword:', { success: result.success, error: result.error });
+    if (!result.success && result.error) {
+      throw new Error(result.error);
+    }
     return result.success;
   }, []);
 

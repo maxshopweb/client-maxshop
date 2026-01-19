@@ -11,7 +11,8 @@ export function useLogin() {
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
     
-    const { login, loginWithGoogle } = useAuth();
+    // Obtener el role del contexto - se actualiza automáticamente después del login
+    const { login, loginWithGoogle, role } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirect = searchParams.get('redirect');
@@ -37,28 +38,40 @@ export function useLogin() {
             }
 
             const loginResult = await login(email, password);
+            
             if (loginResult.success) {
                 toast.success(loginResult.message || '¡Bienvenido de nuevo!');
                 
                 // Estado 2 = perfil incompleto -> completar perfil
                 if (loginResult.estado === 2) {
-                    // Las cookies ya están guardadas, usar router
                     router.replace('/register/complete-perfil');
                     return;
                 }
                 
-                // Esperar un momento para que las cookies se guarden
-                await new Promise(resolve => setTimeout(resolve, 300));
+                // Esperar un momento para que el contexto se actualice y las cookies se guarden
+                await new Promise(resolve => setTimeout(resolve, 500));
                 
-                // Leer el role de las cookies directamente (más confiable que el contexto)
-                const userRole = getUserRole();
+                // Usar el role del contexto primero (más confiable), luego cookies como fallback
+                const contextRole = role;
+                const cookieRole = getUserRole();
+                const userRole = (contextRole || cookieRole)?.trim().toUpperCase();
                 
                 // Estado 3 = perfil completo -> redirigir según rol
+                // Verificar si es admin primero
+                const isAdmin = userRole === 'ADMIN';
+                
                 if (redirect) {
-                    router.push(redirect);
+                    // Si el usuario es admin y el redirect no es a /admin, redirigir a /admin
+                    if (isAdmin && !redirect.startsWith('/admin')) {
+                        window.location.href = '/admin';
+                    } else {
+                        window.location.href = redirect;
+                    }
                 } else {
-                    const targetPath = userRole === 'ADMIN' ? '/admin' : '/';
-                    router.push(targetPath);
+                    const targetPath = isAdmin ? '/admin' : '/';
+                    // Usar window.location.href para forzar recarga completa
+                    // Esto asegura que el middleware vea las cookies actualizadas
+                    window.location.href = targetPath;
                 }
             } else {
                 toast.error(loginResult.message || 'Error al iniciar sesión. Verifica tus credenciales.');
@@ -74,28 +87,40 @@ export function useLogin() {
         setLoading(true);
         try {
             const result = await loginWithGoogle();
+            
             if (result.success) {
                 toast.success(result.message || '¡Bienvenido!');
                 
                 // Estado 2 = perfil incompleto -> completar perfil
                 if (result.estado === 2) {
-                    // Las cookies ya están guardadas, usar router para evitar recarga completa
                     router.replace('/register/complete-perfil');
                     return;
                 }
                 
-                // Esperar un momento para que las cookies se guarden
-                await new Promise(resolve => setTimeout(resolve, 300));
+                // Esperar un momento para que el contexto se actualice y las cookies se guarden
+                await new Promise(resolve => setTimeout(resolve, 500));
                 
-                // Leer el role de las cookies directamente (más confiable que el contexto)
-                const userRole = getUserRole();
+                // Usar el role del contexto primero (más confiable), luego cookies como fallback
+                const contextRole = role;
+                const cookieRole = getUserRole();
+                const userRole = (contextRole || cookieRole)?.trim().toUpperCase();
                 
                 // Estado 3 = perfil completo -> redirigir según rol
+                // Verificar si es admin primero
+                const isAdmin = userRole === 'ADMIN';
+                
                 if (redirect) {
-                    router.push(redirect);
+                    // Si el usuario es admin y el redirect no es a /admin, redirigir a /admin
+                    if (isAdmin && !redirect.startsWith('/admin')) {
+                        window.location.href = '/admin';
+                    } else {
+                        window.location.href = redirect;
+                    }
                 } else {
-                    const targetPath = userRole === 'ADMIN' ? '/admin' : '/';
-                    router.push(targetPath);
+                    const targetPath = isAdmin ? '/admin' : '/';
+                    // Usar window.location.href para forzar recarga completa
+                    // Esto asegura que el middleware vea las cookies actualizadas
+                    window.location.href = targetPath;
                 }
             } else {
                 toast.error(result.message || 'Error al iniciar sesión con Google');

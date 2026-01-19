@@ -26,15 +26,23 @@ export const useForgotPassword = () => {
         return;
       }
 
+      console.log('📧 [useForgotPassword] Intentando enviar email a:', email.trim());
       const success = await forgotPassword(email.trim());
+      
       if (success) {
+        console.log('✅ [useForgotPassword] Email enviado exitosamente');
         setSent(true);
         toast.success('Se ha enviado un correo para restablecer tu contraseña. Revisa tu bandeja de entrada.');
       } else {
+        console.error('❌ [useForgotPassword] Error al enviar email (success = false)');
         toast.error('Error al enviar el correo. Verifica que el email sea correcto.');
       }
     } catch (error: any) {
-      console.error('Error al enviar correo de recuperación:', error);
+      console.error('❌ [useForgotPassword] Error capturado:', error);
+      console.error('❌ [useForgotPassword] Detalles del error:', {
+        message: error?.message,
+        stack: error?.stack
+      });
       toast.error(error?.message || 'Error al enviar el correo');
     } finally {
       setLoading(false);

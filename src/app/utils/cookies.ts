@@ -87,11 +87,16 @@ export function setAuthToken(token: string): void {
  * Guarda el rol del usuario en una cookie y sessionStorage como respaldo
  */
 export function setUserRole(role: string): void {
+  console.log('🍪 [cookies] setUserRole llamado con:', role);
   const days = COOKIE_CONFIG.maxAge / (24 * 60 * 60);
-  setCookie(COOKIE_CONFIG.role, role, days);
+  const success = setCookie(COOKIE_CONFIG.role, role, days);
+  console.log('🍪 [cookies] setUserRole resultado:', { success, role, cookieName: COOKIE_CONFIG.role });
   if (typeof window !== 'undefined') {
     sessionStorage.setItem('user-role-backup', role);
   }
+  // Verificar inmediatamente después de guardar
+  const verify = getCookie(COOKIE_CONFIG.role);
+  console.log('🍪 [cookies] Verificación inmediata de cookie guardada:', { expected: role, actual: verify, match: verify === role });
 }
 
 /**
@@ -146,6 +151,7 @@ export function clearAuthCookies(): void {
  * Retorna una promesa que se resuelve cuando las cookies están guardadas
  */
 export function syncAuthCookies(token: string | null, role: string | null, estado?: number | null): Promise<void> {
+  console.log('🔄 [cookies] syncAuthCookies llamado:', { token: token ? 'EXISTS' : 'NULL', role, estado });
   return new Promise((resolve) => {
     if (token && role) {
       setAuthToken(token);
@@ -159,19 +165,34 @@ export function syncAuthCookies(token: string | null, role: string | null, estad
         // Verificar que las cookies se guardaron correctamente
         const tokenSaved = getCookie(COOKIE_CONFIG.token);
         const roleSaved = getCookie(COOKIE_CONFIG.role);
+        const estadoSaved = getCookie(COOKIE_CONFIG.estado);
+        console.log('🔍 [cookies] Verificación después de syncAuthCookies:', {
+          tokenMatch: tokenSaved === token,
+          roleMatch: roleSaved === role,
+          roleExpected: role,
+          roleActual: roleSaved,
+          estadoSaved
+        });
         if (tokenSaved === token && roleSaved === role) {
+          console.log('✅ [cookies] Cookies sincronizadas correctamente');
           resolve();
         } else {
+          console.warn('⚠️ [cookies] Cookies no coinciden, reintentando...');
           // Si no se guardaron, intentar de nuevo
           setAuthToken(token);
           setUserRole(role);
           if (estado !== undefined) {
             setUserEstado(estado);
           }
-          setTimeout(() => resolve(), 200);
+          setTimeout(() => {
+            const retryRole = getCookie(COOKIE_CONFIG.role);
+            console.log('🔄 [cookies] Reintento completado, role:', retryRole);
+            resolve();
+          }, 200);
         }
       }, 300);
     } else {
+      console.log('🧹 [cookies] Limpiando cookies (token o role es null)');
       clearAuthCookies();
       resolve();
     }

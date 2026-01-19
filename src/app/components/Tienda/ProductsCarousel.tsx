@@ -84,7 +84,7 @@ export default function ProductsCarousel({
               WebkitOverflowScrolling: "touch",
             }}
           >
-            {Array.from({ length: 4 }).map((_, index) => (
+            {Array.from({ length: 5 }).map((_, index) => (
               <div
                 key={`skeleton-${index}`}
                 className="flex-shrink-0 w-[calc(50%-6px)] sm:w-[280px] md:w-[320px] snap-start"
