@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
 import { toast } from 'sonner';
 import { loginSchema, emailSchema } from '@/app/schemas/auth.schema';
 import { getUserRole } from '@/app/utils/cookies';
 
-export function useLogin() {
+export function useLogin(redirect: string | null = null) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -14,8 +14,6 @@ export function useLogin() {
     // Obtener el role del contexto - se actualiza automáticamente después del login
     const { login, loginWithGoogle, role } = useAuth();
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const redirect = searchParams.get('redirect');
 
     // NO redirigir automáticamente - solo redirigir cuando el usuario hace login explícitamente
 
