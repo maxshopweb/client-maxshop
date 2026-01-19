@@ -1,8 +1,6 @@
 {
-  "buildCommand": "npm run vercel-build",
-  "outputDirectory": ".next",
-  "installCommand": "npm install",
-  "framework": "nextjs",
-  "rootDirectory": "client"
+  "buildCommand": "cd client && npm install && npm run vercel-build",
+  "outputDirectory": "client/.next",
+  "installCommand": "cd client && npm install",
+  "framework": "nextjs"
 }
-
