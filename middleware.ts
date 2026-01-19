@@ -3,21 +3,22 @@ import { NextRequest, NextResponse } from "next/server";
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Rutas que requieren estado 3 (perfil completo)
-  const protectedRoutes = ['/', '/admin'];
-  const isProtectedRoute = protectedRoutes.some(route => pathname === route || pathname.startsWith(route + '/'));
-  
-  // Rutas de registro que NO deben ser protegidas
-  const registerRoutes = ['/register', '/login', '/register/verify-email', '/register/complete-perfil'];
-  const isRegisterRoute = registerRoutes.some(route => pathname === route || pathname.startsWith(route + '/'));
+  // Rutas de autenticación que NO deben ser protegidas
+  const authRoutes = ['/register', '/login', '/register/verify-email', '/register/complete-perfil', '/forgot-password', '/reset-password'];
+  const isAuthRoute = authRoutes.some(route => pathname === route || pathname.startsWith(route + '/'));
 
-  // Si es ruta de registro, permitir acceso
-  if (isRegisterRoute) {
+  // Si es ruta de autenticación, permitir acceso
+  if (isAuthRoute) {
     return NextResponse.next();
   }
 
-  // Solo proteger rutas que comienzan con /admin o la raíz
-  if (pathname.startsWith('/admin') || pathname === '/') {
+  // Rutas que requieren autenticación (estado 3 - perfil completo)
+  // Solo /admin y /mi-cuenta requieren autenticación
+  // Todo lo demás en (main) es público
+  const isAdminRoute = pathname.startsWith('/admin');
+  const isMiCuentaRoute = pathname === '/mi-cuenta' || pathname.startsWith('/mi-cuenta/');
+
+  if (isAdminRoute || isMiCuentaRoute) {
     // Obtener token, rol y estado de las cookies (el middleware se ejecuta en el servidor)
     const token = request.cookies.get('auth-token')?.value;
     const role = request.cookies.get('user-role')?.value;
@@ -42,7 +43,7 @@ export function middleware(request: NextRequest) {
     }
 
     // Para rutas admin, verificar que el rol es ADMIN
-    if (pathname.startsWith('/admin')) {
+    if (isAdminRoute) {
       if (role !== 'ADMIN') {
         // Redirigir a la página principal si no es admin
         const homeUrl = new URL('/', request.url);
@@ -52,6 +53,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Permitir continuar si pasa todas las validaciones
+  // La ruta raíz (/) y todas las demás rutas en (main) son públicas
   return NextResponse.next();
 }
 
