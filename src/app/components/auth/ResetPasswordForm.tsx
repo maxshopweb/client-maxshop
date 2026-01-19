@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { Button } from '@/app/components/ui/Button';
 import Input from '@/app/components/ui/Input';
 import PasswordRequirements from '@/app/components/ui/PasswordRequirements';
@@ -74,13 +73,6 @@ export function ResetPasswordForm({
           {loading ? 'Restableciendo...' : 'Restablecer contraseña'}
         </Button>
       </form>
-
-      <p className="text-center text-gray-600 text-sm">
-        ¿Recordaste tu contraseña?{' '}
-        <Link href="/login" className="text-orange-600 hover:text-orange-700 font-semibold">
-          Inicia sesión
-        </Link>
-      </p>
     </>
   );
 }

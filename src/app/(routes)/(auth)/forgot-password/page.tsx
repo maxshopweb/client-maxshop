@@ -27,7 +27,7 @@ export default function ForgotPasswordPage() {
       )}
 
       {/* Login link */}
-      <p className="text-center text-gray-600 text-sm">
+      <p className="text-center text-gray-600 text-sm my-4">
         <Link href="/login" className="text-orange-600 hover:text-orange-700 font-semibold">
           Volver al inicio de sesión
         </Link>

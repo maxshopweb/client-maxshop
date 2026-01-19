@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense } from 'react';
+import Link from 'next/link';
 import AuthLayout from '@/app/components/layouts/authLayout';
 import { useResetPassword } from '@/app/hooks/auth/useResetPassword';
 import { ResetPasswordForm } from '@/app/components/auth/ResetPasswordForm';
@@ -49,7 +50,7 @@ function ResetPasswordContent() {
   return (
     <AuthLayout
       title="Restablecer contraseña"
-      subtitle="Ingresa tu nueva contraseña"
+      subtitle="Ingresa tu nueva contraseña para completar el proceso"
     >
       <ResetPasswordForm
         password={password}
@@ -60,6 +61,13 @@ function ResetPasswordContent() {
         onConfirmPasswordChange={handleConfirmPasswordChange}
         onSubmit={handleSubmit}
       />
+      
+      {/* Login link */}
+      <p className="text-center text-gray-600 text-sm my-4">
+        <Link href="/login" className="text-orange-600 hover:text-orange-700 font-semibold">
+          Volver al inicio de sesión
+        </Link>
+      </p>
     </AuthLayout>
   );
 }

@@ -150,6 +150,7 @@ export default function AboutUs() {
               src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80"
               alt="Sobre Nosotros"
               fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover"
               priority
             />

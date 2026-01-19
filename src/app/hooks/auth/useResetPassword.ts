@@ -22,8 +22,11 @@ export const useResetPassword = () => {
 
   // Obtener y validar oobCode de la URL
   useEffect(() => {
-    // Obtener el código OOB de la URL
-    // Firebase puede enviarlo como 'oobCode' directamente o en el hash
+    // Firebase puede enviar el código de varias formas:
+    // 1. Como parámetro directo: ?oobCode=...
+    // 2. Desde su página de acción: ?mode=resetPassword&oobCode=...
+    // 3. En el hash: #oobCode=...
+    
     const code = searchParams.get('oobCode') || 
                  searchParams.get('code') || 
                  searchParams.get('oob');
@@ -35,14 +38,34 @@ export const useResetPassword = () => {
       hashCode = hashParams.get('oobCode') || hashParams.get('code') || hashParams.get('oob');
     }
     
-    const finalCode = code || hashCode;
+    // Si viene de la página de Firebase, puede estar en la URL completa
+    let urlCode = null;
+    if (typeof window !== 'undefined') {
+      const fullUrl = window.location.href;
+      const urlMatch = fullUrl.match(/[?&]oobCode=([^&]+)/);
+      if (urlMatch) {
+        urlCode = decodeURIComponent(urlMatch[1]);
+      }
+    }
+    
+    const finalCode = code || hashCode || urlCode;
+    
+    console.log('🔍 [useResetPassword] Buscando oobCode:', {
+      searchParams: code,
+      hash: hashCode,
+      url: urlCode,
+      finalCode,
+      currentUrl: typeof window !== 'undefined' ? window.location.href : 'N/A'
+    });
     
     if (!finalCode) {
+      console.error('❌ [useResetPassword] No se encontró oobCode en la URL');
       toast.error('Enlace inválido o expirado. Por favor, solicita un nuevo enlace de recuperación.');
-      router.push('/forgot-password');
+      // No redirigir inmediatamente, dejar que el usuario vea el mensaje
       return;
     }
     
+    console.log('✅ [useResetPassword] oobCode encontrado:', finalCode);
     setOobCode(finalCode);
   }, [searchParams, router]);
 

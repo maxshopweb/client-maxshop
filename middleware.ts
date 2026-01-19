@@ -35,8 +35,22 @@ export function middleware(request: NextRequest) {
     const role = request.cookies.get('user-role')?.value;
     const estado = request.cookies.get('user-estado')?.value;
 
+    console.log('🛡️ [middleware] Verificando ruta protegida:', {
+      pathname,
+      isAdminRoute,
+      isMiCuentaRoute,
+      isProtectedAuthRoute,
+      token: token ? 'EXISTS' : 'MISSING',
+      role,
+      estado,
+      allCookies: Object.fromEntries(
+        request.cookies.getAll().map(c => [c.name, c.value ? 'EXISTS' : 'MISSING'])
+      )
+    });
+
     // Verificar que existe el token
     if (!token) {
+      console.log('❌ [middleware] No hay token, redirigiendo a login');
       // Redirigir al login si no hay token
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('redirect', pathname);
@@ -50,6 +64,7 @@ export function middleware(request: NextRequest) {
       if (estado && estado !== '3' && estado !== 'null') {
         const estadoNum = parseInt(estado);
         if (estadoNum === 1 || estadoNum === 2) {
+          console.log('⚠️ [middleware] Estado incompleto, redirigiendo a completar perfil:', estado);
           const completePerfilUrl = new URL('/register/complete-perfil', request.url);
           return NextResponse.redirect(completePerfilUrl);
         }
@@ -58,11 +73,19 @@ export function middleware(request: NextRequest) {
 
     // Para rutas admin, verificar que el rol es ADMIN
     if (isAdminRoute) {
+      console.log('🔐 [middleware] Verificando rol para ruta admin:', {
+        role,
+        expected: 'ADMIN',
+        match: role === 'ADMIN',
+        type: typeof role
+      });
       if (role !== 'ADMIN') {
+        console.log('❌ [middleware] Rol no es ADMIN, redirigiendo a home. Role recibido:', role);
         // Redirigir a la página principal si no es admin
         const homeUrl = new URL('/', request.url);
         return NextResponse.redirect(homeUrl);
       }
+      console.log('✅ [middleware] Rol ADMIN verificado, permitiendo acceso');
     }
   }
 

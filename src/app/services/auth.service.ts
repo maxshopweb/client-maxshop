@@ -9,6 +9,7 @@ import {
   signInAnonymously,
   signOut,
   confirmPasswordReset,
+  applyActionCode,
   type User,
   type UserCredential
 } from 'firebase/auth';
@@ -149,15 +150,50 @@ class AuthService {
 
   async forgotPassword(email: string): Promise<AuthResult<void>> {
     try {
+      console.log('📧 [AuthService] Enviando email de recuperación a:', email);
+      
+      // Obtener la URL base - prioridad: variable de entorno > window.location.origin
+      let baseUrl: string;
+      
+      if (typeof window !== 'undefined') {
+        // En el navegador, usar variable de entorno o window.location.origin
+        baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+      } else {
+        // En el servidor (SSR), usar variable de entorno o localhost
+        baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      }
+      
+      const authActionUrl = `${baseUrl}/auth-action`;
+      
       const actionCodeSettings = {
-        url: `${window.location.origin}/reset-password`,
-        handleCodeInApp: false,
+        url: authActionUrl,
+        handleCodeInApp: true, // Cambiar a true para que Firebase redirija directamente a nuestra app
       };
       
+      console.log('📧 [AuthService] Configuración de acción:', {
+        ...actionCodeSettings,
+        baseUrl,
+        authActionUrl,
+        envUrl: process.env.NEXT_PUBLIC_APP_URL,
+        windowOrigin: typeof window !== 'undefined' ? window.location.origin : 'N/A',
+        note: 'Esta URL debe coincidir con la configurada en Firebase Console > Authentication > Settings > Action URL'
+      });
+      
       await sendPasswordResetEmail(auth, email, actionCodeSettings);
+      
+      console.log('✅ [AuthService] Email de recuperación enviado exitosamente');
+      console.log('📧 [AuthService] El email debería contener un enlace a:', authActionUrl);
       return { success: true, data: null, error: null };
-    } catch (error) {
+    } catch (error: any) {
+      console.error('❌ [AuthService] Error al enviar email de recuperación:', error);
+      console.error('❌ [AuthService] Detalles del error:', {
+        code: error?.code,
+        message: error?.message,
+        email: error?.email,
+        note: 'Verifica que: 1) La URL de acción esté configurada en Firebase Console, 2) El email esté registrado, 3) El dominio esté autorizado'
+      });
       const message = this.mapFirebaseError(error, 'Error al enviar el correo de recuperación.');
+      console.error('❌ [AuthService] Mensaje de error mapeado:', message);
       return { success: false, data: null, error: message };
     }
   }
@@ -195,6 +231,16 @@ class AuthService {
       return { success: true, data: null, error: null };
     } catch (error) {
       const message = this.mapFirebaseError(error, 'Error al restablecer la contraseña. El enlace puede haber expirado o ser inválido.');
+      return { success: false, data: null, error: message };
+    }
+  }
+
+  async verifyEmail(oobCode: string): Promise<AuthResult<void>> {
+    try {
+      await applyActionCode(auth, oobCode);
+      return { success: true, data: null, error: null };
+    } catch (error) {
+      const message = this.mapFirebaseError(error, 'Error al verificar el email. El enlace puede haber expirado o ser inválido.');
       return { success: false, data: null, error: message };
     }
   }

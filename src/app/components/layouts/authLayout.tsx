@@ -137,6 +137,7 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
                         src="/imgs/login.jpg"
                         alt="MaxShop Background"
                         fill
+                        sizes="50vw"
                         className="object-cover opacity-90 hover:scale-105 transition-transform duration-[20s]"
                         priority
                     />

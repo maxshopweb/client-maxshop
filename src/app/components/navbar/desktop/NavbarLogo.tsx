@@ -25,6 +25,7 @@ export default function NavbarLogo({ pathname }: NavbarLogoProps) {
         width={120}
         height={40}
         className="h-8 md:h-10 w-auto transition-transform duration-300 group-hover:scale-105 brightness-0 invert"
+        style={{ width: "auto" }}
       />
     </Link>
   );
