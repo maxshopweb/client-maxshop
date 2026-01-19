@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import AuthLayout from '@/app/components/layouts/authLayout';
 import Input from '@/app/components/ui/Input';
 import { Button } from '@/app/components/ui/Button';
@@ -14,7 +15,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 // Hacer la página dinámica para evitar prerender
 export const dynamic = 'force-dynamic';
 
-function LoginContent() {
+// Componente wrapper que lee searchParams de forma segura
+function LoginContentWrapper() {
+    const searchParams = useSearchParams();
+    const redirect = searchParams.get('redirect');
+    
+    return <LoginContent redirect={redirect} />;
+}
+
+function LoginContent({ redirect }: { redirect: string | null }) {
     const {
         email,
         password,
@@ -24,7 +33,7 @@ function LoginContent() {
         handleGoogleLogin,
         handleEmailChange,
         handlePasswordChange,
-    } = useLogin();
+    } = useLogin(redirect);
 
     const [isEmailExpanded, setIsEmailExpanded] = useState(false);
 
@@ -185,7 +194,7 @@ export default function LoginPage() {
                 </div>
             </AuthLayout>
         }>
-            <LoginContent />
+            <LoginContentWrapper />
         </Suspense>
     );
 }
