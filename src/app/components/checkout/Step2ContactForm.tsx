@@ -1,7 +1,7 @@
 "use client";
 
 import { useCheckoutStore } from "@/app/hooks/checkout/useCheckoutStore";
-import { ContactFormData } from "../schemas/contactForm.schema";
+import { ContactFormData } from "@/app/schemas/contactForm.schema";
 import { useAuth } from "@/app/context/AuthContext";
 import { useContactForm } from "@/app/hooks/checkout/useContactForm";
 import { useAutoFillUserData } from "@/app/hooks/checkout/useAutoFillUserData";
@@ -180,6 +180,8 @@ export default function Step2ContactForm() {
           control={control}
           errors={errors}
           provinciaOptions={provinciaOptions}
+          setValue={setValue}
+          watch={watch}
         />
 
         <BillingSection

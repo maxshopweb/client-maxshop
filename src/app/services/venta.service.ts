@@ -183,8 +183,8 @@ class VentasService {
       cod_postal?: number | null;
       telefono?: string;
     };
-  }): Promise<IVenta> {
-    const response = await axiosInstance.post<IApiResponse<IVenta>>(
+  }): Promise<IVenta & { mercadoPagoPreferenceUrl?: string | null }> {
+    const response = await axiosInstance.post<IApiResponse<IVenta & { mercadoPagoPreferenceUrl?: string | null }>>(
       '/ventas/checkout',
       data
     );
