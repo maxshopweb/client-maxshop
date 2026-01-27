@@ -128,10 +128,13 @@ export default function Step3PaymentConfirmation() {
       return;
     }
 
+    // Concatenar teléfono completo (área + número)
+    const fullPhone = `${personalData.phoneArea}${personalData.phone}`;
+
     // Preparar observaciones (solo si es envío)
     const observaciones = shippingData.tipoEntrega === 'envio' 
-      ? `Tel: ${personalData.phone}, Dirección: ${shippingData.address}, ${shippingData.city}, ${shippingData.state}, Tipo: ${shippingData.tipoEntrega === 'envio' ? 'Envío' : 'Retiro'}`
-      : `Tel: ${personalData.phone}, Tipo: Retiro en tienda`;
+      ? `Tel: ${fullPhone}, Dirección: ${shippingData.address}, ${shippingData.city}, ${shippingData.state}, Tipo: ${shippingData.tipoEntrega === 'envio' ? 'Envío' : 'Retiro'}`
+      : `Tel: ${fullPhone}, Tipo: Retiro en tienda`;
 
     // Preparar datos de dirección estructurados para actualizar el cliente (solo si es envío)
     const direccionData = shippingData.tipoEntrega === 'envio' && shippingData.postalCode ? {
@@ -145,7 +148,7 @@ export default function Step3PaymentConfirmation() {
         const parsed = parseInt(shippingData.postalCode!.trim(), 10);
         return isNaN(parsed) ? null : parsed;
       })(),
-      telefono: personalData.phone,
+      telefono: fullPhone,
     } : undefined;
 
     // Crear el pedido

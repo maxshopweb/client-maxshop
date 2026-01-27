@@ -54,7 +54,7 @@ export function useGuestCheckoutPersonal({ onSuccess }: UseGuestCheckoutPersonal
           email: data.email,
           nombre: data.firstName,
           apellido: data.lastName,
-          telefono: data.phone,
+          telefono: `${data.phoneArea}${data.phone}`, // Concatenar área + número
         });
 
         if (!result.success) {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Controller } from "react-hook-form";
 import { motion } from "framer-motion";
 import { ArrowLeft, LogIn } from "lucide-react";
@@ -19,6 +20,10 @@ import { PersonalFormData } from "@/app/schemas/personalForm.schema";
 export default function Step2PersonalInfo() {
   const { personalData, setPersonalData, setCurrentStep, completeStep } = useCheckoutStore();
   const { user, isAuthenticated, loading: authLoading } = useAuth();
+  
+  // Estados para notificaciones en tiempo real
+  const [phoneAreaError, setPhoneAreaError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
 
   // Hooks de formulario
   const {
@@ -94,9 +99,9 @@ export default function Step2PersonalInfo() {
       >
         <div className="space-y-4">
           <LogIn className="w-16 h-16 mx-auto text-foreground/30" />
-            <h3 className="text-xl font-bold text-foreground/90">
-              Inicia sesión para continuar
-            </h3>
+          <h3 className="text-xl font-bold text-foreground/90">
+            Inicia sesión para continuar
+          </h3>
           <p className="text-foreground/60">
             Puedes iniciar sesión o continuar como invitado para completar tu pedido
           </p>
@@ -131,8 +136,8 @@ export default function Step2PersonalInfo() {
         <h2 className="text-2xl font-bold text-foreground/90">Información personal</h2>
       </div>
 
-      <form 
-        onSubmit={isGuestMode ? handleSubmit(handleGuestFormSubmit as any) : handleSubmit(onSubmit as any)} 
+      <form
+        onSubmit={isGuestMode ? handleSubmit(handleGuestFormSubmit as any) : handleSubmit(onSubmit as any)}
         className="space-y-6"
       >
         {/* Información de contacto */}
@@ -204,13 +209,13 @@ export default function Step2PersonalInfo() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Tipo de Documento */}
+            {/* Tipo de documento */}
             <Controller
               name="tipoDocumento"
               control={control}
               render={({ field }) => (
                 <Select
-                  label="Tipo de Documento"
+                  label="Tipo de documento"
                   options={tipoDocumentoOptions}
                   value={field.value}
                   onChange={(value) => {
@@ -239,21 +244,98 @@ export default function Step2PersonalInfo() {
             />
           </div>
 
-          {/* Phone */}
-          <Input
-            label="Número de Celular"
-            type="tel"
-            {...register("phone")}
-            error={errors.phone?.message}
-            placeholder="1123456789"
-            className="rounded-lg"
-            style={{
-              backgroundColor: "var(--white)",
-              border: errors.phone
-                ? "1px solid rgb(239, 68, 68)"
-                : "1px solid rgba(23, 28, 53, 0.1)",
-            }}
-          />
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">
+              Número de celular
+            </label>
+
+            <div className="grid grid-cols-[120px_1fr] gap-3">
+              {/* Código de área (sin 0) */}
+              <div className="space-y-1">
+                <Input
+                  label="Área"
+                  placeholder="11"
+                  inputMode="numeric"
+                  maxLength={4}
+                  {...register("phoneArea")}
+                  onChange={(e) => {
+                    let value = e.target.value.replace(/\D/g, "");
+                    
+                    // Detectar y notificar si empieza con 0
+                    if (value.startsWith('0')) {
+                      setPhoneAreaError('No debe comenzar con 0');
+                      value = value.slice(1); // Remover el 0
+                    } else {
+                      setPhoneAreaError(null);
+                    }
+                    
+                    setValue("phoneArea", value, { shouldValidate: true });
+                  }}
+                  style={{
+                    backgroundColor: "var(--white)",
+                    border: errors.phoneArea || phoneAreaError
+                      ? "1px solid rgb(239, 68, 68)"
+                      : "1px solid rgba(23, 28, 53, 0.1)",
+                  }}
+                />
+                <p className="text-xs text-foreground/60">
+                  Sin <strong>0</strong>. Ej: <code>351</code>
+                </p>
+              </div>
+
+              {/* Número (sin 15) */}
+              <div className="space-y-1">
+                <Input
+                  label="Celular"
+                  placeholder="2345678"
+                  inputMode="numeric"
+                  maxLength={8}
+                  {...register("phone")}
+                  onChange={(e) => {
+                    let value = e.target.value.replace(/\D/g, "");
+                    
+                    // Detectar y notificar si empieza con 15
+                    if (value.startsWith('15')) {
+                      setPhoneError('No debe comenzar con 15');
+                      value = value.slice(2); // Remover el 15
+                    } else {
+                      setPhoneError(null);
+                    }
+                    
+                    // Solo guardar el número, sin concatenar el área
+                    setValue("phone", value, { shouldValidate: true });
+                  }}
+                  style={{
+                    backgroundColor: "var(--white)",
+                    border: errors.phone || phoneError
+                      ? "1px solid rgb(239, 68, 68)"
+                      : "1px solid rgba(23, 28, 53, 0.1)",
+                  }}
+                />
+                <p className="text-xs text-foreground/60">
+                  Sin <strong>15</strong>. Ej: <code>12345678</code>
+                </p>
+              </div>
+            </div>
+
+            {(errors.phone || errors.phoneArea || phoneAreaError || phoneError) && (
+              <div className="space-y-1">
+                {errors.phoneArea && (
+                  <p className="text-sm text-red-600">{errors.phoneArea.message}</p>
+                )}
+                {phoneAreaError && !errors.phoneArea && (
+                  <p className="text-sm text-red-600">{phoneAreaError}</p>
+                )}
+                {errors.phone && (
+                  <p className="text-sm text-red-600">{errors.phone.message}</p>
+                )}
+                {phoneError && !errors.phone && (
+                  <p className="text-sm text-red-600">{phoneError}</p>
+                )}
+              </div>
+            )}
+          </div>
+
         </div>
 
         {/* Opción de Facturación */}
@@ -265,7 +347,13 @@ export default function Step2PersonalInfo() {
               <input
                 type="checkbox"
                 checked={necesitaFacturaA}
-                onChange={(e) => setNecesitaFacturaA(e.target.checked)}
+                onChange={(e) => {
+                  setNecesitaFacturaA(e.target.checked);
+                  // Forzar validación después de cambiar
+                  setTimeout(() => {
+                    setValue("necesitaFacturaA", e.target.checked, { shouldValidate: true });
+                  }, 0);
+                }}
                 className="w-5 h-5 rounded border-2 border-principal text-principal focus:ring-principal"
               />
               <span className="text-foreground font-medium">Necesito Factura A</span>
@@ -282,7 +370,13 @@ export default function Step2PersonalInfo() {
                   <input
                     type="checkbox"
                     checked={usarMismosDatos}
-                    onChange={(e) => setUsarMismosDatos(e.target.checked)}
+                    onChange={(e) => {
+                      setUsarMismosDatos(e.target.checked);
+                      // Forzar validación después de cambiar
+                      setTimeout(() => {
+                        setValue("usarMismosDatosFacturacion", e.target.checked, { shouldValidate: true });
+                      }, 0);
+                    }}
                     className="w-5 h-5 rounded border-2 border-principal text-principal focus:ring-principal"
                   />
                   <span className="text-foreground">Usar los mismos datos de contacto</span>
@@ -339,6 +433,11 @@ export default function Step2PersonalInfo() {
                   </motion.div>
                 )}
               </motion.div>
+            )}
+            
+            {/* Mostrar error de facturación si existe */}
+            {errors.facturacionA && typeof errors.facturacionA === 'object' && 'message' in errors.facturacionA && (
+              <p className="text-sm text-red-600">{errors.facturacionA.message as string}</p>
             )}
           </div>
         </div>

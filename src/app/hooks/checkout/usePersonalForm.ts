@@ -16,6 +16,7 @@ export function usePersonalForm() {
       lastName: '',
       tipoDocumento: 'DNI', // Preseleccionar DNI para mejor UX
       documento: '',
+      phoneArea: '',
       phone: '',
       necesitaFacturaA: false,
       usarMismosDatosFacturacion: true,
