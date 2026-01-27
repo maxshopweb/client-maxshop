@@ -160,6 +160,9 @@ export default function Step3PaymentConfirmation() {
       id_direccion: id_direccion || undefined, // ID de dirección guardada (si se seleccionó una)
       direccion: id_direccion ? undefined : direccionData, // Solo usar direccionData si no hay id_direccion
       costo_envio: costoEnvio || 0, // Incluir costo de envío
+      // Datos de documento del cliente
+      tipo_documento: personalData.tipoDocumento || undefined,
+      numero_documento: personalData.documento || undefined,
     });
   };
 

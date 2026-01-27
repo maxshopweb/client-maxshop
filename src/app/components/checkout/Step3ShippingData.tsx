@@ -16,8 +16,10 @@ import { useCotizarEnvioOnSubmit } from "@/app/hooks/checkout/useCotizarEnvioOnS
 import ShippingLoaderOverlay from "./ShippingLoaderOverlay";
 import TipoEntregaSelector from "./TipoEntregaSelector";
 import CostoEnvioDisplay from "./CostoEnvioDisplay";
+import AddressAutocomplete from "./AddressAutocomplete";
 import { ShippingFormData } from "@/app/schemas/shippingForm.schema";
 import { direccionesService } from "@/app/services/direcciones.service";
+import type { IDireccionDTO } from "@/app/types/direccion.type";
 
 export default function Step3ShippingData() {
   const { 
@@ -274,18 +276,50 @@ export default function Step3ShippingData() {
                 </div>
               )}
               
-              <Input
-                label="Calle *"
-                {...register("address")}
-                error={errors.address?.message}
-                placeholder="Nombre de la calle"
-                className="rounded-lg"
-                style={{
-                  backgroundColor: "var(--white)",
-                  border: errors.address
-                    ? "1px solid rgb(239, 68, 68)"
-                    : "1px solid rgba(23, 28, 53, 0.1)",
+              <AddressAutocomplete
+                value={address || ''}
+                onChange={(direccion: IDireccionDTO | null) => {
+                  if (direccion) {
+                    // Autocompletar calle
+                    if (direccion.calle) {
+                      setValue('address', direccion.calle, { shouldValidate: true });
+                    } else if (direccion.direccion_formateada) {
+                      // Si no hay calle separada, usar la formateada
+                      setValue('address', direccion.direccion_formateada.split('/')[0].trim(), { shouldValidate: true });
+                    }
+                    
+                    // Autocompletar altura si viene separada
+                    if (direccion.numero) {
+                      setValue('altura', direccion.numero, { shouldValidate: true });
+                    }
+                    
+                    // Guardar datos de geocodificación
+                    if (direccion.direccion_formateada) {
+                      setValue('direccion_formateada', direccion.direccion_formateada);
+                    }
+                    if (direccion.latitud !== undefined) {
+                      setValue('latitud', direccion.latitud);
+                    }
+                    if (direccion.longitud !== undefined) {
+                      setValue('longitud', direccion.longitud);
+                    }
+                  }
                 }}
+                error={errors.address?.message}
+                label="Calle *"
+                placeholder="Escribí tu calle (ej: San Martín, Córdoba)"
+                onCityChange={(ciudad) => setValue('city', ciudad, { shouldValidate: true })}
+                onProvinceChange={(provincia) => {
+                  // Buscar el código de provincia en las opciones
+                  const provinciaOption = provinciaOptions.find(
+                    (opt) => opt.label.toLowerCase() === provincia.toLowerCase() ||
+                             opt.label.toLowerCase().includes(provincia.toLowerCase())
+                  );
+                  if (provinciaOption) {
+                    setValue('state', provinciaOption.value, { shouldValidate: true });
+                  }
+                }}
+                onPostalCodeChange={(cp) => setValue('postalCode', cp, { shouldValidate: true })}
               />
 
               <div className="grid grid-cols-3 gap-4 items-end">
@@ -382,6 +416,11 @@ export default function Step3ShippingData() {
                 costoEnvio={costoEnvio} 
                 isLoading={isCotizando}
               />
+
+              {/* Campos ocultos para datos de geocodificación */}
+              <input type="hidden" {...register("direccion_formateada")} />
+              <input type="hidden" {...register("latitud", { valueAsNumber: true })} />
+              <input type="hidden" {...register("longitud", { valueAsNumber: true })} />
             </motion.div>
           )}
 

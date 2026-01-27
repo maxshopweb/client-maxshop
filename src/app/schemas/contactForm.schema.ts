@@ -28,6 +28,11 @@ export const contactFormSchema = z.object({
   state: z.string().min(1, 'Provincia requerida'),
   postalCode: z.string().regex(/^\d{4,5}$/, 'Código postal inválido'),
   
+  // Campos de geocodificación (opcionales, llenados por OpenCage)
+  direccion_formateada: z.string().optional(),
+  latitud: z.number().optional(),
+  longitud: z.number().optional(),
+  
   // Facturación
   necesitaFacturaA: z.boolean().default(false),
   usarMismosDatosFacturacion: z.boolean().default(true),

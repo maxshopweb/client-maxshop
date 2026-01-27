@@ -9,6 +9,10 @@ import { useCheckoutStore } from '@/app/hooks/checkout/useCheckoutStore';
 import { useAuth } from '@/app/context/AuthContext';
 import type { IVenta } from '@/app/types/ventas.type';
 
+interface IVentaWithMercadoPago extends IVenta {
+  mercadoPagoPreferenceUrl?: string | null;
+}
+
 interface CreateOrderFromCheckoutData {
   id_cliente?: string;
   metodo_pago: string;
@@ -21,6 +25,9 @@ interface CreateOrderFromCheckoutData {
   observaciones?: string;
   costo_envio?: number; // Costo del envío calculado
   id_direccion?: string; // ID de dirección guardada (opcional)
+  // Datos de documento del cliente
+  tipo_documento?: string; // DNI, CUIT, etc.
+  numero_documento?: string; // Número de documento
   // Datos de dirección para actualizar el cliente (si no se usa id_direccion)
   direccion?: {
     direccion?: string;
@@ -35,7 +42,7 @@ interface CreateOrderFromCheckoutData {
 }
 
 interface UseCreateOrderFromCheckoutOptions {
-  onSuccess?: (venta: IVenta) => void;
+  onSuccess?: (venta: IVentaWithMercadoPago) => void;
   onError?: (error: Error) => void;
 }
 
@@ -70,8 +77,22 @@ export function useCreateOrderFromCheckout(options: UseCreateOrderFromCheckoutOp
         setWasGuest(true);
       }
       
-      // Redirigir PRIMERO a la página de resultado antes de limpiar
-      // Esto evita que el checkout/page.tsx redirija a / mientras navegamos
+      // Si es Mercado Pago y hay URL de preferencia, redirigir directamente a MP
+      const ventaWithMP = venta as IVentaWithMercadoPago;
+      const mercadoPagoUrl = ventaWithMP.mercadoPagoPreferenceUrl;
+      if (venta.metodo_pago === 'mercadopago' && mercadoPagoUrl) {
+        // Limpiar carrito antes de redirigir
+        clearCart();
+        
+        // Ocultar loader
+        setIsCreatingOrder(false);
+        
+        // Redirigir a Mercado Pago
+        window.location.href = mercadoPagoUrl;
+        return; // Salir temprano, no ejecutar el resto del código
+      }
+      
+      // Para otros métodos de pago, redirigir a la página de resultado
       const metodo = venta.metodo_pago === 'efectivo' || venta.metodo_pago === 'transferencia' 
         ? venta.metodo_pago 
         : 'mercadopago';

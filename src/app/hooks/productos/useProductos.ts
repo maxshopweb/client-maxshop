@@ -20,7 +20,7 @@ interface UseProductosOptions {
     enabled?: boolean; // Para controlar cuando se ejecuta la query
     keepPreviousData?: boolean; // Para mantener datos mientras carga nuevos
     filterByImage?: boolean; // Filtrar productos sin imagen (solo para tienda, NO admin)
-    useTiendaEndpoint?: boolean; // Usar endpoint específico de tienda (marca 051 con imágenes)
+    useTiendaEndpoint?: boolean; // Usar endpoint específico de tienda (marca 004 INGCO con imágenes)
 }
 
 export function useProductos(options: UseProductosOptions = {}) {

@@ -13,6 +13,11 @@ export const shippingFormSchema = z.object({
   state: z.string().optional(),
   postalCode: z.string().optional(),
   mismaDireccionEnvio: z.boolean().default(true),
+  
+  // Campos de geocodificación (opcionales, llenados por OpenCage)
+  direccion_formateada: z.string().optional(),
+  latitud: z.number().optional(),
+  longitud: z.number().optional(),
 }).refine((data) => {
   // Si es envío, todos los campos de dirección son obligatorios (excepto piso y dpto)
   if (data.tipoEntrega === 'envio') {

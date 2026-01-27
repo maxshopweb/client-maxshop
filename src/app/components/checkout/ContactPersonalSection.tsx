@@ -1,7 +1,7 @@
 "use client";
 
 import { Controller, UseFormRegister, UseFormWatch, Control, FieldErrors } from "react-hook-form";
-import { ContactFormData } from "../schemas/contactForm.schema";
+import { ContactFormData } from "@/app/schemas/contactForm.schema";
 import Input from "@/app/components/ui/Input";
 import Select, { SelectOption } from "@/app/components/ui/Select";
 import { Button } from "@/app/components/ui/Button";

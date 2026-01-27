@@ -19,7 +19,7 @@ class ProductosService {
     );
   }
 
-  // Método específico para tienda (client/user): solo marca 051 con imágenes
+  // Método específico para tienda (client/user): solo marca INGCO (004) con imágenes
   async getProductosTienda(filters: IProductoFilters = {}): Promise<IPaginatedResponse<IProductos>> {
     const params = new URLSearchParams();
 
@@ -60,7 +60,7 @@ class ProductosService {
     if (filters.busqueda) params.append('busqueda', filters.busqueda);
     if (filters.id_subcat) params.append('id_subcat', filters.id_subcat.toString());
     if (filters.id_cat) params.append('id_cat', filters.id_cat.toString());
-    // id_marca puede ser número (ID) o string (código de marca, ej: "051" para incgo)
+    // id_marca puede ser número (ID) o string (código de marca, ej: "004" para INGCO)
     if (filters.id_marca !== undefined && filters.id_marca !== null && filters.id_marca !== '') {
       params.append('id_marca', filters.id_marca.toString());
     }
