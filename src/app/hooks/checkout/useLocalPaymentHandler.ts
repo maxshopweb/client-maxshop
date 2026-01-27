@@ -72,10 +72,13 @@ export function useLocalPaymentHandler({ formData }: UseLocalPaymentHandlerOptio
     // Obtener id_cliente si existe (del usuario autenticado)
     const idCliente = user?.uid || undefined;
 
+    // Concatenar teléfono completo (área + número)
+    const fullPhone = `${personalData.phoneArea}${personalData.phone}`;
+
     // Preparar observaciones
     const observaciones = shippingData.tipoEntrega === 'envio' 
-      ? `Tel: ${personalData.phone}, Dirección: ${shippingData.address}, ${shippingData.city}, ${shippingData.state}, Tipo: ${shippingData.tipoEntrega === 'envio' ? 'Envío' : 'Retiro'}`
-      : `Tel: ${personalData.phone}, Tipo: Retiro en tienda`;
+      ? `Tel: ${fullPhone}, Dirección: ${shippingData.address}, ${shippingData.city}, ${shippingData.state}, Tipo: ${shippingData.tipoEntrega === 'envio' ? 'Envío' : 'Retiro'}`
+      : `Tel: ${fullPhone}, Tipo: Retiro en tienda`;
 
     // Preparar datos de dirección estructurados para actualizar el cliente (solo si es envío)
     const direccionData = shippingData.tipoEntrega === 'envio' && shippingData.postalCode ? {
@@ -89,7 +92,7 @@ export function useLocalPaymentHandler({ formData }: UseLocalPaymentHandlerOptio
         const parsed = parseInt(shippingData.postalCode!.trim(), 10);
         return isNaN(parsed) ? null : parsed;
       })(),
-      telefono: personalData.phone,
+      telefono: fullPhone,
     } : undefined;
 
     // Crear el pedido usando el hook correcto

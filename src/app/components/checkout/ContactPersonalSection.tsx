@@ -96,13 +96,13 @@ export function ContactPersonalSection({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {/* Tipo de Documento */}
+        {/* Tipo de documento */}
         <Controller
           name="tipoDocumento"
           control={control}
           render={({ field }) => (
             <Select
-              label="Tipo de Documento"
+              label="Tipo de documento"
               options={tipoDocumentoOptions}
               value={field.value}
               onChange={(value) => {
@@ -133,7 +133,7 @@ export function ContactPersonalSection({
 
       {/* Phone */}
       <Input
-        label="Número de Celular"
+        label="Número de celular"
         type="tel"
         {...register("phone")}
         error={errors.phone?.message}

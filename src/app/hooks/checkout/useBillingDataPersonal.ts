@@ -25,11 +25,11 @@ export function useBillingDataPersonal({ setValue, watch }: UseBillingDataPerson
 
   // Sincronizar estado local con el formulario
   useEffect(() => {
-    setValue("necesitaFacturaA", necesitaFacturaA, { shouldValidate: false });
+    setValue("necesitaFacturaA", necesitaFacturaA, { shouldValidate: true });
   }, [necesitaFacturaA, setValue]);
 
   useEffect(() => {
-    setValue("usarMismosDatosFacturacion", usarMismosDatos, { shouldValidate: false });
+    setValue("usarMismosDatosFacturacion", usarMismosDatos, { shouldValidate: true });
   }, [usarMismosDatos, setValue]);
 
   // Sincronizar datos de facturación cuando se usan los mismos datos de contacto

@@ -22,13 +22,22 @@ export function useAutoFillPersonalData({
   setValue,
 }: UseAutoFillPersonalDataOptions) {
   useEffect(() => {
-    if (isAuthenticated && user && !personalData) {
-      setValue("email", user.email || "");
-      setValue("firstName", user.nombre || "");
-      setValue("lastName", user.apellido || "");
-      setValue("phone", user.telefono?.toString() || "");
+    if (!isAuthenticated || !user || personalData) return;
+
+    setValue("email", user.email || "");
+    setValue("firstName", user.nombre || "");
+    setValue("lastName", user.apellido || "");
+
+    if (user.telefono) {
+      const phone = user.telefono.replace(/\D/g, "");
+
+      if (phone.length >= 10) {
+        const area = phone.slice(0, phone.length - 8);
+        const number = phone.slice(-8); // Solo los últimos 8 dígitos
+
+        setValue("phoneArea", area);
+        setValue("phone", number); // Solo el número, sin el área
+      }
     }
   }, [isAuthenticated, user, personalData, setValue]);
 }
-
-
