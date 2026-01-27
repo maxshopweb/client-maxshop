@@ -191,7 +191,7 @@ export default function FiltersSidebar() {
           <FilterSelectSection
             title="Marcas"
             options={marcasOptions}
-            value="051" // SIEMPRE marca 051 (INGCO) fija en tienda
+            value="004" // SIEMPRE marca 004 (INGCO) fija en tienda
             placeholder="INGCO"
             onChange={() => {}} // No permitir cambiar (deshabilitado)
             disabled={true} // Deshabilitar el select

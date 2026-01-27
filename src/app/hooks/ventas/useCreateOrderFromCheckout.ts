@@ -25,6 +25,9 @@ interface CreateOrderFromCheckoutData {
   observaciones?: string;
   costo_envio?: number; // Costo del envío calculado
   id_direccion?: string; // ID de dirección guardada (opcional)
+  // Datos de documento del cliente
+  tipo_documento?: string; // DNI, CUIT, etc.
+  numero_documento?: string; // Número de documento
   // Datos de dirección para actualizar el cliente (si no se usa id_direccion)
   direccion?: {
     direccion?: string;

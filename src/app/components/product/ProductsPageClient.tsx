@@ -28,7 +28,7 @@ function ProductsPageContent() {
   
   // FILTROS PARA TIENDA (CLIENTE):
   // El endpoint /productos/tienda ya aplica automáticamente:
-  // - Marca 051 (INGCO) fijo
+  // - Marca 004 (INGCO) fijo
   // - Solo productos con imagen
   // - Solo productos publicados (activo: "A")
   const finalFilters = useMemo<IProductoFilters>(() => {
