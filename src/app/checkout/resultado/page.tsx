@@ -2,7 +2,10 @@
 
 import { Suspense, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useCheckoutResult } from "../../hooks/checkout/useCheckoutResult";
+import { useCheckoutResult } from "@/app/hooks/checkout/useCheckoutResult";
+import { useCheckoutStore } from "@/app/hooks/checkout/useCheckoutStore";
+import { useCartStore } from "@/app/stores/cartStore";
+import { useAuth } from "@/app/context/AuthContext";
 import CheckoutResultContainer from "../../components/checkout/CheckoutResultContainer";
 import { motion } from "framer-motion";
 
@@ -12,19 +15,44 @@ export const dynamic = 'force-dynamic';
 function CheckoutResultContent() {
   const router = useRouter();
   const result = useCheckoutResult();
+  const { clearCart } = useCartStore();
+  const { resetCheckout, setWasGuest } = useCheckoutStore();
+  const { logout } = useAuth();
 
-  // Validar acceso: solo verificar que hay id_venta o está en estado de procesamiento
+  // Validar acceso: solo redirigir a /checkout cuando no hay resultado válido
+  // No redirigir si la URL tiene id_venta (evita race: searchParams pueden tardar en estar listos)
   useEffect(() => {
-    // Si no hay id_venta y no está en estado de procesamiento, redirigir
-    // (acceso inválido o página recargada sin contexto)
+    if (typeof window === 'undefined') return;
+    const urlHasIdVenta = window.location.search.includes('id_venta=');
+    if (urlHasIdVenta) return;
     if (!result.id_venta && result.status !== 'processing') {
       router.push('/checkout');
     }
   }, [result.id_venta, result.status, router]);
 
-  // Si no hay datos válidos, no renderizar (o mostrar loading)
+  // Limpiar carrito y checkout al montar con resultado válido (efectivo/transferencia
+  // redirigen con window.location.href y la limpieza no se hace en useCreateOrderFromCheckout)
+  useEffect(() => {
+    if (!result.id_venta) return;
+    const wasGuest = useCheckoutStore.getState().wasGuest;
+    clearCart();
+    resetCheckout();
+    if (wasGuest) {
+      setWasGuest(true); // Mantener para que la UI no muestre "Ver mis pedidos" a invitados
+      logout(true);
+    }
+  }, [result.id_venta, clearCart, resetCheckout, setWasGuest, logout]);
+
+  // Si no hay datos válidos: no redirigir si la URL tiene id_venta (efecto arriba); mostrar loading hasta que params carguen
   if (!result.id_venta && result.status !== 'processing') {
-    return null;
+    return (
+      <div className="flex items-center justify-center min-h-[40vh]">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-principal border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-lg text-foreground/60">Cargando resultado...</p>
+        </div>
+      </div>
+    );
   }
 
   return (

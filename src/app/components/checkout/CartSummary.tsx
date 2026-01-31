@@ -1,12 +1,23 @@
 "use client";
 
 import { useMemo } from "react";
+import { useIsMutating } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { useCheckoutStore } from "@/app/hooks/checkout/useCheckoutStore";
 import ProductCart from "@/app/components/cart/ProductCart";
 
 export default function CartSummary() {
-  const { cartItems, costoEnvio } = useCheckoutStore();
+  const { cartItems, costoEnvio, tipoEntrega, codigoPostal } = useCheckoutStore();
+  const isMutatingEnvio = useIsMutating({ mutationKey: ["cotizarEnvio"] });
+
+  const isCalculandoEnvio = useMemo(
+    () =>
+      tipoEntrega === "envio" &&
+      !!codigoPostal &&
+      (costoEnvio === null || costoEnvio === undefined) &&
+      isMutatingEnvio > 0,
+    [tipoEntrega, codigoPostal, costoEnvio, isMutatingEnvio]
+  );
 
   // Calcular totales
   const { subtotal, iva, envio, total } = useMemo(() => {
@@ -66,16 +77,16 @@ export default function CartSummary() {
           <span className="text-foreground/70">IVA (21%)</span>
           <span className="text-foreground font-medium">${iva.toFixed(2)}</span>
         </div>
-        {costoEnvio !== null && costoEnvio > 0 && (
+        {tipoEntrega === "envio" && (
           <div className="flex justify-between text-sm">
             <span className="text-foreground/70">Costo de envío</span>
-            <span className="text-foreground font-medium">${envio.toFixed(2)}</span>
-          </div>
-        )}
-        {costoEnvio === null && (
-          <div className="flex justify-between text-sm">
-            <span className="text-foreground/60 italic">Costo de envío</span>
-            <span className="text-foreground/60 italic text-xs">Por calcular</span>
+            {isCalculandoEnvio ? (
+              <span className="text-foreground/50 text-xs">Calculando...</span>
+            ) : costoEnvio !== null && costoEnvio > 0 ? (
+              <span className="text-foreground font-medium">${envio.toFixed(2)}</span>
+            ) : (
+              <span className="text-foreground/50 text-xs">-</span>
+            )}
           </div>
         )}
       </div>
@@ -93,7 +104,11 @@ export default function CartSummary() {
           className="text-2xl font-bold"
           style={{ color: "var(--principal)" }}
         >
-          ${total.toFixed(2)}
+          {isCalculandoEnvio ? (
+            <span className="text-foreground/70 text-base font-medium">Calculando...</span>
+          ) : (
+            `$${total.toFixed(2)}`
+          )}
         </span>
       </div>
     </div>

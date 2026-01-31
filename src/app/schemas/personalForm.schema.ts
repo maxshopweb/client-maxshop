@@ -59,4 +59,26 @@ export const personalFormSchema = z.object({
 
 export type PersonalFormData = z.infer<typeof personalFormSchema>;
 
+/** Schema reducido para usuario autenticado (solo DNI + facturación) */
+export const personalFormSchemaAuthUser = z.object({
+  tipoDocumento: z.enum(['DNI', 'CUIT']),
+  documento: z.string().min(7, 'Documento inválido').max(11, 'Documento inválido'),
+  necesitaFacturaA: z.boolean().default(false),
+  usarMismosDatosFacturacion: z.boolean().default(true),
+  facturacionA: facturacionASchema.optional(),
+}).refine((data) => {
+  if (data.necesitaFacturaA && !data.usarMismosDatosFacturacion) {
+    if (!data.facturacionA) return false;
+    if (!data.facturacionA.razonSocial || data.facturacionA.razonSocial.length < 2) return false;
+    if (!data.facturacionA.nombreEmpresa || data.facturacionA.nombreEmpresa.length < 2) return false;
+    if (!data.facturacionA.cuit || !/^\d{11}$/.test(data.facturacionA.cuit)) return false;
+  }
+  return true;
+}, {
+  message: 'Debe completar los datos de facturación A (Razón Social, Nombre de Empresa y CUIT)',
+  path: ['facturacionA'],
+});
+
+export type PersonalFormDataAuthUser = z.infer<typeof personalFormSchemaAuthUser>;
+
 

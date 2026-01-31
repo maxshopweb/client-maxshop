@@ -19,14 +19,16 @@ export function useGuestCheckoutCleanup() {
     const currentPath = pathname || '';
     const isInCheckout = currentPath.startsWith('/checkout');
     
-    // Marcar que estaba en checkout si está ahí ahora
     if (isInCheckout) {
       wasInCheckoutRef.current = true;
-      return;
+      return () => {
+        if (wasInCheckoutRef.current && isGuest) {
+          logout().catch(console.error);
+          wasInCheckoutRef.current = false;
+        }
+      };
     }
 
-    // Si estaba en checkout y ahora sale (pero no a /checkout/resultado)
-    // Cerrar sesión solo si realmente salió completamente de checkout
     if (wasInCheckoutRef.current && !isInCheckout && isGuest) {
       logout().catch(console.error);
       wasInCheckoutRef.current = false;
