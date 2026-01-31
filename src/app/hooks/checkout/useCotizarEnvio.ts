@@ -24,6 +24,7 @@ export function useCotizarEnvio() {
   const { items } = useCartStore();
 
   return useMutation({
+    mutationKey: ['cotizarEnvio'],
     mutationFn: async (params: CotizarEnvioParams): Promise<CotizacionResponse> => {
       // Validar que hay productos
       if (!items || items.length === 0) {

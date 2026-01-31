@@ -1,16 +1,26 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useCheckoutStore, CartItem } from "@/app/hooks/checkout/useCheckoutStore";
 import { useCartStore } from "@/app/stores/cartStore";
+import { useAuthStore } from "@/app/stores/userStore";
+import { useAuth } from "@/app/context/AuthContext";
 import ProductCart from "@/app/components/cart/ProductCart";
 import { Button } from "@/app/components/ui/Button";
+import ConfirmModal from "@/app/components/modals/ConfirmModal";
+import { clearStorageExceptCartAndLocation } from "@/app/utils/checkoutStorage.utils";
+import AuthService from "@/app/services/auth.service";
 import { ShoppingCart, ArrowLeft } from "lucide-react";
 
 export default function Step1CartConfirmation() {
-  const { cartItems, setCartItems, setCurrentStep, completeStep } = useCheckoutStore();
+  const router = useRouter();
   const { items } = useCartStore();
+  const { setCartItems, setCurrentStep, completeStep, resetCheckout } = useCheckoutStore();
+  const logoutStore = useAuthStore((s) => s.logout);
+  const { isGuest } = useAuth();
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   // Sincronizar items del carrito con el checkout store
   const syncCartItems = () => {
@@ -33,6 +43,20 @@ export default function Step1CartConfirmation() {
     if (items.length > 0) {
       completeStep(1);
       setCurrentStep(2);
+    }
+  };
+
+  const handleConfirmExit = async () => {
+    resetCheckout();
+    clearStorageExceptCartAndLocation();
+    if (isGuest) {
+      logoutStore();
+      await AuthService.logout().catch(() => {});
+    }
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/");
     }
   };
 
@@ -82,7 +106,7 @@ export default function Step1CartConfirmation() {
         <Button
           variant="outline-primary"
           size="lg"
-          onClick={() => window.location.href = "/"}
+          onClick={() => setShowExitConfirm(true)}
           className="rounded-lg flex-1"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -98,6 +122,17 @@ export default function Step1CartConfirmation() {
           Continuar
         </Button>
       </div>
+
+      <ConfirmModal
+        isOpen={showExitConfirm}
+        onClose={() => setShowExitConfirm(false)}
+        onConfirm={handleConfirmExit}
+        title="¿Estás seguro que quieres salir?"
+        description="Se borrarán todos los datos ingresados."
+        type="warning"
+        confirmText="Sí, salir"
+        cancelText="Cancelar"
+      />
     </motion.div>
   );
 }
