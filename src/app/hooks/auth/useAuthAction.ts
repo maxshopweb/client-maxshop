@@ -75,9 +75,9 @@ export const useAuthAction = () => {
         setEmailVerified(true);
         toast.success('¡Email verificado exitosamente!');
         
-        // Redirigir al login después de 2 segundos
+        // Redirigir a completar perfil (siguiente paso del flujo) en la misma pestaña
         setTimeout(() => {
-          router.push('/login');
+          router.push('/register/complete-perfil');
         }, 2000);
       } else {
         setError(result.error || 'Error al verificar el email');

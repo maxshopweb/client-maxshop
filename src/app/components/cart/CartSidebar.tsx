@@ -99,9 +99,9 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
 
           {/* Footer con resumen */}
           {items.length > 0 && (
-            <div className="border-t border-input bg-background p-6 space-y-4">
+            <div className="border-t border-input bg-background">
               {/* Resumen */}
-              <div className="space-y-2">
+              <div className="px-6 py-4 space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-foreground/70">Subtotal</span>
                   <span className="text-foreground font-medium">
@@ -116,17 +116,22 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                     </span>
                   </div>
                 )}
+
                 <div className="flex justify-between text-sm">
                   <span className="text-foreground/70">Envío</span>
                   <span className="text-foreground font-medium">
                     {summary.envio === 0 ? (
-                      <span className="text-principal">Gratis</span>
+                      <span className="text-principal">-</span>
                     ) : (
                       `$${summary.envio.toFixed(2)}`
                     )}
                   </span>
                 </div>
-                <div className="border-t border-input pt-2 flex justify-between">
+
+                {/* Línea divisoria full width */}
+                <div className="border-t border-input -mx-6"></div>
+
+                <div className="pt-2 flex justify-between">
                   <span className="text-base font-semibold text-foreground">Total</span>
                   <span className="text-xl font-bold text-principal">
                     ${summary.total.toFixed(2)}
@@ -135,7 +140,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
               </div>
 
               {/* Botones */}
-              <div className="space-y-2">
+              <div className="px-6 pb-4 space-y-2">
                 <Button
                   variant="primary"
                   className="w-full flex items-center justify-center gap-2"
@@ -144,13 +149,14 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                   <ShoppingCart className="w-4 h-4" />
                   Ver Carrito
                 </Button>
-                <button
+                <Button
                   onClick={handleVaciarCarrito}
-                  className="w-full py-2.5 px-4 text-sm font-semibold text-destructive hover:text-destructive hover:bg-destructive/10 border border-destructive/30 hover:border-destructive/50 rounded-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                  className="w-full flex items-center justify-center gap-2"
+                  variant="outline-primary"
                 >
                   <Trash2 className="w-4 h-4" />
                   Vaciar Carrito
-                </button>
+                </Button>
                 <button
                   onClick={onClose}
                   className="w-full py-2.5 px-4 text-sm font-medium text-foreground hover:text-foreground/80 transition-all duration-200 decoration-foreground/30 hover:decoration-foreground/60 underline-offset-4"

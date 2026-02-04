@@ -1,10 +1,14 @@
+'use client';
+
+import { useState } from 'react';
 import ModalBase from "./BaseModal";
 import { AlertCircle, CheckCircle, Info } from 'lucide-react';
 
 interface ConfirmModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onConfirm: () => void;
+    /** Sincrónico o async: si devuelve Promise, el modal solo se cierra al resolver sin error */
+    onConfirm: () => void | Promise<void>;
     title: string;
     description?: string;
     type?: 'success' | 'error' | 'warning' | 'info';
@@ -22,11 +26,28 @@ const ConfirmModal = ({
     confirmText = 'Confirmar',
     cancelText = 'Cancelar'
 }: ConfirmModalProps) => {
+    const [isConfirming, setIsConfirming] = useState(false);
+
     const icons = {
         success: <CheckCircle className="w-12 h-12" style={{ color: 'var(--principal)' }} />,
         error: <AlertCircle className="w-12 h-12 text-error" />,
         warning: <AlertCircle className="w-12 h-12" style={{ color: 'var(--principal)' }} />,
         info: <Info className="w-12 h-12" style={{ color: 'var(--principal)' }} />
+    };
+
+    const handleConfirm = async () => {
+        setIsConfirming(true);
+        try {
+            const result = onConfirm();
+            if (result instanceof Promise) {
+                await result;
+            }
+            onClose();
+        } catch {
+            // No cerrar; el caller (ej. toast) ya mostró el error
+        } finally {
+            setIsConfirming(false);
+        }
     };
 
     return (
@@ -50,7 +71,8 @@ const ConfirmModal = ({
                     <div className="flex gap-3">
                         <button
                             onClick={handleClose}
-                            className="flex-1 py-3 px-6 rounded-2xl font-medium transition-all duration-200 hover:scale-105 active:scale-95"
+                            disabled={isConfirming}
+                            className="flex-1 py-3 px-6 rounded-2xl font-medium transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-60"
                             style={{
                                 backgroundColor: 'rgba(var(--foreground-rgb), 0.08)',
                                 color: 'var(--foreground)',
@@ -60,17 +82,15 @@ const ConfirmModal = ({
                             {cancelText}
                         </button>
                         <button
-                            onClick={() => {
-                                onConfirm();
-                                handleClose();
-                            }}
-                            className="flex-1 py-3 px-6 rounded-2xl font-medium transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg"
+                            onClick={handleConfirm}
+                            disabled={isConfirming}
+                            className="flex-1 py-3 px-6 rounded-2xl font-medium transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg disabled:opacity-60"
                             style={{
                                 backgroundColor: 'var(--principal)',
                                 color: 'white'
                             }}
                         >
-                            {confirmText}
+                            {isConfirming ? '...' : confirmText}
                         </button>
                     </div>
                 </div>
