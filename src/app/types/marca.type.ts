@@ -8,19 +8,13 @@ export interface IMarca {
     actualizado_en?: Date | null;
 }
 
-export interface ICreateMarcaDTO {
-    codi_marca: string;
+export interface ICreateMarcaDTO { 
     nombre: string;
-    descripcion?: string;
-}
-
-export interface IUpdateMarcaDTO {
-    nombre?: string;
     descripcion?: string;
 }
 
 export interface MarcaResponse {
     success: boolean;
     data: IMarca[];
-    message?: string;
+    message: string;
 }

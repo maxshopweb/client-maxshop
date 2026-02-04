@@ -40,7 +40,7 @@ export function useLocalPaymentHandler({ formData }: UseLocalPaymentHandlerOptio
       toast.error('Carrito vacío', {
         description: 'No hay productos en el carrito',
       });
-      router.push('/checkout?step=1');
+      router.push('/');
       return;
     }
 

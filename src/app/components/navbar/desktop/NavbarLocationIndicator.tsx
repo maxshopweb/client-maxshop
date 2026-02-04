@@ -1,27 +1,20 @@
 "use client";
 
 import { MapPin } from "lucide-react";
-import { useCheckoutStore } from "@/app/hooks/checkout/useCheckoutStore";
 
 interface NavbarLocationIndicatorProps {
+  localidad: string;
   shouldShowBackground: boolean;
   actualTheme: "light" | "dark";
   onLocationClick: () => void;
 }
 
 export default function NavbarLocationIndicator({
+  localidad,
   shouldShowBackground,
   actualTheme,
   onLocationClick,
 }: NavbarLocationIndicatorProps) {
-  const ciudad = useCheckoutStore((state) => state.ciudad);
-  const provincia = useCheckoutStore((state) => state.provincia);
-  
-  // Formatear localidad desde el store
-  const localidad = ciudad && provincia 
-    ? `${ciudad}, ${provincia}`
-    : ciudad || provincia || "Seleccionar ubicación";
-
   const iconClassName = shouldShowBackground
     ? actualTheme === 'dark'
       ? "text-white"
@@ -34,8 +27,6 @@ export default function NavbarLocationIndicator({
       : "text-terciario"
     : "text-white";
 
-  const mostrarLocalidad = localidad !== "Seleccionar ubicación";
-
   return (
     <button
       onClick={onLocationClick}
@@ -43,9 +34,7 @@ export default function NavbarLocationIndicator({
     >
       <MapPin size={16} className={iconClassName} />
       <span className={textClassName}>
-        {
-          mostrarLocalidad ? `Estás en: ${localidad}` : "Seleccionar ubicación"
-        }
+        Estás en: {localidad}
       </span>
     </button>
   );

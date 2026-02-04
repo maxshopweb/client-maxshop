@@ -18,10 +18,10 @@ export default function TipoEntregaSelector({
 }: TipoEntregaSelectorProps) {
   return (
     <div className="space-y-4">
-      <label className="text-sm font-medium text-foreground mb-2">
+      <label className="text-sm font-medium text-foreground">
         Tipo de entrega *
       </label>
-      <div className="grid grid-cols-2 gap-4 mt-2">
+      <div className="grid grid-cols-2 gap-4">
         <button
           type="button"
           onClick={() => onSelect('envio')}
@@ -29,7 +29,7 @@ export default function TipoEntregaSelector({
             p-6 rounded-xl border-2 transition-all
             ${selectedTipo === 'envio'
               ? 'border-principal bg-principal/5 shadow-md'
-              : 'border-[rgba(23,28,53,0.1)] hover:border-[rgba(23,28,53,0.18)]'
+              : 'border-foreground/10 hover:border-foreground/20'
             }
           `}
         >
@@ -47,7 +47,7 @@ export default function TipoEntregaSelector({
           }`}>
             Envío a domicilio
           </p>
-          {/* {costoEnvio !== null && costoEnvio > 0 && selectedTipo === 'envio' && (
+          {costoEnvio !== null && costoEnvio > 0 && selectedTipo === 'envio' && (
             <motion.p
               initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
@@ -55,12 +55,12 @@ export default function TipoEntregaSelector({
             >
               ${costoEnvio.toFixed(2)}
             </motion.p>
-          )} */}
-          {/* {selectedTipo === 'envio' && costoEnvio === null && (
+          )}
+          {selectedTipo === 'envio' && costoEnvio === null && (
             <p className="text-xs text-foreground/50 mt-1">
               Se calculará automáticamente
             </p>
-          )} */}
+          )}
         </button>
 
         <button
@@ -70,7 +70,7 @@ export default function TipoEntregaSelector({
             p-6 rounded-xl border-2 transition-all
             ${selectedTipo === 'retiro'
               ? 'border-principal bg-principal/5 shadow-md'
-              : 'border-[rgba(23,28,53,0.1)] hover:border-[rgba(23,28,53,0.18)]'
+              : 'border-foreground/10 hover:border-foreground/20'
             }
           `}
         >

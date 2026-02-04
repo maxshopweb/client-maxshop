@@ -2,79 +2,186 @@
 
 import { useState, useEffect } from "react";
 import SimpleModal from "./SimpleModal";
-import { Search, Loader2, CheckCircle2 } from "lucide-react";
-import { usePostalCodeSearch } from "@/app/hooks/cart/usePostalCodeSearch";
+import Select, { SelectOption } from "../ui/Select";
+import { provincias, buscarPorCodigoPostal, obtenerCiudadesPorProvincia, obtenerNombreUbicacion } from "@/app/utils/ubicaciones";
+import { MapPin, Search } from "lucide-react";
 
 interface LocationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onLocationSelect?: (provincia: string, ciudad: string, nombreCompleto: string) => void;
+  onLocationSelect: (provincia: string, ciudad: string, nombreCompleto: string) => void;
+  currentProvincia?: string;
+  currentCiudad?: string;
 }
 
 export default function LocationModal({
   isOpen,
   onClose,
   onLocationSelect,
+  currentProvincia,
+  currentCiudad,
 }: LocationModalProps) {
-  const { searchByPostalCode, isLoading, error, setAddressDataStore, clearPostalCode, foundData } = usePostalCodeSearch();
+  const [selectedProvincia, setSelectedProvincia] = useState<string>(currentProvincia || "");
+  const [selectedCiudad, setSelectedCiudad] = useState<string>(currentCiudad || "");
   const [codigoPostal, setCodigoPostal] = useState<string>("");
-  
-  // Limpiar al cerrar el modal
-  useEffect(() => {
-    if (!isOpen) {
-      setCodigoPostal("");
-      clearPostalCode();
-    }
-  }, [isOpen, clearPostalCode]);
+  const [modoBusqueda, setModoBusqueda] = useState<"select" | "codigo">("select");
+  const [error, setError] = useState<string>("");
 
-  const handlePostalCodeSearch = async () => {
-    if (!/^[0-9]{4}$/.test(codigoPostal)) {
+  // Opciones de provincias para el select
+  const provinciaOptions: SelectOption[] = provincias.map((p) => ({
+    value: p.value,
+    label: p.label,
+  }));
+
+  // Opciones de ciudades basadas en la provincia seleccionada
+  const ciudadOptions: SelectOption[] = selectedProvincia
+    ? obtenerCiudadesPorProvincia(selectedProvincia).map((c) => ({
+        value: c.value,
+        label: c.label,
+      }))
+    : [];
+
+  // Resetear ciudad cuando cambia la provincia
+  useEffect(() => {
+    if (selectedProvincia) {
+      setSelectedCiudad("");
+    }
+  }, [selectedProvincia]);
+
+  // Función para buscar por código postal
+  const handleBuscarPorCodigo = () => {
+    setError("");
+    if (!codigoPostal.trim()) {
+      setError("Por favor ingrese un código postal");
       return;
     }
-    await searchByPostalCode(codigoPostal);
+
+    const resultado = buscarPorCodigoPostal(codigoPostal);
+    if (resultado) {
+      setSelectedProvincia(resultado.provincia);
+      setSelectedCiudad(resultado.ciudad);
+      setError("");
+    } else {
+      setError("No se encontró ubicación para ese código postal");
+    }
   };
 
-  const onChangeCodigoPostal = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, '').slice(0, 4);
-    setCodigoPostal(value);
+  // Función para confirmar selección
+  const handleConfirmar = (handleClose: () => void) => {
+    setError("");
+    
+    if (modoBusqueda === "codigo") {
+      if (!codigoPostal.trim()) {
+        setError("Por favor ingrese un código postal");
+        return;
+      }
+      const resultado = buscarPorCodigoPostal(codigoPostal);
+      if (!resultado) {
+        setError("No se encontró ubicación para ese código postal");
+        return;
+      }
+      const nombreCompleto = obtenerNombreUbicacion(resultado.provincia, resultado.ciudad);
+      onLocationSelect(resultado.provincia, resultado.ciudad, nombreCompleto);
+    } else {
+      if (!selectedProvincia || !selectedCiudad) {
+        setError("Por favor seleccione provincia y ciudad");
+        return;
+      }
+      const nombreCompleto = obtenerNombreUbicacion(selectedProvincia, selectedCiudad);
+      onLocationSelect(selectedProvincia, selectedCiudad, nombreCompleto);
+    }
+    
+    handleClose();
   };
 
   return (
     <SimpleModal
       isOpen={isOpen}
       onClose={onClose}
-      title="Ingrese su código postal"
+      title="Seleccionar ubicación"
       maxWidth="max-w-lg"
+      actions={(handleClose) => (
+        <>
+          <button
+            onClick={handleClose}
+            className="flex-1 px-4 py-3 rounded-lg border-2 border-input/70 text-foreground font-medium hover:bg-input/20 transition-all duration-200"
+            style={{
+              borderColor: 'var(--input)',
+            }}
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={() => handleConfirmar(handleClose)}
+            className="flex-1 px-4 py-3 rounded-lg bg-principal text-white font-medium hover:bg-principal/90 transition-all duration-200"
+          >
+            Confirmar
+          </button>
+        </>
+      )}
     >
-      {(handleClose) => {
-        const handleConfirmAddressData = async () => {
-          // Usar el código postal de foundData si existe, sino el del input
-          const cpToSave = foundData?.codigoPostal || codigoPostal;
-          
-          if (!foundData) {
-            // Si no hay datos encontrados pero hay CP válido, guardar solo el CP
-            if (/^[0-9]{4}$/.test(codigoPostal)) {
-              await setAddressDataStore(cpToSave);
-            }
-          } else {
-            // Si hay datos encontrados, guardar todo (incluyendo código postal)
-            await setAddressDataStore(cpToSave);
-          }
-          
-          // Notificar callback si existe
-          if (onLocationSelect && foundData?.provincia && foundData?.ciudad) {
-            onLocationSelect(
-              foundData.provincia,
-              foundData.ciudad,
-              `${foundData.ciudad}, ${foundData.provincia}`
-            );
-          }
-          
-          // Cerrar con animación
-          handleClose();
-        };
+      <div className="space-y-6">
+        {/* Tabs para cambiar modo de búsqueda */}
+        <div className="flex gap-2 border-b border-input/30 pb-2">
+          <button
+            onClick={() => {
+              setModoBusqueda("select");
+              setError("");
+            }}
+            className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+              modoBusqueda === "select"
+                ? "bg-principal text-white font-medium"
+                : "text-foreground/70 hover:text-foreground hover:bg-input/20"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <MapPin size={16} />
+              <span>Seleccionar</span>
+            </div>
+          </button>
+          <button
+            onClick={() => {
+              setModoBusqueda("codigo");
+              setError("");
+            }}
+            className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+              modoBusqueda === "codigo"
+                ? "bg-principal text-white font-medium"
+                : "text-foreground/70 hover:text-foreground hover:bg-input/20"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Search size={16} />
+              <span>Código Postal</span>
+            </div>
+          </button>
+        </div>
 
-        return (
+        {/* Contenido según el modo */}
+        {modoBusqueda === "select" ? (
+          <div className="space-y-4">
+            <Select
+              label="Provincia"
+              options={provinciaOptions}
+              value={selectedProvincia}
+              onChange={(value) => setSelectedProvincia(value as string)}
+              placeholder="Seleccione una provincia"
+            />
+
+            <Select
+              label="Ciudad"
+              options={ciudadOptions}
+              value={selectedCiudad}
+              onChange={(value) => setSelectedCiudad(value as string)}
+              placeholder={
+                selectedProvincia
+                  ? "Seleccione una ciudad"
+                  : "Primero seleccione una provincia"
+              }
+              disabled={!selectedProvincia}
+            />
+          </div>
+        ) : (
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'var(--foreground)' }}>
@@ -83,64 +190,50 @@ export default function LocationModal({
               <div className="flex gap-2">
                 <input
                   type="text"
-                  inputMode="numeric"
-                  maxLength={4}
                   value={codigoPostal}
-                  onChange={onChangeCodigoPostal}
+                  onChange={(e) => {
+                    setCodigoPostal(e.target.value);
+                    setError("");
+                  }}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      handleBuscarPorCodigo();
+                    }
+                  }}
                   placeholder="Ej: 5000"
-                  disabled={isLoading}
-                  className="flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 appearance-none focus:outline-none focus:ring-2 focus:ring-principal/20 focus:shadow-sm bg-background text-foreground border-2 border-input/70 hover:border-principal/50 focus:border-principal disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 appearance-none focus:outline-none focus:ring-2 focus:ring-principal/20 focus:shadow-sm bg-background text-foreground border-2 border-input/70 hover:border-principal/50 focus:border-principal"
                   style={{
                     backgroundColor: 'var(--background)',
                     color: 'var(--foreground)',
                   }}
                 />
                 <button
-                  type="button"
-                  onClick={handlePostalCodeSearch}
-                  disabled={isLoading || !/^[0-9]{4}$/.test(codigoPostal)}
-                  className="px-6 py-3 rounded-lg bg-principal text-white font-medium hover:bg-principal/90 transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleBuscarPorCodigo}
+                  className="px-6 py-3 rounded-lg bg-principal text-white font-medium hover:bg-principal/90 transition-all duration-200 flex items-center gap-2"
                 >
-                  {isLoading ? (
-                    <Loader2 size={18} className="animate-spin" />
-                  ) : (
-                    <Search size={18} />
-                  )}
+                  <Search size={18} />
                   <span>Buscar</span>
                 </button>
               </div>
-            </div>
-
-            {/* Mostrar resultado de búsqueda */}
-            {foundData && !isLoading && foundData.ciudad && foundData.provincia && (
-              <button
-                type="button"
-                onClick={handleConfirmAddressData}
-                className="w-full p-4 rounded-lg bg-green-50 border-2 border-green-200 hover:bg-green-100 hover:border-green-300 transition-all duration-300 cursor-pointer text-left transform hover:scale-[1.02] active:scale-[0.98]"
-              >
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <div className="flex-1">
-                    <p className="text-sm text-green-700 font-medium">
-                      {foundData.ciudad}, {foundData.provincia}
-                    </p>
-                    <p className="text-xs text-green-600 mt-1">
-                      Click para seleccionar
-                    </p>
-                  </div>
+              {selectedProvincia && selectedCiudad && (
+                <div className="mt-3 p-3 rounded-lg bg-principal/10 border border-principal/20">
+                  <p className="text-sm" style={{ color: 'var(--foreground)' }}>
+                    <strong>Ubicación encontrada:</strong>{" "}
+                    {obtenerNombreUbicacion(selectedProvincia, selectedCiudad)}
+                  </p>
                 </div>
-              </button>
-            )}
-
-            {/* Mostrar error */}
-            {error && !isLoading && (
-              <div className="p-3 rounded-lg bg-red-50 border border-red-200">
-                <p className="text-sm text-red-700">{error}</p>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        );
-      }}
+        )}
+
+        {error && (
+          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+            <p className="text-sm text-red-500">{error}</p>
+          </div>
+        )}
+      </div>
     </SimpleModal>
   );
 }
+

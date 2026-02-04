@@ -31,11 +31,6 @@ class GrupoService {
     const response = await axiosInstance.delete<IGrupoResponse>(`/grupos/${id}`);
     return response.data;
   }
-
-  async getSiguienteCodigo(): Promise<{ success: boolean; data: { codigo: string } }> {
-    const response = await axiosInstance.get<{ success: boolean; data: { codigo: string } }>('/grupos/siguiente-codigo');
-    return response.data;
-  }
 }
 
 export const grupoService = new GrupoService();
