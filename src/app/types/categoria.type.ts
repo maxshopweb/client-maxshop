@@ -22,13 +22,7 @@ export interface ISubcategoria {
 }
 
 export interface ICreateCategoriaDTO {
-    codi_categoria: string;
     nombre: string;
-    descripcion?: string;
-}
-
-export interface IUpdateCategoriaDTO {
-    nombre?: string;
     descripcion?: string;
 }
 

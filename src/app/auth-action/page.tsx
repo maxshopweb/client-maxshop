@@ -179,7 +179,7 @@ function AuthActionContent() {
         <div className="flex flex-col items-center gap-4 py-8">
           <CheckCircle2 className="h-16 w-16 text-green-500" />
           <p className="text-center text-gray-600">
-            Tu email ha sido verificado correctamente. Serás redirigido para completar tu perfil.
+            Tu email ha sido verificado correctamente. Serás redirigido al inicio de sesión.
           </p>
         </div>
       </AuthLayout>

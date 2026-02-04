@@ -1,6 +1,6 @@
 export type UserRole = 'ADMIN' | 'USER';
 
-// 0 = eliminado, 1 = invitado (checkout sin registro), 2 = perfil incompleto, 3 = dado de alta (usuario completo)
+// 1 = activo, 2 = inactivo, 0 = eliminado, 3 = perfil incompleto
 export type UserEstado = 0 | 1 | 2 | 3;
 
 export interface IUsuario {

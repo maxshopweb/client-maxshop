@@ -13,8 +13,7 @@ import {
     Sun,
     User,
     LogOut,
-    ShoppingCart,
-    Zap
+    ShoppingCart
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -34,7 +33,6 @@ const navItems: NavItem[] = [
     { icon: Package, label: "Productos", path: "/admin/productos" },
     { icon: ShoppingCart, label: "Ventas", path: "/admin/ventas" },
     { icon: Calendar, label: "Eventos", path: "/admin/eventos" },
-    { icon: Zap, label: "Utilidades", path: "/admin/utilidades" },
     { icon: Users, label: "Clientes", path: "/admin/clientes" },
     { icon: Settings, label: "Config", path: "/admin/config" },
 ];

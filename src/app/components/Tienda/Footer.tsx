@@ -3,7 +3,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Mail, Phone, MapPin, Facebook, Instagram, Twitter } from "lucide-react";
-import { FaWhatsapp } from "react-icons/fa";
 import { useState } from "react";
 import { Button } from "@/app/components/ui/Button";
 
@@ -59,8 +58,9 @@ export default function Footer() {
                   <MapPin className="w-5 h-5 text-principal mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-white/90 text-sm md:text-base leading-relaxed capitalize">
-                      Punta del Sauce 1826<br />
-                      Córdoba Capital, Argentina
+                      Av. Principal 1234<br />
+                      Ciudad, Provincia<br />
+                      CP 1234
                     </p>
                   </div>
                 </div>
@@ -71,7 +71,7 @@ export default function Footer() {
                     href="tel:+541234567890" 
                     className="text-white/90 hover:text-principal transition-colors text-sm md:text-base capitalize"
                   >
-                    +54 9 11 7150-6220
+                    +54 11 2345-6789
                   </Link>
                 </div>
 
@@ -103,7 +103,7 @@ export default function Footer() {
                   <Facebook size={20} />
                 </Link>
                 <Link
-                  href="https://instagram.com/maxshop.ar/"
+                  href="https://instagram.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-white/5 hover:bg-principal flex items-center justify-center transition-all duration-300 hover:scale-110"
@@ -118,7 +118,7 @@ export default function Footer() {
                   className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-white/5 hover:bg-principal flex items-center justify-center transition-all duration-300 hover:scale-110"
                   aria-label="Twitter"
                 >
-                  <FaWhatsapp size={20} />
+                  <Twitter size={20} />
                 </Link>
               </div>
             </div>

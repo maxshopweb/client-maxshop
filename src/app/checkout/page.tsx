@@ -14,11 +14,17 @@ function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { items } = useCartStore();
-  const {
-    loadCartFromLocalStorage,
-    setCartItems,
+  const { 
+    loadCartFromLocalStorage, 
+    setCartItems, 
+    cartItems, 
     setCurrentStep,
     currentStep,
+    personalData,
+    shippingData,
+    paymentMethod,
+    completedSteps,
+    isCreatingOrder
   } = useCheckoutStore();
   const [isMounted, setIsMounted] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -75,9 +81,35 @@ function CheckoutContent() {
     }
   }, [items, setCartItems]);
 
-  // No redirigir nunca automáticamente a /: el usuario debe usar "Volver" si quiere salir.
-  // Mostrar siempre el layout cuando estamos en /checkout (carrito vacío = mensaje en Step 1).
-  if (!isMounted) return null;
+  // Redirigir si no hay items SOLO si no hay datos de checkout guardados
+  // Esto evita que redirija cuando recargas la página durante el checkout
+  useEffect(() => {
+    if (!isMounted) return;
+    
+    // NO redirigir si estamos creando un pedido (navegando a resultado)
+    if (isCreatingOrder) {
+      return;
+    }
+    
+    const hasCheckoutData = personalData || shippingData || paymentMethod || completedSteps.length > 0;
+    
+    // Solo redirigir si no hay items Y no hay datos de checkout guardados
+    if (items.length === 0 && cartItems.length === 0 && !hasCheckoutData) {
+      router.push("/");
+    }
+  }, [isMounted, items.length, cartItems.length, personalData, shippingData, paymentMethod, completedSteps.length, isCreatingOrder, router]);
+
+  // No renderizar nada hasta que esté montado para evitar hydration mismatch
+  if (!isMounted) {
+    return null;
+  }
+
+  // No renderizar nada mientras se verifica, pero no redirigir inmediatamente
+  const hasCheckoutData = personalData || shippingData || paymentMethod || completedSteps.length > 0;
+  
+  if (items.length === 0 && cartItems.length === 0 && !hasCheckoutData) {
+    return null; // El useEffect redirigirá
+  }
 
   return <CheckoutLayout />;
 }

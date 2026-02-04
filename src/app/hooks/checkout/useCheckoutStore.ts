@@ -16,17 +16,14 @@ interface CheckoutStore {
   currentStep: 1 | 2 | 3 | 4;
   completedSteps: number[];
   cartItems: CartItem[];
-  personalData: PersonalFormData | null;
-  shippingData: ShippingFormData | null;
+  personalData: PersonalFormData | null; // Renombrado de contactData
+  shippingData: ShippingFormData | null; // Nuevo: datos de envío
   tipoEntrega: 'envio' | 'retiro' | null; // Nuevo: tipo de entrega
   paymentMethod: string | null;
   costoEnvio: number | null; // Costo de envío calculado
   id_direccion: string | null; // ID de dirección guardada seleccionada
   isCreatingOrder: boolean; // Estado para el loader de transición
   wasGuest: boolean; // Si el usuario era invitado al completar el checkout
-  codigoPostal: string | null; // Código postal para cotización
-  ciudad: string | null; // Ciudad autocompletada desde OpenCage
-  provincia: string | null; // Provincia autocompletada desde OpenCage
 
   setCurrentStep: (step: 1 | 2 | 3 | 4) => void;
   completeStep: (step: number) => void;
@@ -38,13 +35,13 @@ interface CheckoutStore {
   setIdDireccion: (id: string | null) => void;
   setIsCreatingOrder: (isCreating: boolean) => void;
   setWasGuest: (wasGuest: boolean) => void;
-  setCodigoPostal: (cp: string | null) => void;
-  setCiudad: (ciudad: string | null) => void;
-  setProvincia: (provincia: string | null) => void;
-  clearShippingLocation: () => void; // Limpiar CP, ciudad, provincia
   loadCartFromLocalStorage: () => void;
   setCartItems: (items: CartItem[]) => void;
   resetCheckout: () => void;
+  
+  // Deprecated: mantener para compatibilidad temporal
+  contactData: PersonalFormData | null;
+  setContactData: (data: PersonalFormData) => void;
 }
 
 export const useCheckoutStore = create<CheckoutStore>()(
@@ -61,9 +58,9 @@ export const useCheckoutStore = create<CheckoutStore>()(
       id_direccion: null,
       isCreatingOrder: false,
       wasGuest: false,
-      codigoPostal: null,
-      ciudad: null,
-      provincia: null,
+      
+      // Deprecated: mantener para compatibilidad
+      contactData: null,
 
       setCurrentStep: (step) => set({ currentStep: step }),
 
@@ -74,8 +71,8 @@ export const useCheckoutStore = create<CheckoutStore>()(
             : [...state.completedSteps, step],
         })),
 
-      setPersonalData: (data) => set({ personalData: data }),
-
+      setPersonalData: (data) => set({ personalData: data, contactData: data }), // Mantener compatibilidad
+      
       setShippingData: (data) => set({ shippingData: data }),
 
       setTipoEntrega: (tipo) => set({ tipoEntrega: tipo }),
@@ -90,18 +87,8 @@ export const useCheckoutStore = create<CheckoutStore>()(
       
       setWasGuest: (wasGuest) => set({ wasGuest }),
       
-      setCodigoPostal: (cp) => set({ codigoPostal: cp }),
-      
-      setCiudad: (ciudad) => set({ ciudad }),
-      
-      setProvincia: (provincia) => set({ provincia }),
-      
-      clearShippingLocation: () => set({ 
-        codigoPostal: null, 
-        ciudad: null, 
-        provincia: null,
-        costoEnvio: null 
-      }),
+      // Deprecated: mantener para compatibilidad
+      setContactData: (data) => set({ personalData: data, contactData: data }),
 
       loadCartFromLocalStorage: () => {
         if (typeof window === 'undefined') return;
@@ -130,9 +117,7 @@ export const useCheckoutStore = create<CheckoutStore>()(
 
       setCartItems: (items) => set({ cartItems: items }),
 
-      resetCheckout: () => {
-        // Obtener valores actuales de ubicación para preservarlos
-        const { codigoPostal, ciudad, provincia } = get();
+      resetCheckout: () =>
         set({
           currentStep: 1,
           completedSteps: [],
@@ -145,12 +130,8 @@ export const useCheckoutStore = create<CheckoutStore>()(
           id_direccion: null,
           isCreatingOrder: false,
           wasGuest: false,
-          // Preservar ubicación (ciudad, provincia, codigoPostal) al resetear checkout
-          codigoPostal,
-          ciudad,
-          provincia,
-        });
-      },
+          contactData: null, // Deprecated
+        }),
     }),
     {
       name: 'checkout-storage',
@@ -163,17 +144,11 @@ export const useCheckoutStore = create<CheckoutStore>()(
         paymentMethod: state.paymentMethod,
         costoEnvio: state.costoEnvio,
         id_direccion: state.id_direccion,
-        codigoPostal: state.codigoPostal,
-        ciudad: state.ciudad,
-        provincia: state.provincia,
-        wasGuest: state.wasGuest,
+        wasGuest: state.wasGuest, // Persistir para que esté disponible después de recargar
+        // Deprecated: mantener para compatibilidad
+        contactData: state.contactData,
+        // No persistir cartItems, se cargan desde cartStore
       }),
-      version: 1,
-      migrate: (persistedState: unknown, _version: number) => {
-        const s = persistedState as Record<string, unknown>;
-        const { contactData: _removed, ...rest } = s ?? {};
-        return rest;
-      },
     }
   )
 );

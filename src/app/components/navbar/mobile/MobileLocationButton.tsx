@@ -1,21 +1,16 @@
 "use client";
 
 import { MapPin } from "lucide-react";
-import { useCheckoutStore } from "@/app/hooks/checkout/useCheckoutStore";
 
 interface MobileLocationButtonProps {
+  localidad: string;
   onClick: () => void;
 }
 
 export default function MobileLocationButton({
+  localidad,
   onClick,
 }: MobileLocationButtonProps) {
-  const { ciudad, provincia } = useCheckoutStore();
-  
-  // Formatear localidad desde el store
-  const localidad = ciudad && provincia 
-    ? `${ciudad}, ${provincia}`
-    : ciudad || provincia || "Seleccionar ubicación";
   return (
     <button
       onClick={onClick}

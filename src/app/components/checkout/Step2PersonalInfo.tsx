@@ -4,31 +4,23 @@ import { useState } from "react";
 import { Controller } from "react-hook-form";
 import { motion } from "framer-motion";
 import { ArrowLeft, LogIn } from "lucide-react";
-import { Button } from "@/app/components/ui/Button";
-import Input from "@/app/components/ui/Input";
-import Select from "@/app/components/ui/Select";
-
-import { PersonalFormData, PersonalFormDataAuthUser } from "@/app/schemas/personalForm.schema";
-import { personalDataFromAuthUser } from "@/app/utils/personalDataFromAuthUser";
-
 import { useCheckoutStore } from "@/app/hooks/checkout/useCheckoutStore";
 import { useAuth } from "@/app/context/AuthContext";
+import { Button } from "@/app/components/ui/Button";
 import { GuestCheckoutButton } from "@/app/components/ui/GuestCheckoutButton";
+import Input from "@/app/components/ui/Input";
+import Select from "@/app/components/ui/Select";
 import { usePersonalForm } from "@/app/hooks/checkout/usePersonalForm";
-import { usePersonalFormAuthUser } from "@/app/hooks/checkout/usePersonalFormAuthUser";
 import { useAutoFillPersonalData } from "@/app/hooks/checkout/useAutoFillPersonalData";
 import { useBillingDataPersonal } from "@/app/hooks/checkout/useBillingDataPersonal";
-import { useBillingDataPersonalAuthUser } from "@/app/hooks/checkout/useBillingDataPersonalAuthUser";
 import { useGuestCheckoutPersonal } from "@/app/hooks/checkout/useGuestCheckoutPersonal";
 import { useContactFormOptions } from "@/app/hooks/checkout/useContactFormOptions";
+import { PersonalFormData } from "@/app/schemas/personalForm.schema";
 
 export default function Step2PersonalInfo() {
   const { personalData, setPersonalData, setCurrentStep, completeStep } = useCheckoutStore();
-  const { user, isAuthenticated, isGuest, loading: authLoading } = useAuth();
-
-  /** Usuario logueado (no invitado): ya tenemos sus datos, solo pedimos DNI + facturación */
-  const isLoggedUser = isAuthenticated && !!user && !isGuest;
-
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
+  
   // Estados para notificaciones en tiempo real
   const [phoneAreaError, setPhoneAreaError] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
@@ -75,41 +67,12 @@ export default function Step2PersonalInfo() {
     },
   });
 
-  // Formulario reducido para usuario logueado (solo DNI + facturación)
-  const formAuth = usePersonalFormAuthUser();
-  const {
-    register: registerAuth,
-    handleSubmit: handleSubmitAuth,
-    formState: { errors: errorsAuth, isValid: isValidAuth },
-    setValue: setValueAuth,
-    watch: watchAuth,
-    control: controlAuth,
-  } = formAuth;
-  const {
-    necesitaFacturaA: necesitaFacturaAAuth,
-    usarMismosDatos: usarMismosDatosAuth,
-    setNecesitaFacturaA: setNecesitaFacturaAAuth,
-    setUsarMismosDatos: setUsarMismosDatosAuth,
-  } = useBillingDataPersonalAuthUser({
-    user,
-    setValue: formAuth.setValue,
-    watch: formAuth.watch,
-  });
-
   // Opciones de selects
   const { tipoDocumentoOptions, provinciaOptions } = useContactFormOptions();
 
   // Handlers
   const onSubmit = (data: PersonalFormData) => {
     setPersonalData(data);
-    completeStep(2);
-    setCurrentStep(3);
-  };
-
-  const onSubmitAuthUser = (data: PersonalFormDataAuthUser) => {
-    if (!user) return;
-    const merged = personalDataFromAuthUser(user, data);
-    setPersonalData(merged);
     completeStep(2);
     setCurrentStep(3);
   };
@@ -152,197 +115,6 @@ export default function Step2PersonalInfo() {
             loading={isProcessingGuest}
           />
         </div>
-        <Button
-          type="button"
-          variant="ghost"
-          size="lg"
-          onClick={() => setCurrentStep(1)}
-          className="rounded-lg flex-1"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Volver
-        </Button>
-      </motion.div>
-    );
-  }
-
-  // Usuario logueado (no invitado): solo DNI + facturación
-  if (isLoggedUser) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        className="space-y-6"
-      >
-        <div className="flex items-center gap-4 mb-6">
-          <button
-            onClick={() => setCurrentStep(1)}
-            className="p-2 hover:bg-foreground/5 rounded-lg transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <h2 className="text-2xl font-bold text-foreground/90">Información personal</h2>
-        </div>
-
-        {/* <p className="text-foreground/70 text-sm">
-          Completando con {user?.nombre} {user?.apellido} ({user?.email})
-        </p> */}
-
-        <form onSubmit={handleSubmitAuth(onSubmitAuthUser as any)} className="space-y-6">
-          <div className="space-y-5">
-            <h3 className="text-lg font-semibold text-foreground/90 border-b pb-2">Documento y facturación</h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <Controller
-                name="tipoDocumento"
-                control={controlAuth}
-                render={({ field }) => (
-                  <Select
-                    label="Tipo de documento"
-                    options={tipoDocumentoOptions}
-                    value={field.value}
-                    onChange={(value) => {
-                      field.onChange(value);
-                      setValueAuth("documento", "");
-                    }}
-                    placeholder="Seleccionar..."
-                    error={errorsAuth.tipoDocumento?.message}
-                  />
-                )}
-              />
-              <Input
-                label={watchAuth("tipoDocumento") === "CUIT" ? "CUIT" : "DNI"}
-                {...registerAuth("documento")}
-                error={errorsAuth.documento?.message}
-                placeholder={watchAuth("tipoDocumento") === "CUIT" ? "12345678901" : "12345678"}
-                className="rounded-lg"
-                style={{
-                  backgroundColor: "var(--white)",
-                  border: errorsAuth.documento
-                    ? "1px solid rgb(239, 68, 68)"
-                    : "1px solid rgba(23, 28, 53, 0.1)",
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-5 pt-4 border-t">
-            <h3 className="text-lg font-semibold text-foreground/90 border-b pb-2">Facturación</h3>
-            <div className="space-y-3">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={necesitaFacturaAAuth}
-                  onChange={(e) => {
-                    setNecesitaFacturaAAuth(e.target.checked);
-                    setTimeout(() => {
-                      setValueAuth("necesitaFacturaA", e.target.checked, { shouldValidate: true });
-                    }, 0);
-                  }}
-                  className="w-5 h-5 rounded border-2 border-principal text-principal focus:ring-principal"
-                />
-                <span className="text-foreground font-medium">Necesito Factura A</span>
-              </label>
-              {necesitaFacturaAAuth && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="space-y-4 pl-8 border-l-2 border-principal/30"
-                >
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={usarMismosDatosAuth}
-                      onChange={(e) => {
-                        setUsarMismosDatosAuth(e.target.checked);
-                        setTimeout(() => {
-                          setValueAuth("usarMismosDatosFacturacion", e.target.checked, { shouldValidate: true });
-                        }, 0);
-                      }}
-                      className="w-5 h-5 rounded border-2 border-principal text-principal focus:ring-principal"
-                    />
-                    <span className="text-foreground">Usar los mismos datos de contacto</span>
-                  </label>
-                  {!usarMismosDatosAuth && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="space-y-4"
-                    >
-                      <Input
-                        label="Razón Social"
-                        {...registerAuth("facturacionA.razonSocial")}
-                        error={errorsAuth.facturacionA?.razonSocial?.message}
-                        placeholder="Razón social"
-                        className="rounded-lg"
-                        style={{
-                          backgroundColor: "var(--white)",
-                          border: errorsAuth.facturacionA?.razonSocial
-                            ? "1px solid rgb(239, 68, 68)"
-                            : "1px solid rgba(23, 28, 53, 0.1)",
-                        }}
-                      />
-                      <Input
-                        label="Nombre de la Empresa"
-                        {...registerAuth("facturacionA.nombreEmpresa")}
-                        error={errorsAuth.facturacionA?.nombreEmpresa?.message}
-                        placeholder="Nombre de la empresa"
-                        className="rounded-lg"
-                        style={{
-                          backgroundColor: "var(--white)",
-                          border: errorsAuth.facturacionA?.nombreEmpresa
-                            ? "1px solid rgb(239, 68, 68)"
-                            : "1px solid rgba(23, 28, 53, 0.1)",
-                        }}
-                      />
-                      <Input
-                        label="CUIT"
-                        {...registerAuth("facturacionA.cuit")}
-                        error={errorsAuth.facturacionA?.cuit?.message}
-                        placeholder="12345678901"
-                        className="rounded-lg"
-                        style={{
-                          backgroundColor: "var(--white)",
-                          border: errorsAuth.facturacionA?.cuit
-                            ? "1px solid rgb(239, 68, 68)"
-                            : "1px solid rgba(23, 28, 53, 0.1)",
-                        }}
-                      />
-                    </motion.div>
-                  )}
-                </motion.div>
-              )}
-              {errorsAuth.facturacionA && typeof errorsAuth.facturacionA === "object" && "message" in errorsAuth.facturacionA && (
-                <p className="text-sm text-red-600">{errorsAuth.facturacionA.message as string}</p>
-              )}
-            </div>
-          </div>
-
-          <div className="pt-4 flex gap-4">
-            <Button
-              type="button"
-              variant="outline-primary"
-              size="lg"
-              onClick={() => setCurrentStep(1)}
-              className="rounded-lg flex-1"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Volver
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              disabled={!isValidAuth}
-              className="rounded-lg flex-1"
-            >
-              Continuar
-            </Button>
-          </div>
-        </form>
       </motion.div>
     );
   }
@@ -488,7 +260,7 @@ export default function Step2PersonalInfo() {
                   {...register("phoneArea")}
                   onChange={(e) => {
                     let value = e.target.value.replace(/\D/g, "");
-
+                    
                     // Detectar y notificar si empieza con 0
                     if (value.startsWith('0')) {
                       setPhoneAreaError('No debe comenzar con 0');
@@ -496,7 +268,7 @@ export default function Step2PersonalInfo() {
                     } else {
                       setPhoneAreaError(null);
                     }
-
+                    
                     setValue("phoneArea", value, { shouldValidate: true });
                   }}
                   style={{
@@ -521,7 +293,7 @@ export default function Step2PersonalInfo() {
                   {...register("phone")}
                   onChange={(e) => {
                     let value = e.target.value.replace(/\D/g, "");
-
+                    
                     // Detectar y notificar si empieza con 15
                     if (value.startsWith('15')) {
                       setPhoneError('No debe comenzar con 15');
@@ -529,7 +301,7 @@ export default function Step2PersonalInfo() {
                     } else {
                       setPhoneError(null);
                     }
-
+                    
                     // Solo guardar el número, sin concatenar el área
                     setValue("phone", value, { shouldValidate: true });
                   }}
@@ -662,7 +434,7 @@ export default function Step2PersonalInfo() {
                 )}
               </motion.div>
             )}
-
+            
             {/* Mostrar error de facturación si existe */}
             {errors.facturacionA && typeof errors.facturacionA === 'object' && 'message' in errors.facturacionA && (
               <p className="text-sm text-red-600">{errors.facturacionA.message as string}</p>
