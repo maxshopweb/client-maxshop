@@ -92,44 +92,20 @@ export function useCreateOrderFromCheckout(options: UseCreateOrderFromCheckoutOp
         return; // Salir temprano, no ejecutar el resto del código
       }
       
-      // Para otros métodos de pago, redirigir a la página de resultado
-      const metodo = venta.metodo_pago === 'efectivo' || venta.metodo_pago === 'transferencia' 
-        ? venta.metodo_pago 
+      // Para efectivo/transferencia: redirección dura para evitar que la página de
+      // checkout (que redirige a "/" si carrito vacío + sin datos) se ejecute antes
+      // de completar la navegación. La limpieza de carrito y checkout se hace en la
+      // página de resultado al montar.
+      const metodo = venta.metodo_pago === 'efectivo' || venta.metodo_pago === 'transferencia'
+        ? venta.metodo_pago
         : 'mercadopago';
-      
-      const redirectUrl = `/checkout/resultado?metodo=${metodo}&id_venta=${venta.id_venta}`;
-      
-      // Navegar primero y esperar a que se complete
-      await router.push(redirectUrl);
-      
-      // Esperar un momento adicional para asegurar que la navegación se complete
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Limpiar carrito DESPUÉS de navegar
-      clearCart();
-      
-      // Si el usuario es invitado, cerrar sesión silenciosamente después del checkout
-      // (sin mostrar el toast de "Sesión cerrada correctamente")
-      // NOTA: No resetear checkout aquí para mantener wasGuest disponible en la página de resultado
-      if (isGuest) {
-        await logout(true); // silent = true para no mostrar toast
-      }
-      
-      // Resetear checkout DESPUÉS de cerrar sesión, pero mantener wasGuest
-      // para que la página de resultado pueda usarlo
-      const wasGuestValue = useCheckoutStore.getState().wasGuest;
-      resetCheckout();
-      if (wasGuestValue) {
-        setWasGuest(true);
-      }
-      
-      // Ocultar el loader después de que todo se haya limpiado
-      setTimeout(() => {
-        setIsCreatingOrder(false);
-      }, 300);
 
-      // Callback personalizado
+      const redirectUrl = `/checkout/resultado?metodo=${metodo}&id_venta=${venta.id_venta}`;
+
       options.onSuccess?.(venta);
+      setIsCreatingOrder(false);
+      window.location.href = redirectUrl;
+      return;
     },
 
     onError: (error: any) => {

@@ -484,7 +484,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [loginStore]);
 
-  // Determinar si es invitado (estado 1 = invitado)
+  // Determinar si es invitado: estado 1 = invitado (checkout sin registro). Estado 3 = usuario dado de alta.
   const isGuest = useMemo(() => usuario?.estado === 1, [usuario]);
   const guestEmail = useMemo(() => {
     // Para invitados, el email puede estar en email_temporal

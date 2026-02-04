@@ -99,7 +99,6 @@ export default function UnifiedNavbar() {
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-12 md:h-14">
               <NavbarLocationIndicator
-                localidad={localidad}
                 shouldShowBackground={shouldShowBackground}
                 actualTheme={actualTheme}
                 onLocationClick={handleLocationClick}
@@ -127,7 +126,6 @@ export default function UnifiedNavbar() {
         />
 
         <MobileLocationButton
-          localidad={localidad}
           onClick={handleMobileLocationClick}
         />
 
@@ -161,8 +159,6 @@ export default function UnifiedNavbar() {
         isOpen={isLocationModalOpen}
         onClose={closeLocationModal}
         onLocationSelect={handleLocationSelect}
-        currentProvincia={selectedProvincia}
-        currentCiudad={selectedCiudad}
       />
     </>
   );

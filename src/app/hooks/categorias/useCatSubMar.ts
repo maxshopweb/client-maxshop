@@ -2,8 +2,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { categoriaService } from '@/app/services/categoria.service';
 import { marcaService } from '@/app/services/marca.service';
+import { grupoService } from '@/app/services/grupo.service';
 import type { ICreateCategoriaDTO, ICreateSubcategoriaDTO } from '@/app/types/categoria.type';
 import type { ICreateMarcaDTO } from '@/app/types/marca.type';
+import type { ICreateGrupoDTO } from '@/app/types/grupo.type';
 
 // ========================================
 // CATEGORIA
@@ -59,6 +61,26 @@ export function useCreateMarca() {
         },
         onError: (error: Error) => {
             toast.error('Error al crear marca', {
+                description: error.message
+            });
+        }
+    });
+}
+
+// ========================================
+// GRUPO
+// ========================================
+export function useCreateGrupo() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: ICreateGrupoDTO) => grupoService.create(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['grupos'] });
+            toast.success('Grupo creado exitosamente');
+        },
+        onError: (error: Error) => {
+            toast.error('Error al crear grupo', {
                 description: error.message
             });
         }
