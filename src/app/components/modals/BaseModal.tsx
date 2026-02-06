@@ -21,9 +21,11 @@ const ModalBase = ({
 
     useEffect(() => {
         if (isOpen) {
-            setShouldRender(true);
-            const timer = setTimeout(() => setShouldRender(true), 10);
+            setShouldRender(false);
+            const timer = setTimeout(() => setShouldRender(true), 20);
             return () => clearTimeout(timer);
+        } else {
+            setShouldRender(false);
         }
     }, [isOpen]);
 

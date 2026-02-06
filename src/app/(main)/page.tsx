@@ -36,7 +36,7 @@ export default function TiendaHome() {
       <ScrollAnimate direction="up" delay={0}>
         <ProductsCarousel
           title="Puede interesarte"
-          filter="destacados"
+          filter="publicados"
           showViewAllButton={true}
         />
       </ScrollAnimate>

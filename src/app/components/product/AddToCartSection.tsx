@@ -8,6 +8,8 @@ import { useCartStore } from "@/app/stores/cartStore";
 import { useCartSidebar } from "@/app/hooks/useCartSidebar";
 import { Button } from "../ui/Button";
 import { toast } from "sonner";
+import { useConfigTienda } from "@/app/hooks/config/useConfigTienda";
+import { getEnvioGratisMensaje, getCuotasSinInteresMensaje } from "@/app/utils/promos-messages";
 
 interface AddToCartSectionProps {
   producto: IProductos;
@@ -19,6 +21,7 @@ export default function AddToCartSection({ producto }: AddToCartSectionProps) {
   const [added, setAdded] = useState(false);
   const { addItem } = useCartStore();
   const { open } = useCartSidebar();
+  const { data: config } = useConfigTienda();
 
   const stock = producto.stock ?? 0;
   const maxQuantity = stock;
@@ -230,7 +233,8 @@ export default function AddToCartSection({ producto }: AddToCartSectionProps) {
 
       {/* Información adicional */}
       <div className="pt-3 sm:pt-4 space-y-1 text-xs sm:text-sm text-terciario/60">
-        <p>✓ Envío gratis en compras superiores a $50.000</p>
+        <p>✓ {getEnvioGratisMensaje(config)}</p>
+        <p>✓ {getCuotasSinInteresMensaje(config)}</p>
         <p>✓ Soporte técnico incluido</p>
       </div>
     </motion.div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense, memo, useCallback, useMemo } from "react";
+import { useState, Suspense, memo, useCallback, useMemo, useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
@@ -26,40 +26,40 @@ function ProductsPageContent() {
   // Obtener filtros y paginación desde URL usando el hook
   const { backendFilters, filters, page, limit } = useProductFilters();
   
-  // FILTROS PARA TIENDA (CLIENTE):
-  // El endpoint /productos/tienda ya aplica automáticamente:
-  // - Marca 004 (INGCO) fijo
-  // - Solo productos con imagen
-  // - Solo productos publicados (activo: "A")
+  const TIENDA_PAGE_SIZE = 21;
+  const TIENDA_MIN_PAGE_SIZE = 12;
+
   const finalFilters = useMemo<IProductoFilters>(() => {
+    const rawLimit = backendFilters.limit ?? limit ?? TIENDA_PAGE_SIZE;
+    const safeLimit = Math.min(100, Math.max(TIENDA_MIN_PAGE_SIZE, rawLimit));
     const final: IProductoFilters = {
-      page: backendFilters.page || page,
-      limit: backendFilters.limit || limit,
+      page: backendFilters.page ?? page ?? 1,
+      limit: safeLimit,
       order_by: backendFilters.order_by,
       order: backendFilters.order,
       busqueda: backendFilters.busqueda,
       id_cat: backendFilters.id_cat,
+      id_marca: backendFilters.id_marca,
       codi_grupo: backendFilters.codi_grupo,
       precio_min: backendFilters.precio_min,
       precio_max: backendFilters.precio_max,
       destacado: backendFilters.destacado,
       financiacion: backendFilters.financiacion,
     };
-
     return final;
   }, [backendFilters, page, limit]);
 
-  // Obtener productos usando el endpoint específico de tienda
   const {
     productos,
     pagination,
     isLoading,
     isFetching,
+    prefetchNextPage,
   } = useProductos({
     filters: finalFilters,
     enabled: true,
     keepPreviousData: true,
-    useTiendaEndpoint: true, // Usar endpoint de tienda
+    useTiendaEndpoint: true,
   });
 
   // Filtrar productos por oferta en el cliente (el backend no tiene campo directo)
@@ -96,6 +96,12 @@ function ProductsPageContent() {
   const handleFiltersClose = useCallback(() => {
     setIsFiltersOpen(false);
   }, []);
+
+  useEffect(() => {
+    if (pagination?.hasNextPage && !isLoading) {
+      prefetchNextPage();
+    }
+  }, [pagination?.hasNextPage, pagination?.page, isLoading, prefetchNextPage]);
 
   return (
     <div className="min-h-screen bg-background pt-10">

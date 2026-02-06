@@ -97,7 +97,7 @@ export function CreateMaestroModal({ kind, onClose, onSuccess }: CreateMaestroMo
       maxWidth="max-w-md"
       actions={(handleClose) => (
         <>
-          <Button type="button" variant="outline-secondary" onClick={handleClose}>
+          <Button type="button" variant="outline-secondary" onClick={handleClose} className="!text-secundario dark:!text-white">
             Cancelar
           </Button>
           <Button type="submit" form="create-maestro-form" disabled={isPending}>

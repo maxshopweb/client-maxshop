@@ -12,7 +12,7 @@ import ProductCardSkeleton from "@/app/components/skeleton/product/ProductCardSk
 
 interface ProductsCarouselProps {
   title: string;
-  filter?: "destacados" | "all" | "ofertas";
+  filter?: "destacados" | "publicados" | "all" | "ofertas";
   showViewAllButton?: boolean;
 }
 
@@ -24,14 +24,18 @@ export default function ProductsCarousel({
   const router = useRouter();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Obtener productos según el filtro
+  // Tienda: solo productos activos y publicados (endpoint /productos/tienda)
+  // "destacados" = solo destacados; "publicados" = solo publicados sin destacados
   const { data, isLoading } = useQuery({
-    queryKey: ["productos", filter],
+    queryKey: ["productos-tienda", filter],
     queryFn: () => {
       if (filter === "destacados") {
-        return productosService.getAll({ destacado: true, limit: 20, estado: 1 });
+        return productosService.getProductosTienda({ destacado: true, limit: 20 });
       }
-      return productosService.getAll({ limit: 20, estado: 1 });
+      if (filter === "publicados") {
+        return productosService.getProductosTienda({ destacado: false, limit: 20 });
+      }
+      return productosService.getProductosTienda({ limit: 20 });
     },
   });
 
@@ -54,6 +58,8 @@ export default function ProductsCarousel({
   const handleViewAll = () => {
     if (filter === "destacados") {
       router.push("/tienda/productos?destacado=true");
+    } else if (filter === "publicados") {
+      router.push("/tienda/productos?destacado=false");
     } else {
       router.push("/tienda/productos");
     }

@@ -6,7 +6,8 @@ import { Button } from "../ui/Button";
 interface StepModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onComplete: () => void;
+    /** Si retorna false, el modal no se cierra (ej. validación fallida). Si retorna true o void, se cierra. */
+    onComplete: () => void | Promise<void | boolean>;
     title: string;
     steps: {
         title: string;
@@ -52,8 +53,10 @@ const StepModal = ({
                         setSlideDirection('right');
                         setTimeout(() => setCurrentStep(currentStep + 1), 50);
                     } else {
-                        onComplete();
-                        handleClose();
+                        setIsValidating(true);
+                        const result = await onComplete?.();
+                        setIsValidating(false);
+                        if (result !== false) handleClose();
                     }
                 };
 

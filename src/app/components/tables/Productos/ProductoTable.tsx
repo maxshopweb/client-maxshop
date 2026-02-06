@@ -16,7 +16,9 @@ interface ProductosTableProps {
     onEdit: (producto: IProductos) => void;
     onDelete: (producto: IProductos) => void;
     onToggleDestacado: (producto: IProductos) => void;
+    onTogglePublicado: (producto: IProductos) => void;
     onUpdateStock: (producto: IProductos) => void;
+    onCambiarImagen?: (producto: IProductos) => void;
     tableState: ReturnType<typeof useProductosTable>;
 }
 
@@ -24,7 +26,9 @@ export function ProductosTable({
     onEdit,
     onDelete,
     onToggleDestacado,
+    onTogglePublicado,
     onUpdateStock,
+    onCambiarImagen,
     tableState,
 }: ProductosTableProps) {
     // Hooks
@@ -46,7 +50,9 @@ export function ProductosTable({
         onEdit,
         onDelete,
         onToggleDestacado,
+        onTogglePublicado,
         onUpdateStock,
+        onCambiarImagen,
         categorias,
         marcas,
     });

@@ -2,6 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { extractArticleCodeAndExtension, generateImageVariations } from "@/app/utils/productImage";
+import { buildImageUrl } from "@/app/lib/upload";
+
+/** Convierte path relativo a URL absoluta (evita 404 en localhost) */
+function toAbsoluteUrl(path: string | null | undefined): string {
+  if (!path || typeof path !== "string") return "";
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  return buildImageUrl(path.startsWith("/") ? path : `/${path}`);
+}
 
 interface ProductImageProps {
   imgPrincipal: string | null | undefined;
@@ -25,67 +33,84 @@ export default function ProductImage({
     const loadImage = async () => {
       setError(false);
 
-      // Si img_principal existe y es válida, intentar usarla primero
-      if (imgPrincipal && imgPrincipal.startsWith('/imgs/productos/')) {
-        try {
-          const img = new Image();
-          await new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => reject(new Error('Timeout')), 2000);
-            img.onload = () => {
-              clearTimeout(timeout);
-              resolve(true);
-            };
-            img.onerror = () => {
-              clearTimeout(timeout);
-              reject(new Error('Image load failed'));
-            };
-            img.src = imgPrincipal;
-          });
-          
-          setImageSrc(imgPrincipal);
-          return;
-        } catch (err) {
-          // Continuar con variaciones
+      // Si img_principal existe, intentar usarla (siempre como URL absoluta)
+      if (imgPrincipal && (imgPrincipal.includes("/imgs/productos/") || imgPrincipal.includes("productos/"))) {
+        const absoluteUrl = toAbsoluteUrl(imgPrincipal.startsWith("/") ? imgPrincipal : `imgs/productos/${imgPrincipal}`);
+        if (absoluteUrl) {
+          try {
+            const img = new Image();
+            await new Promise((resolve, reject) => {
+              const timeout = setTimeout(() => reject(new Error("Timeout")), 5000);
+              img.onload = () => {
+                clearTimeout(timeout);
+                resolve(true);
+              };
+              img.onerror = () => {
+                clearTimeout(timeout);
+                reject(new Error("Image load failed"));
+              };
+              img.src = absoluteUrl;
+            });
+            setImageSrc(absoluteUrl);
+            return;
+          } catch {
+            // Continuar con variaciones
+          }
+        }
+      }
+
+      // También intentar directamente el path con base URL (ej: "8202-03.png")
+      if (imgPrincipal && imgPrincipal.trim()) {
+        const absoluteUrl = toAbsoluteUrl(imgPrincipal.startsWith("/") ? imgPrincipal : `imgs/productos/${imgPrincipal}`);
+        if (absoluteUrl) {
+          try {
+            const img = new Image();
+            await new Promise((resolve, reject) => {
+              const timeout = setTimeout(() => reject(new Error("Timeout")), 5000);
+              img.onload = () => {
+                clearTimeout(timeout);
+                resolve(true);
+              };
+              img.onerror = () => reject(new Error("Image load failed"));
+              img.src = absoluteUrl;
+            });
+            setImageSrc(absoluteUrl);
+            return;
+          } catch {
+            // Continuar
+          }
         }
       }
 
       // Extraer código y extensión del artículo
       const codeAndExt = extractArticleCodeAndExtension(imgPrincipal, codiArti);
-      
       if (!codeAndExt) {
         setError(true);
         return;
       }
 
-      // Generar variaciones limitadas (solo 4 intentos máximo)
       const variations = generateImageVariations(codeAndExt.code, codeAndExt.extension);
-
-      // Intentar cargar cada variación con timeout
-      for (const imgUrl of variations) {
+      for (const relPath of variations) {
+        const absoluteUrl = toAbsoluteUrl(relPath);
+        if (!absoluteUrl) continue;
         try {
           const img = new Image();
           await new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => reject(new Error('Timeout')), 2000);
+            const timeout = setTimeout(() => reject(new Error("Timeout")), 5000);
             img.onload = () => {
               clearTimeout(timeout);
               resolve(true);
             };
-            img.onerror = () => {
-              clearTimeout(timeout);
-              reject(new Error('Image load failed'));
-            };
-            img.src = imgUrl;
+            img.onerror = () => reject(new Error("Image load failed"));
+            img.src = absoluteUrl;
           });
-          
-          setImageSrc(imgUrl);
+          setImageSrc(absoluteUrl);
           return;
-        } catch (err) {
-          // Continuar con la siguiente variación
+        } catch {
           continue;
         }
       }
 
-      // Si ninguna imagen funcionó
       setError(true);
     };
 

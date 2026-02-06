@@ -131,9 +131,9 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
                         <option value="" style={{ backgroundColor: 'rgba(255, 255, 255, 1)', color: 'rgb(107, 114, 128)' }}>
                             {placeholder}
                         </option>
-                        {options.map((option) => (
+                        {options.map((option, index) => (
                             <option 
-                                key={String(option.value)} 
+                                key={`${String(option.value)}-${index}`}
                                 value={String(option.value)}
                                 disabled={option.disabled}
                                 style={{ backgroundColor: 'rgba(255, 255, 255, 1)', color: 'rgb(17, 24, 39)' }}

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { IProductos } from "@/app/types/producto.type";
-import { Package, Truck, FileText } from "lucide-react";
+import { Package, FileText } from "lucide-react";
 
 interface ProductTabsProps {
   producto: IProductos;
@@ -87,49 +87,6 @@ export default function ProductTabs({ producto }: ProductTabsProps) {
         </div>
       </div>
     ),
-    shipping: (
-      <div className="space-y-6">
-        <div>
-          <h3 className="text-lg font-semibold text-foreground mb-3">Opciones de Envío</h3>
-          <div className="space-y-3">
-            <div className="p-4 bg-card rounded-lg border border-card-border">
-              <div className="flex items-start gap-3">
-                <Truck className="w-5 h-5 text-principal mt-0.5" />
-                <div className="flex-1">
-                  <h4 className="font-semibold text-foreground mb-1">Envío Estándar</h4>
-                  <p className="text-sm text-foreground/70 mb-2">
-                    Entrega en 5-7 días hábiles
-                  </p>
-                  <p className="text-sm font-medium text-principal">
-                    $2.000 - Gratis en compras superiores a $50.000
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="p-4 bg-card rounded-lg border border-card-border">
-              <div className="flex items-start gap-3">
-                <Truck className="w-5 h-5 text-principal mt-0.5" />
-                <div className="flex-1">
-                  <h4 className="font-semibold text-foreground mb-1">Envío Express</h4>
-                  <p className="text-sm text-foreground/70 mb-2">
-                    Entrega en 24-48 horas
-                  </p>
-                  <p className="text-sm font-medium text-principal">
-                    $5.000
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="p-4 bg-principal/10 rounded-lg border border-principal/20">
-          <p className="text-sm text-foreground/80">
-            <strong>Nota:</strong> Los tiempos de entrega pueden variar según la ubicación. 
-            Te notificaremos cuando tu pedido sea enviado.
-          </p>
-        </div>
-      </div>
-    ),
   };
 
   return (
@@ -173,24 +130,6 @@ export default function ProductTabs({ producto }: ProductTabsProps) {
           {tabContent[activeTab]}
         </motion.div>
       </AnimatePresence>
-
-      {/* Envío fijo (no tabulable) */}
-      <div className="pt-3 sm:pt-4 border-t border-card-border/10">
-        <div className="space-y-2 sm:space-y-3">
-          <div className="flex items-start gap-2 sm:gap-3">
-            <Truck className="w-4 h-4 sm:w-5 sm:h-5 text-principal mt-0.5 flex-shrink-0" />
-            <div className="flex-1">
-              <h4 className="text-xs sm:text-sm font-semibold text-terciario mb-1">Envío Estándar</h4>
-              <p className="text-xs text-terciario/60 mb-1">
-                Entrega en 5-7 días hábiles
-              </p>
-              <p className="text-xs sm:text-sm font-medium text-principal">
-                $2.000 - Gratis en compras superiores a $50.000
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

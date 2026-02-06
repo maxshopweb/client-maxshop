@@ -1,7 +1,6 @@
-import { Trash2, Power, PowerOff, Star, StarOff, X } from 'lucide-react';
-import {
-    useBulkUpdateEstado,
-} from '@/app/hooks/productos/useProductosMutations';
+import { Trash2, Power, PowerOff, Globe, GlobeLock, X } from 'lucide-react';
+import { useBulkUpdateEstado } from '@/app/hooks/productos/useProductosMutations';
+import { useBulkSetPublicado } from '@/app/hooks/productos/usePublicadoMutations';
 import { Button } from '../../ui/Button';
 
 interface BulkActionsProps {
@@ -17,6 +16,12 @@ export function BulkActions({ selectedIds, onClearSelection, onBulkDelete }: Bul
         },
     });
 
+    const { bulkSetPublicado, isUpdating: isBulkUpdatingPublicado } = useBulkSetPublicado({
+        onSuccess: () => {
+            onClearSelection();
+        },
+    });
+
     const selectedCount = selectedIds.length;
 
     const handleActivar = () => {
@@ -27,7 +32,15 @@ export function BulkActions({ selectedIds, onClearSelection, onBulkDelete }: Bul
         bulkUpdateEstado({ ids: selectedIds, estado: 2 });
     };
 
-    const isLoading = isBulkUpdatingEstado;
+    const handlePublicar = () => {
+        bulkSetPublicado({ ids: selectedIds, publicado: true });
+    };
+
+    const handleDespublicar = () => {
+        bulkSetPublicado({ ids: selectedIds, publicado: false });
+    };
+
+    const isLoading = isBulkUpdatingEstado || isBulkUpdatingPublicado;
 
     return (
         <div className="bg-[var(--principal)] text-white px-4 py-3 rounded-lg shadow-lg flex items-center justify-between">
@@ -57,6 +70,26 @@ export function BulkActions({ selectedIds, onClearSelection, onBulkDelete }: Bul
                     >
                         <PowerOff className="w-4 h-4" />
                         <span className="text-sm">Desactivar</span>
+                    </Button>
+
+                    {/* Publicar / Despublicar */}
+                    <Button
+                        onClick={handlePublicar}
+                        disabled={isLoading}
+                        title="Publicar en tienda"
+                        variant='secondary'
+                    >
+                        <Globe className="w-4 h-4" />
+                        <span className="text-sm">Publicar</span>
+                    </Button>
+                    <Button
+                        onClick={handleDespublicar}
+                        disabled={isLoading}
+                        title="Despublicar de tienda"
+                        variant='secondary'
+                    >
+                        <GlobeLock className="w-4 h-4" />
+                        <span className="text-sm">Despublicar</span>
                     </Button>
 
                     {/* Eliminar */}

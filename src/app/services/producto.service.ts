@@ -5,7 +5,8 @@ import type {
   IPaginatedResponse,
   ICreateProductoDTO,
   IUpdateProductoDTO,
-  IApiResponse
+  IApiResponse,
+  ICrearProductoContenido
 } from '@/app/types/producto.type';
 import { EstadoGeneral } from '../types/estados.type';
 
@@ -19,7 +20,7 @@ class ProductosService {
     );
   }
 
-  // Método específico para tienda (client/user): solo marca INGCO (004) con imágenes
+  /** Tienda (client/user): solo productos ACTIVOS y PUBLICADOS. Usar siempre este endpoint para listados de tienda. */
   async getProductosTienda(filters: IProductoFilters = {}): Promise<IPaginatedResponse<IProductos>> {
     const params = new URLSearchParams();
 
@@ -33,6 +34,9 @@ class ProductosService {
     if (filters.order) params.append('order', filters.order);
     if (filters.busqueda) params.append('busqueda', filters.busqueda);
     if (filters.id_cat) params.append('id_cat', filters.id_cat.toString());
+    if (filters.id_marca !== undefined && filters.id_marca !== null && filters.id_marca !== '') {
+      params.append('id_marca', filters.id_marca.toString());
+    }
     if (filters.codi_grupo) params.append('codi_grupo', filters.codi_grupo);
     if (filters.precio_min !== undefined) params.append('precio_min', filters.precio_min.toString());
     if (filters.precio_max !== undefined) params.append('precio_max', filters.precio_max.toString());
@@ -45,6 +49,7 @@ class ProductosService {
     return response.data;
   }
 
+  /** Listado general (admin). Para tienda usar getProductosTienda (solo activos + publicados). */
   async getAll(filters: IProductoFilters = {}, filterByImage: boolean = false): Promise<IPaginatedResponse<IProductos>> {
     const params = new URLSearchParams();
 
@@ -103,6 +108,16 @@ class ProductosService {
       throw new Error(response.data.error || 'Producto no encontrado');
     }
 
+    return response.data.data;
+  }
+
+  async getContenidoCrearProducto(): Promise<ICrearProductoContenido> {
+    const response = await axiosInstance.get<IApiResponse<ICrearProductoContenido>>(
+      '/productos/contenido-crear'
+    );
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.error || 'Error al obtener contenido');
+    }
     return response.data.data;
   }
 
@@ -200,6 +215,31 @@ class ProductosService {
 
     if (!response.data.success || !response.data.data) {
       throw new Error(response.data.error || 'Error al cambiar estado destacado');
+    }
+
+    return response.data.data;
+  }
+
+  async togglePublicado(id: number): Promise<IProductos> {
+    const response = await axiosInstance.patch<IApiResponse<IProductos>>(
+      `/productos/${id}/publicado`
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.error || 'Error al cambiar estado publicado');
+    }
+
+    return response.data.data;
+  }
+
+  async bulkSetPublicado(ids: number[], publicado: boolean): Promise<{ count: number }> {
+    const response = await axiosInstance.patch<IApiResponse<{ count: number }>>(
+      '/productos/bulk/publicado',
+      { ids, publicado }
+    );
+
+    if (!response.data.success || response.data.data === undefined) {
+      throw new Error(response.data.error || 'Error al actualizar estado publicado');
     }
 
     return response.data.data;

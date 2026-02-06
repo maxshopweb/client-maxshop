@@ -280,21 +280,41 @@ export function ProductosFilters() {
                                 </div>
                             </div>
 
-                            {/* ACTIVO (Activo/Inactivo) */}
+                            {/* Estado del producto (Activo / Inactivo) */}
                             <div>
                                 <label className="block text-sm font-medium text-input mb-1.5">
-                                    Estado de publicación
+                                    Estado del producto
                                 </label>
                                 <select
-                                    value={filters.activo || ''}
-                                    onChange={(e) =>
-                                        setFilter('activo', e.target.value || undefined)
-                                    }
+                                    value={filters.estado ?? ''}
+                                    onChange={(e) => {
+                                        const v = e.target.value;
+                                        setFilter('estado', v ? (Number(v) as 1 | 2) : undefined);
+                                    }}
                                     className="w-full px-3 py-2.5 bg-input border border-input rounded-2xl text-input text-sm focus:outline-none focus:ring-2 focus:ring-principal transition-all"
                                 >
                                     <option value="">Todos</option>
-                                    <option value="A">Activo</option>
-                                    <option value="I">Inactivo</option>
+                                    <option value="1">Activo</option>
+                                    <option value="2">Inactivo</option>
+                                </select>
+                            </div>
+
+                            {/* Publicado en tienda (Sí / No) */}
+                            <div>
+                                <label className="block text-sm font-medium text-input mb-1.5">
+                                    Publicado en tienda
+                                </label>
+                                <select
+                                    value={filters.publicado === undefined ? '' : String(filters.publicado)}
+                                    onChange={(e) => {
+                                        const v = e.target.value;
+                                        setFilter('publicado', v === '' ? undefined : v === 'true');
+                                    }}
+                                    className="w-full px-3 py-2.5 bg-input border border-input rounded-2xl text-input text-sm focus:outline-none focus:ring-2 focus:ring-principal transition-all"
+                                >
+                                    <option value="">Todos</option>
+                                    <option value="true">Publicado</option>
+                                    <option value="false">No publicado</option>
                                 </select>
                             </div>
 
@@ -449,10 +469,17 @@ export function ProductosFilters() {
                         />
                     )}
 
-                    {filters.activo && (
+                    {filters.estado !== undefined && (
                         <FilterChip
-                            label={filters.activo === 'A' ? 'Activos' : 'Inactivos'}
-                            onRemove={() => setFilter('activo', undefined)}
+                            label={`Estado: ${filters.estado === 1 ? 'Activo' : 'Inactivo'}`}
+                            onRemove={() => setFilter('estado', undefined)}
+                        />
+                    )}
+
+                    {filters.publicado !== undefined && (
+                        <FilterChip
+                            label={filters.publicado ? 'Publicado' : 'No publicado'}
+                            onRemove={() => setFilter('publicado', undefined)}
                         />
                     )}
                 </div>

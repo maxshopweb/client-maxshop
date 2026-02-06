@@ -1,6 +1,7 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Edit, Trash2, Star } from 'lucide-react';
+import { MoreHorizontal, Edit, Trash2, Star, ImageIcon } from 'lucide-react';
 import * as Checkbox from '@radix-ui/react-checkbox';
+import * as Switch from '@radix-ui/react-switch';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { Check } from 'lucide-react';
 import type { IProductos } from '@/app/types/producto.type';
@@ -12,7 +13,9 @@ interface ProductosTableActions {
     onEdit: (producto: IProductos) => void;
     onDelete: (producto: IProductos) => void;
     onToggleDestacado: (producto: IProductos) => void;
+    onTogglePublicado: (producto: IProductos) => void;
     onUpdateStock: (producto: IProductos) => void;
+    onCambiarImagen?: (producto: IProductos) => void;
     categorias?: any[];
     marcas?: any[];
 }
@@ -282,6 +285,26 @@ export const getProductosColumns = (
             enableSorting: false,
         },
         {
+            accessorKey: 'publicado',
+            header: 'Publicado',
+            cell: ({ row }) => {
+                const publicado = row.getValue('publicado') as boolean | null | undefined;
+                const producto = row.original;
+                const checked = publicado ?? false;
+
+                return (
+                    <Switch.Root
+                        checked={checked}
+                        onCheckedChange={() => actions.onTogglePublicado(producto)}
+                        className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-gray-300 bg-gray-200 transition-colors duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-[var(--principal)] focus:ring-offset-2 data-[state=checked]:bg-[var(--principal)] data-[state=checked]:border-[var(--principal)]"
+                    >
+                        <Switch.Thumb className="pointer-events-none block h-5 w-5 rounded-full border-2 border-gray-300 bg-white shadow-md ring-0 transition-[transform] duration-200 ease-out translate-x-0.5 data-[state=checked]:translate-x-5 data-[state=checked]:border-white/80" />
+                    </Switch.Root>
+                );
+            },
+            enableSorting: false,
+        },
+        {
             id: 'actions',
             header: 'Acciones',
             cell: ({ row }) => {
@@ -308,6 +331,16 @@ export const getProductosColumns = (
                                     <Edit className="mr-2 h-4 w-4" />
                                     Editar
                                 </DropdownMenu.Item>
+
+                                {actions.onCambiarImagen && (
+                                    <DropdownMenu.Item
+                                        className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
+                                        onClick={() => actions.onCambiarImagen?.(producto)}
+                                    >
+                                        <ImageIcon className="mr-2 h-4 w-4" />
+                                        Cambiar imagen
+                                    </DropdownMenu.Item>
+                                )}
 
                                 {/* <DropdownMenu.Item
                                     className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
@@ -348,6 +381,7 @@ export const defaultColumnVisibility = {
     'marca.nombre': true,
     'subcategoria.nombre': true,
     destacado: true,
+    publicado: true,
     estado: true,
 };
 
@@ -361,5 +395,6 @@ export const defaultColumnOrder = [
     'stock',
     'estado',
     'destacado',
+    'publicado',
     'actions',
 ];

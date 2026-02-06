@@ -3,24 +3,32 @@
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { productosService } from '@/app/services/producto.service';
-import type { IProductoFilters, IPaginatedResponse, IProductos } from '@/app/types/producto.type';
+import type { IProductoFilters, IPaginatedResponse, IProductos, ICrearProductoContenido } from '@/app/types/producto.type';
 
 export const productosKeys = {
     all: ['productos'] as const,
     lists: () => [...productosKeys.all, 'list'] as const,
     list: (filters: IProductoFilters) => [...productosKeys.lists(), filters] as const,
+    /** Key para listas de tienda (mismo prefijo que lists + 'tienda' para invalidar solo admin si se quiere) */
+    tiendaList: (filters: IProductoFilters) => [...productosKeys.lists(), 'tienda', filters] as const,
     details: () => [...productosKeys.all, 'detail'] as const,
     detail: (id: number) => [...productosKeys.details(), id] as const,
     destacados: (limit?: number) => [...productosKeys.all, 'destacados', limit] as const,
     stockBajo: () => [...productosKeys.all, 'stock-bajo'] as const,
+    contenidoCrear: () => [...productosKeys.all, 'contenido-crear'] as const,
 };
+
+const CACHE_TIENDA_STALE_MS = 1000 * 60 * 20;   // 20 min
+const CACHE_TIENDA_GC_MS = 1000 * 60 * 45;       // 45 min
+const CACHE_ADMIN_STALE_MS = 1000 * 60 * 5;     // 5 min
+const CACHE_ADMIN_GC_MS = 1000 * 60 * 10;       // 10 min
 
 interface UseProductosOptions {
     filters?: IProductoFilters;
     enabled?: boolean; // Para controlar cuando se ejecuta la query
     keepPreviousData?: boolean; // Para mantener datos mientras carga nuevos
     filterByImage?: boolean; // Filtrar productos sin imagen (solo para tienda, NO admin)
-    useTiendaEndpoint?: boolean; // Usar endpoint específico de tienda (marca 004 INGCO con imágenes)
+    useTiendaEndpoint?: boolean; // Usar endpoint de tienda (solo activos + publicados)
 }
 
 export function useProductos(options: UseProductosOptions = {}) {
@@ -33,37 +41,47 @@ export function useProductos(options: UseProductosOptions = {}) {
     } = options;
 
     const queryClient = useQueryClient();
+    const isTienda = useTiendaEndpoint === true;
+    const staleTime = isTienda ? CACHE_TIENDA_STALE_MS : CACHE_ADMIN_STALE_MS;
+    const gcTime = isTienda ? CACHE_TIENDA_GC_MS : CACHE_ADMIN_GC_MS;
 
     const query = useQuery({
-        queryKey: useTiendaEndpoint 
-            ? [...productosKeys.lists(), 'tienda', filters] 
-            : productosKeys.list(filters),
-        queryFn: () => useTiendaEndpoint 
+        queryKey: isTienda ? productosKeys.tiendaList(filters) : productosKeys.list(filters),
+        queryFn: () => isTienda
             ? productosService.getProductosTienda(filters)
             : productosService.getAll(filters, filterByImage),
         enabled,
         placeholderData: keepPreviousData ? (previousData) => previousData : undefined,
-        staleTime: 1000 * 60 * 5, // 5 minutos
-        gcTime: 1000 * 60 * 10, // 10 minutos (antes era cacheTime)
-        refetchOnMount: false, // No refetchear si hay datos en caché
+        staleTime,
+        gcTime,
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
     });
 
-    // Helper para invalidar y refetch
     const refetch = () => {
         return queryClient.invalidateQueries({
             queryKey: productosKeys.lists(),
         });
     };
 
-    // Helper para prefetch de la siguiente página
     const prefetchNextPage = () => {
         const nextPage = (filters.page || 1) + 1;
+        if (!query.data || nextPage > query.data.totalPages) return;
 
-        if (query.data && nextPage <= query.data.totalPages) {
+        const nextFilters = { ...filters, page: nextPage };
+        if (isTienda) {
             queryClient.prefetchQuery({
-                queryKey: productosKeys.list({ ...filters, page: nextPage }),
-                queryFn: () => productosService.getAll({ ...filters, page: nextPage }),
-                staleTime: 1000 * 60 * 5,
+                queryKey: productosKeys.tiendaList(nextFilters),
+                queryFn: () => productosService.getProductosTienda(nextFilters),
+                staleTime,
+                gcTime,
+            });
+        } else {
+            queryClient.prefetchQuery({
+                queryKey: productosKeys.list(nextFilters),
+                queryFn: () => productosService.getAll(nextFilters, filterByImage),
+                staleTime,
+                gcTime,
             });
         }
     };
@@ -175,6 +193,28 @@ export function useProductosPrefetch() {
     };
 
     return { prefetchProducto };
+}
+
+export function useContenidoCrearProducto(enabled = true) {
+    const query = useQuery({
+        queryKey: productosKeys.contenidoCrear(),
+        queryFn: () => productosService.getContenidoCrearProducto(),
+        enabled,
+        staleTime: 1000 * 60 * 30, // 30 min
+    });
+    return {
+        contenido: query.data ?? null,
+        listasPrecio: query.data?.listasPrecio ?? [],
+        situacionesFiscales: query.data?.situacionesFiscales ?? [],
+        ivas: query.data?.ivas ?? [],
+        marcas: query.data?.marcas ?? [],
+        categorias: query.data?.categorias ?? [],
+        grupos: query.data?.grupos ?? [],
+        isLoading: query.isLoading,
+        isError: query.isError,
+        error: query.error,
+        refetch: query.refetch,
+    };
 }
 
 export function useProductosCache() {

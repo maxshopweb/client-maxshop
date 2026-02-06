@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ZoomIn, Tag, Sparkles, Star } from "lucide-react";
 import { IProductos } from "@/app/types/producto.type";
 import { extractArticleCodeAndExtension, generateImageVariations } from "@/app/utils/productImage";
 import ProductImage from "@/app/components/shared/ProductImage";
@@ -16,6 +16,12 @@ export default function ProductGallery({ producto }: ProductGalleryProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Mismas reglas que ProductCard para badges sobre la imagen
+  const listaActiva = producto.lista_activa;
+  const esOferta = listaActiva?.es_oferta === true;
+  const esCampanya = listaActiva?.es_campanya === true;
+  const esDestacado = producto.destacado;
 
   useEffect(() => {
     const loadImages = async () => {
@@ -117,6 +123,30 @@ export default function ProductGallery({ producto }: ProductGalleryProps) {
           transition={{ duration: 0.2 }}
           onClick={() => setLightboxOpen(true)}
         >
+          {/* Badges como en ProductCard: Oferta / Campaña (izq), Destacado (der) */}
+          {esOferta && (
+            <div className="absolute top-3 left-3 bg-amber-500 text-white px-2.5 py-1 rounded-md text-xs font-semibold z-10 shadow-md flex items-center gap-1">
+              <Tag size={12} />
+              Oferta
+            </div>
+          )}
+          {esCampanya && !esOferta && (
+            <div className="absolute top-3 left-3 bg-emerald-600 text-white px-2.5 py-1 rounded-md text-xs font-semibold z-10 shadow-md flex items-center gap-1">
+              <Sparkles size={12} />
+              Campaña
+            </div>
+          )}
+          {esDestacado && !esOferta && !esCampanya && (
+            <div className="absolute top-3 right-3 z-10 bg-principal/10 backdrop-blur-sm p-2 rounded-full">
+              <Star size={18} className="fill-principal text-principal" />
+            </div>
+          )}
+          {(esOferta || esCampanya) && esDestacado && (
+            <div className="absolute top-3 right-3 z-10 bg-white/80 backdrop-blur-sm p-1.5 rounded-full shadow-sm">
+              <Star size={16} className="fill-principal text-principal" />
+            </div>
+          )}
+
           {selectedImage ? (
             <img
               src={selectedImage}

@@ -3,6 +3,14 @@ import { EstadoGeneral } from "./estados.type";
 import { IIva } from "./iva.type";
 import { IMarca } from "./marca.type";
 
+/** Info de la lista activa solo para UI (oferta/campaña). Nombre de lista no se expone. */
+export interface IListaActivaInfo {
+    codi_lista: string;
+    tipo_lista: string | null;
+    es_oferta?: boolean;
+    es_campanya?: boolean;
+}
+
 export interface IProductos {
     id_prod: number;
     codi_arti: string;
@@ -15,6 +23,12 @@ export interface IProductos {
     nombre?: string | null;
     descripcion?: string | null;
     modelo?: string | null;
+    precio_venta?: number | null;
+    precio_especial?: number | null;
+    precio_pvp?: number | null;
+    precio_campanya?: number | null;
+    lista_precio_activa?: string | null;
+    lista_activa?: IListaActivaInfo | null;
     precio_mayorista?: number | null;
     precio_minorista?: number | null;
     precio_evento?: number | null;
@@ -30,6 +44,7 @@ export interface IProductos {
     img_principal?: string | null;
     imagenes?: string[] | null; // JSONB
     destacado?: boolean | null;
+    publicado?: boolean | null;
     financiacion?: boolean | null;
     activo?: string | null;
     creado_en?: Date | null;
@@ -74,6 +89,7 @@ export interface IProductoFilters {
 
     // Filtros booleanos
     destacado?: boolean;
+    publicado?: boolean;
     financiacion?: boolean;
 
     // Filtro por stock
@@ -85,7 +101,13 @@ export interface ICreateProductoDTO {
     // Requeridos
     codi_arti: string;
     nombre: string;
-    precio: number;
+
+    // Precios por lista (V, O, P, Q) - al menos uno requerido
+    precio_venta?: number | null;
+    precio_especial?: number | null;
+    precio_pvp?: number | null;
+    precio_campanya?: number | null;
+    lista_precio_activa?: string | null; // Con cuál lista se publica: V | O | P | Q
 
     // Opcionales - usar códigos
     codi_categoria?: string;
@@ -100,6 +122,8 @@ export interface ICreateProductoDTO {
     precio_minorista?: number;
     precio_evento?: number;
     precio_sin_iva?: number;
+    /** @deprecated usar precio_venta; el backend lo mapea si se envía */
+    precio?: number;
     stock?: number;
     stock_min?: number;
     stock_mayorista?: number;

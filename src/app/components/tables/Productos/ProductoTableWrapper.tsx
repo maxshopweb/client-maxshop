@@ -12,7 +12,9 @@ interface ProductosTableWrapperProps {
     onEdit: (producto: IProductos) => void;
     onDelete: (producto: IProductos) => void;
     onToggleDestacado: (producto: IProductos) => void;
+    onTogglePublicado: (producto: IProductos) => void;
     onUpdateStock: (producto: IProductos) => void;
+    onCambiarImagen?: (producto: IProductos) => void;
     onBulkDelete: (ids: number[]) => void;
 }
 

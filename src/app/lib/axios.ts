@@ -41,6 +41,11 @@ const isPublicEndpoint = (url: string | undefined): boolean => {
 // Interceptor para agregar token en cada request
 axiosInstance.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
+    // Con FormData no enviar Content-Type para que axios/navegador use multipart/form-data con boundary
+    if (config.data instanceof FormData && config.headers) {
+      delete config.headers['Content-Type'];
+    }
+
     if (typeof window !== 'undefined') {
       const currentPath = window.location.pathname;
       const requestUrl = config.url || '';

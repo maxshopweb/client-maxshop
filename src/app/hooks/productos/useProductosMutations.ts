@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { productosService } from '@/app/services/producto.service';
 import { productosKeys } from './useProductos';
+import { useTogglePublicado, useBulkSetPublicado } from './usePublicadoMutations';
 import type {
     IProductos,
     ICreateProductoDTO,
@@ -401,6 +402,8 @@ export function useProductosMutations() {
     const bulkDelete = useBulkDeleteProductos();
     const bulkUpdateEstado = useBulkUpdateEstado();
     const toggleDestacado = useToggleDestacado();
+    const togglePublicado = useTogglePublicado();
+    const bulkSetPublicado = useBulkSetPublicado();
 
     return {
         // Create
@@ -423,10 +426,15 @@ export function useProductosMutations() {
         toggleDestacado: toggleDestacado.toggleDestacado,
         isTogglingDestacado: toggleDestacado.isToggling,
 
+        // Publicado
+        togglePublicado: togglePublicado.togglePublicado,
+        isTogglingPublicado: togglePublicado.isToggling,
+        bulkSetPublicado: bulkSetPublicado.bulkSetPublicado,
+        isBulkUpdatingPublicado: bulkSetPublicado.isUpdating,
+
         // Bulk
         bulkDelete: bulkDelete.bulkDelete,
         isBulkDeleting: bulkDelete.isDeleting,
-
         bulkUpdateEstado: bulkUpdateEstado.bulkUpdateEstado,
         isBulkUpdatingEstado: bulkUpdateEstado.isUpdating,
 
@@ -437,7 +445,9 @@ export function useProductosMutations() {
             deleteProducto.isDeleting ||
             updateStock.isUpdating ||
             toggleDestacado.isToggling ||
+            togglePublicado.isToggling ||
             bulkDelete.isDeleting ||
-            bulkUpdateEstado.isUpdating
+            bulkUpdateEstado.isUpdating ||
+            bulkSetPublicado.isUpdating
     };
 }

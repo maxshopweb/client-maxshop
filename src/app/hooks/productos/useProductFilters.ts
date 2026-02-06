@@ -25,8 +25,8 @@ export interface ProductFilters {
     destacado?: boolean;
     oferta?: boolean;
     // Filtros adicionales del admin
-    estado?: EstadoGeneral; // Solo para admin ver activos/inactivos (1 o 2, nunca 0)
-    activo?: string; // Filtro por publicar/despublicar: "A" = publicado, "I" = despublicado
+    estado?: EstadoGeneral; // Estado del producto: 1 = Activo, 2 = Inactivo
+    publicado?: boolean; // Publicado en tienda: true = publicado, false = no publicado
     stockBajo?: boolean;
     financiacion?: boolean;
     subcategoria?: number;
@@ -222,7 +222,7 @@ export function useProductFilters(): UseProductFiltersReturn {
                 oferta: parseBoolean(searchParams.get("oferta")),
                 // Filtros adicionales del admin
                 estado: searchParams.get("estado") !== null ? (parseNumber(searchParams.get("estado")) as EstadoGeneral) : undefined,
-                activo: searchParams.get("activo") || undefined, // "A" = publicado, "I" = despublicado
+                publicado: searchParams.get("publicado") !== null ? parseBoolean(searchParams.get("publicado")) : undefined,
                 stockBajo: parseBoolean(searchParams.get("stockBajo")),
                 financiacion: parseBoolean(searchParams.get("financiacion")),
                 subcategoria: parseNumber(searchParams.get("subcategoria")),
@@ -311,7 +311,7 @@ export function useProductFilters(): UseProductFiltersReturn {
                 codi_grupo: "grupo",
                 id_subcat: "subcategoria",
                 estado: "estado",
-                activo: "activo", // "A" = publicado, "I" = despublicado
+                publicado: "publicado",
                 destacado: "destacado",
                 financiacion: "financiacion",
                 stock_bajo: "stockBajo",
@@ -407,8 +407,8 @@ export function useProductFilters(): UseProductFiltersReturn {
         const isAdmin = pathname?.includes('/admin');
         
         // Para usuarios (tienda), solo mostrar productos publicados por defecto
-        if (!isAdmin && !filters.activo) {
-            backend.activo = "A"; // "A" = publicado
+        if (!isAdmin && filters.publicado === undefined) {
+            backend.publicado = true;
         }
 
         if (filters.search) backend.busqueda = filters.search;
@@ -423,7 +423,7 @@ export function useProductFilters(): UseProductFiltersReturn {
         if (filters.destacado !== undefined) backend.destacado = filters.destacado;
         // Filtros adicionales del admin
         if (filters.estado !== undefined) backend.estado = filters.estado;
-        if (filters.activo) backend.activo = filters.activo; // "A" = publicado, "I" = despublicado
+        if (filters.publicado !== undefined) backend.publicado = filters.publicado;
         if (filters.stockBajo !== undefined) backend.stock_bajo = filters.stockBajo;
         if (filters.financiacion !== undefined) backend.financiacion = filters.financiacion;
         if (filters.subcategoria !== undefined) backend.id_subcat = filters.subcategoria;
@@ -449,7 +449,8 @@ export function useProductFilters(): UseProductFiltersReturn {
             !!filters.grupo ||
             filters.destacado === true ||
             filters.oferta === true ||
-            !!filters.activo ||
+            filters.estado !== undefined ||
+            filters.publicado !== undefined ||
             filters.stockBajo === true ||
             filters.financiacion === true ||
             filters.subcategoria !== undefined,
@@ -467,7 +468,8 @@ export function useProductFilters(): UseProductFiltersReturn {
         if (filters.grupo) count++;
         if (filters.destacado === true) count++;
         if (filters.oferta === true) count++;
-        if (filters.activo) count++;
+        if (filters.estado !== undefined) count++;
+        if (filters.publicado !== undefined) count++;
         if (filters.stockBajo === true) count++;
         if (filters.financiacion === true) count++;
         return count;
@@ -482,7 +484,7 @@ export function useProductFilters(): UseProductFiltersReturn {
         const searchFromUrl = searchParams.get("search") || searchParams.get("busqueda") || null;
         const subcategoriaFromUrl = searchParams.get("subcategoria") || searchParams.get("id_subcat") || null;
         const estadoFromUrl = searchParams.get("estado");
-        const activoFromUrl = searchParams.get("activo");
+        const publicadoFromUrl = searchParams.get("publicado");
         const destacadoFromUrl = searchParams.get("destacado");
         const financiacionFromUrl = searchParams.get("financiacion");
         const stockBajoFromUrl = searchParams.get("stockBajo") || searchParams.get("stock_bajo") || null;
@@ -501,7 +503,7 @@ export function useProductFilters(): UseProductFiltersReturn {
             id_subcat: subcategoriaFromUrl ? parseNumber(subcategoriaFromUrl) : (filters.subcategoria ?? backendFilters.id_subcat ?? undefined),
             stock_bajo: stockBajoFromUrl ? parseBoolean(stockBajoFromUrl) : (filters.stockBajo ?? backendFilters.stock_bajo ?? undefined),
             estado: estadoFromUrl !== null ? (parseNumber(estadoFromUrl) as EstadoGeneral) : (filters.estado ?? backendFilters.estado ?? undefined),
-            activo: activoFromUrl || filters.activo || backendFilters.activo || undefined,
+            publicado: publicadoFromUrl !== null ? parseBoolean(publicadoFromUrl) : (filters.publicado ?? backendFilters.publicado ?? undefined),
             financiacion: financiacionFromUrl !== null ? parseBoolean(financiacionFromUrl) : (filters.financiacion ?? backendFilters.financiacion ?? undefined),
             destacado: destacadoFromUrl !== null ? parseBoolean(destacadoFromUrl) : (filters.destacado ?? backendFilters.destacado ?? undefined),
         } as ProductFilters & IProductoFilters;

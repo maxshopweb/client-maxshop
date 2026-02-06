@@ -8,13 +8,15 @@ import type { IProductos } from '@/app/types/producto.type';
 import { Button } from '@/app/components/ui/Button';
 import { CreateProductoModal } from '@/app/components/modals/Producto/CreateWrapper';
 import { EditProductoModal } from '@/app/components/modals/Producto/EditWrapper';
+import { CambiarImagenModal } from '@/app/components/modals/Producto/CambiarImagenModal';
 import { DeleteProductoModal } from '@/app/components/modals/Producto/DeleteProduct';
 import { BulkDeleteProductosModal } from '@/app/components/modals/Producto/BulkDeleteProductosModal';
 import { useToggleDestacado } from '@/app/hooks/productos/useProductosMutations';
+import { useTogglePublicado } from '@/app/hooks/productos/usePublicadoMutations';
 import { useProductos } from '@/app/hooks/productos/useProductos';
 import { useProductFilters } from '@/app/hooks/productos/useProductFilters';
 
-type ModalType = 'create' | 'edit' | 'delete' | 'stock' | 'bulk-delete' | null;
+type ModalType = 'create' | 'edit' | 'delete' | 'stock' | 'bulk-delete' | 'cambiar-imagen' | null;
 
 interface ModalState {
     type: ModalType;
@@ -37,9 +39,11 @@ function ProductosPageContent() {
 
     const openCreateModal = () => setModal({ type: 'create' });
     const openEditModal = (producto: IProductos) => setModal({ type: 'edit', producto });
+    const openCambiarImagenModal = (producto: IProductos) => setModal({ type: 'cambiar-imagen', producto });
     const openDeleteDialog = (producto: IProductos) => setModal({ type: 'delete', producto });
     const openStockDialog = (producto: IProductos) => setModal({ type: 'stock', producto });
     const { toggleDestacado } = useToggleDestacado();
+    const { togglePublicado } = useTogglePublicado();
 
     const closeModal = () => {
         setModal({ type: null });
@@ -53,6 +57,10 @@ function ProductosPageContent() {
 
     const handleToggleDestacado = (producto: IProductos) => {
         toggleDestacado(producto.id_prod);
+    };
+
+    const handleTogglePublicado = (producto: IProductos) => {
+        togglePublicado(producto.id_prod);
     };
 
     return (
@@ -94,7 +102,9 @@ function ProductosPageContent() {
                         onEdit={openEditModal}
                         onDelete={openDeleteDialog}
                         onToggleDestacado={handleToggleDestacado}
+                        onTogglePublicado={handleTogglePublicado}
                         onUpdateStock={openStockDialog}
+                        onCambiarImagen={openCambiarImagenModal}
                         onBulkDelete={openBulkDeleteDialog}
                     />
                 </div>
@@ -107,6 +117,10 @@ function ProductosPageContent() {
 
             {modal.type === 'edit' && modal.producto && (
                 <EditProductoModal producto={modal.producto} onClose={closeModal} />
+            )}
+
+            {modal.type === 'cambiar-imagen' && modal.producto && (
+                <CambiarImagenModal product={modal.producto} onClose={closeModal} />
             )}
 
             {modal.type === 'delete' && modal.producto && (

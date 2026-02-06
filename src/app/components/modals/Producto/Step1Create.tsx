@@ -1,14 +1,12 @@
 import { UseFormReturn } from 'react-hook-form';
 import Input from '@/app/components/ui/Input';
-import * as Checkbox from '@radix-ui/react-checkbox';
-import { Check, Package, Tag, FileText } from 'lucide-react';
+import { Package, Tag, FileText } from 'lucide-react';
 import { useCategorias, useSubcategorias } from '@/app/hooks/categorias/useCategorias';
 import { useMarcas } from '@/app/hooks/marcas/useMarcas';
-import { useCreateCategoria, useCreateSubcategoria, useCreateMarca } from '../../../hooks/categorias/useCatSubMar';
 import type { CreateProductoData } from '@/app/schemas/producto.schema';
 import { ICategoria, ISubcategoria } from '@/app/types/categoria.type';
 import { IMarca } from '@/app/types/marca.type';
-import SelectWithCreate from '@/app/components/ui/SelectWithCreate';
+import Select from '@/app/components/ui/Select';
 
 interface StepOneProps {
     form: UseFormReturn<CreateProductoData>;
@@ -22,10 +20,18 @@ export function StepOneBasicInfo({ form }: StepOneProps) {
     const { data: categorias, isLoading: loadingCategorias } = useCategorias();
     const { data: subcategorias, isLoading: loadingSubcategorias } = useSubcategorias(idCatSelected);
     const { data: marcas, isLoading: loadingMarcas } = useMarcas();
-    
-    const createCategoria = useCreateCategoria();
-    const createSubcategoria = useCreateSubcategoria();
-    const createMarca = useCreateMarca();
+
+    const categoriasList: ICategoria[] = Array.isArray(categorias?.data)
+        ? categorias.data
+        : categorias?.data
+            ? [categorias.data]
+            : [];
+
+    const marcasList: IMarca[] = Array.isArray(marcas?.data)
+        ? marcas.data
+        : marcas?.data
+            ? [marcas.data]
+            : [];
 
     return (
         <div className="space-y-4 max-h-[350px] overflow-y-auto px-2">
@@ -78,108 +84,93 @@ export function StepOneBasicInfo({ form }: StepOneProps) {
                 />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-                <SelectWithCreate
+            <div className="grid grid-cols-3 gap-3">
+                <Select
                     label="Categoria"
-                    options={categorias?.data?.map((cat: ICategoria) => ({
-                        value: cat.codi_categoria || cat.id_cat?.toString() || '',
-                        label: `${cat.nombre || ''} ${cat.codi_categoria ? `(${cat.codi_categoria})` : ''}`
-                    })) || []}
+                    options={categoriasList.map((cat) => {
+                        const optValue = (cat.codi_categoria && String(cat.codi_categoria).trim()) || (cat.id_cat != null ? String(cat.id_cat) : '');
+                        return {
+                            value: optValue || `cat-${cat.id_cat ?? ''}`,
+                            label: `${cat.nombre || ''} ${cat.codi_categoria ? `(${cat.codi_categoria})` : ''}`.trim() || optValue
+                        };
+                    }).filter((o) => o.value)}
                     placeholder="Seleccionar"
                     disabled={loadingCategorias}
-                    canCreate
-                    createLabel="+ Crear Categoría"
-                    onCreateSubmit={createCategoria.mutateAsync}
-                    isCreating={createCategoria.isPending}
-                    {...register('codi_categoria')}
-                    onChange={(e) => {
-                        const selectedCat = categorias?.data?.find((cat: ICategoria) => 
-                            cat.codi_categoria === e.target.value || cat.id_cat?.toString() === e.target.value
+                    value={(() => {
+                        const codi = watch('codi_categoria');
+                        const idCat = watch('id_cat');
+                        if (codi && String(codi).trim()) return String(codi).trim();
+                        if (idCat != null && idCat !== '') return String(idCat);
+                        return '';
+                    })()}
+                    onChange={(value) => {
+                        const strVal = String(value);
+                        const selectedCat = categoriasList.find((cat) =>
+                            (cat.codi_categoria && String(cat.codi_categoria).trim() === strVal) ||
+                            (cat.id_cat != null && String(cat.id_cat) === strVal)
                         );
                         if (selectedCat) {
-                            setValue('codi_categoria', selectedCat.codi_categoria || undefined);
-                            setValue('id_cat', selectedCat.id_cat || undefined);
+                            setValue('codi_categoria', selectedCat.codi_categoria && String(selectedCat.codi_categoria).trim() ? selectedCat.codi_categoria : undefined, { shouldDirty: true });
+                            setValue('id_cat', selectedCat.id_cat ?? undefined, { shouldDirty: true });
                         }
-                        setValue('id_subcat', undefined);
+                        setValue('id_subcat', undefined, { shouldDirty: true });
                     }}
                 />
 
-                <SelectWithCreate
+                <Select
                     label="Subcategoria"
                     options={subcategorias?.data?.map((sub: ISubcategoria) => ({
-                        value: sub.id_subcat,
+                        value: sub.id_subcat != null ? String(sub.id_subcat) : '',
                         label: sub.nombre || ''
-                    })) || []}
+                    }))?.filter((o) => o.value) || []}
                     placeholder="Seleccionar"
                     disabled={!idCatSelected || loadingSubcategorias}
-                    canCreate
-                    createLabel="+ Crear Subcategoría"
-                    onCreateSubmit={createSubcategoria.mutateAsync}
-                    isCreating={createSubcategoria.isPending}
-                    needsParent
-                    parentId={Number(idCatSelected)}
-                    parentLabel="una categoría"
-                    {...register('id_subcat')}
+                    value={watch('id_subcat') != null && watch('id_subcat') !== '' ? String(watch('id_subcat')) : ''}
+                    onChange={(value) => setValue('id_subcat', value !== '' ? Number(value) : undefined, { shouldDirty: true })}
+                />
+
+                <Select
+                    label="Marca"
+                    options={marcasList.map((marca) => {
+                        const optValue = (marca.codi_marca && String(marca.codi_marca).trim()) || (marca.id_marca != null ? String(marca.id_marca) : '');
+                        return {
+                            value: optValue || `marca-${marca.id_marca ?? ''}`,
+                            label: `${marca.nombre || ''} ${marca.codi_marca ? `(${marca.codi_marca})` : ''}`.trim() || optValue
+                        };
+                    }).filter((o) => o.value)}
+                    placeholder="Seleccionar marca"
+                    disabled={loadingMarcas}
+                    value={(() => {
+                        const codi = watch('codi_marca');
+                        const idMar = watch('id_marca');
+                        if (codi && String(codi).trim()) return String(codi).trim();
+                        if (idMar != null && idMar !== '') return String(idMar);
+                        return '';
+                    })()}
+                    onChange={(value) => {
+                        const strVal = String(value);
+                        const selectedMarca = marcasList.find((marca) =>
+                            (marca.codi_marca && String(marca.codi_marca).trim() === strVal) ||
+                            (marca.id_marca != null && String(marca.id_marca) === strVal)
+                        );
+                        if (selectedMarca) {
+                            setValue('codi_marca', selectedMarca.codi_marca && String(selectedMarca.codi_marca).trim() ? selectedMarca.codi_marca : undefined, { shouldDirty: true });
+                            setValue('id_marca', selectedMarca.id_marca ?? undefined, { shouldDirty: true });
+                        }
+                    }}
                 />
             </div>
 
             <div>
-                <div className="col-span-2">
-                    <label className="block text-sm font-medium text-input mb-1.5">
-                        Descripcion
-                    </label>
-                    <textarea
-                        {...register('descripcion')}
-                        placeholder="Describe las características del producto..."
-                        rows={3}
-                        className="w-full px-3 py-2.5 bg-input border border-input rounded-2xl text-input text-sm focus:outline-none focus:ring-2 focus:ring-principal transition-all resize-none"
-                    />
-                </div>
-            </div>
-
-            {/* FILA 3: Marca y Checkboxes */}
-            <div className="grid grid-cols-2 gap-6">
-                <SelectWithCreate
-                    label="Marca"
-                    options={marcas?.data?.map((marca: IMarca) => ({
-                        value: marca.codi_marca || marca.id_marca?.toString() || '',
-                        label: `${marca.nombre || ''} ${marca.codi_marca ? `(${marca.codi_marca})` : ''}`
-                    })) || []}
-                    placeholder="Seleccionar marca"
-                    disabled={loadingMarcas}
-                    canCreate
-                    createLabel="+ Crear Marca"
-                    onCreateSubmit={createMarca.mutateAsync}
-                    isCreating={createMarca.isPending}
-                    {...register('codi_marca')}
-                    onChange={(e) => {
-                        const selectedMarca = marcas?.data?.find((marca: IMarca) => 
-                            marca.codi_marca === e.target.value || marca.id_marca?.toString() === e.target.value
-                        );
-                        if (selectedMarca) {
-                            setValue('codi_marca', selectedMarca.codi_marca || undefined);
-                            setValue('id_marca', selectedMarca.id_marca || undefined);
-                        }
-                    }}
+                <label className="block text-sm font-medium text-input mb-1.5">
+                    Descripcion
+                </label>
+                <textarea
+                    {...register('descripcion')}
+                    placeholder="Describe las características del producto..."
+                    rows={3}
+                    className="w-full px-3 py-2.5 bg-input border border-input rounded-2xl text-input text-sm focus:outline-none focus:ring-2 focus:ring-principal transition-all resize-none"
                 />
-
-                {/* Checkbox */}
-                <div className="flex items-center gap-6 pt-6">
-                    <label className="flex items-center gap-2 cursor-pointer group">
-                        <Checkbox.Root
-                            checked={watch('financiacion') ?? false}
-                            onCheckedChange={(checked) => setValue('financiacion', checked === true)}
-                            className="flex h-5 w-5 items-center justify-center rounded border-2 border-input group-hover:border-principal data-[state=checked]:bg-principal data-[state=checked]:border-principal transition-all"
-                        >
-                            <Checkbox.Indicator>
-                                <Check className="h-3.5 w-3.5 text-white" />
-                            </Checkbox.Indicator>
-                        </Checkbox.Root>
-                        <span className="text-sm text-input group-hover:text-principal transition-colors whitespace-nowrap">
-                            Financiacion
-                        </span>
-                    </label>
-                </div>
             </div>
         </div>
     );

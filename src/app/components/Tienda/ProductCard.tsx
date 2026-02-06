@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Star, Sparkles } from "lucide-react";
+import { Star, Sparkles, Tag } from "lucide-react";
 import type { IProductos } from "@/app/types/producto.type";
 import AddToCartButton from "@/app/components/cart/AddToCartButton";
 import ProductImage from "@/app/components/shared/ProductImage";
@@ -11,17 +11,11 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ producto }: ProductCardProps) {
-  const precioFinal = Number(producto.precio || producto.precio_minorista || 0);
-  const precioMinorista = Number(producto.precio_minorista || 0);
-  const precio = Number(producto.precio || 0);
-  
-  const tieneDescuento = precioMinorista && precio && precio < precioMinorista;
-  const porcentajeDescuento = tieneDescuento
-    ? Math.round(((precioMinorista - precio) / precioMinorista) * 100)
-    : 0;
-  
+  const precioFinal = Number(producto.precio ?? 0);
+  const listaActiva = producto.lista_activa;
+  const esOferta = listaActiva?.es_oferta === true;
+  const esCampanya = listaActiva?.es_campanya === true;
   const esDestacado = producto.destacado;
-  const esOferta = tieneDescuento && porcentajeDescuento > 0;
 
   return (
     <Link 
@@ -30,32 +24,35 @@ export default function ProductCard({ producto }: ProductCardProps) {
     >
       {/* Imagen del Producto */}
       <div className="relative aspect-square bg-gradient-to-br from-background to-background/50 overflow-hidden">
-        {/* Badge de Oferta */}
-        {/* {esOferta && (
-          <div className="absolute top-3 left-3 bg-principal text-white px-3 py-1.5 rounded-full text-xs font-semibold z-10 shadow-md">
-            -{porcentajeDescuento}% OFF
-          </div>
-        )} */}
-
-        {/* Badge de Destacado */}
-        {esDestacado && !esOferta && (
-          <div className="absolute top-3 right-3 z-10 bg-principal/10 backdrop-blur-sm p-2 rounded-full">
-            <Star 
-              size={18} 
-              className="fill-principal text-principal" 
-            />
+        {/* Badge por tipo de lista: Oferta (destacado) */}
+        {esOferta && (
+          <div className="absolute top-3 left-3 bg-amber-500 text-white px-2.5 py-1 rounded-md text-xs font-semibold z-10 shadow-md flex items-center gap-1">
+            <Tag size={12} />
+            Oferta
           </div>
         )}
 
-        {/* Badge combinado: Destacado + Oferta */}
-        {/* {esDestacado && esOferta && (
-          <div className="absolute top-3 right-3 z-10 bg-principal/10 backdrop-blur-sm p-1.5 rounded-full">
-            <Sparkles 
-              size={16} 
-              className="text-principal" 
-            />
+        {/* Badge Campaña */}
+        {esCampanya && !esOferta && (
+          <div className="absolute top-3 left-3 bg-emerald-600 text-white px-2.5 py-1 rounded-md text-xs font-semibold z-10 shadow-md flex items-center gap-1">
+            <Sparkles size={12} />
+            Campaña
           </div>
-        )} */}
+        )}
+
+        {/* Badge Destacado (cuando no es oferta/campaña) */}
+        {esDestacado && !esOferta && !esCampanya && (
+          <div className="absolute top-3 right-3 z-10 bg-principal/10 backdrop-blur-sm p-2 rounded-full">
+            <Star size={18} className="fill-principal text-principal" />
+          </div>
+        )}
+
+        {/* Destacado + Oferta/Campaña: estrella a la derecha */}
+        {(esOferta || esCampanya) && esDestacado && (
+          <div className="absolute top-3 right-3 z-10 bg-white/80 backdrop-blur-sm p-1.5 rounded-full shadow-sm">
+            <Star size={16} className="fill-principal text-principal" />
+          </div>
+        )}
 
         {/* Imagen */}
         <ProductImage 
@@ -87,20 +84,13 @@ export default function ProductCard({ producto }: ProductCardProps) {
         {/* Precio */}
         <div className="mt-auto space-y-2 sm:space-y-3">
           <div>
-            {esOferta ? (
-              <div className="flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
-                <span className="text-lg sm:text-xl md:text-2xl font-bold text-principal">
-                  ${precioFinal.toFixed(2)}
-                </span>
-                <span className="text-xs sm:text-sm text-terciario/40 line-through">
-                  ${precioMinorista.toFixed(2)}
-                </span>
-              </div>
-            ) : (
-              <span className="text-lg sm:text-xl md:text-2xl font-bold text-principal">
-                ${precioFinal.toFixed(2)}
-              </span>
-            )}
+            <span
+              className={`text-lg sm:text-xl md:text-2xl font-bold ${
+                esOferta ? "text-amber-600" : esCampanya ? "text-emerald-700" : "text-principal"
+              }`}
+            >
+              ${precioFinal.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
           </div>
           
           {/* Botón Agregar al Carrito */}
