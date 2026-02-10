@@ -1,21 +1,20 @@
 "use client";
 
+import { useEffect } from "react";
 import { Controller } from "react-hook-form";
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
 import { Button } from "@/app/components/ui/Button";
 import Input from "@/app/components/ui/Input";
 import Select from "@/app/components/ui/Select";
 import TipoEntregaSelector from "./TipoEntregaSelector";
-import AddressAutocomplete from "./AddressAutocomplete";
 import { useStep3ShippingData } from "@/app/hooks/checkout/useStep3ShippingData";
-import type { IDireccionDTO } from "@/app/types/direccion.type";
+import { usePostalCodeSearch } from "@/app/hooks/cart/usePostalCodeSearch";
 
 export default function Step3ShippingData() {
   const {
-    form: { register, handleSubmit, errors, isValid, setValue, control },
+    form: { register, handleSubmit, errors, isValid, setValue, control, watch },
     tipoEntrega,
-    address,
     costoEnvio,
     provinciaOptions,
     direcciones,
@@ -27,6 +26,30 @@ export default function Step3ShippingData() {
     handleDireccionSelect,
     isAddressVerified,
   } = useStep3ShippingData();
+
+  const { searchByPostalCode, setAddressDataStore, isLoading: isLoadingCp, error: errorCp, foundData } = usePostalCodeSearch();
+  const postalCodeWatch = watch("postalCode");
+
+  const handleBuscarCp = async () => {
+    const cp = typeof postalCodeWatch === "string" ? postalCodeWatch.trim() : "";
+    if (!/^[0-9]{4}$/.test(cp)) return;
+    await searchByPostalCode(cp);
+    await setAddressDataStore(cp);
+  };
+
+  // Sincronizar ciudad/provincia del CP al formulario cuando hay resultado
+  useEffect(() => {
+    if (!foundData || tipoEntrega !== "envio") return;
+    setValue("city", foundData.ciudad ?? "", { shouldValidate: true });
+    if (foundData.provincia) {
+      const opt = provinciaOptions.find(
+        (o) =>
+          o.label.toLowerCase() === foundData.provincia?.toLowerCase() ||
+          foundData.provincia?.toLowerCase().includes(o.label.toLowerCase())
+      );
+      if (opt) setValue("state", typeof opt.value === "number" ? String(opt.value) : opt.value, { shouldValidate: true });
+    }
+  }, [foundData?.ciudad, foundData?.provincia, tipoEntrega, provinciaOptions, setValue]);
 
   return (
     <motion.div
@@ -79,35 +102,16 @@ export default function Step3ShippingData() {
               </div>
             )}
 
-            <AddressAutocomplete
-              value={address || ""}
-              onChange={(direccion: IDireccionDTO | null) => {
-                if (direccion) {
-                  if (direccion.calle) setValue("address", direccion.calle, { shouldValidate: true });
-                  else if (direccion.direccion_formateada)
-                    setValue("address", direccion.direccion_formateada.split("/")[0].trim(), { shouldValidate: true });
-                  if (direccion.numero) setValue("altura", direccion.numero, { shouldValidate: true });
-                  if (direccion.direccion_formateada) setValue("direccion_formateada", direccion.direccion_formateada);
-                  if (direccion.latitud !== undefined) setValue("latitud", direccion.latitud);
-                  if (direccion.longitud !== undefined) setValue("longitud", direccion.longitud);
-                }
-              }}
-              error={errors.address?.message}
+            <Input
               label="Calle *"
-              placeholder="Escribí tu calle (ej: San Martín, Córdoba)"
-              onCityChange={(ciudad) => setValue("city", ciudad, { shouldValidate: true })}
-              onProvinceChange={(provincia) => {
-                const opt = provinciaOptions.find(
-                  (o) =>
-                    o.label.toLowerCase() === provincia.toLowerCase() ||
-                    o.label.toLowerCase().includes(provincia.toLowerCase())
-                );
-                if (opt) {
-                  const v = typeof opt.value === "number" ? String(opt.value) : (opt.value as string);
-                  setValue("state", v, { shouldValidate: true });
-                }
+              {...register("address")}
+              error={errors.address?.message}
+              placeholder="Ej: San Martín, Av. Corrientes"
+              className="rounded-lg"
+              style={{
+                backgroundColor: "var(--white)",
+                border: errors.address ? "1px solid rgb(239, 68, 68)" : "1px solid rgba(23, 28, 53, 0.1)",
               }}
-              onPostalCodeChange={(cp) => setValue("postalCode", cp, { shouldValidate: true })}
             />
 
             <div className="grid grid-cols-3 gap-4 items-end">
@@ -174,17 +178,38 @@ export default function Step3ShippingData() {
               />
             </div>
 
-            <Input
-              label="Código Postal *"
-              {...register("postalCode")}
-              error={errors.postalCode?.message}
-              placeholder="5000"
-              className="rounded-lg"
-              style={{
-                backgroundColor: "var(--white)",
-                border: errors.postalCode ? "1px solid rgb(239, 68, 68)" : "1px solid rgba(23, 28, 53, 0.1)",
-              }}
-            />
+            <div className="space-y-1">
+              <div className="flex gap-2">
+                <Input
+                  label="Código Postal *"
+                  {...register("postalCode")}
+                  error={errors.postalCode?.message || errorCp || undefined}
+                  placeholder="5000"
+                  className="rounded-lg flex-1"
+                  style={{
+                    backgroundColor: "var(--white)",
+                    border: errors.postalCode || errorCp ? "1px solid rgb(239, 68, 68)" : "1px solid rgba(23, 28, 53, 0.1)",
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline-primary"
+                  className="self-end shrink-0"
+                  onClick={handleBuscarCp}
+                  disabled={!postalCodeWatch || !/^[0-9]{4}$/.test(String(postalCodeWatch).trim()) || isLoadingCp}
+                >
+                  {isLoadingCp ? (
+                    <span className="animate-pulse">...</span>
+                  ) : (
+                    <>
+                      <Search className="w-4 h-4 mr-1" />
+                      Buscar
+                    </>
+                  )}
+                </Button>
+              </div>
+              <p className="text-xs text-foreground/60">Ingresá tu CP y tocá Buscar para completar localidad y provincia.</p>
+            </div>
 
             <input type="hidden" {...register("direccion_formateada")} />
             <input type="hidden" {...register("latitud", { valueAsNumber: true })} />

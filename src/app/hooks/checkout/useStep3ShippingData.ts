@@ -36,10 +36,10 @@ export function useStep3ShippingData() {
   const { register, handleSubmit, formState: { errors, isValid }, watch, setValue, control, trigger } = form;
   const tipoEntrega = watch("tipoEntrega");
   const address = watch("address");
+  const altura = watch("altura");
   const city = watch("city");
   const state = watch("state");
   const postalCode = watch("postalCode");
-  const direccionFormateada = watch("direccion_formateada");
 
   const { provinciaOptions } = useContactFormOptions();
   const { data: direcciones = [] } = useQuery({
@@ -138,8 +138,16 @@ export function useStep3ShippingData() {
     await trigger();
   };
 
+  // Dirección válida: guardada, o manual con calle, altura, ciudad, provincia y CP (4 dígitos)
+  const cpValid = postalCode && /^\d{4}$/.test(String(postalCode).trim());
   const isAddressVerified =
-    tipoEntrega !== "envio" || !!selectedDireccionId || !!(direccionFormateada && direccionFormateada.trim());
+    tipoEntrega !== "envio" ||
+    !!selectedDireccionId ||
+    (!!(address && String(address).trim()) &&
+      !!(altura && String(altura).trim()) &&
+      !!(city && String(city).trim()) &&
+      !!(state && String(state).trim()) &&
+      !!cpValid);
 
   return {
     form: { register, handleSubmit, errors, isValid, watch, setValue, control, trigger },

@@ -1,13 +1,13 @@
 "use client";
 
-import { Check, X } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { Check, X, Search } from "lucide-react";
 import Input from "@/app/components/ui/Input";
 import Select from "@/app/components/ui/Select";
 import { Button } from "@/app/components/ui/Button";
-import AddressAutocomplete from "@/app/components/checkout/AddressAutocomplete";
 import { useContactFormOptions } from "@/app/hooks/checkout/useContactFormOptions";
+import { usePostalCodeSearch } from "@/app/hooks/cart/usePostalCodeSearch";
 import type { ICreateDireccionDTO } from "@/app/services/direcciones.service";
-import type { IDireccionDTO } from "@/app/types/direccion.type";
 
 interface AddressFormProps {
   formData: ICreateDireccionDTO;
@@ -35,6 +35,30 @@ export default function AddressForm({
   hasChanges = true,
 }: AddressFormProps) {
   const { provinciaOptions } = useContactFormOptions();
+  const { searchByPostalCode, isLoading: isLoadingCp, error: errorCp, foundData } = usePostalCodeSearch();
+  const formDataRef = useRef(formData);
+  formDataRef.current = formData;
+
+  useEffect(() => {
+    if (!foundData) return;
+    const prev = formDataRef.current;
+    const opt = provinciaOptions.find(
+      (o) =>
+        o.label.toLowerCase() === (foundData.provincia ?? "").toLowerCase() ||
+        (foundData.provincia ?? "").toLowerCase().includes(o.label.toLowerCase())
+    );
+    setFormData({
+      ...prev,
+      ciudad: foundData.ciudad ?? prev.ciudad ?? "",
+      provincia: opt ? String(opt.value) : (prev.provincia ?? ""),
+    });
+  }, [foundData, provinciaOptions, setFormData]);
+
+  const handleBuscarCp = async () => {
+    const cp = formData.cod_postal != null ? String(formData.cod_postal).padStart(4, "0").slice(0, 4) : "";
+    if (!/^[0-9]{4}$/.test(cp)) return;
+    await searchByPostalCode(cp);
+  };
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
@@ -44,42 +68,11 @@ export default function AddressForm({
         onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
         placeholder="Ej: Casa, Trabajo"
       />
-      <AddressAutocomplete
-        value={formData.direccion || ""}
-        onChange={(direccion: IDireccionDTO | null) => {
-          if (direccion) {
-            const calle = direccion.calle ?? (direccion.direccion_formateada?.split("/")[0]?.trim() ?? "");
-            setFormData({
-              ...formData,
-              direccion: calle,
-              altura: direccion.numero ?? formData.altura ?? "",
-              ciudad: direccion.ciudad ?? formData.ciudad ?? "",
-              provincia: (() => {
-                const provincia = direccion.provincia;
-                if (!provincia) return formData.provincia ?? "";
-                const opt = provinciaOptions.find(
-                  (o) =>
-                    o.label.toLowerCase() === provincia.toLowerCase() ||
-                    o.label.toLowerCase().includes(provincia.toLowerCase())
-                );
-                return opt ? String(opt.value) : (formData.provincia ?? "");
-              })(),
-              cod_postal: direccion.cod_postal != null ? (typeof direccion.cod_postal === "string" ? parseInt(direccion.cod_postal, 10) || null : direccion.cod_postal) : formData.cod_postal ?? null,
-            });
-          }
-        }}
+      <Input
         label="Calle *"
-        placeholder="Escribí tu calle (ej: San Martín, Córdoba)"
-        onCityChange={(ciudad) => setFormData({ ...formData, ciudad })}
-        onProvinceChange={(provincia) => {
-          const opt = provinciaOptions.find(
-            (o) =>
-              o.label.toLowerCase() === provincia.toLowerCase() ||
-              o.label.toLowerCase().includes(provincia.toLowerCase())
-          );
-          if (opt) setFormData({ ...formData, provincia: String(opt.value) });
-        }}
-        onPostalCodeChange={(cp) => setFormData({ ...formData, cod_postal: cp ? parseInt(cp, 10) || null : null })}
+        value={formData.direccion || ""}
+        onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
+        placeholder="Ej: San Martín, Av. Corrientes"
       />
       <div className="grid grid-cols-3 gap-4">
         <Input
@@ -113,13 +106,29 @@ export default function AddressForm({
           onChange={(value) => setFormData({ ...formData, provincia: String(value) })}
         />
       </div>
-      <Input
-        label="Código Postal *"
-        type="number"
-        value={formData.cod_postal || ""}
-        onChange={(e) => setFormData({ ...formData, cod_postal: parseInt(e.target.value) || null })}
-        required
-      />
+      <div className="space-y-1">
+        <div className="flex gap-2 items-end">
+          <Input
+            label="Código Postal *"
+            type="number"
+            value={formData.cod_postal ?? ""}
+            onChange={(e) => setFormData({ ...formData, cod_postal: parseInt(e.target.value, 10) || null })}
+            error={errorCp || undefined}
+            required
+            className="flex-1"
+          />
+          <Button
+            type="button"
+            variant="outline-primary"
+            size="sm"
+            onClick={handleBuscarCp}
+            disabled={formData.cod_postal == null || !/^[0-9]{4}$/.test(String(formData.cod_postal)) || isLoadingCp}
+          >
+            {isLoadingCp ? "..." : <><Search className="w-4 h-4 mr-1" />Buscar</>}
+          </Button>
+        </div>
+        <p className="text-xs text-foreground/60">Tocá Buscar para completar localidad y provincia.</p>
+      </div>
       <div className="flex items-center gap-2">
         <input
           type="checkbox"
