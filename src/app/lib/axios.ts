@@ -1,5 +1,6 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { getAuthToken } from '../utils/cookies';
+import { getGuestDeviceId } from '../utils/guestDeviceId';
 import { refreshFirebaseToken, isTokenExpiredError } from '../utils/tokenRefresh';
 
 // Determinar la URL base según el entorno
@@ -110,7 +111,11 @@ axiosInstance.interceptors.request.use(
       // Solo agregar token si existe, el endpoint no es público, y no hay header ya establecido
       if (token && config.headers && !isPublic && !hasExistingAuthHeader) {
         config.headers.Authorization = `Bearer ${token}`;
-        
+        const guestDeviceId = getGuestDeviceId();
+        if (guestDeviceId) {
+          config.headers['X-Guest-Device-Id'] = guestDeviceId;
+        }
+
         // Log adicional para verificar que se está agregando
         if (typeof window !== 'undefined') {
           const currentPath = window.location.pathname;

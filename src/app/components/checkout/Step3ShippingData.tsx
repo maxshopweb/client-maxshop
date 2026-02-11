@@ -13,7 +13,7 @@ import { usePostalCodeSearch } from "@/app/hooks/cart/usePostalCodeSearch";
 
 export default function Step3ShippingData() {
   const {
-    form: { register, handleSubmit, errors, isValid, setValue, control, watch },
+    form: { register, handleSubmit, errors, setValue, control, watch },
     tipoEntrega,
     costoEnvio,
     provinciaOptions,
@@ -65,7 +65,10 @@ export default function Step3ShippingData() {
         <h2 className="text-2xl font-bold text-foreground/90">Datos de envío</h2>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
+      <form
+        onSubmit={handleSubmit(onSubmit as any, (err) => console.error("Validation errors:", err))}
+        className="space-y-6"
+      >
         <TipoEntregaSelector
           selectedTipo={tipoEntrega}
           costoEnvio={costoEnvio}
@@ -179,7 +182,7 @@ export default function Step3ShippingData() {
             </div>
 
             <div className="space-y-1">
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-end">
                 <Input
                   label="Código Postal *"
                   {...register("postalCode")}
@@ -194,7 +197,8 @@ export default function Step3ShippingData() {
                 <Button
                   type="button"
                   variant="outline-primary"
-                  className="self-end shrink-0"
+                  size="md"
+                  className="shrink-0 h-11 min-h-11 rounded-lg"
                   onClick={handleBuscarCp}
                   disabled={!postalCodeWatch || !/^[0-9]{4}$/.test(String(postalCodeWatch).trim()) || isLoadingCp}
                 >
@@ -218,14 +222,13 @@ export default function Step3ShippingData() {
         )}
 
         {tipoEntrega === "retiro" && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-4 rounded-lg bg-principal/10 border border-principal/20"
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-sm text-foreground/60"
           >
-            <p className="text-sm text-foreground/70">Retirarás tu pedido en nuestro local sin costo adicional.</p>
-            <p className="text-xs text-foreground/50 mt-1">Te contactaremos cuando tu pedido esté listo para retirar.</p>
-          </motion.div>
+            Retirarás tu pedido en nuestro local sin costo. Te contactaremos cuando esté listo.
+          </motion.p>
         )}
 
         <div className="flex gap-4 pt-4">
@@ -234,15 +237,15 @@ export default function Step3ShippingData() {
             Volver
           </Button>
           <Button
-            type="submit"
+            type="button"
             variant="primary"
             size="lg"
-            disabled={
-              !(isValid || (tipoEntrega === "envio" && selectedDireccionId)) ||
-              !isAddressVerified ||
-              isSubmitting
-            }
+            disabled={!tipoEntrega || (tipoEntrega === "envio" && !isAddressVerified) || isSubmitting}
             className="rounded-lg flex-1"
+            onClick={(e) => {
+              e.preventDefault();
+              handleSubmit(onSubmit as any, (err) => console.error("Validation errors:", err))(e);
+            }}
           >
             {isSubmitting ? (
               <>

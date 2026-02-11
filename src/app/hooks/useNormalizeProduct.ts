@@ -33,8 +33,14 @@ export const useNormalizeProduct = ({ product }: UseNormalizeProductProps) => {
     const precio_unitario = isICartItem 
         ? (product as ICartItem).precio_unitario 
         : (product as CartItem).precio;
+    const precio_unitario_sin_iva = isICartItem
+        ? (product as ICartItem).precio_unitario_sin_iva ?? (product as ICartItem).producto?.precio_sin_iva ?? 0
+        : (product as CartItem).precioSinImpuestos ?? 0;
     
     const subtotal = product.subtotal;
+    const subtotal_sin_iva = isICartItem
+        ? (product as ICartItem).subtotal_sin_iva ?? precio_unitario_sin_iva * cantidad
+        : (product as CartItem).subtotalSinImpuestos ?? precio_unitario_sin_iva * cantidad;
     const descuento = isICartItem 
         ? (product as ICartItem).descuento || 0 
         : 0;
@@ -52,7 +58,9 @@ export const useNormalizeProduct = ({ product }: UseNormalizeProductProps) => {
         marca,
         cantidad,
         precio_unitario,
+        precio_unitario_sin_iva,
         subtotal,
+        subtotal_sin_iva,
         descuento,
         porcentajeDescuento,
         tieneDescuento

@@ -3,6 +3,7 @@ import { User } from 'firebase/auth';
 import AuthService from './auth.service';
 import EmailValidationService from './emailValidation.service';
 import axiosInstance from '../lib/axios';
+import { getGuestDeviceId } from '../utils/guestDeviceId';
 import { auth } from '../lib/firebase.config';
 import { BackendAuthOperationResult, BackendAuthenticatedUser, BackendAuthResponse } from '../types/auth';
 import { IUsuario, UserRole } from '../types/user';
@@ -517,7 +518,8 @@ class AuthIntegrationService {
           email: guestData.email,
           nombre: guestData.nombre,
           apellido: guestData.apellido ?? null,
-          telefono: guestData.telefono ?? null
+          telefono: guestData.telefono ?? null,
+          guestDeviceId: getGuestDeviceId() ?? undefined
         });
 
         // Verificar que backendResult y backendResult.user existan

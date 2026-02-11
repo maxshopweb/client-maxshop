@@ -5,6 +5,7 @@ import { useIsMutating } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { useCheckoutStore } from "@/app/hooks/checkout/useCheckoutStore";
 import ProductCart from "@/app/components/cart/ProductCart";
+import { formatCurrencyARS } from "@/app/utils/currency";
 
 export default function CartSummary() {
   const { cartItems, costoEnvio, tipoEntrega, codigoPostal } = useCheckoutStore();
@@ -20,16 +21,20 @@ export default function CartSummary() {
   );
 
   // Calcular totales
-  const { subtotal, iva, envio, total } = useMemo(() => {
+  const { subtotal, subtotalSinImpuestos, impuestos, envio, total, totalSinImpuestos } = useMemo(() => {
     const sub = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
-    const tax = sub * 0.21; // IVA 21%
+    const subSinImp = cartItems.reduce((sum, item) => sum + (item.subtotalSinImpuestos ?? item.subtotal), 0);
+    const impuestosCalculados = Math.max(sub - subSinImp, 0);
     const env = costoEnvio || 0;
-    const tot = sub + tax + env;
+    const tot = sub + env;
+    const totSinImp = subSinImp + env;
     return {
       subtotal: sub,
-      iva: tax,
+      subtotalSinImpuestos: subSinImp,
+      impuestos: impuestosCalculados,
       envio: env,
       total: tot,
+      totalSinImpuestos: totSinImp,
     };
   }, [cartItems, costoEnvio]);
 
@@ -70,20 +75,25 @@ export default function CartSummary() {
       {/* Totales */}
       <div className="space-y-2 mb-4">
         <div className="flex justify-between text-sm">
-          <span className="text-foreground/70">Subtotal (sin IVA)</span>
-          <span className="text-foreground font-medium">${subtotal.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-foreground/70">IVA (21%)</span>
-          <span className="text-foreground font-medium">${iva.toFixed(2)}</span>
+          <span className="text-foreground/70">Subtotal</span>
+          <div className="text-right">
+            <span className="text-foreground font-medium block">{formatCurrencyARS(subtotal)}</span>
+            {subtotalSinImpuestos > 0 && (
+              <span className="block text-[11px] text-foreground/50">
+                Sin impuestos: {formatCurrencyARS(subtotalSinImpuestos)}
+              </span>
+            )}
+          </div>
         </div>
         {tipoEntrega === "envio" && (
           <div className="flex justify-between text-sm">
             <span className="text-foreground/70">Costo de envío</span>
             {isCalculandoEnvio ? (
               <span className="text-foreground/50 text-xs">Calculando...</span>
+            ) : costoEnvio !== null && costoEnvio === 0 ? (
+              <span className="text-foreground font-medium text-green-600">Envío gratis</span>
             ) : costoEnvio !== null && costoEnvio > 0 ? (
-              <span className="text-foreground font-medium">${envio.toFixed(2)}</span>
+              <span className="text-foreground font-medium">{formatCurrencyARS(envio)}</span>
             ) : (
               <span className="text-foreground/50 text-xs">-</span>
             )}
@@ -107,7 +117,14 @@ export default function CartSummary() {
           {isCalculandoEnvio ? (
             <span className="text-foreground/70 text-base font-medium">Calculando...</span>
           ) : (
-            `$${total.toFixed(2)}`
+            <>
+              {formatCurrencyARS(total)}
+              {totalSinImpuestos > 0 && (
+                <span className="block text-[11px] text-foreground/50 italic mt-1 font-normal">
+                  (Sin impuestos: {formatCurrencyARS(totalSinImpuestos)})
+                </span>
+              )}
+            </>
           )}
         </span>
       </div>

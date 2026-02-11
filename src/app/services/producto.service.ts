@@ -75,6 +75,7 @@ class ProductosService {
     if (filters.destacado !== undefined) params.append('destacado', filters.destacado.toString());
     if (filters.financiacion !== undefined) params.append('financiacion', filters.financiacion.toString());
     if (filters.stock_bajo !== undefined) params.append('stock_bajo', filters.stock_bajo.toString());
+    if (filters.publicado !== undefined) params.append('publicado', filters.publicado.toString());
     if (filters.activo) params.append('activo', filters.activo);
 
     const url = `/productos?${params.toString()}`;

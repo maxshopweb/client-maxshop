@@ -5,6 +5,7 @@ import { useConfigTienda, useConfigTiendaMutation } from "@/app/hooks/config/use
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/app/components/ui/Button";
+import Input from "@/app/components/ui/Input";
 
 export default function ConfigPage() {
   const { data: config, isLoading: loadingConfig } = useConfigTienda();
@@ -21,6 +22,18 @@ export default function ConfigPage() {
       setCuotasMin(String(config.cuotas_sin_interes_minimo ?? 80000));
     }
   }, [config]);
+
+  const defEnvio = config?.envio_gratis_minimo ?? 100000;
+  const defCuotas = config?.cuotas_sin_interes ?? 3;
+  const defCuotasMin = config?.cuotas_sin_interes_minimo ?? 80000;
+  const envioVal = parseInt(envioMin.replace(/\D/g, ""), 10);
+  const cuotasVal = parseInt(cuotas, 10);
+  const cuotasMinVal = parseInt(cuotasMin.replace(/\D/g, ""), 10);
+  const hasChanges =
+    config != null &&
+    ((Number.isNaN(envioVal) ? defEnvio : envioVal) !== defEnvio ||
+      (Number.isNaN(cuotasVal) ? defCuotas : cuotasVal) !== defCuotas ||
+      (Number.isNaN(cuotasMinVal) ? defCuotasMin : cuotasMinVal) !== defCuotasMin);
 
   const handleSavePromos = async () => {
     const envio = parseInt(envioMin.replace(/\D/g, ""), 10);
@@ -54,7 +67,7 @@ export default function ConfigPage() {
     <div className="space-y-6">
       <div className="bg-white dark:bg-secundario p-8 rounded-2xl shadow-lg border border-principal/10 dark:border-white/10">
         <h1 className="text-3xl font-bold text-text mb-4">
-          Configuración del Sistema
+          Configuración del sistema
         </h1>
         <p className="text-text/60">
           Gestiona las integraciones y reglas de negocio de tu sistema.
@@ -146,31 +159,28 @@ export default function ConfigPage() {
       {/* Reglas de Negocio */}
       <div className="bg-white dark:bg-secundario p-6 rounded-xl shadow border border-principal/10 dark:border-white/10">
         <h2 className="text-2xl font-bold text-text mb-6">
-          Reglas de Negocio
+          Reglas de negocio
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Envíos Gratis - editable */}
           <div className="bg-white dark:bg-secundario border border-principal/20 dark:border-white/20 rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-200">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-text">
-                Envíos Gratis
+                Envíos gratis
               </h3>
               <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-semibold">
                 Activo
               </span>
             </div>
             <div className="space-y-3 text-sm text-text/70 pt-4 border-t border-principal/10 dark:border-white/10">
-              <div>
-                <span className="font-medium text-text">Monto mínimo (pesos):</span>
-                <input
-                  type="text"
-                  value={envioMin}
-                  onChange={(e) => setEnvioMin(e.target.value)}
-                  placeholder="100000"
-                  className="mt-1 w-full rounded border border-principal/20 dark:border-white/20 bg-input text-input-text px-3 py-2 text-principal font-semibold"
-                  disabled={loadingConfig}
-                />
-              </div>
+              <Input
+                label="Monto mínimo (pesos):"
+                type="text"
+                value={envioMin}
+                onChange={(e) => setEnvioMin(e.target.value)}
+                placeholder="100000"
+                disabled={loadingConfig}
+              />
               <p className="mt-1 text-text/60">Todo el país</p>
             </div>
           </div>
@@ -179,35 +189,29 @@ export default function ConfigPage() {
           <div className="bg-white dark:bg-secundario border border-principal/20 dark:border-white/20 rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-200">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-text">
-                Cuotas Sin Interés
+                Cuotas sin interés
               </h3>
               <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-semibold">
                 Activo
               </span>
             </div>
             <div className="space-y-3 text-sm text-text/70 pt-4 border-t border-principal/10 dark:border-white/10">
-              <div>
-                <span className="font-medium text-text">Cantidad de cuotas:</span>
-                <input
-                  type="number"
-                  min={1}
-                  value={cuotas}
-                  onChange={(e) => setCuotas(e.target.value)}
-                  className="mt-1 w-full rounded border border-principal/20 dark:border-white/20 bg-input text-input-text px-3 py-2 text-principal font-semibold"
-                  disabled={loadingConfig}
-                />
-              </div>
-              <div>
-                <span className="font-medium text-text">Monto mínimo (pesos):</span>
-                <input
-                  type="text"
-                  value={cuotasMin}
-                  onChange={(e) => setCuotasMin(e.target.value)}
-                  placeholder="80000"
-                  className="mt-1 w-full rounded border border-principal/20 dark:border-white/20 bg-input text-input-text px-3 py-2 text-principal font-semibold"
-                  disabled={loadingConfig}
-                />
-              </div>
+              <Input
+                label="Cantidad de cuotas:"
+                type="number"
+                min={1}
+                value={cuotas}
+                onChange={(e) => setCuotas(e.target.value)}
+                disabled={loadingConfig}
+              />
+              <Input
+                label="Monto mínimo (pesos):"
+                type="text"
+                value={cuotasMin}
+                onChange={(e) => setCuotasMin(e.target.value)}
+                placeholder="80000"
+                disabled={loadingConfig}
+              />
             </div>
           </div>
 
@@ -215,7 +219,7 @@ export default function ConfigPage() {
           <div className="flex items-end">
             <Button
               onClick={handleSavePromos}
-              disabled={mutation.isPending || loadingConfig}
+              disabled={mutation.isPending || loadingConfig || !hasChanges}
               variant="primary"
               className="w-full"
             >
@@ -227,7 +231,7 @@ export default function ConfigPage() {
           <div className="bg-white dark:bg-secundario border border-principal/20 dark:border-white/20 rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-200">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-text">
-                Alerta Stock Mínimo
+                Alerta stock mínimo
               </h3>
               <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-semibold">
                 Activo
@@ -271,7 +275,7 @@ export default function ConfigPage() {
           <div className="bg-white dark:bg-secundario border border-principal/20 dark:border-white/20 rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-200">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-text">
-                Política de Devoluciones
+                Política de devoluciones
               </h3>
               <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-semibold">
                 Activo

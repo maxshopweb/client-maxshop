@@ -5,13 +5,16 @@ import { Star, Sparkles, Tag } from "lucide-react";
 import type { IProductos } from "@/app/types/producto.type";
 import AddToCartButton from "@/app/components/cart/AddToCartButton";
 import ProductImage from "@/app/components/shared/ProductImage";
+import { formatCurrencyARS } from "@/app/utils/currency";
+import { getPrecioConImpuestos, getPrecioSinImpuestos } from "@/app/utils/producto.utils";
 
 interface ProductCardProps {
   producto: IProductos;
 }
 
 export default function ProductCard({ producto }: ProductCardProps) {
-  const precioFinal = Number(producto.precio ?? 0);
+  const precioSinImpuestos = getPrecioSinImpuestos(producto) ?? 0;
+  const precioFinal = getPrecioConImpuestos(producto) ?? precioSinImpuestos;
   const listaActiva = producto.lista_activa;
   const esOferta = listaActiva?.es_oferta === true;
   const esCampanya = listaActiva?.es_campanya === true;
@@ -89,8 +92,13 @@ export default function ProductCard({ producto }: ProductCardProps) {
                 esOferta ? "text-amber-600" : esCampanya ? "text-emerald-700" : "text-principal"
               }`}
             >
-              ${precioFinal.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {formatCurrencyARS(precioFinal)}
             </span>
+            {precioSinImpuestos > 0 && (
+              <p className="text-xs text-terciario/60 mt-1">
+                Sin impuestos: {formatCurrencyARS(precioSinImpuestos)}
+              </p>
+            )}
           </div>
           
           {/* Botón Agregar al Carrito */}

@@ -403,8 +403,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         toast.success('Sesión cerrada correctamente');
       }
       
-      // SIEMPRE redirigir a / después del logout
-      if (typeof window !== 'undefined') {
+      // Redirigir a / solo si no es logout silencioso (ej. invitado en página de resultado)
+      if (typeof window !== 'undefined' && !silent) {
         window.location.href = '/';
       }
       
@@ -418,8 +418,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setRole(null);
       setLoading(false);
       
-      // SIEMPRE redirigir a / después del logout, incluso si hay error
-      if (typeof window !== 'undefined') {
+      // Redirigir a / solo si no es logout silencioso
+      if (typeof window !== 'undefined' && !silent) {
         window.location.href = '/';
       }
       

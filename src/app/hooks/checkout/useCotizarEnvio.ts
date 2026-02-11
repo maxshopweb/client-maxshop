@@ -13,6 +13,7 @@ interface CotizarEnvioParams {
 interface CotizacionResponse {
   precio: number;
   moneda: string;
+  envioGratis?: boolean;
   tarifaConIva?: {
     seguroDistribucion: string;
     distribucion: string;
@@ -72,6 +73,7 @@ export function useCotizarEnvio() {
         volumen: String(volumenTotal),
         kilos: String(Math.max(pesoTotal, 1)),
         valorDeclarado: String(subtotal),
+        subtotalCarrito: subtotal,
         altoCm: '10',
         largoCm: '30',
         anchoCm: '20',

@@ -7,9 +7,11 @@ export interface CartItem {
   id: number;
   nombre: string;
   precio: number;
+  precioSinImpuestos: number;
   cantidad: number;
   img_principal: string;
   subtotal: number;
+  subtotalSinImpuestos: number;
 }
 
 interface CheckoutStore {
@@ -116,9 +118,11 @@ export const useCheckoutStore = create<CheckoutStore>()(
                 id: item.id_prod,
                 nombre: item.producto?.nombre || 'Producto sin nombre',
                 precio: item.precio_unitario || 0,
+                precioSinImpuestos: item.precio_unitario_sin_iva || item.producto?.precio_sin_iva || 0,
                 cantidad: item.cantidad || 1,
                 img_principal: item.producto?.img_principal || '',
                 subtotal: item.subtotal || 0,
+                subtotalSinImpuestos: item.subtotal_sin_iva || (item.precio_unitario_sin_iva || item.producto?.precio_sin_iva || 0) * (item.cantidad || 1),
               }));
               set({ cartItems });
             }

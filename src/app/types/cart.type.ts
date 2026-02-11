@@ -6,16 +6,21 @@ export interface ICartItem {
   producto: IProductos;
   cantidad: number;
   precio_unitario: number;
+  precio_unitario_sin_iva: number;
   descuento?: number;
   subtotal: number;
+  subtotal_sin_iva: number;
 }
 
 // Resumen del carrito
 export interface ICartSummary {
   subtotal: number;
+  subtotalSinImpuestos: number;
   descuentos: number;
   envio: number;
   total: number;
+  totalSinImpuestos: number;
+  impuestos: number;
   cantidadItems: number;
 }
 

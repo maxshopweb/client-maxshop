@@ -7,6 +7,7 @@ import { CartItem } from "@/app/hooks/checkout/useCheckoutStore";
 import ConfirmModal from "../modals/ConfirmModal";
 import { useHandleCart } from "@/app/hooks/useHandleCart";
 import { useNormalizeProduct } from "@/app/hooks/useNormalizeProduct";
+import { formatCurrencyARS } from "@/app/utils/currency";
 
 interface ProductCartProps {
   // Puede recibir ICartItem (del cartStore) o CartItem (del checkoutStore)
@@ -44,7 +45,9 @@ export default function ProductCart({
     marca, 
     cantidad, 
     precio_unitario, 
+    precio_unitario_sin_iva,
     subtotal, 
+    subtotal_sin_iva,
     descuento, 
     porcentajeDescuento,
     tieneDescuento
@@ -52,6 +55,8 @@ export default function ProductCart({
 
   // Verificar si este item es el que se está eliminando
   const isDeleting = itemToDelete === id_prod;
+  const totalSinImpuestos = subtotal_sin_iva ?? (precio_unitario_sin_iva || 0) * cantidad;
+  const showSubtotal = false;
 
   // Variante pequeña para resumen (solo lectura)
   if (variant === 'sm' || readOnly) {
@@ -73,13 +78,15 @@ export default function ProductCart({
           {marca && (
             <p className="text-xs text-foreground/50 capitalize">{marca.nombre}</p>
           )}
-          <p className="text-foreground/60 text-xs mt-1">
-            {cantidad} × ${precio_unitario.toFixed(2)}
+          <p className="text-sm font-semibold text-foreground mt-1">
+            {formatCurrencyARS(precio_unitario)} c/u
           </p>
+          {precio_unitario_sin_iva > 0 && (
+            <p className="text-[11px] text-foreground/45">
+              Sin impuestos: {formatCurrencyARS(precio_unitario_sin_iva)} c/u
+            </p>
+          )}
         </div>
-        <p className="font-semibold text-foreground flex-shrink-0">
-          ${subtotal.toFixed(2)}
-        </p>
       </div>
     );
   }
@@ -119,20 +126,22 @@ export default function ProductCart({
               {tieneDescuento ? (
                 <div className="flex items-baseline gap-1.5 flex-wrap">
                   <span className="text-base font-bold text-principal">
-                    ${subtotal.toFixed(2)}
+                    {formatCurrencyARS(precio_unitario)} c/u
                   </span>
                   <span className="text-xs text-foreground/40 line-through">
-                    ${(precio_unitario * cantidad + descuento).toFixed(2)}
+                    {formatCurrencyARS(precio_unitario * cantidad + descuento)}
                   </span>
                 </div>
               ) : (
                 <span className="text-base font-bold text-principal">
-                  ${subtotal.toFixed(2)}
+                  {formatCurrencyARS(precio_unitario)} c/u
                 </span>
               )}
-              <p className="text-xs text-foreground/50 mt-0.5">
-                ${precio_unitario.toFixed(2)} c/u
-              </p>
+              {precio_unitario_sin_iva > 0 && (
+                <p className="text-[11px] text-foreground/45 mt-0.5">
+                  Sin impuestos: {formatCurrencyARS(precio_unitario_sin_iva)} c/u
+                </p>
+              )}
             </div>
 
             {/* Controles alineados */}

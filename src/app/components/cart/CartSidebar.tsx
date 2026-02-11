@@ -7,6 +7,7 @@ import ConfirmModal from "../modals/ConfirmModal";
 import { useRef } from "react";
 import { useHandleCart } from "@/app/hooks/useHandleCart";
 import ProductCart from "./ProductCart";
+import { formatCurrencyARS } from "@/app/utils/currency";
 
 interface CartSidebarProps {
   isOpen: boolean;
@@ -104,15 +105,23 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
               <div className="px-6 py-4 space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-foreground/70">Subtotal</span>
-                  <span className="text-foreground font-medium">
-                    ${summary.subtotal.toFixed(2)}
-                  </span>
+                  <div className="text-right">
+                    <span className="text-foreground font-medium block">
+                      {formatCurrencyARS(summary.subtotal)}
+                    </span>
+                    {summary.subtotalSinImpuestos > 0 && (
+                      <span className="block text-[11px] text-foreground/50">
+                        Sin impuestos: {formatCurrencyARS(summary.subtotalSinImpuestos)}
+                      </span>
+                    )}
+                    {/* Se omite el detalle de impuestos para mantener solo precio con/sin impuestos */}
+                  </div>
                 </div>
                 {summary.descuentos > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-foreground/70">Descuentos</span>
                     <span className="text-principal font-medium">
-                      -${summary.descuentos.toFixed(2)}
+                      {formatCurrencyARS(-summary.descuentos)}
                     </span>
                   </div>
                 )}
@@ -123,7 +132,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                     {summary.envio === 0 ? (
                       <span className="text-principal">-</span>
                     ) : (
-                      `$${summary.envio.toFixed(2)}`
+                      formatCurrencyARS(summary.envio)
                     )}
                   </span>
                 </div>
@@ -133,9 +142,16 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
 
                 <div className="pt-2 flex justify-between">
                   <span className="text-base font-semibold text-foreground">Total</span>
-                  <span className="text-xl font-bold text-principal">
-                    ${summary.total.toFixed(2)}
-                  </span>
+                  <div className="text-right">
+                    <span className="block text-xl font-bold text-principal">
+                      {formatCurrencyARS(summary.total)}
+                    </span>
+                    {summary.totalSinImpuestos > 0 && (
+                      <span className="block text-[11px] text-foreground/60">
+                        Sin impuestos: {formatCurrencyARS(summary.totalSinImpuestos)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 

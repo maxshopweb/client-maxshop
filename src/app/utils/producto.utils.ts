@@ -29,7 +29,7 @@ export function getStockInfo(producto: IProductos): IStockInfo {
         },
         stock_alto: {
             color: 'bg-green-100 text-green-800 border-green-200',
-            label: 'Stock disponible',
+            label: 'Disponible',
         },
     };
 
@@ -68,6 +68,108 @@ export function truncarDescripcion(desc: string | null | undefined, maxLength: n
     if (!desc) return '';
     if (desc.length <= maxLength) return desc;
     return desc.substring(0, maxLength) + '...';
+}
+
+/**
+ * Obtiene el mejor precio sin impuestos disponible del producto.
+ */
+export function getPrecioSinImpuestos(producto: IProductos): number | null {
+    const porcentajeIva = getPorcentajeIva(producto);
+
+    const candidates = [
+        producto.precio_sin_iva,
+        producto.precio_venta,
+        producto.precio_especial,
+        producto.precio_pvp,
+        producto.precio_campanya,
+        producto.precio_evento,
+    ];
+
+    for (const value of candidates) {
+        if (value != null) {
+            const numeric = Number(value);
+            if (!Number.isNaN(numeric) && numeric > 0) {
+                return numeric;
+            }
+        }
+    }
+
+    if (producto.precio != null && porcentajeIva != null) {
+        const precioConIva = Number(producto.precio);
+        if (!Number.isNaN(precioConIva) && precioConIva > 0) {
+            const divisor = 1 + porcentajeIva / 100;
+            if (divisor > 0) {
+                return precioConIva / divisor;
+            }
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Obtiene el precio final con impuestos del producto.
+ */
+export function getPrecioConImpuestos(producto: IProductos): number | null {
+    if (producto.precio != null) {
+        const precioConIva = Number(producto.precio);
+        if (!Number.isNaN(precioConIva) && precioConIva > 0) {
+            return precioConIva;
+        }
+    }
+
+    const precioBase = getPrecioSinImpuestos(producto);
+    if (precioBase != null) {
+        const porcentajeIva = getPorcentajeIva(producto);
+        if (porcentajeIva != null) {
+            return precioBase * (1 + porcentajeIva / 100);
+        }
+        const precioMinorista = producto.precio_minorista != null ? Number(producto.precio_minorista) : null;
+        if (precioMinorista != null && !Number.isNaN(precioMinorista) && precioMinorista > 0) {
+            return precioMinorista;
+        }
+        return precioBase;
+    }
+
+    const precioMinorista = producto.precio_minorista != null ? Number(producto.precio_minorista) : null;
+    if (precioMinorista != null && !Number.isNaN(precioMinorista) && precioMinorista > 0) {
+        return precioMinorista;
+    }
+
+    return null;
+}
+
+function getPorcentajeIva(producto: IProductos): number | null {
+    const ivaData = producto.iva as (typeof producto.iva & { porcentaje?: number | null; porcen_iva?: number | null }) | null;
+    if (ivaData?.porcentaje != null) {
+        const numeric = Number(ivaData.porcentaje);
+        if (!Number.isNaN(numeric)) {
+            return numeric;
+        }
+    }
+    if ((ivaData as any)?.porcen_iva != null) {
+        const numeric = Number((ivaData as any).porcen_iva);
+        if (!Number.isNaN(numeric)) {
+            return numeric;
+        }
+    }
+    if (producto.iva_monto != null) {
+        const base =
+            producto.precio_sin_iva ??
+            producto.precio_venta ??
+            producto.precio_especial ??
+            producto.precio_pvp ??
+            producto.precio_campanya ??
+            null;
+        if (base != null) {
+            const numericBase = Number(base);
+            const ivaMonto = Number(producto.iva_monto);
+            if (!Number.isNaN(numericBase) && numericBase > 0 && !Number.isNaN(ivaMonto)) {
+                return (ivaMonto / numericBase) * 100;
+            }
+        }
+    }
+    return null;
 }
 
 /**

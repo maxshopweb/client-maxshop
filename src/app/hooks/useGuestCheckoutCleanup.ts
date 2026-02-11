@@ -23,6 +23,9 @@ export function useGuestCheckoutCleanup() {
       wasInCheckoutRef.current = true;
       return () => {
         if (wasInCheckoutRef.current && isGuest) {
+          // No llamar logout() desde el cleanup si estamos en resultado: la página ya llamó logout(true).
+          // Si llamáramos logout() aquí, sería logout(false) y redirigiría a /.
+          if (currentPath.startsWith('/checkout/resultado')) return;
           logout().catch(console.error);
           wasInCheckoutRef.current = false;
         }

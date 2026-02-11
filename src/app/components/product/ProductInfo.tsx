@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { Star, Package, CreditCard, Tag, Sparkles } from "lucide-react";
 import { IProductos } from "@/app/types/producto.type";
 import { formatPrecio, getStockInfo } from "@/app/types/producto.type";
+import { getPrecioConImpuestos, getPrecioSinImpuestos } from "@/app/utils/producto.utils";
+import { formatCurrencyARS } from "@/app/utils/currency";
 
 interface ProductInfoProps {
   producto: IProductos;
@@ -13,7 +15,9 @@ export default function ProductInfo({ producto }: ProductInfoProps) {
   const stockInfo = getStockInfo(producto);
 
   // Mismas reglas que ProductCard: lista activa, oferta/campaña/destacado
-  const precioFinal = Number(producto.precio ?? 0);
+  const precioSinImpuestos = getPrecioSinImpuestos(producto);
+  const precioFinalCalculado = getPrecioConImpuestos(producto);
+  const precioFinal = precioFinalCalculado ?? 0;
   const listaActiva = producto.lista_activa;
   const esOferta = listaActiva?.es_oferta === true;
   const esCampanya = listaActiva?.es_campanya === true;
@@ -25,7 +29,6 @@ export default function ProductInfo({ producto }: ProductInfoProps) {
     producto.precio < producto.precio_minorista
       ? producto.precio_minorista
       : null;
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -58,7 +61,7 @@ export default function ProductInfo({ producto }: ProductInfoProps) {
               esOferta ? "text-amber-600" : esCampanya ? "text-emerald-700" : "text-principal"
             }`}
           >
-            {formatPrecio(precioFinal)}
+            {formatCurrencyARS(precioFinal)}
           </span>
           {precioOriginal != null && (
             <span className="text-base sm:text-lg text-terciario/40 line-through">
@@ -66,6 +69,11 @@ export default function ProductInfo({ producto }: ProductInfoProps) {
             </span>
           )}
         </div>
+        {precioSinImpuestos != null && precioSinImpuestos > 0 && (
+          <p className="text-xs sm:text-sm text-terciario/60">
+            Sin impuestos: {formatCurrencyARS(precioSinImpuestos)}
+          </p>
+        )}
 
         {producto.precio_mayorista && (
           <p className="text-xs sm:text-sm text-terciario/50">

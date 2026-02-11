@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ICartItem, ICartSummary, IDatosEnvio, IDatosFacturacion, IDatosPago, ICheckoutState } from '../types/cart.type';
 import { IProductos } from '../types/producto.type';
+import { getPrecioConImpuestos, getPrecioSinImpuestos } from '../utils/producto.utils';
 
 interface CartState {
   // Items del carrito
@@ -30,20 +31,18 @@ interface CartState {
   calculateSummary: () => ICartSummary;
 }
 
-// Función para calcular precio con descuentos
-const calcularPrecioFinal = (producto: IProductos): number => {
-  const precioMinorista = Number(producto.precio_minorista || 0);
-  const precio = Number(producto.precio || 0);
-  
-  // Si hay precio menor que minorista, hay descuento
-  if (precio && precioMinorista && precio < precioMinorista) {
-    return precio;
-  }
-  
-  return precio || precioMinorista || 0;
+// Misma lógica que ProductCard: un solo precio (con impuestos) y sin impuestos
+const getPrecioConImpuestosNum = (producto: IProductos): number => {
+  const conImp = getPrecioConImpuestos(producto);
+  const sinImp = getPrecioSinImpuestos(producto);
+  return conImp ?? sinImp ?? 0;
 };
 
-// Función para calcular descuento
+const getPrecioSinImpuestosNum = (producto: IProductos): number => {
+  return getPrecioSinImpuestos(producto) ?? 0;
+};
+
+// Función para calcular descuento (solo para mostrar tachado si aplica)
 const calcularDescuento = (producto: IProductos): number => {
   const precioMinorista = Number(producto.precio_minorista || 0);
   const precio = Number(producto.precio || 0);
@@ -68,9 +67,12 @@ export const useCartStore = create<CartState>()(
       },
       summary: {
         subtotal: 0,
+        subtotalSinImpuestos: 0,
         descuentos: 0,
         envio: 0,
         total: 0,
+        totalSinImpuestos: 0,
+        impuestos: 0,
         cantidadItems: 0,
       },
       
@@ -82,8 +84,9 @@ export const useCartStore = create<CartState>()(
           if (existingItem) {
             // Si ya existe, actualizar cantidad
             const newQuantity = existingItem.cantidad + cantidad;
-            const precioUnitario = calcularPrecioFinal(producto);
+            const precioUnitario = getPrecioConImpuestosNum(producto);
             const descuento = calcularDescuento(producto);
+            const precioUnitarioSinImpuestos = getPrecioSinImpuestosNum(producto);
             
             const updatedItems = state.items.map((item) =>
               item.id_prod === producto.id_prod
@@ -91,8 +94,10 @@ export const useCartStore = create<CartState>()(
                     ...item,
                     cantidad: newQuantity,
                     precio_unitario: precioUnitario,
+                    precio_unitario_sin_iva: precioUnitarioSinImpuestos,
                     descuento: descuento * newQuantity,
                     subtotal: precioUnitario * newQuantity,
+                    subtotal_sin_iva: precioUnitarioSinImpuestos * newQuantity,
                   }
                 : item
             );
@@ -102,14 +107,20 @@ export const useCartStore = create<CartState>()(
             const descuentos = updatedItems.reduce((sum, item) => sum + (item.descuento || 0), 0);
             // El costo de envío ahora se calcula dinámicamente en el checkout, no aquí
             const envio = 0; // Removido: se calcula dinámicamente en checkout
+            const subtotalSinImpuestos = updatedItems.reduce((sum, item) => sum + (item.subtotal_sin_iva || 0), 0);
+            const impuestos = Math.max(subtotal - subtotalSinImpuestos, 0);
             const total = subtotal - descuentos + envio;
+            const totalSinImpuestos = subtotalSinImpuestos - descuentos + envio;
             const cantidadItems = updatedItems.reduce((sum, item) => sum + item.cantidad, 0);
             
             const newSummary = {
               subtotal,
+              subtotalSinImpuestos,
               descuentos,
               envio,
               total,
+              totalSinImpuestos,
+              impuestos,
               cantidadItems,
             };
             
@@ -119,15 +130,18 @@ export const useCartStore = create<CartState>()(
             };
           } else {
             // Si no existe, agregar nuevo item
-            const precioUnitario = calcularPrecioFinal(producto);
+            const precioUnitario = getPrecioConImpuestosNum(producto);
             const descuento = calcularDescuento(producto);
+            const precioUnitarioSinImpuestos = getPrecioSinImpuestosNum(producto);
             const newItem: ICartItem = {
               id_prod: producto.id_prod,
               producto,
               cantidad,
               precio_unitario: precioUnitario,
+               precio_unitario_sin_iva: precioUnitarioSinImpuestos,
               descuento: descuento * cantidad,
               subtotal: precioUnitario * cantidad,
+              subtotal_sin_iva: precioUnitarioSinImpuestos * cantidad,
             };
             
             const updatedItems = [...state.items, newItem];
@@ -137,14 +151,20 @@ export const useCartStore = create<CartState>()(
             const descuentos = updatedItems.reduce((sum, item) => sum + (item.descuento || 0), 0);
             // El costo de envío ahora se calcula dinámicamente en el checkout, no aquí
             const envio = 0; // Removido: se calcula dinámicamente en checkout
+            const subtotalSinImpuestos = updatedItems.reduce((sum, item) => sum + (item.subtotal_sin_iva || 0), 0);
+            const impuestos = Math.max(subtotal - subtotalSinImpuestos, 0);
             const total = subtotal - descuentos + envio;
+            const totalSinImpuestos = subtotalSinImpuestos - descuentos + envio;
             const cantidadItems = updatedItems.reduce((sum, item) => sum + item.cantidad, 0);
             
             const newSummary = {
               subtotal,
+              subtotalSinImpuestos,
               descuentos,
               envio,
               total,
+              totalSinImpuestos,
+              impuestos,
               cantidadItems,
             };
             
@@ -165,14 +185,20 @@ export const useCartStore = create<CartState>()(
           const subtotal = updatedItems.reduce((sum, item) => sum + item.subtotal, 0);
           const descuentos = updatedItems.reduce((sum, item) => sum + (item.descuento || 0), 0);
           const envio = subtotal > 50000 ? 0 : 2000;
+          const subtotalSinImpuestos = updatedItems.reduce((sum, item) => sum + (item.subtotal_sin_iva || 0), 0);
+          const impuestos = Math.max(subtotal - subtotalSinImpuestos, 0);
           const total = subtotal - descuentos + envio;
+          const totalSinImpuestos = subtotalSinImpuestos - descuentos + envio;
           const cantidadItems = updatedItems.reduce((sum, item) => sum + item.cantidad, 0);
           
           const newSummary = {
             subtotal,
+            subtotalSinImpuestos,
             descuentos,
             envio,
             total,
+            totalSinImpuestos,
+            impuestos,
             cantidadItems,
           };
           
@@ -194,14 +220,17 @@ export const useCartStore = create<CartState>()(
           const updatedItems = state.items.map((item) => {
             if (item.id_prod === id_prod) {
               // Recalcular precio unitario y descuento basándose en el producto actual
-              const precioUnitario = calcularPrecioFinal(item.producto);
+              const precioUnitario = getPrecioConImpuestosNum(item.producto);
               const descuento = calcularDescuento(item.producto);
+              const precioUnitarioSinImpuestos = getPrecioSinImpuestosNum(item.producto);
               return {
                 ...item,
                 cantidad,
                 precio_unitario: precioUnitario,
+                precio_unitario_sin_iva: precioUnitarioSinImpuestos,
                 descuento: descuento * cantidad,
                 subtotal: precioUnitario * cantidad,
+                subtotal_sin_iva: precioUnitarioSinImpuestos * cantidad,
               };
             }
             return item;
@@ -211,14 +240,20 @@ export const useCartStore = create<CartState>()(
           const subtotal = updatedItems.reduce((sum, item) => sum + item.subtotal, 0);
           const descuentos = updatedItems.reduce((sum, item) => sum + (item.descuento || 0), 0);
           const envio = subtotal > 50000 ? 0 : 2000;
+          const subtotalSinImpuestos = updatedItems.reduce((sum, item) => sum + (item.subtotal_sin_iva || 0), 0);
+          const impuestos = Math.max(subtotal - subtotalSinImpuestos, 0);
           const total = subtotal - descuentos + envio;
+          const totalSinImpuestos = subtotalSinImpuestos - descuentos + envio;
           const cantidadItems = updatedItems.reduce((sum, item) => sum + item.cantidad, 0);
           
           const newSummary = {
             subtotal,
+            subtotalSinImpuestos,
             descuentos,
             envio,
             total,
+            totalSinImpuestos,
+            impuestos,
             cantidadItems,
           };
           
@@ -235,9 +270,12 @@ export const useCartStore = create<CartState>()(
           items: [],
           summary: {
             subtotal: 0,
+            subtotalSinImpuestos: 0,
             descuentos: 0,
             envio: 0,
             total: 0,
+            totalSinImpuestos: 0,
+            impuestos: 0,
             cantidadItems: 0,
           },
         });
@@ -305,14 +343,20 @@ export const useCartStore = create<CartState>()(
         // El costo de envío ahora se calcula dinámicamente en el checkout mediante cotización de Andreani
         const envio = 0; // Removido: se calcula dinámicamente en checkout
         
+        const subtotalSinImpuestos = state.items.reduce((sum, item) => sum + (item.subtotal_sin_iva || 0), 0);
+        const impuestos = Math.max(subtotal - subtotalSinImpuestos, 0);
         const total = subtotal - descuentos + envio;
+        const totalSinImpuestos = subtotalSinImpuestos - descuentos + envio;
         const cantidadItems = state.items.reduce((sum, item) => sum + item.cantidad, 0);
         
         return {
           subtotal,
+          subtotalSinImpuestos,
           descuentos,
           envio,
           total,
+          totalSinImpuestos,
+          impuestos,
           cantidadItems,
         };
       },
@@ -328,13 +372,16 @@ export const useCartStore = create<CartState>()(
         if (state && state.items.length > 0) {
           // Recalcular precios y subtotales de cada item
           const updatedItems = state.items.map((item) => {
-            const precioUnitario = calcularPrecioFinal(item.producto);
+            const precioUnitario = getPrecioConImpuestosNum(item.producto);
             const descuento = calcularDescuento(item.producto);
+            const precioUnitarioSinImpuestos = getPrecioSinImpuestosNum(item.producto);
             return {
               ...item,
               precio_unitario: precioUnitario,
+              precio_unitario_sin_iva: precioUnitarioSinImpuestos,
               descuento: descuento * item.cantidad,
               subtotal: precioUnitario * item.cantidad,
+              subtotal_sin_iva: precioUnitarioSinImpuestos * item.cantidad,
             };
           });
           
@@ -342,16 +389,22 @@ export const useCartStore = create<CartState>()(
           const subtotal = updatedItems.reduce((sum, item) => sum + item.subtotal, 0);
           const descuentos = updatedItems.reduce((sum, item) => sum + (item.descuento || 0), 0);
           const envio = subtotal > 50000 ? 0 : 2000;
+          const subtotalSinImpuestos = updatedItems.reduce((sum, item) => sum + (item.subtotal_sin_iva || 0), 0);
+          const impuestos = Math.max(subtotal - subtotalSinImpuestos, 0);
           const total = subtotal - descuentos + envio;
+          const totalSinImpuestos = subtotalSinImpuestos - descuentos + envio;
           const cantidadItems = updatedItems.reduce((sum, item) => sum + item.cantidad, 0);
           
           // Actualizar estado
           state.items = updatedItems;
           state.summary = {
             subtotal,
+            subtotalSinImpuestos,
             descuentos,
             envio,
             total,
+            totalSinImpuestos,
+            impuestos,
             cantidadItems,
           };
         }

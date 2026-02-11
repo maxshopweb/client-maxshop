@@ -41,7 +41,7 @@ export default function Step1CartConfirmation() {
               <div className="flex items-center gap-3">
                 <ShoppingCart className="w-6 h-6 text-principal" />
                 <h3 className="text-xl font-semibold text-foreground">
-                  Productos en tu carritooo
+                  Productos en tu carrito
                 </h3>
                 <span className="bg-principal/10 text-principal text-xs font-semibold px-2.5 py-1 rounded-full">
                   {items.length} {items.length === 1 ? 'producto' : 'productos'}
