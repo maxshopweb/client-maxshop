@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/app/components/ui/Button";
 import Input from "@/app/components/ui/Input";
+import { AdminPageHeader } from "@/app/components/Admin/AdminPageHeader";
+import { AdminPageContainer } from "@/app/components/Admin/AdminPageContainer";
 
 export default function ConfigPage() {
   const { data: config, isLoading: loadingConfig } = useConfigTienda();
@@ -64,15 +66,11 @@ export default function ConfigPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white dark:bg-secundario p-8 rounded-2xl shadow-lg border border-principal/10 dark:border-white/10">
-        <h1 className="text-3xl font-bold text-text mb-4">
-          Configuración del sistema
-        </h1>
-        <p className="text-text/60">
-          Gestiona las integraciones y reglas de negocio de tu sistema.
-        </p>
-      </div>
+    <AdminPageContainer>
+      <AdminPageHeader
+        title="Configuración del sistema"
+        description="Gestiona las integraciones y reglas de negocio de tu sistema."
+      />
 
       {/* Integraciones */}
       <div className="bg-white dark:bg-secundario p-6 rounded-xl shadow border border-principal/10 dark:border-white/10">
@@ -294,6 +292,6 @@ export default function ConfigPage() {
           </div>
         </div>
       </div>
-    </div>
+    </AdminPageContainer>
   );
 }

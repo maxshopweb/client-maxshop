@@ -1,14 +1,13 @@
+import { AdminPageHeader } from '@/app/components/Admin/AdminPageHeader';
+import { AdminPageContainer } from '@/app/components/Admin/AdminPageContainer';
+
 export default function EventosPage() {
     return (
-        <div className="space-y-6">
-            <div className="bg-white dark:bg-secundario p-8 rounded-2xl shadow-lg border border-principal/10 dark:border-white/10">
-                <h1 className="text-3xl font-bold text-text mb-4">
-                    Gestión de Eventos
-                </h1>
-                <p className="text-text/60">
-                    Módulo en desarrollo - Aquí podrás gestionar eventos, promociones y descuentos especiales.
-                </p>
-            </div>
+        <AdminPageContainer>
+            <AdminPageHeader
+                title="Gestión de Eventos"
+                description="Módulo en desarrollo - Aquí podrás gestionar eventos, promociones y descuentos especiales."
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-white dark:bg-secundario p-6 rounded-xl shadow border border-principal/10 dark:border-white/10">
@@ -24,7 +23,7 @@ export default function EventosPage() {
                     <p className="text-3xl font-bold text-principal">0</p>
                 </div>
             </div>
-        </div>
+        </AdminPageContainer>
     );
 }
 

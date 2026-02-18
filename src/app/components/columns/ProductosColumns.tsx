@@ -214,7 +214,7 @@ export const getProductosColumns = (
                 return (
                     <div className="flex items-center gap-2">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${stockInfo.color}`}>
-                            {stockInfo.cantidad} unidades
+                            {stockInfo.cantidad} / u
                         </span>
                         {stockInfo.status === 'stock_bajo' && (
                             <span className="text-xs text-yellow-600">⚠️</span>

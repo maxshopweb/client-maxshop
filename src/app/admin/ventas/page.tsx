@@ -13,6 +13,8 @@ import { useVentasPage } from '@/app/hooks/ventas/useVentasPage';
 import { useVentasStats } from '@/app/hooks/ventas/useVentasStats';
 import { AnimatedStatCard } from '@/app/components/ui/AnimatedStatCard';
 import { formatPrecio } from '@/app/types/ventas.type';
+import { AdminPageHeader } from '@/app/components/Admin/AdminPageHeader';
+import { AdminPageContainer } from '@/app/components/Admin/AdminPageContainer';
 
 export default function VentasPage() {
     const {
@@ -33,38 +35,27 @@ export default function VentasPage() {
 
     return (
         <div className="min-h-screen">
-            <div className="">
-                <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 ">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-3xl font-bold text-text">Ventas</h1>
-                            <p className="mt-1 text-sm text-text">
-                                Gestiona todas las ventas y pedidos
-                            </p>
-                        </div>
+            <AdminPageContainer>
+                <AdminPageHeader
+                    title="Ventas"
+                    description="Gestiona todas las ventas y pedidos"
+                >
+                    <Button
+                        onClick={refetch}
+                        disabled={isFetching}
+                        variant="outline-primary"
+                        className="flex items-center gap-2 justify-center"
+                    >
+                        <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+                        Refrescar
+                    </Button>
+                    <Button onClick={openCreateModal}>
+                        <Plus className="h-5 w-5" />
+                        Nueva venta
+                    </Button>
+                </AdminPageHeader>
 
-                        <div className="flex items-center gap-3">
-                            <Button
-                                onClick={refetch}
-                                disabled={isFetching}
-                                variant="outline-primary"
-                                className="flex items-center gap-2 justify-center"
-                            >
-                                <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
-                                Refrescar
-                            </Button>
-                            <Button onClick={openCreateModal}>
-                                <Plus className="h-5 w-5" />
-                                Nueva venta
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="space-y-6">
-                    {/* Estadísticas */}
+                {/* Estadísticas */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <AnimatedStatCard
                             title="Total ventas"
@@ -96,15 +87,14 @@ export default function VentasPage() {
 
                     <VentasFilters />
 
-                    <VentasTableWrapper
-                        onEdit={openEditModal}
-                        onDelete={openDeleteDialog}
-                        onView={openViewDialog}
-                        onBulkDelete={openBulkDeleteDialog}
-                        highlightId={highlightId}
-                    />
-                </div>
-            </div>
+                <VentasTableWrapper
+                    onEdit={openEditModal}
+                    onDelete={openDeleteDialog}
+                    onView={openViewDialog}
+                    onBulkDelete={openBulkDeleteDialog}
+                    highlightId={highlightId}
+                />
+            </AdminPageContainer>
 
             {/* MODALES */}
             {modal.type === 'create' && (

@@ -4,8 +4,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useVentas } from './useVentas';
 import { useVentasFilters } from './useVentasFilters';
+import { useUpdateEstadoPago, useAprobarDesdeVencido } from './useVentasMutations';
 import { useNotificationsStore } from '@/app/stores/notificationsStore';
 import type { IVenta } from '@/app/types/ventas.type';
+import type { EstadoPago } from '@/app/types/estados.type';
 
 type ModalType = 'create' | 'edit' | 'delete' | 'view' | 'bulk-delete' | null;
 
@@ -26,6 +28,8 @@ export function useVentasPage() {
   const { filters } = useVentasFilters();
   const { ventas, pagination, refetch, isFetching } = useVentas({ filters });
   const { clearNotifications } = useNotificationsStore();
+  const { updateEstadoPago, updateEstadoPagoAsync, isUpdating: isUpdatingEstadoPago } = useUpdateEstadoPago();
+  const { aprobarDesdeVencido, aprobarDesdeVencidoAsync, isAprobando } = useAprobarDesdeVencido();
 
   // Limpiar notificaciones al entrar a esta página
   useEffect(() => {
@@ -60,6 +64,21 @@ export function useVentasPage() {
     setBulkDeleteIds([]);
   }, []);
 
+  /**
+   * Cambia el estado de pago de una venta.
+   * Si la venta está vencida y el nuevo estado es aprobado, usa aprobarDesdeVencido (descuenta stock, envía email).
+   */
+  const changeEstadoPago = useCallback(
+    async (venta: IVenta, nuevoEstado: string) => {
+      if (venta.estado_pago === 'vencido' && nuevoEstado === 'aprobado') {
+        await aprobarDesdeVencidoAsync(venta.id_venta);
+      } else {
+        await updateEstadoPagoAsync({ id: venta.id_venta, estado: nuevoEstado as EstadoPago });
+      }
+    },
+    [aprobarDesdeVencidoAsync, updateEstadoPagoAsync]
+  );
+
   return {
     // Estado de modales
     modal,
@@ -81,6 +100,15 @@ export function useVentasPage() {
 
     // Acciones de datos
     refetch,
+
+    // Cambio de estado de pago (elige aprobarDesdeVencido o updateEstadoPago según corresponda)
+    changeEstadoPago,
+    updateEstadoPago,
+    updateEstadoPagoAsync,
+    aprobarDesdeVencido,
+    aprobarDesdeVencidoAsync,
+    isUpdatingEstadoPago,
+    isAprobando,
   };
 }
 

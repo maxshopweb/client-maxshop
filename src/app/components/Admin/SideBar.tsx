@@ -14,7 +14,8 @@ import {
     User,
     LogOut,
     ShoppingCart,
-    Zap
+    Zap,
+    FileText
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -33,9 +34,10 @@ const navItems: NavItem[] = [
     { icon: Home, label: "Inicio", path: "/admin" },
     { icon: Package, label: "Productos", path: "/admin/productos" },
     { icon: ShoppingCart, label: "Ventas", path: "/admin/ventas" },
+    { icon: Users, label: "Clientes", path: "/admin/clientes" },
     { icon: Calendar, label: "Eventos", path: "/admin/eventos" },
     { icon: Zap, label: "Utilidades", path: "/admin/utilidades" },
-    { icon: Users, label: "Clientes", path: "/admin/clientes" },
+    { icon: FileText, label: "Auditoría", path: "/admin/auditoria" },
     { icon: Settings, label: "Config", path: "/admin/config" },
 ];
 

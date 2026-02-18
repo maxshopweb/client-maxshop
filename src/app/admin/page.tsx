@@ -1,6 +1,7 @@
 'use client';
 
 import { DashboardHeader } from '../components/dashboard/DashboardHeader';
+import { AdminPageContainer } from '@/app/components/Admin/AdminPageContainer';
 import { KpiGrid } from '../components/dashboard/KpiGrid';
 import { SalesChart } from '../components/dashboard/SalesChart';
 import { OrderStatusChart } from '../components/dashboard/OrderStatusChart';
@@ -34,7 +35,7 @@ export default function AdminPage() {
     }, [lastSaleEvent, queryClient]);
 
     return (
-        <div className="space-y-6 pb-10">
+        <AdminPageContainer className="pb-10">
             <DashboardHeader />
 
             <KpiGrid />
@@ -56,6 +57,6 @@ export default function AdminPage() {
                 </h3>
                 <AlertsPanel />
             </div>
-        </div>
+        </AdminPageContainer>
     );
 }

@@ -9,6 +9,7 @@ import Link from 'next/link';
 import TableSkeleton from '@/app/components/skeletons/TableProductSkeleton';
 import { formatPrecio } from '@/app/types/ventas.type';
 import { AnimatedStatCard } from '@/app/components/ui/AnimatedStatCard';
+import { AdminPageContainer } from '@/app/components/Admin/AdminPageContainer';
 
 export default function ClienteDetailPage() {
     const params = useParams();
@@ -21,29 +22,29 @@ export default function ClienteDetailPage() {
 
     if (isLoadingCliente) {
         return (
-            <div className="space-y-6">
+            <AdminPageContainer>
                 <div className="bg-card border border-card p-8 rounded-2xl shadow-lg">
                     <TableSkeleton />
                 </div>
-            </div>
+            </AdminPageContainer>
         );
     }
 
     if (!cliente) {
         return (
-            <div className="space-y-6">
+            <AdminPageContainer>
                 <div className="bg-card border border-card p-8 rounded-2xl shadow-lg text-center">
                     <h2 className="text-2xl font-bold text-text mb-4">Cliente no encontrado</h2>
                     <Button onClick={() => router.push('/admin/clientes')}>
                         Volver a Clientes
                     </Button>
                 </div>
-            </div>
+            </AdminPageContainer>
         );
     }
 
     return (
-        <div className="space-y-6">
+        <AdminPageContainer>
             {/* Header */}
             <div className="bg-white dark:bg-secundario p-6 rounded-2xl shadow-lg border border-principal/10 dark:border-white/10">
                 <div className="mb-6">
@@ -266,7 +267,7 @@ export default function ClienteDetailPage() {
                     </div>
                 )}
             </div>
-        </div>
+        </AdminPageContainer>
     );
 }
 

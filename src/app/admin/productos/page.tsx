@@ -15,6 +15,8 @@ import { useToggleDestacado } from '@/app/hooks/productos/useProductosMutations'
 import { useTogglePublicado } from '@/app/hooks/productos/usePublicadoMutations';
 import { useProductos } from '@/app/hooks/productos/useProductos';
 import { useProductFilters } from '@/app/hooks/productos/useProductFilters';
+import { AdminPageHeader } from '@/app/components/Admin/AdminPageHeader';
+import { AdminPageContainer } from '@/app/components/Admin/AdminPageContainer';
 
 type ModalType = 'create' | 'edit' | 'delete' | 'stock' | 'bulk-delete' | 'cambiar-imagen' | null;
 
@@ -65,40 +67,29 @@ function ProductosPageContent() {
 
     return (
         <div className="min-h-screen">
-            <div className="">
-                <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 ">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-3xl font-bold text-text">Productos</h1>
-                            <p className="mt-1 text-sm text-text">
-                                Gestiona tu catálogo de productos
-                            </p>
-                        </div>
+            <AdminPageContainer>
+                <AdminPageHeader
+                    title="Productos"
+                    description="Gestiona tu catálogo de productos"
+                >
+                    <Button
+                        onClick={() => refetch()}
+                        disabled={isFetching}
+                        variant="outline-primary"
+                        className="flex items-center gap-2 justify-center"
+                    >
+                        <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+                        Refrescar
+                    </Button>
+                    <Button onClick={openCreateModal}>
+                        <Plus className="h-5 w-5" />
+                        Nuevo Producto
+                    </Button>
+                </AdminPageHeader>
 
-                        <div className="flex items-center gap-3">
-                            <Button
-                                onClick={() => refetch()}
-                                disabled={isFetching}
-                                variant="outline-primary"
-                                className="flex items-center gap-2 justify-center"
-                            >
-                                <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
-                                Refrescar
-                            </Button>
-                            <Button onClick={openCreateModal}>
-                                <Plus className="h-5 w-5" />
-                                Nuevo Producto
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                <ProductosFilters />
 
-            <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="space-y-6">
-                    <ProductosFilters />
-
-                    <ProductosTableWrapper
+                <ProductosTableWrapper
                         onEdit={openEditModal}
                         onDelete={openDeleteDialog}
                         onToggleDestacado={handleToggleDestacado}
@@ -107,8 +98,7 @@ function ProductosPageContent() {
                         onCambiarImagen={openCambiarImagenModal}
                         onBulkDelete={openBulkDeleteDialog}
                     />
-                </div>
-            </div>
+            </AdminPageContainer>
 
             {/* MODALES */}
             {modal.type === 'create' && (
@@ -142,16 +132,14 @@ export default function ProductosPage() {
         <Suspense
             fallback={
                 <div className="min-h-screen">
-                    <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                        <div className="space-y-6">
-                            <div className="bg-card border border-card p-4 rounded-lg shadow-lg animate-pulse">
-                                <div className="h-10 bg-input rounded"></div>
-                            </div>
-                            <div className="bg-card border border-card rounded-lg shadow-lg animate-pulse">
-                                <div className="h-96"></div>
-                            </div>
+                    <AdminPageContainer>
+                        <div className="bg-card border border-card p-4 rounded-lg shadow-lg animate-pulse">
+                            <div className="h-10 bg-input rounded"></div>
                         </div>
-                    </div>
+                        <div className="bg-card border border-card rounded-lg shadow-lg animate-pulse">
+                            <div className="h-96"></div>
+                        </div>
+                    </AdminPageContainer>
                 </div>
             }
         >

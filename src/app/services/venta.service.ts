@@ -97,6 +97,22 @@ class VentasService {
     return response.data.data;
   }
 
+  /**
+   * Aprobar una venta que está en estado vencido (revocación de vencimiento).
+   * Solo admin. Descuenta stock, ejecuta handlers y envía email de confirmación.
+   */
+  async aprobarDesdeVencido(id: number): Promise<IVenta> {
+    const response = await axiosInstance.post<IApiResponse<IVenta>>(
+      `/ventas/${id}/aprobar-desde-vencido`
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.error || 'Error al aprobar venta vencida');
+    }
+
+    return response.data.data;
+  }
+
   async updateEstadoEnvio(id: number, estado: string): Promise<IVenta> {
     const response = await axiosInstance.patch<IApiResponse<IVenta>>(
       `/ventas/${id}/estado-envio`,

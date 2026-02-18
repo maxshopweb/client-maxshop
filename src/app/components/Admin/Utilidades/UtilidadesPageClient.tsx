@@ -16,6 +16,8 @@ import { useCategorias } from '@/app/hooks/categorias/useCategorias';
 import { useGrupos } from '@/app/hooks/grupos/useGrupos';
 import { useMaestrosFilters } from '@/app/hooks/maestros/useMaestrosFilters';
 import type { MarcasSSRResponse, CategoriasSSRResponse, GruposSSRResponse } from '@/app/lib/getMaestros';
+import { AdminPageHeader } from '@/app/components/Admin/AdminPageHeader';
+import { AdminPageContainer } from '@/app/components/Admin/AdminPageContainer';
 
 type ModalType = 'create' | 'edit' | 'delete' | null;
 
@@ -74,33 +76,26 @@ export function UtilidadesPageClient({
 
   return (
     <div className="min-h-screen">
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-text">Utilidades</h1>
-            <p className="mt-1 text-sm text-text">
-              Gestioná marcas, categorías y grupos
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button
-              onClick={() => refetch()}
-              disabled={isFetching}
-              variant="outline-primary"
-              className="flex items-center gap-2 justify-center"
-            >
-              <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
-              Refrescar
-            </Button>
-            <Button onClick={openCreate} className="flex items-center gap-2">
-              <Plus className="h-5 w-5" />
-              Crear {label.singular}
-            </Button>
-          </div>
-        </div>
-      </div>
+      <AdminPageContainer>
+        <AdminPageHeader
+          title="Utilidades"
+          description="Gestioná marcas, categorías y grupos"
+        >
+          <Button
+            onClick={() => refetch()}
+            disabled={isFetching}
+            variant="outline-primary"
+            className="flex items-center gap-2 justify-center"
+          >
+            <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+            Refrescar
+          </Button>
+          <Button onClick={openCreate} className="flex items-center gap-2">
+            <Plus className="h-5 w-5" />
+            Crear {label.singular}
+          </Button>
+        </AdminPageHeader>
 
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         <UtilidadesTabs activeTab={activeTab} onTabChange={setActiveTab} />
         <MaestrosFilterInput
           value={busquedaInput}
@@ -115,7 +110,7 @@ export function UtilidadesPageClient({
           onEdit={openEdit}
           onDelete={openDelete}
         />
-      </div>
+      </AdminPageContainer>
 
       {modal.type === 'create' && (
         <CreateMaestroModal

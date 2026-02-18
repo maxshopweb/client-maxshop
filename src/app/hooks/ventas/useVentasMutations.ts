@@ -158,6 +158,53 @@ export function useDeleteVenta(options: UseDeleteVentaOptions = {}) {
     };
 }
 
+/**
+ * Aprobar una venta que está en estado vencido (revocación de vencimiento).
+ * Descuenta stock, ejecuta handlers y envía email de confirmación.
+ */
+interface UseAprobarDesdeVencidoOptions {
+    onSuccess?: (data: IVenta) => void;
+    onError?: (error: Error) => void;
+}
+
+export function useAprobarDesdeVencido(options: UseAprobarDesdeVencidoOptions = {}) {
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: (id: number) => ventasService.aprobarDesdeVencido(id),
+
+        onSuccess: (data, id) => {
+            queryClient.setQueryData(ventasKeys.detail(id), data);
+            queryClient.invalidateQueries({
+                queryKey: ventasKeys.lists(),
+            });
+
+            toast.success('Venta aprobada', {
+                description: `Venta #${data.id_venta} aprobada desde vencida. Stock descontado y email enviado.`,
+            });
+
+            options.onSuccess?.(data);
+        },
+
+        onError: (error: Error) => {
+            toast.error('Error al aprobar venta vencida', {
+                description: error.message || 'Ocurrió un error inesperado',
+            });
+
+            options.onError?.(error);
+        },
+    });
+
+    return {
+        aprobarDesdeVencido: mutation.mutate,
+        aprobarDesdeVencidoAsync: mutation.mutateAsync,
+        isAprobando: mutation.isPending,
+        isSuccess: mutation.isSuccess,
+        isError: mutation.isError,
+        error: mutation.error,
+    };
+}
+
 interface UseUpdateEstadoPagoOptions {
     onSuccess?: (data: IVenta) => void;
     onError?: (error: Error) => void;
