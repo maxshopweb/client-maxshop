@@ -1,15 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { extractArticleCodeAndExtension, generateImageVariations } from "@/app/utils/productImage";
-import { buildImageUrl } from "@/app/lib/upload";
-
-/** Convierte path relativo a URL absoluta (evita 404 en localhost) */
-function toAbsoluteUrl(path: string | null | undefined): string {
-  if (!path || typeof path !== "string") return "";
-  if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  return buildImageUrl(path.startsWith("/") ? path : `/${path}`);
-}
+import { resolveProductImageUrl } from "@/app/lib/upload";
 
 interface ProductImageProps {
   imgPrincipal: string | null | undefined;
@@ -26,102 +19,48 @@ export default function ProductImage({
   className = "",
   size = "md",
 }: ProductImageProps) {
-  const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [index, setIndex] = useState(0);
   const [error, setError] = useState(false);
 
-  useEffect(() => {
-    const loadImage = async () => {
-      setError(false);
+  const candidates = useMemo(() => {
+    const urls: string[] = [];
 
-      // Si img_principal existe, intentar usarla (siempre como URL absoluta)
-      if (imgPrincipal && (imgPrincipal.includes("/imgs/productos/") || imgPrincipal.includes("productos/"))) {
-        const absoluteUrl = toAbsoluteUrl(imgPrincipal.startsWith("/") ? imgPrincipal : `imgs/productos/${imgPrincipal}`);
-        if (absoluteUrl) {
-          try {
-            const img = new Image();
-            await new Promise((resolve, reject) => {
-              const timeout = setTimeout(() => reject(new Error("Timeout")), 5000);
-              img.onload = () => {
-                clearTimeout(timeout);
-                resolve(true);
-              };
-              img.onerror = () => {
-                clearTimeout(timeout);
-                reject(new Error("Image load failed"));
-              };
-              img.src = absoluteUrl;
-            });
-            setImageSrc(absoluteUrl);
-            return;
-          } catch {
-            // Continuar con variaciones
-          }
-        }
-      }
+    const primary = resolveProductImageUrl(imgPrincipal);
+    if (primary) urls.push(primary);
 
-      // También intentar directamente el path con base URL (ej: "8202-03.png")
-      if (imgPrincipal && imgPrincipal.trim()) {
-        const absoluteUrl = toAbsoluteUrl(imgPrincipal.startsWith("/") ? imgPrincipal : `imgs/productos/${imgPrincipal}`);
-        if (absoluteUrl) {
-          try {
-            const img = new Image();
-            await new Promise((resolve, reject) => {
-              const timeout = setTimeout(() => reject(new Error("Timeout")), 5000);
-              img.onload = () => {
-                clearTimeout(timeout);
-                resolve(true);
-              };
-              img.onerror = () => reject(new Error("Image load failed"));
-              img.src = absoluteUrl;
-            });
-            setImageSrc(absoluteUrl);
-            return;
-          } catch {
-            // Continuar
-          }
-        }
-      }
-
-      // Extraer código y extensión del artículo
-      const codeAndExt = extractArticleCodeAndExtension(imgPrincipal, codiArti);
-      if (!codeAndExt) {
-        setError(true);
-        return;
-      }
-
+    // Fallback legacy para artículos de Excel que no tienen path completo.
+    const codeAndExt = extractArticleCodeAndExtension(imgPrincipal, codiArti);
+    if (codeAndExt) {
       const variations = generateImageVariations(codeAndExt.code, codeAndExt.extension);
-      for (const relPath of variations) {
-        const absoluteUrl = toAbsoluteUrl(relPath);
-        if (!absoluteUrl) continue;
-        try {
-          const img = new Image();
-          await new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => reject(new Error("Timeout")), 5000);
-            img.onload = () => {
-              clearTimeout(timeout);
-              resolve(true);
-            };
-            img.onerror = () => reject(new Error("Image load failed"));
-            img.src = absoluteUrl;
-          });
-          setImageSrc(absoluteUrl);
-          return;
-        } catch {
-          continue;
+      for (const variation of variations) {
+        const resolved = resolveProductImageUrl(variation);
+        if (resolved && !urls.includes(resolved)) {
+          urls.push(resolved);
         }
       }
+    }
 
-      setError(true);
-    };
-
-    loadImage();
+    return urls;
   }, [imgPrincipal, codiArti]);
+
+  useEffect(() => {
+    setIndex(0);
+    setError(false);
+  }, [candidates]);
+
+  useEffect(() => {
+    if (candidates.length === 0) {
+      setError(true);
+    }
+  }, [candidates]);
 
   const sizeClasses = {
     sm: "text-2xl",
     md: "text-4xl",
     lg: "text-6xl",
   };
+
+  const imageSrc = candidates[index] ?? "";
 
   if (error || !imageSrc) {
     return (
@@ -136,7 +75,13 @@ export default function ProductImage({
       src={imageSrc}
       alt={nombre || "Producto"}
       className={`w-full h-full object-contain transition-transform duration-300 ${className}`}
-      onError={() => setError(true)}
+      onError={() => {
+        if (index < candidates.length - 1) {
+          setIndex((prev) => prev + 1);
+          return;
+        }
+        setError(true);
+      }}
     />
   );
 }

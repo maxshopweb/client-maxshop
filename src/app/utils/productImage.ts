@@ -15,7 +15,7 @@ export function extractArticleCodeAndExtension(
       if (imgPath) {
         const fileName = imgPath.split('/').pop() || imgPath;
         const decodedFileName = decodeURIComponent(fileName);
-        const extMatch = decodedFileName.match(/\.(jpg|jpeg|png|JPG|JPEG|PNG)$/);
+        const extMatch = decodedFileName.match(/\.(jpg|jpeg|png|webp|JPG|JPEG|PNG|WEBP)$/);
         if (extMatch) {
           extension = extMatch[0].toLowerCase();
         }
@@ -38,7 +38,7 @@ export function extractArticleCodeAndExtension(
   if (!codeMatch) return null;
 
   // Extraer la extensión
-  const extMatch = decodedFileName.match(/\.(jpg|jpeg|png|JPG|JPEG|PNG)$/);
+  const extMatch = decodedFileName.match(/\.(jpg|jpeg|png|webp|JPG|JPEG|PNG|WEBP)$/);
   const extension = extMatch ? extMatch[0].toLowerCase() : '.jpg';
 
   return { code: codeMatch[1], extension };

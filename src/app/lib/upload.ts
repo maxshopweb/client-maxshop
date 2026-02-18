@@ -15,3 +15,40 @@ export function buildImageUrl(path: string | null | undefined): string {
   const normalized = path.startsWith('/') ? path.slice(1) : path;
   return `${base}/${normalized}`;
 }
+
+function isAbsoluteUrl(path: string): boolean {
+  return /^https?:\/\//i.test(path);
+}
+
+function isLegacyImagePath(path: string): boolean {
+  return path.startsWith('/imgs/productos/') || path.startsWith('imgs/productos/');
+}
+
+function looksLikeImageFilename(path: string): boolean {
+  return /\.(jpg|jpeg|png|webp|gif|avif)$/i.test(path) && !path.includes('/');
+}
+
+/**
+ * Resuelve una ruta de imagen soportando:
+ * - URL absoluta (https://...)
+ * - Path nuevo de backend (productos/... o banners/...)
+ * - Path legacy (/imgs/productos/...)
+ * - Nombre legacy suelto (ej: 620004-01.jpg)
+ */
+export function resolveProductImageUrl(path: string | null | undefined): string {
+  if (!path || typeof path !== 'string') return '';
+  const raw = path.trim();
+  if (!raw) return '';
+
+  if (isAbsoluteUrl(raw)) return raw;
+
+  if (isLegacyImagePath(raw)) {
+    return raw.startsWith('/') ? raw : `/${raw}`;
+  }
+
+  if (looksLikeImageFilename(raw)) {
+    return `/imgs/productos/${raw}`;
+  }
+
+  return buildImageUrl(raw);
+}

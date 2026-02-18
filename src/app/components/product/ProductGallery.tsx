@@ -6,6 +6,7 @@ import { X, ChevronLeft, ChevronRight, ZoomIn, Tag, Sparkles, Star } from "lucid
 import { IProductos } from "@/app/types/producto.type";
 import { extractArticleCodeAndExtension, generateImageVariations } from "@/app/utils/productImage";
 import ProductImage from "@/app/components/shared/ProductImage";
+import { resolveProductImageUrl } from "@/app/lib/upload";
 
 interface ProductGalleryProps {
   producto: IProductos;
@@ -24,22 +25,22 @@ export default function ProductGallery({ producto }: ProductGalleryProps) {
   const esDestacado = producto.destacado;
 
   useEffect(() => {
-    const loadImages = async () => {
+    const loadImages = () => {
       setLoading(true);
       const loadedImages: string[] = [];
 
-      // Agregar imagen principal si existe
-      if (producto.img_principal && producto.img_principal.startsWith('/imgs/productos/')) {
-        loadedImages.push(producto.img_principal);
+      // Soportar imagen principal nueva (productos/...) y legacy (/imgs/productos/...).
+      const mainImage = resolveProductImageUrl(producto.img_principal);
+      if (mainImage) {
+        loadedImages.push(mainImage);
       }
 
-      // Agregar imágenes adicionales del array imagenes
+      // Agregar imágenes adicionales desde BD (paths relativos o absolutos).
       if (producto.imagenes && Array.isArray(producto.imagenes)) {
         producto.imagenes.forEach((img) => {
-          if (typeof img === 'string' && img.startsWith('/imgs/productos/')) {
-            if (!loadedImages.includes(img)) {
-              loadedImages.push(img);
-            }
+          const normalized = resolveProductImageUrl(typeof img === "string" ? img : null);
+          if (normalized && !loadedImages.includes(normalized)) {
+            loadedImages.push(normalized);
           }
         });
       }
@@ -53,8 +54,15 @@ export default function ProductGallery({ producto }: ProductGalleryProps) {
         
         if (codeAndExt) {
           const variations = generateImageVariations(codeAndExt.code, codeAndExt.extension);
-          // Intentar cargar la primera variación
-          loadedImages.push(variations[0]);
+          // Fallback para productos legacy sin path normalizado en BD.
+          variations
+            .map((variation) => resolveProductImageUrl(variation))
+            .filter((url): url is string => Boolean(url))
+            .forEach((url) => {
+              if (!loadedImages.includes(url)) {
+                loadedImages.push(url);
+              }
+            });
         }
       }
 

@@ -2,7 +2,7 @@
 
 import { useRef } from 'react';
 import { ImagePlus, X } from 'lucide-react';
-import { buildImageUrl } from '@/app/lib/upload';
+import { resolveProductImageUrl } from '@/app/lib/upload';
 import type { IProductos } from '@/app/types/producto.type';
 
 const ACCEPT = 'image/jpeg,image/png,image/webp';
@@ -33,7 +33,7 @@ export function ProductoImagenesEditor({
   const secondaryInputRef = useRef<HTMLInputElement>(null);
 
   const mainPreviewUrl = mainFile ? URL.createObjectURL(mainFile) : null;
-  const existingMainUrl = mode === 'edit' && product?.img_principal ? buildImageUrl(product.img_principal) : null;
+  const existingMainUrl = mode === 'edit' && product?.img_principal ? resolveProductImageUrl(product.img_principal) : null;
   const showMainPreview = mainPreviewUrl ?? existingMainUrl;
 
   const handleMainChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,7 +43,7 @@ export function ProductoImagenesEditor({
   };
 
   const handleSecondaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files ? Array.from(files) : [];
+    const files = e.target.files ? Array.from(e.target.files) : [];
     setSecondaryFiles((prev) => [...prev, ...files]);
     e.target.value = '';
   };
@@ -112,7 +112,7 @@ export function ProductoImagenesEditor({
             <div key={`existing-${index}`} className="relative group">
               <div className={`${BOX_CLASS} w-[120px] max-h-[120px] rounded-xl overflow-hidden ring-1 ring-input/30`}>
                 <img
-                  src={buildImageUrl(path)}
+                  src={resolveProductImageUrl(path)}
                   alt={`Secundaria ${index + 1}`}
                   className="w-full h-full object-contain"
                 />
