@@ -3,20 +3,10 @@ import { getAuthToken } from '../utils/cookies';
 import { getGuestDeviceId } from '../utils/guestDeviceId';
 import { refreshFirebaseToken, isTokenExpiredError } from '../utils/tokenRefresh';
 
-// Determinar la URL base según el entorno
-const getBaseURL = (): string => {
-  // Si hay una variable de entorno definida, usarla (tiene prioridad)
-  // if (process.env.NEXT_PUBLIC_API_URL) {
-  //   return process.env.NEXT_PUBLIC_API_URL;
-  // }
-  
-  // Por defecto: backend en puerto 3001
-  const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-  return baseURL;
-};
+import { getApiBaseUrl } from './apiBaseUrl';
 
 const axiosInstance = axios.create({
-  baseURL: getBaseURL(),
+  baseURL: getApiBaseUrl(),
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

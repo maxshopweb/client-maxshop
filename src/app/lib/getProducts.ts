@@ -1,7 +1,8 @@
 import { cookies } from 'next/headers';
 import type { IProductos, IProductoFilters, IPaginatedResponse } from '@/app/types/producto.type';
+import { getApiBaseUrl } from '@/app/lib/apiBaseUrl';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = getApiBaseUrl();
 
 export async function getProducts(
   filters: IProductoFilters = {}

@@ -2,8 +2,9 @@ import { cookies } from 'next/headers';
 import type { IMarca } from '@/app/types/marca.type';
 import type { ICategoria } from '@/app/types/categoria.type';
 import type { IGrupo } from '@/app/types/grupo.type';
+import { getApiBaseUrl } from '@/app/lib/apiBaseUrl';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = getApiBaseUrl();
 
 async function fetchWithAuth(path: string) {
   const cookieStore = await cookies();
