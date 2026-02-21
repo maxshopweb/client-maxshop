@@ -39,7 +39,7 @@ export default function Carousel() {
   };
 
   return (
-    <div className="relative w-full h-full max-h-[700px] overflow-hidden bg-secundario group z-0">
+    <div className="relative w-full h-full overflow-hidden bg-secundario group z-0">
       {/* Carousel Images */}
       <div className="relative w-full h-full">
         {carouselImages.map((image, index) => (
@@ -62,9 +62,6 @@ export default function Carousel() {
       {/* Gradient Overlays for better visibility of controls */}
       <div className="absolute inset-y-0 left-0 w-16 md:w-24 bg-gradient-to-r from-black/20 to-transparent pointer-events-none" />
       <div className="absolute inset-y-0 right-0 w-16 md:w-24 bg-gradient-to-l from-black/20 to-transparent pointer-events-none" />
-
-      {/* Overlay oscuro para mejor legibilidad del texto centrado */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/20 pointer-events-none" />
 
       {/* Hero Button Overlay - Centrado */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">

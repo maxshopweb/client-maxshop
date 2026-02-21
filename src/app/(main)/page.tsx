@@ -11,7 +11,7 @@ import AboutUs from "../components/Tienda/AboutUs";
 export default function TiendaHome() {
   return (
     <div className="flex flex-col">
-      <section className="w-full h-[400px] md:h-[500px] -mt-[calc(3.5rem+3rem)] md:-mt-[calc(4rem+3.5rem)]">
+      <section className="w-full -mt-[160px] h-[calc(520px+160px)] md:h-[calc(600px+160px)]">
         <Carousel />
       </section>
       

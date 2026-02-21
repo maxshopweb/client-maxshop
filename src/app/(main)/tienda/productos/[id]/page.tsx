@@ -124,16 +124,23 @@ export default function ProductPage() {
 
   // Main content
   return (
-    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 py-16 sm:py-20">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="space-y-4 sm:space-y-6"
         >
-          {/* Breadcrumbs */}
-          <ProductBreadcrumbs producto={producto} />
+          {/* Breadcrumbs mobile */}
+          <div className="md:hidden mb-4">
+            <ProductBreadcrumbs producto={producto} />
+          </div>
 
+          {/* Breadcrumbs desktop — superpuesto sobre el nav inferior transparente */}
+          <div className="hidden md:flex items-center -mt-[56px] h-14 relative z-40 mb-4 sm:mb-6">
+            <ProductBreadcrumbs producto={producto} />
+          </div>
+
+          <div className="space-y-4 sm:space-y-6">
           {/* Main Product Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
             {/* Gallery */}
@@ -187,6 +194,7 @@ export default function ProductPage() {
               />
             )}
           </motion.div>
+          </div>
         </motion.div>
       </div>
   );

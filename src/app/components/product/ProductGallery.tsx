@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, ZoomIn, Tag, Sparkles, Star } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Tag, Sparkles, Star } from "lucide-react";
 import { IProductos } from "@/app/types/producto.type";
 import { extractArticleCodeAndExtension, generateImageVariations } from "@/app/utils/productImage";
 import ProductImage from "@/app/components/shared/ProductImage";
@@ -175,10 +175,8 @@ export default function ProductGallery({ producto }: ProductGalleryProps) {
             />
           )}
           
-          {/* Overlay con zoom icon en hover */}
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-            <ZoomIn className="w-12 h-12 text-white drop-shadow-lg" />
-          </div>
+          {/* Overlay sutil en hover */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
 
           {/* Botones de navegación (solo si hay más de una imagen) */}
           {images.length > 1 && (
@@ -209,25 +207,27 @@ export default function ProductGallery({ producto }: ProductGalleryProps) {
 
         {/* Thumbnails */}
         {images.length > 1 && (
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+          <div className="grid grid-cols-4 gap-2">
             {images.map((image, index) => (
               <motion.button
                 key={index}
                 onClick={() => handleThumbnailClick(image)}
-                className={`relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden transition-all ${
+                className={`relative w-full aspect-square rounded-md transition-all p-0.5 ${
                   selectedImage === image
-                    ? "ring-2 ring-principal scale-105"
-                    : "ring-1 ring-card-border/30 hover:ring-principal/50"
+                    ? "ring-1 ring-principal"
+                    : "ring-1 ring-transparent hover:ring-principal/40"
                 }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
                 aria-label={`Ver imagen ${index + 1}`}
               >
-                <img
-                  src={image}
-                  alt={`${producto.nombre} - Vista ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
+                <div className="w-full h-full rounded-sm overflow-hidden">
+                  <img
+                    src={image}
+                    alt={`${producto.nombre} - Vista ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               </motion.button>
             ))}
           </div>
