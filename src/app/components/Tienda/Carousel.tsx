@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
-import HeroButton from "@/app/components/ui/HeroButton";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export const carouselImages = [
   "/carrousel/black-decker-1.jpg",
@@ -59,23 +58,6 @@ export default function Carousel() {
         ))}
       </div>
 
-      {/* Gradient Overlays for better visibility of controls */}
-      <div className="absolute inset-y-0 left-0 w-16 md:w-24 bg-gradient-to-r from-black/20 to-transparent pointer-events-none" />
-      <div className="absolute inset-y-0 right-0 w-16 md:w-24 bg-gradient-to-l from-black/20 to-transparent pointer-events-none" />
-
-      {/* Hero Button Overlay - Centrado */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-        <div className="pointer-events-auto">
-          <HeroButton
-            variant="white-orange"
-            icon={ArrowRight}
-            href="/tienda/productos"
-          >
-            Ver Catálogo
-          </HeroButton>
-        </div>
-      </div>
-
       {/* Previous Button */}
       <button
         onClick={goToPrevious}
@@ -109,10 +91,6 @@ export default function Carousel() {
         ))}
       </div>
 
-      {/* Image Counter */}
-      <div className="absolute top-3 md:top-4 right-3 md:right-4 bg-black/50 backdrop-blur-sm px-3 py-1 rounded-full text-white text-sm font-semibold z-20">
-        {currentIndex + 1} / {carouselImages.length}
-      </div>
     </div>
   );
 }
