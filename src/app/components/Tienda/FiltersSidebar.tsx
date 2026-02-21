@@ -148,7 +148,7 @@ export default function FiltersSidebar() {
 
   return (
     <motion.aside
-      className="w-full lg:w-80 flex-shrink-0 bg-sidebar rounded-lg p-4 overflow-y-auto scrollbar-visible lg:sticky lg:top-28 lg:self-start"
+      className="w-full lg:w-80 flex-shrink-0 bg-sidebar rounded-sm p-4 overflow-y-auto scrollbar-visible lg:sticky lg:top-28 lg:self-start"
       initial="hidden"
       animate="visible"
       variants={containerVariants}

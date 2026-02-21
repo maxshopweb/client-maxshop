@@ -84,7 +84,7 @@ export default function Footer() {
                   href="https://www.facebook.com/maxshop.ar"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-xl bg-neutral-200 border border-neutral-300 flex items-center justify-center text-neutral-500 hover:text-neutral-900 hover:border-neutral-400 transition-all duration-300"
+                  className="w-9 h-9 rounded-md bg-neutral-200 border border-neutral-300 flex items-center justify-center text-neutral-500 hover:text-neutral-900 hover:border-neutral-400 transition-all duration-300"
                   aria-label="Facebook"
                 >
                   <Facebook size={16} />
@@ -93,7 +93,7 @@ export default function Footer() {
                   href="https://instagram.com/maxshop.ar/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-xl bg-neutral-200 border border-neutral-300 flex items-center justify-center text-neutral-500 hover:text-neutral-900 hover:border-neutral-400 transition-all duration-300"
+                  className="w-9 h-9 rounded-md bg-neutral-200 border border-neutral-300 flex items-center justify-center text-neutral-500 hover:text-neutral-900 hover:border-neutral-400 transition-all duration-300"
                   aria-label="Instagram"
                 >
                   <Instagram size={16} />
@@ -102,7 +102,7 @@ export default function Footer() {
                   href={buildUrl()}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-xl bg-neutral-200 border border-neutral-300 flex items-center justify-center text-neutral-500 hover:text-neutral-900 hover:border-neutral-400 transition-all duration-300"
+                  className="w-9 h-9 rounded-md bg-neutral-200 border border-neutral-300 flex items-center justify-center text-neutral-500 hover:text-neutral-900 hover:border-neutral-400 transition-all duration-300"
                   aria-label="WhatsApp"
                 >
                   <FaWhatsapp size={16} />
@@ -134,7 +134,7 @@ export default function Footer() {
 
       {/* Footer Inferior */}
       <div className="w-full bg-neutral-200 py-4 md:py-5">
-        <div className="container mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="container mx-auto px-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <p className="text-xs text-neutral-400">
             &copy; {new Date().getFullYear()} MaxShop. Todos los derechos reservados.
           </p>

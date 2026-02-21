@@ -93,7 +93,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                         onChange={handleChange}
                         type={inputType}
                         className={`
-              w-full px-3 py-2.5 rounded-2xl
+              w-full px-3 py-2.5 rounded-sm
               bg-transparent
               text-sm
               transition-all duration-200

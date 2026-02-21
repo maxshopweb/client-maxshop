@@ -51,7 +51,7 @@ const ModalBase = ({
             onClick={handleClose}
         >
             <div
-                className={`relative w-full ${maxWidth} rounded-3xl shadow-2xl transition-all duration-300 ${isClosing || !shouldRender ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
+                className={`relative w-full ${maxWidth} rounded-md shadow-2xl transition-all duration-300 ${isClosing || !shouldRender ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
                     }`}
                 style={{
                     backgroundColor: 'var(--background)',
@@ -62,7 +62,7 @@ const ModalBase = ({
                 {showCloseButton && (
                     <button
                         onClick={handleClose}
-                        className="absolute top-4 right-4 p-2 rounded-full transition-all duration-200 hover:scale-110 z-10"
+                        className="absolute top-4 right-4 p-2 rounded-sm transition-all duration-200 hover:scale-110 z-10"
                         style={{
                             backgroundColor: 'rgba(var(--foreground-rgb), 0.05)',
                             color: 'var(--foreground)'

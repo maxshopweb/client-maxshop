@@ -47,43 +47,22 @@ export default function NavbarDesktopMenu({
           <Link
             key={link.label}
             href={link.href}
-            className={`relative text-sm lg:text-base group py-2 px-2 -mx-2 rounded-md transition-all duration-300 ease-out ${
-              isActive ? '-translate-y-1' : 'group-hover:-translate-y-1'
-            }`}
+            className="relative group py-2 px-1 flex flex-col items-center gap-0"
           >
             <span
-              className={`relative z-10 inline-block transition-all duration-300 ease-out ${
-                isActive ? '-translate-y-1' : 'group-hover:-translate-y-1'
-              } ${
+              className={`text-sm lg:text-base tracking-wide transition-colors duration-200 ${
                 isActive
-                  ? shouldShowBackground
-                    ? actualTheme === 'dark'
-                      ? "text-white font-medium"
-                      : "text-terciario font-medium"
-                    : "text-white font-medium"
-                  : shouldShowBackground
-                  ? actualTheme === 'dark'
-                    ? "text-white/70 group-hover:text-white"
-                    : "text-terciario/70 group-hover:text-terciario"
-                  : "text-white/70 group-hover:text-white"
+                  ? shouldShowBackground ? "text-foreground font-medium" : "text-white font-medium"
+                  : shouldShowBackground ? "text-foreground/50 group-hover:text-foreground" : "text-white/60 group-hover:text-white"
               }`}
             >
               {link.label}
             </span>
-            {/* Barrita debajo del link */}
             <span
-              className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-[3px] rounded-full transition-all duration-300 ease-out ${
-                isActive
-                  ? shouldShowBackground
-                    ? actualTheme === 'dark'
-                      ? "w-[50%] bg-principal"
-                      : "w-[50%] bg-terciario"
-                    : "w-[50%] bg-white"
-                  : shouldShowBackground
-                  ? actualTheme === 'dark'
-                    ? "w-0 group-hover:w-[50%] bg-principal"
-                    : "w-0 group-hover:w-[50%] bg-secundario"
-                  : "w-0 group-hover:w-[50%] bg-white/60"
+              className={`block h-px transition-all duration-300 ${
+                shouldShowBackground ? "bg-principal" : "bg-white"
+              } ${
+                isActive ? "w-full" : "w-0 group-hover:w-full"
               }`}
             />
           </Link>

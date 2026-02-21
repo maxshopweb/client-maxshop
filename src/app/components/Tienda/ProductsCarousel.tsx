@@ -83,7 +83,7 @@ export default function ProductsCarousel({
         {/* Productos */}
         {isLoading ? (
           <div
-            className="flex gap-3 sm:gap-6 overflow-x-auto overflow-y-visible scrollbar-hide scroll-smooth pb-4 snap-x snap-mandatory"
+            className="flex gap-3 sm:gap-5 overflow-x-auto overflow-y-visible scrollbar-hide scroll-smooth pb-4 snap-x snap-mandatory"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
@@ -93,7 +93,7 @@ export default function ProductsCarousel({
             {Array.from({ length: 5 }).map((_, index) => (
               <div
                 key={`skeleton-${index}`}
-                className="flex-shrink-0 w-[calc(50%-6px)] sm:w-[280px] md:w-[320px] snap-start"
+                className="flex-shrink-0 w-[calc(50%-6px)] sm:w-[calc(33.333%-14px)] lg:w-[calc(25%-15px)] snap-start"
               >
                 <ProductCardSkeleton />
               </div>
@@ -106,7 +106,7 @@ export default function ProductsCarousel({
         ) : (
           <div
             ref={scrollContainerRef}
-            className="flex gap-3 sm:gap-6 overflow-x-auto overflow-y-visible scrollbar-hide scroll-smooth pb-4 snap-x snap-mandatory"
+            className="flex gap-3 sm:gap-5 overflow-x-auto overflow-y-visible scrollbar-hide scroll-smooth pb-4 snap-x snap-mandatory"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
@@ -116,7 +116,7 @@ export default function ProductsCarousel({
             {productos.map((producto) => (
               <div
                 key={producto.id_prod}
-                className="flex-shrink-0 w-[calc(50%-6px)] sm:w-[280px] md:w-[320px] snap-start"
+                className="flex-shrink-0 w-[calc(50%-6px)] sm:w-[calc(33.333%-14px)] lg:w-[calc(25%-15px)] snap-start"
               >
                 <ProductCard producto={producto} />
               </div>
@@ -141,7 +141,7 @@ export default function ProductsCarousel({
         <div className="flex justify-center mt-10">
           <Button 
             variant="primary" 
-            size="lg"
+            size="sm"
             onClick={handleViewAll}
           >
             Ver más

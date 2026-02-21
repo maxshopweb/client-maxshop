@@ -75,7 +75,7 @@ export default function HeroButton({
         py-2
         md:pl-6
         md:py-3
-        rounded-full
+        rounded-xl
         font-semibold
         text-sm
         md:text-lg
@@ -104,7 +104,7 @@ export default function HeroButton({
         items-center
         justify-center
         aspect-square
-        rounded-full
+        rounded-lg
         ${styles.iconBg}
         transition-all
         duration-300

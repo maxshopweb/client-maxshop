@@ -54,7 +54,7 @@ export default function ModalDemo() {
                 <div className="grid grid-cols-3 gap-4">
                     <button
                         onClick={() => setShowConfirm(true)}
-                        className="py-4 px-6 rounded-2xl font-medium transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg"
+                        className="py-4 px-6 rounded-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg"
                         style={{
                             backgroundColor: 'var(--principal)',
                             color: 'white'
@@ -65,7 +65,7 @@ export default function ModalDemo() {
 
                     <button
                         onClick={() => setShowStep(true)}
-                        className="py-4 px-6 rounded-2xl font-medium transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg"
+                        className="py-4 px-6 rounded-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg"
                         style={{
                             backgroundColor: 'var(--secundario)',
                             color: 'white'
@@ -76,7 +76,7 @@ export default function ModalDemo() {
 
                     <button
                         onClick={() => setShowSimple(true)}
-                        className="py-4 px-6 rounded-2xl font-medium transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg"
+                        className="py-4 px-6 rounded-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg"
                         style={{
                             backgroundColor: 'var(--terciario)',
                             color: 'white'
@@ -119,7 +119,7 @@ export default function ModalDemo() {
                         <>
                             <button
                                 onClick={handleClose}
-                                className="flex-1 py-3 px-6 rounded-2xl font-medium transition-all duration-200 hover:scale-105 active:scale-95"
+                                className="flex-1 py-3 px-6 rounded-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95"
                                 style={{
                                     backgroundColor: 'rgba(var(--foreground-rgb), 0.08)',
                                     color: 'var(--foreground)',
@@ -132,7 +132,7 @@ export default function ModalDemo() {
                                 onClick={() => {
                                     handleClose();
                                 }}
-                                className="flex-1 py-3 px-6 rounded-2xl font-medium transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg"
+                                className="flex-1 py-3 px-6 rounded-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg"
                                 style={{
                                     backgroundColor: 'var(--principal)',
                                     color: 'white'

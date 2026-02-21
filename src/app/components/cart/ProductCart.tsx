@@ -63,7 +63,7 @@ export default function ProductCart({
     return (
       <div className="flex items-start gap-3 text-sm">
         {/* Imagen del producto */}
-        <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-input/30">
+        <div className="w-16 h-16 flex-shrink-0 rounded-sm overflow-hidden bg-input/30">
           <ProductImage
             imgPrincipal={img_principal}
             codiArti={codi_arti}
@@ -94,10 +94,10 @@ export default function ProductCart({
   // Variante mediana para carrito principal (con acciones)
   return (
     <>
-      <div className="group bg-card rounded-xl overflow-hidden transition-all duration-300 shadow-sm hover:shadow-md">
+      <div className="group bg-card rounded-sm overflow-hidden transition-all duration-300 shadow-sm hover:shadow-md">
         <div className="flex gap-3 p-3">
           {/* Imagen */}
-          <div className="relative w-20 h-20 flex-shrink-0 bg-gradient-to-br from-background to-background/50 rounded-lg overflow-hidden">
+          <div className="relative w-20 h-20 flex-shrink-0 bg-gradient-to-br from-background to-background/50 rounded-sm overflow-hidden">
             <ProductImage
               imgPrincipal={img_principal}
               codiArti={codi_arti}
@@ -147,7 +147,7 @@ export default function ProductCart({
             {/* Controles alineados */}
             <div className="flex items-center justify-between gap-2 mt-auto">
               {/* Controles de cantidad */}
-              <div className="flex items-center gap-1.5 bg-input/50 rounded-lg p-0.5">
+              <div className="flex items-center gap-1.5 bg-input/50 rounded-sm p-0.5">
                 <button
                   onClick={() => {
                     if (!readOnly) {
@@ -155,7 +155,7 @@ export default function ProductCart({
                       onUpdate?.();
                     }
                   }}
-                  className="p-1.5 hover:bg-input rounded-md transition-all duration-200 active:scale-95 flex items-center justify-center border border-transparent hover:border-principal/30"
+                  className="p-1.5 hover:bg-input rounded-sm transition-all duration-200 active:scale-95 flex items-center justify-center border border-transparent hover:border-principal/30"
                   aria-label="Disminuir cantidad"
                 >
                   <Minus className="w-3.5 h-3.5 text-foreground" />
@@ -170,7 +170,7 @@ export default function ProductCart({
                       onUpdate?.();
                     }
                   }}
-                  className="p-1.5 hover:bg-input rounded-md transition-all duration-200 active:scale-95 flex items-center justify-center border border-transparent hover:border-principal/30"
+                  className="p-1.5 hover:bg-input rounded-sm transition-all duration-200 active:scale-95 flex items-center justify-center border border-transparent hover:border-principal/30"
                   aria-label="Aumentar cantidad"
                 >
                   <Plus className="w-3.5 h-3.5 text-foreground" />
@@ -184,7 +184,7 @@ export default function ProductCart({
                     handleEliminarItem(id_prod);
                   }
                 }}
-                className="p-2 hover:bg-destructive/10 rounded-lg transition-all duration-200 text-destructive hover:text-destructive/80 active:scale-95 border border-transparent hover:border-destructive/20"
+                className="p-2 hover:bg-destructive/10 rounded-sm transition-all duration-200 text-destructive hover:text-destructive/80 active:scale-95 border border-transparent hover:border-destructive/20"
                 aria-label="Eliminar producto"
               >
                 <Trash2 className="w-4 h-4" />

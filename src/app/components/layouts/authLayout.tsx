@@ -101,7 +101,7 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
                             <ArrowLeft className="w-4 h-4" />
                             <span>Volver</span>
                         </a>
-                        <Image src="/logos/logo-negativo.svg" alt="logo" width={40} height={40} className="w-10 h-10 object-contain" />
+                        <Image src="/logos/logo-negativo.svg" alt="logo" width={52} height={52} className="w-13 h-13 object-contain" />
                         <div className="w-16" /> {/* Spacer para centrar visualmente el logo si fuera necesario, o dejarlo a la derecha */}
                     </div>
 
@@ -162,7 +162,7 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
                 {/* Content Side (Right) */}
                 <div className="w-1/2 flex flex-col p-12 lg:p-16 relative">
                     <div className="absolute top-8 right-8">
-                        <Image src="/logos/logo-negativo.svg" alt="logo" width={50} height={50} className="w-10 h-10 opacity-80" />
+                        <Image src="/logos/logo-negativo.svg" alt="logo" width={64} height={64} className="w-14 h-14 opacity-80" />
                     </div>
 
                     <div className="flex flex-col h-full justify-center max-w-sm mx-auto w-full">

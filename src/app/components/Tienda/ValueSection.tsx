@@ -96,7 +96,7 @@ function ValueRow({ row }: { row: typeof valueRows[0] }) {
 
           {/* Badge gloss */}
           <span
-            className="inline-flex items-center gap-1.5 w-fit mb-6 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide"
+            className="inline-flex items-center gap-1.5 w-fit mb-6 px-3.5 py-1.5 rounded-md text-xs font-semibold tracking-wide"
             style={{
               background: "linear-gradient(135deg, rgba(232,138,66,0.18) 0%, rgba(255,255,255,0.28) 50%, rgba(232,138,66,0.12) 100%)",
               border: "1px solid rgba(232,138,66,0.35)",

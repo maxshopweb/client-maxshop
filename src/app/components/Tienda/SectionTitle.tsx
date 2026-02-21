@@ -25,7 +25,7 @@ export default function SectionTitle({
   });
 
   return (
-    <section className={`pb-8 md:py-5 lg:py-8 bg-background ${className}`}>
+    <section className={`py-6 md:py-8 lg:py-10 bg-background ${className}`}>
       <div className="container mx-auto px-4">
         {/* Título Minimalista */}
         <div className="mb-4 md:mb-4">

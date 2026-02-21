@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Star, Package, CreditCard, Tag, Sparkles } from "lucide-react";
+import { Package, CreditCard, Tag, Sparkles } from "lucide-react";
+import { FaStar } from "react-icons/fa";
 import { IProductos } from "@/app/types/producto.type";
 import { formatPrecio, getStockInfo } from "@/app/types/producto.type";
 import { getPrecioConImpuestos, getPrecioSinImpuestos } from "@/app/utils/producto.utils";
@@ -111,7 +112,7 @@ export default function ProductInfo({ producto }: ProductInfoProps) {
         )}
         {esDestacado && (
           <div className="flex items-center gap-1 px-2 py-1 bg-principal/10 text-principal rounded-full text-xs font-medium">
-            <Star className="w-3 h-3 fill-principal" />
+            <FaStar className="w-3 h-3" />
             <span>Destacado</span>
           </div>
         )}

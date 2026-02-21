@@ -15,40 +15,42 @@ export default function TiendaHome() {
         <Carousel />
       </section>
       
-      <div className="flex flex-col">
-      <ScrollAnimate direction="up" delay={0}>
-        <BenefitsCards />
-      </ScrollAnimate>
+      <div className="flex flex-col gap-8 md:gap-14">
+        <ScrollAnimate direction="up" delay={0}>
+          <BenefitsCards />
+        </ScrollAnimate>
 
-      <ScrollAnimate direction="up" delay={0}>
-        <ProductsCarousel
-          title="Productos destacados"
-          filter="destacados"
-          showViewAllButton={true}
-        />
-      </ScrollAnimate>
+        <ScrollAnimate direction="up" delay={0}>
+          <ProductsCarousel
+            title="Productos destacados"
+            filter="destacados"
+            showViewAllButton={true}
+          />
+        </ScrollAnimate>
 
-      <ScrollAnimate direction="up" delay={100}>
-        <SmallCarousel />
-      </ScrollAnimate>
+        <ScrollAnimate direction="up" delay={100}>
+          <SmallCarousel />
+        </ScrollAnimate>
 
-      <ScrollAnimate direction="up" delay={0}>
-        <ProductsGrid
-          title="Puede interesarte"
-          filter="publicados"
-          showViewAllButton={true}
-          rows={2}
-          cols={4}
-        />
-      </ScrollAnimate>
+        <ScrollAnimate direction="up" delay={0}>
+          <ProductsGrid
+            title="Puede interesarte"
+            filter="publicados"
+            showViewAllButton={true}
+            rows={2}
+            cols={4}
+          />
+        </ScrollAnimate>
 
-      <ScrollAnimate direction="up" delay={100}>
-        <ValueSection />
-      </ScrollAnimate>
+        <div className="flex flex-col">
+          <ScrollAnimate direction="up" delay={100}>
+            <ValueSection />
+          </ScrollAnimate>
 
-      <ScrollAnimate direction="up" delay={100}>
-        <AboutUs/>
-      </ScrollAnimate>
+          <ScrollAnimate direction="up" delay={100}>
+            <AboutUs />
+          </ScrollAnimate>
+        </div>
       </div>
     </div>
   );

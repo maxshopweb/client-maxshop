@@ -58,7 +58,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
                         ref={ref}
                         disabled={disabled}
                         className={`
-                            w-full px-3 py-2.5 rounded-2xl
+                            w-full px-3 py-2.5 rounded-xl
                             bg-transparent
                             text-sm
                             transition-all duration-200

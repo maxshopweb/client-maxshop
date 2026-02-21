@@ -106,7 +106,7 @@ const SelectWithCreate = forwardRef<HTMLSelectElement, SelectWithCreateProps>(
                                 onChange?.(e);
                             }}
                             className={clsx(
-                                'w-full px-4 py-2.5 pr-10 rounded-2xl font-medium transition-all duration-300 appearance-none',
+                                'w-full px-4 py-2.5 pr-10 rounded-xl font-medium transition-all duration-300 appearance-none',
                                 'focus:outline-none focus:ring-2 focus:ring-principal focus:shadow-lg focus:shadow-principal/20',
                                 'bg-input border-2 border-input text-input',
                                 'hover:border-principal/50 hover:shadow-md',
@@ -143,7 +143,7 @@ const SelectWithCreate = forwardRef<HTMLSelectElement, SelectWithCreateProps>(
                             }}
                             disabled={disabled || (needsParent && !parentId)}
                             className={clsx(
-                                'w-full flex items-center justify-center gap-2 px-4 py-2 rounded-2xl',
+                                'w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl',
                                 'border-2 border-dashed transition-all duration-300',
                                 'text-sm font-medium',
                                 (needsParent && !parentId)
@@ -166,7 +166,7 @@ const SelectWithCreate = forwardRef<HTMLSelectElement, SelectWithCreateProps>(
                     )}>
                         <form
                             onSubmit={handleSubmit(handleCreate)}
-                            className="p-4 bg-card border-2 border-principal/20 rounded-2xl space-y-3"
+                            className="p-4 bg-card border-2 border-principal/20 rounded-xl space-y-3"
                         >
                             <div className="flex items-center justify-between mb-2">
                                 <h4 className="text-sm font-semibold text-principal">
@@ -198,7 +198,7 @@ const SelectWithCreate = forwardRef<HTMLSelectElement, SelectWithCreateProps>(
                                     placeholder="Descripción opcional..."
                                     rows={2}
                                     disabled={isCreating}
-                                    className="w-full px-3 py-2.5 bg-input border-2 border-input rounded-2xl text-input text-sm focus:outline-none focus:ring-2 focus:ring-principal transition-all resize-none"
+                                    className="w-full px-3 py-2.5 bg-input border-2 border-input rounded-xl text-input text-sm focus:outline-none focus:ring-2 focus:ring-principal transition-all resize-none"
                                 />
                             </div>
 

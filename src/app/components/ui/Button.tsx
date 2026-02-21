@@ -20,9 +20,9 @@ export function Button({
 }: ButtonProps) {
 
     const sizeStyles = {
-        sm: "px-3 py-1.5 text-sm rounded-lg",
-        md: "px-4 py-2 text-sm rounded-full",
-        lg: "px-5 py-2.5 text-base rounded-full"
+        sm: "px-3 py-1.5 text-sm rounded-sm",
+        md: "px-4 py-2 text-sm rounded-sm",
+        lg: "px-5 py-2.5 text-base rounded-sm"
     };
 
     const baseStyles = `${sizeStyles[size]} font-medium transition-all duration-300 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:scale-100 disabled:hover:shadow-none relative overflow-hidden group ${fullWidth ? 'w-full' : 'min-w-[150px]'}`;
@@ -48,7 +48,7 @@ export function Button({
 
         "white-primary": "bg-white !text-principal border-2 border-principal/20 hover:border-principal hover:bg-principal hover:!text-white hover:shadow-lg hover:shadow-principal/30 hover:scale-105",
 
-        ghost: "text-principal hover:text-principal/80 hover:bg-principal/10 rounded-md"
+        ghost: "text-principal hover:text-principal/80 hover:bg-principal/10 rounded-sm"
     };
 
     const isGhost = variant === "ghost";

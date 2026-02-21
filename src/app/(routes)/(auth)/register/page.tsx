@@ -18,7 +18,7 @@ export default function RegisterPage() {
   return (
     <AuthLayout title="Crear cuenta" subtitle="Únete a MaxShop hoy mismo">
       <div className="flex flex-col h-full justify-between w-full">
-        <div className="flex flex-col gap-6 flex-1 justify-center">
+        <div className="flex flex-col gap-3 flex-1 justify-center">
 
         {/* 1. Primary CTA: Google Register */}
         <motion.div
@@ -33,7 +33,7 @@ export default function RegisterPage() {
             fullWidth
             onClick={handleGoogleRegister}
             disabled={loading}
-            className="relative group h-14 sm:h-16 text-base sm:text-lg shadow-sm border border-gray-200 hover:border-orange-200 hover:bg-orange-50/50 transition-all duration-300"
+            className="relative group h-14 sm:h-16 text-base sm:text-lg shadow-sm border border-gray-200 hover:border-orange-200 hover:bg-orange-50/50 transition-all duration-300 !rounded-xl"
           >
             <div className="absolute left-4 sm:left-6 flex items-center justify-center bg-white p-1 rounded-full shadow-sm">
               <LogoGoogle />
@@ -45,7 +45,7 @@ export default function RegisterPage() {
         </motion.div>
 
         {/* Separator */}
-        <div className="relative flex items-center gap-4 py-4 opacity-60 flex-shrink-0">
+        <div className="relative flex items-center gap-4 py-1 opacity-60 flex-shrink-0">
           <div className="flex-1 border-t border-gray-200"></div>
           <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">o</span>
           <div className="flex-1 border-t border-gray-200"></div>
@@ -60,7 +60,7 @@ export default function RegisterPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
               onClick={() => setIsEmailExpanded(true)}
-              className="w-full py-4 flex items-center justify-between px-6 rounded-2xl border border-gray-200 hover:border-orange-300 hover:shadow-md hover:bg-white bg-gray-50/50 transition-all duration-300 group text-left cursor-pointer"
+              className="w-full py-4 flex items-center justify-between px-6 rounded-xl border border-gray-200 hover:border-orange-300 hover:shadow-md hover:bg-white bg-gray-50/50 transition-all duration-300 group text-left cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 group-hover:scale-110 transition-transform">

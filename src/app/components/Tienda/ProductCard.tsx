@@ -1,12 +1,34 @@
 "use client";
 
 import Link from "next/link";
-import { Star, Sparkles, Tag } from "lucide-react";
+import { Sparkles, Tag } from "lucide-react";
 import type { IProductos } from "@/app/types/producto.type";
 import AddToCartButton from "@/app/components/cart/AddToCartButton";
 import ProductImage from "@/app/components/shared/ProductImage";
 import { formatCurrencyARS } from "@/app/utils/currency";
 import { getPrecioConImpuestos, getPrecioSinImpuestos } from "@/app/utils/producto.utils";
+
+function HalfStar({ size = 18 }: { size?: number }) {
+  const id = "half-star-grad";
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id={id} x1="0" x2="1" y1="0" y2="0">
+          <stop offset="50%" stopColor="currentColor" />
+          <stop offset="50%" stopColor="currentColor" stopOpacity="0.25" />
+        </linearGradient>
+      </defs>
+      <polygon
+        points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"
+        fill={`url(#${id})`}
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+        className="text-principal"
+      />
+    </svg>
+  );
+}
 
 interface ProductCardProps {
   producto: IProductos;
@@ -23,13 +45,13 @@ export default function ProductCard({ producto }: ProductCardProps) {
   return (
     <Link 
       href={`/tienda/productos/${producto.id_prod}`}
-      className="group bg-white rounded-xl overflow-hidden transition-all duration-300 flex flex-col h-full shadow-sm hover:shadow-lg hover:-translate-y-1 max-h-full"
+      className="group bg-white rounded-sm overflow-hidden transition-all duration-300 flex flex-col h-full shadow-sm hover:shadow-lg hover:-translate-y-1 max-h-full"
     >
       {/* Imagen del Producto */}
       <div className="relative aspect-square bg-gradient-to-br from-background to-background/50 overflow-hidden">
         {/* Badge por tipo de lista: Oferta (destacado) */}
         {esOferta && (
-          <div className="absolute top-3 left-3 bg-amber-500 text-white px-2.5 py-1 rounded-md text-xs font-semibold z-10 shadow-md flex items-center gap-1">
+          <div className="absolute top-3 left-3 bg-amber-500 text-white px-2.5 py-1 rounded-sm text-xs font-semibold z-10 shadow-md flex items-center gap-1">
             <Tag size={12} />
             Oferta
           </div>
@@ -37,7 +59,7 @@ export default function ProductCard({ producto }: ProductCardProps) {
 
         {/* Badge Campaña */}
         {esCampanya && !esOferta && (
-          <div className="absolute top-3 left-3 bg-emerald-600 text-white px-2.5 py-1 rounded-md text-xs font-semibold z-10 shadow-md flex items-center gap-1">
+          <div className="absolute top-3 left-3 bg-emerald-600 text-white px-2.5 py-1 rounded-sm text-xs font-semibold z-10 shadow-md flex items-center gap-1">
             <Sparkles size={12} />
             Campaña
           </div>
@@ -45,15 +67,15 @@ export default function ProductCard({ producto }: ProductCardProps) {
 
         {/* Badge Destacado (cuando no es oferta/campaña) */}
         {esDestacado && !esOferta && !esCampanya && (
-          <div className="absolute top-3 right-3 z-10 bg-principal/10 backdrop-blur-sm p-2 rounded-full">
-            <Star size={18} className="fill-principal text-principal" />
+          <div className="absolute top-3 right-3 z-10 bg-principal/10 backdrop-blur-sm p-2 rounded-sm text-principal">
+            <HalfStar size={18} />
           </div>
         )}
 
         {/* Destacado + Oferta/Campaña: estrella a la derecha */}
         {(esOferta || esCampanya) && esDestacado && (
-          <div className="absolute top-3 right-3 z-10 bg-white/80 backdrop-blur-sm p-1.5 rounded-full shadow-sm">
-            <Star size={16} className="fill-principal text-principal" />
+          <div className="absolute top-3 right-3 z-10 bg-white/80 backdrop-blur-sm p-1.5 rounded-sm shadow-sm text-principal">
+            <HalfStar size={16} />
           </div>
         )}
 
@@ -73,7 +95,7 @@ export default function ProductCard({ producto }: ProductCardProps) {
       {/* Información del Producto */}
       <div className="p-3 sm:p-5 flex flex-col flex-1">
         {/* Nombre del Producto */}
-        <h3 className="text-sm sm:text-base md:text-lg font-medium text-terciario group-hover:text-principal transition-colors line-clamp-2 min-h-[2.5rem] mb-1 sm:mb-2 leading-tight capitalize">
+        <h3 className="text-sm sm:text-base md:text-lg font-medium text-terciario group-hover:text-principal transition-colors mb-1 sm:mb-2 leading-tight capitalize">
           {producto.nombre || "Producto sin nombre"}
         </h3>
 

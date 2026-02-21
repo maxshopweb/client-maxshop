@@ -108,7 +108,7 @@ export default function RelatedProducts({ productos, isLoading, title = "Product
 
       <div
         ref={scrollContainerRef}
-        className="flex gap-4 overflow-x-auto scrollbar-thin pb-4 scroll-smooth"
+        className="flex gap-3 sm:gap-5 overflow-x-auto scrollbar-thin pb-4 scroll-smooth"
         style={{ scrollbarWidth: "thin" }}
       >
         {productos.map((producto, index) => (
@@ -117,7 +117,7 @@ export default function RelatedProducts({ productos, isLoading, title = "Product
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, delay: index * 0.1 }}
-            className="flex-shrink-0 w-[200px] sm:w-[240px] md:w-[280px]"
+            className="flex-shrink-0 w-[calc(50%-8px)] sm:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)]"
           >
             <ProductCard producto={producto} />
           </motion.div>

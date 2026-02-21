@@ -55,7 +55,7 @@ export default function AboutUs() {
               mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
             }`}
           >
-            <span className="inline-flex items-center border border-white/20 text-white/60 text-xs font-medium px-3 py-1 rounded-full mb-8 tracking-widest uppercase">
+            <span className="inline-flex items-center border border-white/20 text-white/60 text-xs font-medium px-3 py-1 rounded-md mb-8 tracking-widest uppercase">
               Quiénes somos
             </span>
           </div>
@@ -84,7 +84,7 @@ export default function AboutUs() {
                   }`}
                   style={{ transitionDelay: mounted ? `${300 + i * 100}ms` : "0ms" }}
                 >
-                  <div className="w-9 h-9 rounded-xl bg-white/8 border border-white/15 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-9 h-9 rounded-md bg-white/8 border border-white/15 flex items-center justify-center shrink-0 mt-0.5">
                     <Icon className="w-4 h-4 text-white/60" />
                   </div>
                   <div>

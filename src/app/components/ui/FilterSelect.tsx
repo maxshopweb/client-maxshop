@@ -73,7 +73,7 @@ function FilterSelectComponent({
           value={actualSelectValue}
           onChange={handleChange}
           disabled={disabled}
-          className="w-full px-4 py-2.5 pr-10 border border-input rounded-lg bg-background text-foreground text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-principal/20 focus:border-principal transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:border-principal/50"
+          className="w-full px-4 py-2.5 pr-10 border border-input rounded-xl bg-background text-foreground text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-principal/20 focus:border-principal transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:border-principal/50"
         >
           {placeholder && (
             <option value="">
