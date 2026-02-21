@@ -72,7 +72,7 @@ export default function ProductsGrid({
       )}
 
       {showViewAllButton && productos.length > 0 && (
-        <div className="flex justify-center mt-10">
+        <div className="flex justify-center mt-22 mb-15">
           <Button variant="primary" size="lg" onClick={handleViewAll}>
             Ver todos los productos
           </Button>
