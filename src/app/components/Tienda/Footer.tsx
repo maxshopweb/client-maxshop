@@ -2,84 +2,71 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Mail, Phone, MapPin, Facebook, Instagram, Twitter } from "lucide-react";
+import { Mail, Phone, MapPin, Facebook, Instagram } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
-import { useState } from "react";
-import { Button } from "@/app/components/ui/Button";
+import { useWhatsapp } from "@/app/hooks/contact/useWhatsapp";
+
+const LEGAL_LINKS = [
+  { label: "Política de privacidad", href: "/" },
+  { label: "Términos y condiciones", href: "/" },
+  { label: "Política de devoluciones", href: "/politica-de-devoluciones" },
+  { label: "Iniciar sesión", href: "/login" },
+] as const;
 
 export default function Footer() {
-  const [formData, setFormData] = useState({
-    nombre: "",
-    apellido: "",
-    email: "",
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Aquí iría la lógica de envío
-    setFormData({ nombre: "", apellido: "", email: "" });
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+  const { display: whatsappDisplay, buildUrl } = useWhatsapp({ message: "Hola! Tengo una consulta sobre MaxShop." });
 
   return (
     <>
-      {/* Footer Superior - 4 Columnas */}
-      <footer className="bg-terciario text-white" id="contacto">
+      {/* Footer Superior */}
+      <footer className="bg-neutral-100 text-neutral-800" id="contacto">
         <div className="container mx-auto px-4 py-10 md:py-14">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-6 lg:gap-8">
+
             {/* Columna 1 - Logo */}
             <div className="flex flex-col">
               <Link href="/" className="mb-4">
                 <Image
-                  src="/logos/logo-positivo.svg"
+                  src="/logos/logo-negativo.svg"
                   alt="MaxShop"
-                  width={140}
-                  height={50}
-                  className="h-10 md:h-12 w-auto"
+                  width={300}
+                  height={300}
+                  className="h-15 md:h-25 w-auto"
                 />
               </Link>
-              <p className="text-white/70 text-sm md:text-base leading-relaxed capitalize">
-                Tu tienda especializada en herramientas profesionales y soluciones integrales para construcción.
-              </p>
             </div>
 
             {/* Columna 2 - Contacto */}
             <div>
-              <h3 className="text-lg md:text-xl mb-4 md:mb-6 text-principal capitalize">
+              <h3 className="text-xs font-semibold tracking-widest uppercase text-neutral-400 mb-4 md:mb-6">
                 Contacto
               </h3>
               <div className="space-y-3 md:space-y-4">
                 <div className="flex items-start gap-3">
-                  <MapPin className="w-5 h-5 text-principal mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-white/90 text-sm md:text-base leading-relaxed capitalize">
-                      Punta del Sauce 1826<br />
-                      Córdoba Capital, Argentina
-                    </p>
-                  </div>
+                  <MapPin className="w-4 h-4 text-neutral-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-neutral-600 text-sm leading-relaxed">
+                    Punta del Sauce 1826<br />
+                    Córdoba Capital, Argentina
+                  </p>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Phone className="w-5 h-5 text-principal flex-shrink-0" />
-                  <Link 
-                    href="tel:+541234567890" 
-                    className="text-white/90 hover:text-principal transition-colors text-sm md:text-base capitalize"
+                  <Phone className="w-4 h-4 text-neutral-400 flex-shrink-0" />
+                  <Link
+                    href={buildUrl()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-neutral-600 hover:text-neutral-900 transition-colors text-sm"
                   >
-                    +54 9 11 7150-6220
+                    {whatsappDisplay}
                   </Link>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Mail className="w-5 h-5 text-principal flex-shrink-0" />
-                  <Link 
-                    href="mailto:info@maxshop.com" 
-                    className="text-white/90 hover:text-principal transition-colors text-sm md:text-base"
+                  <Mail className="w-4 h-4 text-neutral-400 flex-shrink-0" />
+                  <Link
+                    href="mailto:info@maxshop.com"
+                    className="text-neutral-600 hover:text-neutral-900 transition-colors text-sm"
                   >
                     info@maxshop.com
                   </Link>
@@ -89,94 +76,76 @@ export default function Footer() {
 
             {/* Columna 3 - Redes Sociales */}
             <div>
-              <h3 className="text-lg md:text-xl mb-4 md:mb-6 text-principal capitalize">
+              <h3 className="text-xs font-semibold tracking-widest uppercase text-neutral-400 mb-4 md:mb-6">
                 Redes sociales
               </h3>
-              <div className="flex items-center gap-3 md:gap-4">
+              <div className="flex items-center gap-3">
                 <Link
-                  href="https://facebook.com"
+                  href="https://www.facebook.com/maxshop.ar"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-white/5 hover:bg-principal flex items-center justify-center transition-all duration-300 hover:scale-110"
+                  className="w-9 h-9 rounded-xl bg-neutral-200 border border-neutral-300 flex items-center justify-center text-neutral-500 hover:text-neutral-900 hover:border-neutral-400 transition-all duration-300"
                   aria-label="Facebook"
                 >
-                  <Facebook size={20} />
+                  <Facebook size={16} />
                 </Link>
                 <Link
                   href="https://instagram.com/maxshop.ar/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-white/5 hover:bg-principal flex items-center justify-center transition-all duration-300 hover:scale-110"
+                  className="w-9 h-9 rounded-xl bg-neutral-200 border border-neutral-300 flex items-center justify-center text-neutral-500 hover:text-neutral-900 hover:border-neutral-400 transition-all duration-300"
                   aria-label="Instagram"
                 >
-                  <Instagram size={20} />
+                  <Instagram size={16} />
                 </Link>
                 <Link
-                  href="https://twitter.com"
+                  href={buildUrl()}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-white/5 hover:bg-principal flex items-center justify-center transition-all duration-300 hover:scale-110"
-                  aria-label="Twitter"
+                  className="w-9 h-9 rounded-xl bg-neutral-200 border border-neutral-300 flex items-center justify-center text-neutral-500 hover:text-neutral-900 hover:border-neutral-400 transition-all duration-300"
+                  aria-label="WhatsApp"
                 >
-                  <FaWhatsapp size={20} />
+                  <FaWhatsapp size={16} />
                 </Link>
               </div>
             </div>
 
-            {/* Columna 4 - Formulario de Contacto */}
+            {/* Columna 4 - Información */}
             <div>
-              <h3 className="text-lg md:text-xl mb-4 md:mb-6 text-principal capitalize">
-                Suscríbete
+              <h3 className="text-xs font-semibold tracking-widest uppercase text-neutral-400 mb-4 md:mb-6">
+                Información
               </h3>
-              <form onSubmit={handleSubmit} className="space-y-3">
-                <input
-                  type="text"
-                  name="nombre"
-                  placeholder="Nombre"
-                  value={formData.nombre}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2.5 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-principal text-sm transition-all capitalize"
-                  required
-                />
-                <input
-                  type="text"
-                  name="apellido"
-                  placeholder="Apellido"
-                  value={formData.apellido}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2.5 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-principal text-sm transition-all capitalize"
-                  required
-                />
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2.5 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-principal text-sm transition-all"
-                  required
-                />
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="md"
-                  fullWidth
-                  className="mt-2"
-                >
-                  Enviar
-                </Button>
-              </form>
+              <ul className="space-y-2.5">
+                {LEGAL_LINKS.map(({ label, href }) => (
+                  <li key={href}>
+                    <Link
+                      href={href}
+                      className="text-neutral-600 hover:text-neutral-900 transition-colors text-sm"
+                    >
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
       </footer>
 
-      {/* Footer Inferior - Full Width Azul Más Oscuro */}
-      <div className="w-full text-white/60 py-4 md:py-5" style={{ backgroundColor: '#05060f' }}>
-        <div className="container mx-auto px-4">
-          <p className="text-center text-sm md:text-base">
+      {/* Footer Inferior */}
+      <div className="w-full bg-neutral-200 py-4 md:py-5">
+        <div className="container mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p className="text-xs text-neutral-400">
             &copy; {new Date().getFullYear()} MaxShop. Todos los derechos reservados.
           </p>
+          <Link
+            href="https://gentiomkt.com.ar"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-neutral-400 hover:text-neutral-700 transition-colors"
+          >
+            Hecho por <span className="font-medium">GentioMKT</span>
+          </Link>
         </div>
       </div>
     </>

@@ -27,7 +27,7 @@ import NavbarSearchContainer from "@/app/components/search/NavbarSearchContainer
 
 export default function UnifiedNavbar() {
   const pathname = usePathname();
-  const actualTheme = "light";
+  const actualTheme = "light" as "light" | "dark";
 
   // Hooks
   const { shouldShowBackground } = useNavbarScroll();
@@ -62,7 +62,7 @@ export default function UnifiedNavbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50">
+      <header className="fixed top-10 left-0 right-0 z-50">
         {/* Parte Superior: Logo, Toggle, User, Cart */}
         <NavbarHeader shouldShowBackground={shouldShowBackground}>
           <NavbarLogo pathname={pathname || ''} />

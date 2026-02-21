@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import HeroButton from "@/app/components/ui/HeroButton";
 
-const carouselImages = [
+export const carouselImages = [
   "/carrousel/black-decker-1.jpg",
   "/carrousel/dewalt-1.jpg",
   "/carrousel/ignco-1.jpg",
@@ -39,15 +39,14 @@ export default function Carousel() {
   };
 
   return (
-    <div className="relative w-full h-full max-h-[500px] overflow-hidden bg-secundario group z-0">
+    <div className="relative w-full h-full max-h-[700px] overflow-hidden bg-secundario group z-0">
       {/* Carousel Images */}
       <div className="relative w-full h-full">
         {carouselImages.map((image, index) => (
           <div
             key={image}
-            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-              index === currentIndex ? "opacity-100" : "opacity-0"
-            }`}
+            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${index === currentIndex ? "opacity-100" : "opacity-0"
+              }`}
           >
             <Image
               src={image}
@@ -61,12 +60,12 @@ export default function Carousel() {
       </div>
 
       {/* Gradient Overlays for better visibility of controls */}
-      <div className="absolute inset-y-0 left-0 w-16 md:w-24 bg-gradient-to-r from-black/40 to-transparent pointer-events-none" />
-      <div className="absolute inset-y-0 right-0 w-16 md:w-24 bg-gradient-to-l from-black/40 to-transparent pointer-events-none" />
-      
+      <div className="absolute inset-y-0 left-0 w-16 md:w-24 bg-gradient-to-r from-black/20 to-transparent pointer-events-none" />
+      <div className="absolute inset-y-0 right-0 w-16 md:w-24 bg-gradient-to-l from-black/20 to-transparent pointer-events-none" />
+
       {/* Overlay oscuro para mejor legibilidad del texto centrado */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/50 pointer-events-none" />
-      
+      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/20 pointer-events-none" />
+
       {/* Hero Button Overlay - Centrado */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
         <div className="pointer-events-auto">
@@ -104,11 +103,10 @@ export default function Carousel() {
           <button
             key={index}
             onClick={() => goToSlide(index)}
-            className={`transition-all duration-300 touch-manipulation ${
-              index === currentIndex
+            className={`transition-all duration-300 touch-manipulation ${index === currentIndex
                 ? "w-8 h-2 bg-principal"
                 : "w-2 h-2 bg-white/50 hover:bg-white/80"
-            } rounded-full`}
+              } rounded-full`}
             aria-label={`Ir a imagen ${index + 1}`}
           />
         ))}

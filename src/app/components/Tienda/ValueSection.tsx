@@ -1,86 +1,135 @@
 "use client";
 
-import { Wrench, Building2, ArrowRight } from "lucide-react";
-import ScrollAnimate from "../ui/ScrollAnimate";
+import { Wrench, Building2, ArrowRight, MessageCircle } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
+import { useRef, useEffect, useState } from "react";
 import HeroButton from "../ui/HeroButton";
 
-const valueCards = [
+function useFadeIn(delay = 0) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => setVisible(true), delay);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [delay]);
+
+  return { ref, visible };
+}
+
+const valueRows = [
   {
     image: "/value/value-1.jpg",
-    title: "Herramientas profesionales",
-    description: "Equipamiento de alta calidad para profesionales de la construcción",
-    link: "/tienda/productos?categoria=herramientas",
+    badge: "Herramientas",
+    title: "Equipamiento para\nprofesionales",
+    description:
+      "La mayor variedad en herramientas eléctricas, de mano y accesorios. Calidad de marca, al alcance de tu presupuesto.",
+    cta: { label: "Ver productos", href: "/tienda/productos?categoria=herramientas", icon: ArrowRight, variant: "orange-white" as const },
     icon: Wrench,
+    imageLeft: false,
   },
   {
     image: "/value/value-2.jpg",
-    title: "Soluciones integrales",
-    description: "Todo lo que necesitas para tus proyectos de construcción y renovación",
-    link: "/tienda/productos?categoria=construccion",
+    badge: "Construcción",
+    title: "Todo para tu\npróximo proyecto",
+    description:
+      "Materiales y soluciones integrales de construcción y renovación. Hablá con un asesor y encontrá lo que necesitás.",
+    cta: { label: "Hablar con un asesor", href: "https://wa.me/5491100000000", icon: FaWhatsapp, variant: "ghost-orange" as const },
     icon: Building2,
+    imageLeft: true,
   },
 ];
 
-export default function ValueSection() {
-  return (
-    <section className="py-12 md:py-16 lg:py-20 bg-background">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-          {valueCards.map((card, index) => {
-            const Icon = card.icon;
-            return (
-              <ScrollAnimate
-                key={index}
-                direction={index % 2 === 0 ? "left" : "right"}
-                delay={index * 150}
-              >
-                <div
-                  className="relative group overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500"
-                >
-                  {/* Imagen */}
-                  <div className="relative h-56 sm:h-64 md:h-80 lg:h-96 xl:h-[28rem] overflow-hidden">
-                    <img
-                      src={card.image}
-                      alt={card.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-                    />
-                    {/* Overlay con gradiente más sutil */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20 group-hover:from-black/95 group-hover:via-black/60 transition-all duration-500" />
-                  </div>
+function ValueRow({ row }: { row: typeof valueRows[0] }) {
+  const { ref: imgRef, visible: imgVisible } = useFadeIn(0);
+  const { ref: textRef, visible: textVisible } = useFadeIn(180);
+  const Icon = row.icon;
+  const CtaIcon = row.cta.icon;
 
-                  {/* Contenido */}
-                  <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 md:p-8 lg:p-10 text-white">
-                    {/* Icono decorativo */}
-                    <div className="mb-3 sm:mb-4 md:mb-5">
-                      <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-principal/20 backdrop-blur-sm border border-principal/30">
-                        <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-principal" />
-                      </div>
-                    </div>
-                    
-                    <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-semibold mb-2 sm:mb-3 md:mb-4 drop-shadow-2xl tracking-tight leading-tight">
-                      {card.title}
-                    </h3>
-                    <p className="text-white/90 mb-4 sm:mb-5 md:mb-6 lg:mb-8 text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed font-normal max-w-2xl">
-                      {card.description}
-                    </p>
-                    
-                    {/* Botón HeroButton */}
-                    <HeroButton
-                      variant="orange-white"
-                      icon={ArrowRight}
-                      href={card.link}
-                      className="mt-auto"
-                    >
-                      Ver Productos
-                    </HeroButton>
-                  </div>
-                </div>
-              </ScrollAnimate>
-            );
-          })}
+  return (
+    <div
+      className={`relative flex flex-col lg:h-screen overflow-hidden ${
+        row.imageLeft ? "lg:flex-row" : "lg:flex-row-reverse"
+      }`}
+    >
+      {/* Imagen */}
+      <div
+        ref={imgRef}
+        className="relative w-full lg:w-1/2 h-[60vw] min-h-[260px] lg:h-full shrink-0"
+        style={{
+          opacity: imgVisible ? 1 : 0,
+          transform: imgVisible ? "translateY(0)" : "translateY(16px)",
+          transition: "opacity 0.7s ease, transform 0.7s ease",
+          willChange: "opacity, transform",
+        }}
+      >
+        <img
+          src={row.image}
+          alt={row.title}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      </div>
+
+      {/* Texto */}
+      <div
+        ref={textRef}
+        className="relative w-full lg:w-1/2 shrink-0 flex items-center border-y border-card lg:border lg:border-card bg-background"
+        style={{
+          opacity: textVisible ? 1 : 0,
+          transform: textVisible ? "translateY(0)" : "translateY(12px)",
+          transition: "opacity 0.7s ease, transform 0.7s ease",
+          willChange: "opacity, transform",
+        }}
+      >
+        <div className={`flex flex-col justify-center w-full px-8 md:px-12 lg:px-16 py-12 lg:py-0 ${!row.imageLeft ? "lg:items-end lg:text-right" : ""}`}>
+
+          {/* Badge gloss */}
+          <span
+            className="inline-flex items-center gap-1.5 w-fit mb-6 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide"
+            style={{
+              background: "linear-gradient(135deg, rgba(232,138,66,0.18) 0%, rgba(255,255,255,0.28) 50%, rgba(232,138,66,0.12) 100%)",
+              border: "1px solid rgba(232,138,66,0.35)",
+              color: "var(--principal)",
+              backdropFilter: "blur(8px)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.4), 0 1px 3px rgba(232,138,66,0.15)",
+            }}
+          >
+            <Icon className="w-3 h-3" />
+            {row.badge}
+          </span>
+
+          <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-5 whitespace-pre-line">
+            {row.title}
+          </h3>
+          <p className="text-sm md:text-base text-foreground/60 leading-relaxed mb-8 max-w-2xl">
+            {row.description}
+          </p>
+          <HeroButton variant={row.cta.variant} icon={CtaIcon} href={row.cta.href}>
+            {row.cta.label}
+          </HeroButton>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
 
+export default function ValueSection() {
+  return (
+    <section className="bg-background overflow-x-hidden">
+      {valueRows.map((row, index) => (
+        <ValueRow key={index} row={row} />
+      ))}
+    </section>
+  );
+}

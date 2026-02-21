@@ -1,6 +1,7 @@
 import Carousel from "../components/Tienda/Carousel";
 import TitleSection from "../components/Tienda/TitleSection";
 import ProductsCarousel from "../components/Tienda/ProductsCarousel";
+import ProductsGrid from "../components/Tienda/ProductsGrid";
 import SmallCarousel from "../components/Tienda/SmallCarousel";
 import ValueSection from "../components/Tienda/ValueSection";
 import BenefitsCards from "../components/Tienda/BenefitsCards";
@@ -15,8 +16,6 @@ export default function TiendaHome() {
       </section>
       
       <div className="flex flex-col">
-      {/* <TitleSection /> */}
-
       <ScrollAnimate direction="up" delay={0}>
         <BenefitsCards />
       </ScrollAnimate>
@@ -34,10 +33,12 @@ export default function TiendaHome() {
       </ScrollAnimate>
 
       <ScrollAnimate direction="up" delay={0}>
-        <ProductsCarousel
+        <ProductsGrid
           title="Puede interesarte"
           filter="publicados"
           showViewAllButton={true}
+          rows={2}
+          cols={4}
         />
       </ScrollAnimate>
 

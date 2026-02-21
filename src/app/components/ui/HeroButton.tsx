@@ -9,7 +9,8 @@ type HeroButtonVariant =
   | "white-orange"      // blanco con naranja
   | "blue-orange"       // azul con naranja
   | "orange-blue"       // naranja con azul
-  | "blue-white";        // azul con blanco
+  | "blue-white"        // azul con blanco
+  | "ghost-orange";     // transparente con borde principal
 
 interface HeroButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
   variant?: HeroButtonVariant;
@@ -44,6 +45,11 @@ const variantStyles = {
     button: "bg-azul text-white hover:bg-azul/90",
     iconBg: "bg-white",
     iconColor: "text-azul",
+  },
+  "ghost-orange": {
+    button: "bg-transparent text-principal border border-principal hover:bg-principal/5",
+    iconBg: "bg-principal",
+    iconColor: "text-white",
   },
 };
 

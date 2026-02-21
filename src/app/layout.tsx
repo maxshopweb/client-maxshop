@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
-import { Fredoka } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/app/context/Providers";
 import { Toaster } from "sonner";
 import { AuthProvider } from "./context/AuthContext";
 
-const fredoka = Fredoka({
-  variable: "--font-fredoka",
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
+
 
 export const metadata: Metadata = {
   title: {
@@ -134,7 +136,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${fredoka.variable} antialiased`}>
+      <body className={`${poppins.variable} antialiased`}>
         <Providers>
           <AuthProvider>
             {children}

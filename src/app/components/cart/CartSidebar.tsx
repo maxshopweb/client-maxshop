@@ -128,12 +128,8 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
 
                 <div className="flex justify-between text-sm">
                   <span className="text-foreground/70">Envío</span>
-                  <span className="text-foreground font-medium">
-                    {summary.envio === 0 ? (
-                      <span className="text-principal">-</span>
-                    ) : (
-                      formatCurrencyARS(summary.envio)
-                    )}
+                  <span className="text-foreground/50 italic text-xs">
+                    -
                   </span>
                 </div>
 
@@ -163,7 +159,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                   onClick={handleVerCarrito}
                 >
                   <ShoppingCart className="w-4 h-4" />
-                  Ver Carrito
+                  Ir a la compra
                 </Button>
                 <Button
                   onClick={handleVaciarCarrito}

@@ -136,7 +136,7 @@ export default function AddToCartSection({ producto }: AddToCartSectionProps) {
                 toast.error(`Solo hay ${maxQuantity} unidades disponibles`);
               }
             }}
-            className="w-16 sm:w-20 text-center text-base sm:text-lg font-semibold border border-card-border/50 rounded-lg py-1.5 sm:py-2 focus:outline-none focus:border-principal bg-input text-input-text"
+            className="w-16 sm:w-20 text-center text-base sm:text-lg font-semibold border border-card-border/50 rounded-lg py-1.5 sm:py-2 focus:outline-none focus:border-principal bg-input text-input-text [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             disabled={isOutOfStock}
           />
 

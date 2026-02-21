@@ -25,75 +25,69 @@ export default function AdminProfileHeader({ user }: AdminProfileHeaderProps) {
   };
 
   return (
-    <div className="bg-card rounded-xl shadow-sm border border-input p-4 sm:p-6">
+    <div className="bg-card rounded-xl border border-border/50 p-4 sm:p-6">
       {/* Avatar y Nombre */}
-      <div className="flex flex-col items-center text-center mb-6 pb-6 border-b border-input">
+      <div className="flex flex-col items-center text-center mb-6 pb-6 border-b border-border/40">
         <div className="relative mb-4">
           {user.img ? (
             <img
               src={user.img}
               alt={user.nombre}
-              className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-principal/20"
+              className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover"
             />
           ) : (
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-principal/10 flex items-center justify-center border-4 border-principal/20">
-              <User className="w-10 h-10 sm:w-12 sm:h-12 text-principal" />
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-muted flex items-center justify-center">
+              <User className="w-8 h-8 sm:w-10 sm:h-10 text-foreground/25" />
             </div>
           )}
         </div>
-        <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-1">
+        <h2 className="text-base sm:text-lg font-medium text-foreground mb-0.5">
           {user.nombre} {user.apellido || ""}
         </h2>
         {user.username && (
-          <p className="text-sm text-foreground/60 mb-2">@{user.username}</p>
+          <p className="text-xs text-foreground/40 mb-3">@{user.username}</p>
         )}
         <div className="flex items-center gap-2">
-          <div className="inline-flex items-center px-3 py-1 rounded-full bg-principal/10 text-principal text-xs sm:text-sm font-medium">
-            <Shield className="w-3 h-3 mr-1" />
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-border/50 text-foreground/50 text-xs">
+            <Shield className="w-3 h-3" />
             Administrador
-          </div>
+          </span>
           {user.estado !== undefined && user.estado !== null && (
-            <div className="inline-flex items-center px-3 py-1 rounded-full bg-background text-foreground/70 text-xs sm:text-sm font-medium border border-input">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full border border-border/50 text-foreground/40 text-xs">
               {getEstadoLabel(user.estado)}
-            </div>
+            </span>
           )}
         </div>
       </div>
 
       {/* Información de contacto */}
-      <div className="space-y-3 sm:space-y-4">
-        <div className="flex items-center gap-3 text-sm sm:text-base">
-          <div className="p-2 bg-background rounded-lg">
-            <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-foreground/60" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs text-foreground/50 mb-0.5">Email</p>
-            <p className="text-foreground truncate">{user.email}</p>
+      <div className="space-y-3">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wide text-foreground/35 mb-1.5">Email</p>
+          <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-border/30 bg-muted/30">
+            <Mail className="w-3.5 h-3.5 text-foreground/25 shrink-0" />
+            <span className="text-sm text-foreground/50 truncate">{user.email}</span>
           </div>
         </div>
 
         {user.telefono && (
-          <div className="flex items-center gap-3 text-sm sm:text-base">
-            <div className="p-2 bg-background rounded-lg">
-              <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-foreground/60" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-foreground/50 mb-0.5">Teléfono</p>
-              <p className="text-foreground">{user.telefono}</p>
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-foreground/35 mb-1.5">Teléfono</p>
+            <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-border/30 bg-muted/30">
+              <Phone className="w-3.5 h-3.5 text-foreground/25 shrink-0" />
+              <span className="text-sm text-foreground/50">{user.telefono}</span>
             </div>
           </div>
         )}
 
         {user.nacimiento && (
-          <div className="flex items-center gap-3 text-sm sm:text-base">
-            <div className="p-2 bg-background rounded-lg">
-              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-foreground/60" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-foreground/50 mb-0.5">Fecha de nacimiento</p>
-              <p className="text-foreground">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-foreground/35 mb-1.5">Nacimiento</p>
+            <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-border/30 bg-muted/30">
+              <Calendar className="w-3.5 h-3.5 text-foreground/25 shrink-0" />
+              <span className="text-sm text-foreground/50">
                 {format(new Date(user.nacimiento), "dd/MM/yyyy")}
-              </p>
+              </span>
             </div>
           </div>
         )}

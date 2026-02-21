@@ -9,9 +9,10 @@ import ProductCard from "@/app/components/Tienda/ProductCard";
 interface RelatedProductsProps {
   productos: IProductos[];
   isLoading?: boolean;
+  title?: string;
 }
 
-export default function RelatedProducts({ productos, isLoading }: RelatedProductsProps) {
+export default function RelatedProducts({ productos, isLoading, title = "Productos relacionados" }: RelatedProductsProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScroll, setCanScroll] = useState(false);
 
@@ -83,7 +84,7 @@ export default function RelatedProducts({ productos, isLoading }: RelatedProduct
     >
       <div className="flex items-center justify-between">
         <h2 className="text-lg sm:text-xl md:text-2xl font-medium text-terciario">
-          Productos relacionados
+          {title}
         </h2>
         {canScroll && (
           <div className="flex gap-2">

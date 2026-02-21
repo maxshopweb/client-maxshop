@@ -60,7 +60,7 @@ export function PaginationControls({
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex flex-col items-center gap-4 mt-8 pt-6 border-t border-input">
+    <div className="flex flex-col items-center gap-4 mt-8 pt-6 ">
       <div className="flex items-center justify-center gap-2 flex-wrap">
         <button
           onClick={handlePrevPage}

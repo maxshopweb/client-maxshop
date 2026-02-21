@@ -2,66 +2,51 @@
 
 import { useEffect, useState } from "react";
 
+const SECTIONS = ["about-us", "contacto"];
+
 export function useActiveSection() {
   const [activeSection, setActiveSection] = useState<string>("");
 
   useEffect(() => {
-    const checkActiveSection = () => {
-      const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-      
-      // Obtener todas las secciones
-      const aboutUsElement = document.getElementById("about-us");
-      const contactoElement = document.getElementById("contacto");
+    // Mapa de secciones visibles con su ratio de intersección
+    const visibilityMap = new Map<string, number>();
 
-      let newActiveSection = "";
-
-      // Verificar si estamos en el top de la página
-      if (scrollPosition < windowHeight * 0.3) {
-        newActiveSection = "";
-      } else if (contactoElement) {
-        const contactoTop = contactoElement.offsetTop;
-        const contactoBottom = contactoTop + contactoElement.offsetHeight;
-        const viewportMiddle = scrollPosition + windowHeight * 0.3;
-
-        if (viewportMiddle >= contactoTop && viewportMiddle < contactoBottom) {
-          newActiveSection = "contacto";
-        } else if (aboutUsElement) {
-          const aboutUsTop = aboutUsElement.offsetTop;
-          const aboutUsBottom = aboutUsTop + aboutUsElement.offsetHeight;
-
-          if (viewportMiddle >= aboutUsTop && viewportMiddle < aboutUsBottom) {
-            newActiveSection = "about-us";
-          }
+    const pickActive = () => {
+      // Ordenar por ratio descendente y tomar la más visible
+      let best = "";
+      let bestRatio = 0;
+      visibilityMap.forEach((ratio, id) => {
+        if (ratio > bestRatio) {
+          bestRatio = ratio;
+          best = id;
         }
-      } else if (aboutUsElement) {
-        const aboutUsTop = aboutUsElement.offsetTop;
-        const aboutUsBottom = aboutUsTop + aboutUsElement.offsetHeight;
-        const viewportMiddle = scrollPosition + windowHeight * 0.3;
+      });
+      setActiveSection(best);
+    };
 
-        if (viewportMiddle >= aboutUsTop && viewportMiddle < aboutUsBottom) {
-          newActiveSection = "about-us";
-        }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          visibilityMap.set(entry.target.id, entry.intersectionRatio);
+        });
+        pickActive();
+      },
+      {
+        // Disparar en múltiples umbrales para mayor precisión
+        threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+        // El rootMargin recorta el área de detección: la sección debe ocupar
+        // al menos la zona central del viewport para considerarse activa
+        rootMargin: "-40% 0px -40% 0px",
       }
+    );
 
-      setActiveSection(newActiveSection);
-    };
-
-    // Verificar al cargar
-    checkActiveSection();
-
-    // Verificar al hacer scroll
-    window.addEventListener("scroll", checkActiveSection, { passive: true });
-    
-    // Verificar cuando cambia el hash (navegación por anclas)
-    const handleHashChange = () => {
-      setTimeout(checkActiveSection, 100);
-    };
-    window.addEventListener("hashchange", handleHashChange);
+    SECTIONS.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
 
     return () => {
-      window.removeEventListener("scroll", checkActiveSection);
-      window.removeEventListener("hashchange", handleHashChange);
+      observer.disconnect();
     };
   }, []);
 

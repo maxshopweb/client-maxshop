@@ -2,13 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { carouselImages } from "./Carousel";
 
-const carouselImages = [
-  "/carrousel/black-decker-1.jpg",
-  "/carrousel/dewalt-1.jpg",
-  "/carrousel/ignco-1.jpg",
-  "/carrousel/stanley-1.jpg",
-];
 
 export default function SmallCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -39,7 +34,7 @@ export default function SmallCarousel() {
   return (
     <div className="py-6 md:py-8 bg-background">
       <div className="container mx-auto px-4">
-        <div className="relative w-full max-w-4xl mx-auto h-[180px] sm:h-[220px] md:h-[250px] overflow-hidden bg-secundario rounded-xl group">
+        <div className="relative w-full h-[180px] sm:h-[220px] md:h-[400px] overflow-hidden bg-secundario rounded-xl group">
           {/* Carousel Images */}
           <div className="relative w-full h-full">
             {carouselImages.map((image, index) => (

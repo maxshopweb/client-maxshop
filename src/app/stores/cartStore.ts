@@ -184,7 +184,7 @@ export const useCartStore = create<CartState>()(
           // Calcular summary con los items actualizados
           const subtotal = updatedItems.reduce((sum, item) => sum + item.subtotal, 0);
           const descuentos = updatedItems.reduce((sum, item) => sum + (item.descuento || 0), 0);
-          const envio = subtotal > 50000 ? 0 : 2000;
+          const envio = 0; // Se calcula dinámicamente en checkout via Andreani
           const subtotalSinImpuestos = updatedItems.reduce((sum, item) => sum + (item.subtotal_sin_iva || 0), 0);
           const impuestos = Math.max(subtotal - subtotalSinImpuestos, 0);
           const total = subtotal - descuentos + envio;
@@ -239,7 +239,7 @@ export const useCartStore = create<CartState>()(
           // Calcular summary con los items actualizados
           const subtotal = updatedItems.reduce((sum, item) => sum + item.subtotal, 0);
           const descuentos = updatedItems.reduce((sum, item) => sum + (item.descuento || 0), 0);
-          const envio = subtotal > 50000 ? 0 : 2000;
+          const envio = 0; // Se calcula dinámicamente en checkout via Andreani
           const subtotalSinImpuestos = updatedItems.reduce((sum, item) => sum + (item.subtotal_sin_iva || 0), 0);
           const impuestos = Math.max(subtotal - subtotalSinImpuestos, 0);
           const total = subtotal - descuentos + envio;
@@ -388,7 +388,7 @@ export const useCartStore = create<CartState>()(
           // Calcular summary con los items actualizados
           const subtotal = updatedItems.reduce((sum, item) => sum + item.subtotal, 0);
           const descuentos = updatedItems.reduce((sum, item) => sum + (item.descuento || 0), 0);
-          const envio = subtotal > 50000 ? 0 : 2000;
+          const envio = 0; // Se calcula dinámicamente en checkout via Andreani
           const subtotalSinImpuestos = updatedItems.reduce((sum, item) => sum + (item.subtotal_sin_iva || 0), 0);
           const impuestos = Math.max(subtotal - subtotalSinImpuestos, 0);
           const total = subtotal - descuentos + envio;

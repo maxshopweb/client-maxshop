@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, AlertCircle } from "lucide-react";
 import { useProduct } from "@/app/hooks/productos/useProduct";
 import { useRelatedProducts } from "@/app/hooks/productos/useRelatedProducts";
+import { useProductosDestacados } from "@/app/hooks/productos/useProductos";
 import ProductGallery from "@/app/components/product/ProductGallery";
 import ProductInfo from "@/app/components/product/ProductInfo";
 import AddToCartSection from "@/app/components/product/AddToCartSection";
@@ -30,6 +31,13 @@ export default function ProductPage() {
     data: relatedProducts,
     isLoading: isLoadingRelated,
   } = useRelatedProducts(productId, 5);
+
+  const noRelated = !isLoadingRelated && (!relatedProducts || relatedProducts.length === 0);
+
+  const {
+    productos: destacados,
+    isLoading: isLoadingDestacados,
+  } = useProductosDestacados({ limit: 5, enabled: noRelated });
 
   // Loading state
   if (isLoading) {
@@ -116,7 +124,7 @@ export default function ProductPage() {
 
   // Main content
   return (
-    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 pt-16 sm:pt-20">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 py-16 sm:py-20">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -160,19 +168,25 @@ export default function ProductPage() {
           </motion.div>
 
           {/* Related Products */}
-          {relatedProducts && relatedProducts.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="pt-4 sm:pt-6"
-            >
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="pt-4 sm:pt-6"
+          >
+            {noRelated ? (
               <RelatedProducts
-                productos={relatedProducts}
+                productos={destacados.filter(p => p.id_prod !== productId)}
+                isLoading={isLoadingDestacados}
+                title="También te puede interesar"
+              />
+            ) : (
+              <RelatedProducts
+                productos={relatedProducts ?? []}
                 isLoading={isLoadingRelated}
               />
-            </motion.div>
-          )}
+            )}
+          </motion.div>
         </motion.div>
       </div>
   );

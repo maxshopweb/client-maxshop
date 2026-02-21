@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import UnifiedNavbar from "@/app/components/Tienda/UnifiedNavbar";
 import Footer from "@/app/components/Tienda/Footer";
 import PromoBanner from "@/app/components/Tienda/PromoBanner";
+import WhatsappButton from "@/app/components/Tienda/WhatsappButton";
 import { useAuth } from "@/app/context/AuthContext";
 import { getUserRole } from "@/app/utils/cookies";
 import { type UserRole } from "@/app/types/user";
@@ -78,13 +79,12 @@ export default function MainLayout({
       <PromoBanner />
       
       {/* Navbar Unificado */}
-      <div className="sticky top-10 z-50">
-        <UnifiedNavbar />
-      </div>
-      <div className="flex flex-col min-h-screen">
+      <UnifiedNavbar />
+      <div className="flex flex-col min-h-screen pt-[160px]">
         {children}
         <Footer />
       </div>
+      <WhatsappButton />
     </>
   );
 }
