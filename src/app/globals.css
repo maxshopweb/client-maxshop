@@ -30,6 +30,7 @@
   /* Componentes UI - Modo Claro */
   --card-bg: rgba(var(--white-rgb), 0.6);
   --card-border: rgba(var(--secundario-rgb), 0.15);
+  --outline-subtle: rgba(var(--secundario-rgb), 0.12);
   --input-bg: rgba(var(--white-rgb), 0.8);
   --input-border: rgba(var(--secundario-rgb), 0.2);
   --input-text: var(--terciario);
@@ -56,6 +57,7 @@
     /* Componentes UI - Modo Oscuro */
     --card-bg: var(--terciario);
     --card-border: rgba(var(--white-rgb), 0.1);
+    --outline-subtle: rgba(var(--white-rgb), 0.08);
     --input-bg: var(--secundario);
     --input-border: rgba(var(--white-rgb), 0.1);
     --input-text: var(--white);
@@ -81,6 +83,7 @@
   
   --card-bg: var(--terciario);
   --card-border: rgba(var(--white-rgb), 0.1);
+  --outline-subtle: rgba(var(--white-rgb), 0.08);
   --input-bg: var(--secundario);
   --input-border: rgba(var(--white-rgb), 0.1);
   --input-text: var(--white);
@@ -104,6 +107,7 @@
   
   --card-bg: rgba(var(--white-rgb), 0.6);
   --card-border: rgba(var(--secundario-rgb), 0.15);
+  --outline-subtle: rgba(var(--secundario-rgb), 0.12);
   --input-bg: rgba(var(--white-rgb), 0.8);
   --input-border: rgba(var(--secundario-rgb), 0.2);
   --input-text: var(--terciario);
@@ -154,6 +158,7 @@ h1, h2, h3, h4, h5, h6 {
 .border-card { border-color: var(--card-border); }
 .bg-input { background-color: var(--input-bg); }
 .border-input { border-color: var(--input-border); }
+.border-outline-subtle { border-color: var(--outline-subtle); }
 .text-input { color: var(--input-text); }
 .placeholder-input::placeholder { color: var(--input-placeholder); }
 .bg-sidebar { background-color: var(--sidebar-bg); }

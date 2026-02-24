@@ -13,8 +13,6 @@ type SearchParamsAuditoria = {
   tabla_afectada?: string;
   method?: string;
   estado?: string;
-  tiempo_min?: string;
-  tiempo_max?: string;
 };
 
 interface AuditoriaPageProps {
@@ -36,8 +34,6 @@ export default async function AuditoriaPage({ searchParams }: AuditoriaPageProps
   if (params.tabla_afectada) getParams.tabla_afectada = params.tabla_afectada;
   if (params.method) getParams.method = params.method;
   if (params.estado) getParams.estado = params.estado;
-  if (params.tiempo_min) getParams.tiempo_min = Number(params.tiempo_min) || undefined;
-  if (params.tiempo_max) getParams.tiempo_max = Number(params.tiempo_max) || undefined;
 
   const initialData = await getAuditoriaLogs(getParams);
 

@@ -7,6 +7,7 @@ import { useNotificationsStore } from "@/app/stores/notificationsStore";
 import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "@/app/components/ui/Badge";
 
 export function NotificationPopup() {
     const [isOpen, setIsOpen] = useState(false);
@@ -48,16 +49,16 @@ export function NotificationPopup() {
         }
     };
 
-    const getEstadoColor = (estado: string) => {
+    const getEstadoVariant = (estado: string): "success" | "warning" | "error" | "neutral" => {
         switch (estado) {
             case "aprobado":
-                return "text-green-600 dark:text-green-400";
+                return "success";
             case "pendiente":
-                return "text-yellow-600 dark:text-yellow-400";
+                return "warning";
             case "cancelado":
-                return "text-red-600 dark:text-red-400";
+                return "error";
             default:
-                return "text-gray-600 dark:text-gray-400";
+                return "neutral";
         }
     };
 
@@ -156,7 +157,7 @@ export function NotificationPopup() {
                                                                 Nueva venta
                                                             </h4>
                                                             {!notification.isRead && (
-                                                                <span className="w-2 h-2 bg-principal rounded-full flex-shrink-0"></span>
+                                                                <span className="w-2 h-2 bg-principal rounded-full shrink-0"></span>
                                                             )}
                                                         </div>
                                                         <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
@@ -182,16 +183,12 @@ export function NotificationPopup() {
                                                             </p>
                                                         )}
                                                         <div className="flex items-center gap-2 mt-2">
-                                                            <span
-                                                                className={`text-xs font-medium ${getEstadoColor(
-                                                                    notification.estado_pago
-                                                                )}`}
-                                                            >
+                                                            <Badge variant={getEstadoVariant(notification.estado_pago)}>
                                                                 {
                                                                     notification.estado_pago.charAt(0).toUpperCase() +
                                                                     notification.estado_pago.slice(1)
                                                                 }
-                                                            </span>
+                                                            </Badge>
                                                             <span className="text-xs text-gray-400 dark:text-gray-500">
                                                                 •
                                                             </span>

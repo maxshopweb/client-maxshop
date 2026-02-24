@@ -52,7 +52,7 @@ export default function ProductsGrid({
   };
 
   return (
-    <SectionTitle title={title}>
+    <SectionTitle title={title} className="pb-0">
       {isLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
           {Array.from({ length: limit }).map((_, i) => (
@@ -72,7 +72,7 @@ export default function ProductsGrid({
       )}
 
       {showViewAllButton && productos.length > 0 && (
-        <div className="flex justify-center mt-22 mb-15">
+        <div className="flex justify-center mt-8 md:mt-14">
           <Button variant="primary" size="lg" onClick={handleViewAll}>
             Ver todos los productos
           </Button>

@@ -20,7 +20,7 @@ const TABS: MaestroKind[] = ['marca', 'categoria', 'grupo'];
 export function UtilidadesTabs({ activeTab, onTabChange }: UtilidadesTabsProps) {
   return (
     <div
-      className="flex gap-1 p-1 rounded-2xl border border-input bg-card/50"
+      className="flex gap-1 p-1 rounded-sm border border-input bg-card/50"
       style={{ borderColor: 'rgba(var(--foreground-rgb), 0.12)' }}
     >
       {TABS.map((tab) => {
@@ -33,7 +33,7 @@ export function UtilidadesTabs({ activeTab, onTabChange }: UtilidadesTabsProps) 
             type="button"
             onClick={() => onTabChange(tab)}
             className={`
-              flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all
+              flex items-center gap-2 px-4 py-2.5 rounded-sm text-sm font-medium transition-all
               ${isActive
                 ? 'bg-principal text-white shadow-md'
                 : 'text-input hover:bg-input/30'

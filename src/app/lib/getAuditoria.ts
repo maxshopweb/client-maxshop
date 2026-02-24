@@ -41,8 +41,6 @@ export interface GetAuditoriaLogsParams {
   tabla_afectada?: string;
   method?: string;
   estado?: string;
-  tiempo_min?: number;
-  tiempo_max?: number;
 }
 
 export async function getAuditoriaLogs(
@@ -56,8 +54,6 @@ export async function getAuditoriaLogs(
     (['fecha_desde', 'fecha_hasta', 'accion', 'tabla_afectada', 'method', 'estado'] as const).forEach((key) => {
       if (rest[key] != null && rest[key] !== '') search.set(key, String(rest[key]));
     });
-    if (rest.tiempo_min != null) search.set('tiempo_min', String(rest.tiempo_min));
-    if (rest.tiempo_max != null) search.set('tiempo_max', String(rest.tiempo_max));
     const data = await fetchWithAuth(`/admin/auditoria?${search.toString()}`);
     if (data === null) {
       console.warn(

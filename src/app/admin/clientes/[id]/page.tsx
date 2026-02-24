@@ -9,6 +9,7 @@ import Link from 'next/link';
 import TableSkeleton from '@/app/components/skeletons/TableProductSkeleton';
 import { formatPrecio } from '@/app/types/ventas.type';
 import { AnimatedStatCard } from '@/app/components/ui/AnimatedStatCard';
+import { TableBadge } from '@/app/components/ui/TableBadge';
 import { AdminPageContainer } from '@/app/components/Admin/AdminPageContainer';
 
 export default function ClienteDetailPage() {
@@ -239,17 +240,7 @@ export default function ClienteDetailPage() {
                                             {formatPrecio(venta.total_neto || 0)}
                                         </td>
                                         <td className="px-4 py-3 text-sm">
-                                            <span
-                                                className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                                    venta.estado_pago === 'aprobado'
-                                                        ? 'bg-green-100 text-green-800'
-                                                        : venta.estado_pago === 'pendiente'
-                                                        ? 'bg-yellow-100 text-yellow-800'
-                                                        : 'bg-red-100 text-red-800'
-                                                }`}
-                                            >
-                                                {venta.estado_pago || 'N/A'}
-                                            </span>
+                                            <TableBadge kind="estado_pago" value={venta.estado_pago} />
                                         </td>
                                         <td className="px-4 py-3 text-sm">
                                             <Link

@@ -24,7 +24,7 @@ export function KpiGrid() {
 
     const cards = [
         {
-            label: 'Ventas Netas',
+            label: 'Ventas netas',
             value: data ? formatCurrency(data.total_ventas_netas) : '$0',
             icon: DollarSign,
             color: 'text-principal',
@@ -40,7 +40,7 @@ export function KpiGrid() {
             delay: 0.1,
         },
         {
-            label: 'Ticket Promedio',
+            label: 'Ticket promedio',
             value: data ? formatCurrency(data.ticket_promedio) : '$0',
             icon: TrendingUp,
             color: 'text-green-500',
@@ -48,7 +48,7 @@ export function KpiGrid() {
             delay: 0.2,
         },
         {
-            label: 'Clientes Únicos',
+            label: 'Clientes únicos',
             value: data ? formatNumber(data.clientes_unicos) : '0',
             icon: Users,
             color: 'text-purple-500',

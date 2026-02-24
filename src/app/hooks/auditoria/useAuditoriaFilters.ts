@@ -12,8 +12,6 @@ export interface AuditoriaFilters {
   tabla_afectada?: string;
   method?: string;
   estado?: string;
-  tiempo_min?: number;
-  tiempo_max?: number;
 }
 
 const DEFAULT_FILTERS: AuditoriaFilters = {
@@ -28,8 +26,6 @@ const FILTER_KEYS: (keyof Omit<AuditoriaFilters, 'page' | 'limit'>)[] = [
   'tabla_afectada',
   'method',
   'estado',
-  'tiempo_min',
-  'tiempo_max',
 ];
 
 function toParams(f: AuditoriaFilters): URLSearchParams {
@@ -76,12 +72,6 @@ export function useAuditoriaFilters() {
 
     const estado = searchParams.get('estado');
     if (estado) params.estado = estado;
-
-    const tiempo_min = searchParams.get('tiempo_min');
-    if (tiempo_min) params.tiempo_min = Number(tiempo_min) || undefined;
-
-    const tiempo_max = searchParams.get('tiempo_max');
-    if (tiempo_max) params.tiempo_max = Number(tiempo_max) || undefined;
 
     return params;
   }, [searchParams]);

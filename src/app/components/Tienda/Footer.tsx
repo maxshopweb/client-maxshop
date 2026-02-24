@@ -139,7 +139,7 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} MaxShop. Todos los derechos reservados.
           </p>
           <Link
-            href="https://gentiomkt.com.ar"
+            href="https://gentiomkt.com"
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs text-neutral-400 hover:text-neutral-700 transition-colors"

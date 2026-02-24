@@ -2,6 +2,7 @@
 
 import type { AuditoriaLog } from '@/app/services/auditoria.service';
 import TableSkeleton from '@/app/components/skeletons/TableProductSkeleton';
+import { TableBadge } from '@/app/components/ui/TableBadge';
 import { FileText } from 'lucide-react';
 import { useAuditoriaFilters } from '@/app/hooks/auditoria/useAuditoriaFilters';
 import { useAuditoria } from '@/app/hooks/auditoria/useAuditoria';
@@ -130,17 +131,13 @@ export function AuditoriaTable() {
                   <span className="font-mono text-text">{log.method ?? '—'}</span>
                 </td>
                 <td className="px-4 py-3 text-sm">
-                  <span
-                    className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                      log.estado === 'SUCCESS'
-                        ? 'bg-green-100 text-green-800'
-                        : log.estado === 'ERROR'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-gray-100 text-gray-700'
-                    }`}
-                  >
-                    {log.estado ?? '—'}
-                  </span>
+                  {log.estado === 'SUCCESS' ? (
+                    <TableBadge variant="success">{log.estado}</TableBadge>
+                  ) : log.estado === 'ERROR' ? (
+                    <TableBadge variant="error">{log.estado}</TableBadge>
+                  ) : (
+                    <TableBadge variant="neutral">{log.estado ?? '—'}</TableBadge>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-sm text-text text-right">
                   {log.tiempo_procesamiento != null

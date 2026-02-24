@@ -45,7 +45,7 @@ export function ClientesFilters() {
                 {/* Botón filtros avanzados */}
                 <Popover.Root open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
                     <Popover.Trigger asChild>
-                        <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-input border border-input rounded-2xl text-sm font-medium text-input hover:bg-input/80 transition-all duration-200 hover:scale-105 whitespace-nowrap">
+                        <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-input border border-input rounded-sm text-sm font-medium text-input hover:bg-input/80 transition-all duration-200 hover:scale-105 whitespace-nowrap">
                             <SlidersHorizontal className="h-4 w-4" />
                             Filtros
                             {activeFiltersCount > 0 && (
@@ -157,7 +157,7 @@ export function ClientesFilters() {
                 {hasActiveFilters && (
                     <button
                         onClick={clearFilters}
-                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-red-50 border border-red-200 rounded-2xl text-sm font-medium text-red-600 hover:bg-red-100 transition-all duration-200 whitespace-nowrap"
+                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-red-50 border border-red-200 rounded-sm text-sm font-medium text-red-600 hover:bg-red-100 transition-all duration-200 whitespace-nowrap"
                     >
                         <X className="h-4 w-4" />
                         Limpiar

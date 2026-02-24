@@ -1,297 +1,125 @@
 "use client";
 
-import Image from "next/image";
 import { useConfigTienda, useConfigTiendaMutation } from "@/app/hooks/config/useConfigTienda";
-import { useState, useEffect } from "react";
-import { toast } from "sonner";
+import { usePromoConfig } from "@/app/hooks/config/usePromoConfig";
 import { Button } from "@/app/components/ui/Button";
 import Input from "@/app/components/ui/Input";
 import { AdminPageHeader } from "@/app/components/Admin/AdminPageHeader";
 import { AdminPageContainer } from "@/app/components/Admin/AdminPageContainer";
+import { ConfigSection } from "@/app/components/Admin/Config/ConfigSection";
+import { ConfigCard } from "@/app/components/Admin/Config/ConfigCard";
+import { IntegrationCard } from "@/app/components/Admin/Config/IntegrationCard";
+import { BannersPanel } from "@/app/components/Admin/Config/Banners/BannersPanel";
+
+const INTEGRATIONS = [
+    {
+        logoSrc: "/logos/mp-logo.png",
+        name: "Mercado Pago",
+        description: "Integración de pagos y gestión de transacciones",
+        status: "Activa" as const,
+        ambiente: "Dev",
+    },
+    {
+        logoSrc: "/logos/andreani-logo.png",
+        name: "Andreani",
+        description: "Gestión de envíos y logística",
+        status: "Activa" as const,
+        ambiente: "Dev",
+    },
+];
 
 export default function ConfigPage() {
-  const { data: config, isLoading: loadingConfig } = useConfigTienda();
-  const mutation = useConfigTiendaMutation();
+    const { data: config, isLoading } = useConfigTienda();
+    const mutation = useConfigTiendaMutation();
+    const promo = usePromoConfig(config, mutation);
 
-  const [envioMin, setEnvioMin] = useState<string>("");
-  const [cuotas, setCuotas] = useState<string>("");
-  const [cuotasMin, setCuotasMin] = useState<string>("");
+    return (
+        <AdminPageContainer>
+            <AdminPageHeader
+                title="Configuración del sistema"
+                description="Gestiona las integraciones y reglas de negocio de tu sistema."
+            />
 
-  useEffect(() => {
-    if (config) {
-      setEnvioMin(String(config.envio_gratis_minimo ?? 100000));
-      setCuotas(String(config.cuotas_sin_interes ?? 3));
-      setCuotasMin(String(config.cuotas_sin_interes_minimo ?? 80000));
-    }
-  }, [config]);
+            <ConfigSection title="Banners">
+                <BannersPanel />
+            </ConfigSection>
 
-  const defEnvio = config?.envio_gratis_minimo ?? 100000;
-  const defCuotas = config?.cuotas_sin_interes ?? 3;
-  const defCuotasMin = config?.cuotas_sin_interes_minimo ?? 80000;
-  const envioVal = parseInt(envioMin.replace(/\D/g, ""), 10);
-  const cuotasVal = parseInt(cuotas, 10);
-  const cuotasMinVal = parseInt(cuotasMin.replace(/\D/g, ""), 10);
-  const hasChanges =
-    config != null &&
-    ((Number.isNaN(envioVal) ? defEnvio : envioVal) !== defEnvio ||
-      (Number.isNaN(cuotasVal) ? defCuotas : cuotasVal) !== defCuotas ||
-      (Number.isNaN(cuotasMinVal) ? defCuotasMin : cuotasMinVal) !== defCuotasMin);
+            <ConfigSection title="Integraciones" columns={2}>
+                {INTEGRATIONS.map((integration) => (
+                    <IntegrationCard key={integration.name} {...integration} />
+                ))}
+            </ConfigSection>
 
-  const handleSavePromos = async () => {
-    const envio = parseInt(envioMin.replace(/\D/g, ""), 10);
-    const nCuotas = parseInt(cuotas, 10);
-    const minCuotas = parseInt(cuotasMin.replace(/\D/g, ""), 10);
-    if (isNaN(envio) || envio < 0) {
-      toast.error("Monto mínimo de envío gratis inválido");
-      return;
-    }
-    if (isNaN(nCuotas) || nCuotas < 1) {
-      toast.error("Cantidad de cuotas inválida");
-      return;
-    }
-    if (isNaN(minCuotas) || minCuotas < 0) {
-      toast.error("Monto mínimo para cuotas inválido");
-      return;
-    }
-    try {
-      await mutation.mutateAsync({
-        envio_gratis_minimo: envio,
-        cuotas_sin_interes: nCuotas,
-        cuotas_sin_interes_minimo: minCuotas,
-      });
-      toast.success("Configuración guardada. Los mensajes se actualizarán en toda la tienda.");
-    } catch {
-      toast.error("Error al guardar la configuración");
-    }
-  };
+            <ConfigSection title="Reglas de negocio" columns={3}>
+                <ConfigCard title="Envíos gratis" status="Activo">
+                    <Input
+                        label="Monto mínimo (pesos):"
+                        type="text"
+                        value={promo.envioMin}
+                        onChange={(e) => promo.setEnvioMin(e.target.value)}
+                        placeholder="100000"
+                        disabled={isLoading}
+                    />
+                    <p className="mt-1 text-text/60">Todo el país</p>
+                </ConfigCard>
 
-  return (
-    <AdminPageContainer>
-      <AdminPageHeader
-        title="Configuración del sistema"
-        description="Gestiona las integraciones y reglas de negocio de tu sistema."
-      />
+                <ConfigCard title="Cuotas sin interés" status="Activo">
+                    <Input
+                        label="Cantidad de cuotas:"
+                        type="number"
+                        min={1}
+                        value={promo.cuotas}
+                        onChange={(e) => promo.setCuotas(e.target.value)}
+                        disabled={isLoading}
+                    />
+                    <Input
+                        label="Monto mínimo (pesos):"
+                        type="text"
+                        value={promo.cuotasMin}
+                        onChange={(e) => promo.setCuotasMin(e.target.value)}
+                        placeholder="80000"
+                        disabled={isLoading}
+                    />
+                </ConfigCard>
 
-      {/* Integraciones */}
-      <div className="bg-white dark:bg-secundario p-6 rounded-xl shadow border border-principal/10 dark:border-white/10">
-        <h2 className="text-2xl font-bold text-text mb-6">
-          Integraciones
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Mercado Pago */}
-          <div className="bg-white dark:bg-secundario border border-principal/20 dark:border-white/20 rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-200 hover:border-principal/40 dark:hover:border-white/40">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-start gap-4 flex-1">
-                <div className="relative w-16 h-16 flex-shrink-0 bg-white dark:bg-gray-800 rounded-lg p-2 border border-principal/10 dark:border-white/10">
-                  <Image
-                    src="/logos/mp-logo.png"
-                    alt="Mercado Pago"
-                    fill
-                    className="object-contain"
-                  />
+                <div className="flex items-end">
+                    <Button
+                        onClick={promo.handleSave}
+                        disabled={mutation.isPending || isLoading || !promo.hasChanges}
+                        variant="primary"
+                        className="w-full"
+                    >
+                        {mutation.isPending ? "Guardando..." : "Guardar envío y cuotas"}
+                    </Button>
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold text-text mb-2">
-                    Mercado Pago
-                  </h3>
-                  <p className="text-text/60 text-sm">
-                    Integración de pagos y gestión de transacciones
-                  </p>
-                </div>
-              </div>
-              <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-xs font-semibold flex-shrink-0">
-                Activa
-              </span>
-            </div>
-            <div className="space-y-2 text-sm text-text/70 pt-4 border-t border-principal/10 dark:border-white/10">
-              <div className="flex justify-between">
-                <span>Estado:</span>
-                <span className="text-green-600 dark:text-green-400 font-medium">Conectado</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Ambiente:</span>
-                <span className="text-text font-medium">Dev</span>
-              </div>
-            </div>
-          </div>
 
-          {/* Andreani */}
-          <div className="bg-white dark:bg-secundario border border-principal/20 dark:border-white/20 rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-200 hover:border-principal/40 dark:hover:border-white/40">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-start gap-4 flex-1">
-                <div className="relative w-16 h-16 flex-shrink-0 bg-white dark:bg-gray-800 rounded-lg p-2 border border-principal/10 dark:border-white/10">
-                  <Image
-                    src="/logos/andreani-logo.png"
-                    alt="Andreani"
-                    fill
-                    className="object-contain"
-                  />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold text-text mb-2">
-                    Andreani
-                  </h3>
-                  <p className="text-text/60 text-sm">
-                    Gestión de envíos y logística
-                  </p>
-                </div>
-              </div>
-              <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-xs font-semibold flex-shrink-0">
-                Activa
-              </span>
-            </div>
-            <div className="space-y-2 text-sm text-text/70 pt-4 border-t border-principal/10 dark:border-white/10">
-              <div className="flex justify-between">
-                <span>Estado:</span>
-                <span className="text-green-600 dark:text-green-400 font-medium">Conectado</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Ambiente:</span>
-                <span className="text-text font-medium">Dev</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+                <ConfigCard
+                    title="Alerta stock mínimo"
+                    status="Activo"
+                    fields={[
+                        { label: "Umbral", value: "5 unidades", highlight: true },
+                        { label: "Notificación", value: "Email automático" },
+                    ]}
+                />
 
-      {/* Reglas de Negocio */}
-      <div className="bg-white dark:bg-secundario p-6 rounded-xl shadow border border-principal/10 dark:border-white/10">
-        <h2 className="text-2xl font-bold text-text mb-6">
-          Reglas de negocio
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Envíos Gratis - editable */}
-          <div className="bg-white dark:bg-secundario border border-principal/20 dark:border-white/20 rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-200">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-text">
-                Envíos gratis
-              </h3>
-              <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-semibold">
-                Activo
-              </span>
-            </div>
-            <div className="space-y-3 text-sm text-text/70 pt-4 border-t border-principal/10 dark:border-white/10">
-              <Input
-                label="Monto mínimo (pesos):"
-                type="text"
-                value={envioMin}
-                onChange={(e) => setEnvioMin(e.target.value)}
-                placeholder="100000"
-                disabled={loadingConfig}
-              />
-              <p className="mt-1 text-text/60">Todo el país</p>
-            </div>
-          </div>
+                <ConfigCard
+                    title="Eventos activos"
+                    status="Inactivo"
+                    fields={[
+                        { label: "Tipo", value: "Eventos por fechas" },
+                        { label: "Estado", value: "Sin eventos activos" },
+                    ]}
+                />
 
-          {/* Cuotas Sin Interés - editable */}
-          <div className="bg-white dark:bg-secundario border border-principal/20 dark:border-white/20 rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-200">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-text">
-                Cuotas sin interés
-              </h3>
-              <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-semibold">
-                Activo
-              </span>
-            </div>
-            <div className="space-y-3 text-sm text-text/70 pt-4 border-t border-principal/10 dark:border-white/10">
-              <Input
-                label="Cantidad de cuotas:"
-                type="number"
-                min={1}
-                value={cuotas}
-                onChange={(e) => setCuotas(e.target.value)}
-                disabled={loadingConfig}
-              />
-              <Input
-                label="Monto mínimo (pesos):"
-                type="text"
-                value={cuotasMin}
-                onChange={(e) => setCuotasMin(e.target.value)}
-                placeholder="80000"
-                disabled={loadingConfig}
-              />
-            </div>
-          </div>
-
-          {/* Botón guardar promos */}
-          <div className="flex items-end">
-            <Button
-              onClick={handleSavePromos}
-              disabled={mutation.isPending || loadingConfig || !hasChanges}
-              variant="primary"
-              className="w-full"
-            >
-              {mutation.isPending ? "Guardando..." : "Guardar envío y cuotas"}
-            </Button>
-          </div>
-
-          {/* Stock Mínimo */}
-          <div className="bg-white dark:bg-secundario border border-principal/20 dark:border-white/20 rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-200">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-text">
-                Alerta stock mínimo
-              </h3>
-              <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-semibold">
-                Activo
-              </span>
-            </div>
-            <div className="space-y-3 text-sm text-text/70 pt-4 border-t border-principal/10 dark:border-white/10">
-              <div>
-                <span className="font-medium text-text">Umbral:</span>
-                <p className="text-principal font-semibold mt-1">5 unidades</p>
-              </div>
-              <div>
-                <span className="font-medium text-text">Notificación:</span>
-                <p className="mt-1">Email automático</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Eventos activos (antes Promociones temporales) */}
-          <div className="bg-white dark:bg-secundario border border-principal/20 dark:border-white/20 rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-200">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-text">
-                Eventos activos
-              </h3>
-              <span className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full text-xs font-semibold">
-                Inactivo
-              </span>
-            </div>
-            <div className="space-y-3 text-sm text-text/70 pt-4 border-t border-principal/10 dark:border-white/10">
-              <div>
-                <span className="font-medium text-text">Tipo:</span>
-                <p className="mt-1">Eventos por fechas</p>
-              </div>
-              <div>
-                <span className="font-medium text-text">Estado:</span>
-                <p className="mt-1">Sin eventos activos</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Política de Devoluciones */}
-          <div className="bg-white dark:bg-secundario border border-principal/20 dark:border-white/20 rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-200">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-text">
-                Política de devoluciones
-              </h3>
-              <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-semibold">
-                Activo
-              </span>
-            </div>
-            <div className="space-y-3 text-sm text-text/70 pt-4 border-t border-principal/10 dark:border-white/10">
-              <div>
-                <span className="font-medium text-text">Plazo:</span>
-                <p className="text-principal font-semibold mt-1">30 días</p>
-              </div>
-              <div>
-                <span className="font-medium text-text">Condición:</span>
-                <p className="mt-1">Producto sin uso</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </AdminPageContainer>
-  );
+                <ConfigCard
+                    title="Política de devoluciones"
+                    status="Activo"
+                    fields={[
+                        { label: "Plazo", value: "30 días", highlight: true },
+                        { label: "Condición", value: "Producto sin uso" },
+                    ]}
+                />
+            </ConfigSection>
+        </AdminPageContainer>
+    );
 }

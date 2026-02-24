@@ -12,7 +12,7 @@ export function DashboardHeader() {
                 </p>
             </div>
 
-            <div className="flex items-center gap-2 bg-white dark:bg-terciario p-2 rounded-xl shadow-sm border border-principal/10 dark:border-white/10">
+            <div className="flex items-center gap-2 bg-white dark:bg-terciario p-2 rounded-sm shadow-sm border border-principal/10 dark:border-white/10">
                 <div className="p-2 bg-principal/10 rounded-lg text-principal">
                     <CalendarIcon size={20} />
                 </div>

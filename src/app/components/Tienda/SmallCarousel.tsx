@@ -32,7 +32,7 @@ export default function SmallCarousel() {
   };
 
   return (
-    <div className="py-6 md:py-8 bg-background">
+    <div className="pt-0 pb-6 md:pb-8 bg-background">
       <div className="container mx-auto px-4">
         <div className="relative w-full h-[180px] sm:h-[220px] md:h-[400px] overflow-hidden bg-secundario rounded-xl group">
           {/* Carousel Images */}

@@ -19,7 +19,7 @@ export function SalesCategoryChart() {
             className="col-span-12 md:col-span-6 lg:col-span-3 bg-white dark:bg-terciario p-6 rounded-2xl shadow-lg border border-principal/10 dark:border-white/5"
         >
             <div className="mb-4">
-                <h3 className="text-lg font-bold text-secundario dark:text-white">Por Categoría</h3>
+                <h3 className="text-lg font-bold text-secundario dark:text-white">Por categoría</h3>
                 <p className="text-sm text-secundario dark:text-white/80 font-medium">Ventas totales</p>
             </div>
 

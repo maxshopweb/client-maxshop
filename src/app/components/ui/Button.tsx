@@ -19,10 +19,12 @@ export function Button({
     ...props
 }: ButtonProps) {
 
+    const isOutline = variant?.startsWith("outline") || variant === "white-primary";
+
     const sizeStyles = {
-        sm: "px-3 py-1.5 text-sm rounded-sm",
-        md: "px-4 py-2 text-sm rounded-sm",
-        lg: "px-5 py-2.5 text-base rounded-sm"
+        sm: isOutline ? "px-3 py-[4px] text-sm rounded-sm" : "px-3 py-1.5 text-sm rounded-sm",
+        md: isOutline ? "px-4 py-[6px] text-sm rounded-sm" : "px-4 py-2 text-sm rounded-sm",
+        lg: isOutline ? "px-5 py-[8px] text-base rounded-sm" : "px-5 py-2.5 text-base rounded-sm"
     };
 
     const baseStyles = `${sizeStyles[size]} font-medium transition-all duration-300 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:scale-100 disabled:hover:shadow-none relative overflow-hidden group ${fullWidth ? 'w-full' : 'min-w-[150px]'}`;

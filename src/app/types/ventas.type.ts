@@ -208,10 +208,11 @@ export const VENTA_LIMIT_OPTIONS = [
 ] as const;
 
 export const ESTADO_PAGO_OPTIONS: { value: EstadoPago; label: string; color: string }[] = [
-    { value: 'pendiente', label: 'Pendiente', color: 'yellow' },
+    { value: 'pendiente', label: 'Pendiente', color: 'orange' },
     { value: 'aprobado', label: 'Aprobado', color: 'green' },
     { value: 'rechazado', label: 'Rechazado', color: 'red' },
     { value: 'cancelado', label: 'Cancelado', color: 'gray' },
+    { value: 'vencido', label: 'Vencido', color: 'gray' },
 ];
 
 export const ESTADO_ENVIO_OPTIONS: { value: EstadoEnvio; label: string; color: string }[] = [

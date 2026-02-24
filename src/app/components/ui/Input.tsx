@@ -110,7 +110,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                                 : 'rgb(17, 24, 39)',
                             border: displayError
                                 ? '1.5px solid rgb(239, 68, 68)'
-                                : '1.5px solid rgba(0, 0, 0, 0.15)',
+                                : '1.5px solid var(--outline-subtle)',
                             backgroundColor: disabled
                                 ? 'rgba(0, 0, 0, 0.02)'
                                 : 'rgba(255, 255, 255, 1)'
@@ -122,7 +122,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                         }}
                         onBlur={(e) => {
                             if (!displayError) {
-                                e.target.style.borderColor = 'rgba(0, 0, 0, 0.15)';
+                                e.target.style.borderColor = 'var(--outline-subtle)';
                             }
                         }}
                         {...inputProps}

@@ -208,6 +208,7 @@ const SelectWithCreate = forwardRef<HTMLSelectElement, SelectWithCreateProps>(
                                     variant="ghost"
                                     onClick={cancelCreate}
                                     disabled={isCreating}
+                                    className="!text-input hover:!text-input hover:bg-principal/10"
                                 >
                                     Cancelar
                                 </Button>

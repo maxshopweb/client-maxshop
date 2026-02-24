@@ -47,7 +47,7 @@ export function TopProductsChart() {
             className="col-span-12 lg:col-span-6 bg-white dark:bg-terciario p-6 rounded-2xl shadow-lg border border-principal/10 dark:border-white/5"
         >
             <div className="mb-2">
-                <h3 className="text-xl font-bold text-secundario dark:text-white">Top Productos</h3>
+                <h3 className="text-xl font-bold text-secundario dark:text-white">Top productos</h3>
                 <p className="text-sm text-secundario dark:text-white/80 font-medium">Los 5 más vendidos</p>
             </div>
 

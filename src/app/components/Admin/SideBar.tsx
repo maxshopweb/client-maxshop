@@ -142,7 +142,7 @@ export default function Sidebar() {
                             <div
                                 key={item.path}
                                 className={`
-                                    flex items-center gap-3 px-3 py-3 rounded-xl
+                                    flex items-center gap-3 px-3 py-3 rounded-md
                                     transition-all duration-300
                                     relative overflow-hidden
                                     ${isCollapsed ? 'justify-center' : 'justify-between'}
@@ -184,7 +184,7 @@ export default function Sidebar() {
                             key={item.path}
                             href={item.path}
                             className={`
-                                flex items-center gap-3 px-3 py-3 rounded-xl
+                                flex items-center gap-3 px-3 py-3 rounded-md
                                 transition-all duration-300
                                 group relative overflow-hidden
                                 ${isCollapsed ? 'justify-center' : ''}

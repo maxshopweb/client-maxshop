@@ -15,8 +15,8 @@ export default function ProfileCard({
   className = "" 
 }: ProfileCardProps) {
   return (
-    <div className={`bg-card rounded-xl shadow-sm border border-input p-4 sm:p-6 ${className}`}>
-      <div className="flex items-center gap-3 mb-4 sm:mb-6 pb-4 border-b border-input">
+    <div className={`bg-card rounded-xl shadow-sm border border-outline-subtle p-4 sm:p-6 ${className}`}>
+      <div className="flex items-center gap-3 mb-4 sm:mb-6 pb-4 border-b border-outline-subtle">
         {Icon && (
           <div className="p-2 bg-principal/10 rounded-lg">
             <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-principal" />

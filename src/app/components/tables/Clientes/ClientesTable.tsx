@@ -11,7 +11,7 @@ import { useClientes } from '@/app/hooks/clientes/useClientes';
 import { useClientesFilters } from '@/app/hooks/clientes/useClientesFilters';
 import { useClientesTable } from '@/app/hooks/clientes/useClientesTable';
 import { createClientesColumns } from '../../columns/ClientesColumns';
-import type { ICliente } from '@/app/types/cliente.type';
+// import type { ICliente } from '@/app/types/cliente.type';
 import TableSkeleton from '../../skeletons/TableProductSkeleton';
 
 interface ClientesTableProps {

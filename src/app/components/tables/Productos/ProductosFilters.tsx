@@ -123,7 +123,7 @@ export function ProductosFilters() {
                 {/* Botón filtros avanzados */}
                 <Popover.Root open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
                     <Popover.Trigger asChild>
-                        <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-input border border-input rounded-2xl text-sm font-medium text-input hover:bg-input/80 transition-all duration-200 hover:scale-105 whitespace-nowrap">
+                        <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-input border border-input rounded-sm text-sm font-medium text-input hover:bg-input/80 transition-all duration-200 hover:scale-105 whitespace-nowrap">
                             <SlidersHorizontal className="h-4 w-4" />
                             Filtros
                             {activeFiltersCount > 0 && (
@@ -291,7 +291,7 @@ export function ProductosFilters() {
                                         const v = e.target.value;
                                         setFilter('estado', v ? (Number(v) as 1 | 2) : undefined);
                                     }}
-                                    className="w-full px-3 py-2.5 bg-input border border-input rounded-2xl text-input text-sm focus:outline-none focus:ring-2 focus:ring-principal transition-all"
+                                    className="w-full px-3 py-2.5 bg-input border border-input rounded-sm text-input text-sm focus:outline-none focus:ring-2 focus:ring-principal transition-all"
                                 >
                                     <option value="">Todos</option>
                                     <option value="1">Activo</option>
@@ -310,7 +310,7 @@ export function ProductosFilters() {
                                         const v = e.target.value;
                                         setFilter('publicado', v === '' ? undefined : v === 'true');
                                     }}
-                                    className="w-full px-3 py-2.5 bg-input border border-input rounded-2xl text-input text-sm focus:outline-none focus:ring-2 focus:ring-principal transition-all"
+                                    className="w-full px-3 py-2.5 bg-input border border-input rounded-sm text-input text-sm focus:outline-none focus:ring-2 focus:ring-principal transition-all"
                                 >
                                     <option value="">Todos</option>
                                     <option value="true">Publicado</option>
@@ -381,7 +381,7 @@ export function ProductosFilters() {
                 {hasActiveFilters && (
                     <button
                         onClick={clearFilters}
-                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-red-500/10 border-2 border-red-500/30 rounded-2xl text-sm font-medium text-red-500 hover:bg-red-500/20 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-red-500/10 border-2 border-red-500/30 rounded-sm text-sm font-medium text-red-500 hover:bg-red-500/20 transition-all duration-200 hover:scale-105 whitespace-nowrap"
                     >
                         <X className="h-4 w-4" />
                         Limpiar

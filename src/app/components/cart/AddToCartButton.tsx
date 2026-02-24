@@ -63,7 +63,14 @@ export default function AddToCartButton({
           )}
         </>
       )}
-      <span>{added ? "Agregado" : "Agregar al carrito"}</span>
+      <span>
+        {added ? "Agregado" : (
+          <>
+            <span className="sm:hidden">Agregar</span>
+            <span className="hidden sm:inline">Agregar al carrito</span>
+          </>
+        )}
+      </span>
     </Button>
   );
 }

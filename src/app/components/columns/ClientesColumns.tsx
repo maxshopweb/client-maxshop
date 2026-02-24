@@ -7,6 +7,8 @@ import { ArrowUpDown, MoreHorizontal, Eye, ExternalLink, Check } from "lucide-re
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import type { ICliente } from "@/app/types/cliente.type";
 import { getClienteNombreCompleto, getClienteEmail, formatFecha } from "@/app/types/cliente.type";
+import { TableBadge } from "@/app/components/ui/TableBadge";
+import type { BadgeVariant } from "@/app/components/ui/Badge";
 import Link from "next/link";
 
 export const createClientesColumns = (
@@ -217,16 +219,16 @@ export const createClientesColumns = (
         header: "Estado",
         cell: ({ row }) => {
             const estado = row.original.usuario?.estado;
-            const estadoLabels: Record<number, { label: string; color: string }> = {
-                1: { label: "Activo", color: "text-green-600" },
-                2: { label: "Inactivo", color: "text-yellow-600" },
-                0: { label: "Eliminado", color: "text-red-600" },
+            const estadoConfig: Record<number, { label: string; variant: BadgeVariant }> = {
+                1: { label: "Activo", variant: "success" },
+                2: { label: "Inactivo", variant: "warning" },
+                0: { label: "Eliminado", variant: "error" },
             };
-            const estadoInfo = estadoLabels[estado || 0] || { label: "Desconocido", color: "text-gray-600" };
+            const config = estadoConfig[estado ?? 0] ?? { label: "Desconocido", variant: "neutral" as BadgeVariant };
             return (
-                <span className={`text-sm font-medium ${estadoInfo.color}`}>
-                    {estadoInfo.label}
-                </span>
+                <TableBadge variant={config.variant}>
+                    {config.label}
+                </TableBadge>
             );
         },
         size: 100,

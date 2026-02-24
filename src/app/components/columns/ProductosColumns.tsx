@@ -6,7 +6,8 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { Check } from 'lucide-react';
 import type { IProductos } from '@/app/types/producto.type';
 import { formatearPrecio, getStockInfo } from '@/app/utils/producto.utils';
-import { EstadoGeneral } from '@/app/types/estados.type';
+import { TableBadge } from '@/app/components/ui/TableBadge';
+import type { BadgeVariant } from '@/app/components/ui/Badge';
 import ProductImage from '../shared/ProductImage';
 
 interface ProductosTableActions {
@@ -227,37 +228,17 @@ export const getProductosColumns = (
             accessorKey: 'estado',
             header: 'Estado',
             cell: ({ row }) => {
-                const estado = row.getValue('estado') as EstadoGeneral;
-
-                const config = {
-                    1: {
-                        bg: 'bg-green-100',
-                        text: 'text-green-800',
-                        border: 'border-green-200',
-                        label: 'Activo'
-                    },
-                    2: {
-                        bg: 'bg-yellow-100',
-                        text: 'text-yellow-800',
-                        border: 'border-yellow-200',
-                        label: 'Inactivo'
-                    },
-                    0: {
-                        bg: 'bg-red-100',
-                        text: 'text-red-800',
-                        border: 'border-red-200',
-                        label: 'Eliminado'
-                    }
+                const estado = row.getValue('estado') as 0 | 1 | 2 | undefined;
+                const estadoConfig: Record<number, { label: string; variant: BadgeVariant }> = {
+                    1: { label: 'Activo', variant: 'success' },
+                    2: { label: 'Inactivo', variant: 'warning' },
+                    0: { label: 'Eliminado', variant: 'error' },
                 };
-
-                const style = config[estado as 0 | 1 | 2] || config[2];
-
+                const config = estadoConfig[estado ?? 2] ?? { label: 'Inactivo', variant: 'warning' as BadgeVariant };
                 return (
-                    <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${style.bg} ${style.text} ${style.border}`}
-                    >
-                        {style.label}
-                    </span>
+                    <TableBadge variant={config.variant}>
+                        {config.label}
+                    </TableBadge>
                 );
             },
         },

@@ -80,9 +80,9 @@ class ProductosService {
 
     const url = `/productos?${params.toString()}`;
     // eslint-disable-next-line no-console
-    console.log('🚀 ProductosService.getAll - URL:', url);
+    // console.log('🚀 ProductosService.getAll - URL:', url);
     // eslint-disable-next-line no-console
-    console.log('🚀 ProductosService.getAll - filters:', filters);
+    // console.log('🚀 ProductosService.getAll - filters:', filters);
 
     const response = await axiosInstance.get<IPaginatedResponse<IProductos>>(url);
 

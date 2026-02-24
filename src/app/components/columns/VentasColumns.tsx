@@ -4,8 +4,9 @@ import * as Checkbox from '@radix-ui/react-checkbox';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { Check } from 'lucide-react';
 import type { IVenta } from '@/app/types/ventas.type';
-import { formatPrecio, formatFecha, getEstadoPagoColor, getEstadoEnvioColor } from '@/app/types/ventas.type';
-import { ESTADO_PAGO_OPTIONS, ESTADO_ENVIO_OPTIONS, METODO_PAGO_OPTIONS, TIPO_VENTA_OPTIONS } from '@/app/types/ventas.type';
+import { formatPrecio, formatFecha } from '@/app/types/ventas.type';
+import { TIPO_VENTA_OPTIONS } from '@/app/types/ventas.type';
+import { TableBadge } from '@/app/components/ui/TableBadge';
 
 interface VentasTableActions {
     onEdit: (venta: IVenta) => void;
@@ -113,57 +114,7 @@ export const getVentasColumns = (
             header: 'Método de pago',
             cell: ({ row }) => {
                 const metodo = row.getValue('metodo_pago') as string | null;
-                const option = METODO_PAGO_OPTIONS.find(opt => opt.value === metodo);
-                
-                if (!metodo) {
-                    return <span className="text-gray-400">-</span>;
-                }
-
-                // Determinar el color según el método de pago
-                let backgroundColor: string;
-                let borderColor: string;
-                let textColor: string;
-                let boxShadow: string;
-
-                switch (metodo) {
-                    case 'efectivo':
-                        backgroundColor = 'rgba(var(--efectivo-rgb), 0.15)';
-                        borderColor = 'var(--efectivo)';
-                        textColor = 'var(--efectivo)';
-                        boxShadow = '0 2px 4px rgba(var(--efectivo-rgb), 0.1)';
-                        break;
-                    case 'transferencia':
-                        backgroundColor = 'rgba(var(--principal-rgb), 0.15)';
-                        borderColor = 'var(--principal)';
-                        textColor = 'var(--principal)';
-                        boxShadow = '0 2px 4px rgba(var(--principal-rgb), 0.1)';
-                        break;
-                    case 'mercadopago':
-                        backgroundColor = 'rgba(var(--mercadopago-rgb), 0.15)';
-                        borderColor = 'var(--mercadopago)';
-                        textColor = 'var(--mercadopago)';
-                        boxShadow = '0 2px 4px rgba(var(--mercadopago-rgb), 0.1)';
-                        break;
-                    default:
-                        backgroundColor = 'rgba(var(--secundario-rgb), 0.1)';
-                        borderColor = 'rgba(var(--secundario-rgb), 0.3)';
-                        textColor = 'var(--foreground)';
-                        boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
-                }
-
-                return (
-                    <span 
-                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border"
-                        style={{
-                            backgroundColor,
-                            borderColor,
-                            color: textColor,
-                            boxShadow,
-                        }}
-                    >
-                        {option?.label || metodo}
-                    </span>
-                );
+                return <TableBadge kind="metodo_pago" value={metodo} />;
             },
         },
         {
@@ -171,20 +122,7 @@ export const getVentasColumns = (
             header: 'Estado pago',
             cell: ({ row }) => {
                 const estado = row.getValue('estado_pago') as string | null;
-                if (!estado) return <span className="text-gray-400">-</span>;
-
-                const option = ESTADO_PAGO_OPTIONS.find(opt => opt.value === estado);
-                const color = getEstadoPagoColor(estado as any);
-                const colorClass = color === 'yellow' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                    color === 'green' ? 'bg-green-100 text-green-800 border-green-200' :
-                    color === 'red' ? 'bg-red-100 text-red-800 border-red-200' :
-                    'bg-gray-100 text-gray-800 border-gray-200';
-
-                return (
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${colorClass}`}>
-                        {option?.label || estado}
-                    </span>
-                );
+                return <TableBadge kind="estado_pago" value={estado} />;
             },
         },
         {
@@ -192,23 +130,7 @@ export const getVentasColumns = (
             header: 'Estado envío',
             cell: ({ row }) => {
                 const estado = row.getValue('estado_envio') as string | null;
-                if (!estado) return <span className="text-gray-400">-</span>;
-
-                const option = ESTADO_ENVIO_OPTIONS.find(opt => opt.value === estado);
-                const color = getEstadoEnvioColor(estado as any);
-                const colorClass = color === 'yellow' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                    color === 'green' ? 'bg-green-100 text-green-800 border-green-200' :
-                    color === 'blue' ? 'bg-blue-100 text-blue-800 border-blue-200' :
-                    color === 'purple' ? 'bg-purple-100 text-purple-800 border-purple-200' :
-                    color === 'indigo' ? 'bg-indigo-100 text-indigo-800 border-indigo-200' :
-                    color === 'red' ? 'bg-red-100 text-red-800 border-red-200' :
-                    'bg-gray-100 text-gray-800 border-gray-200';
-
-                return (
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${colorClass}`}>
-                        {option?.label || estado}
-                    </span>
-                );
+                return <TableBadge kind="estado_envio" value={estado} />;
             },
         },
         {

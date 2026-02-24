@@ -18,7 +18,7 @@ export const useSimpleModal = () => {
 interface SimpleModalProps {
     isOpen: boolean;
     onClose: () => void;
-    title?: string;
+    title?: string | React.ReactNode;
     children: React.ReactNode | ((handleClose: () => void) => React.ReactNode);
     actions?: (handleClose: () => void) => React.ReactNode;
     maxWidth?: string;

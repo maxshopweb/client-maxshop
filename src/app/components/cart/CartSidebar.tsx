@@ -54,9 +54,9 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
           <div className="flex items-center justify-between p-6 border-b border-input bg-card z-10">
             <div className="flex items-center gap-2">
               <ShoppingBag className="w-6 h-6 text-principal" />
-              <h2 className="text-xl font-semibold text-foreground">Mi Carrito</h2>
+              <h2 className="text-xl font-semibold text-foreground">Mi carrito</h2>
               {summary.cantidadItems > 0 && (
-                <span className="bg-principal text-white text-xs font-semibold px-2 py-1 rounded-full">
+                <span className="bg-principal text-white text-xs font-semibold w-6 h-6 flex items-center justify-center rounded-full">
                   {summary.cantidadItems}
                 </span>
               )}

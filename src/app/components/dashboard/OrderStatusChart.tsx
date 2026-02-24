@@ -54,7 +54,7 @@ export function OrderStatusChart() {
             className="col-span-12 lg:col-span-4 bg-white dark:bg-terciario p-6 rounded-2xl shadow-lg border border-principal/10 dark:border-white/5"
         >
             <div className="mb-6">
-                <h3 className="text-xl font-bold text-secundario dark:text-white">Estado de Órdenes</h3>
+                <h3 className="text-xl font-bold text-secundario dark:text-white">Estado de órdenes</h3>
                 <p className="text-sm text-secundario dark:text-white/80 font-medium">Distribución por estado de pago</p>
             </div>
 

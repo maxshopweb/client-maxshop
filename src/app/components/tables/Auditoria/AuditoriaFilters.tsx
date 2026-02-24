@@ -44,7 +44,7 @@ export function AuditoriaFilters() {
           <button
             type="button"
             onClick={clearFilters}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-principal hover:bg-principal/10 rounded-lg transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-principal hover:bg-principal/10 rounded-sm transition-colors"
           >
             <X className="h-4 w-4" />
             Limpiar filtros
@@ -96,30 +96,6 @@ export function AuditoriaFilters() {
           value={filters.estado ?? ''}
           onChange={(value) => setFilter('estado', value ? String(value) : undefined)}
           placeholder="Estado"
-        />
-        <Input
-          label="Tiempo mín (ms)"
-          type="number"
-          min={0}
-          placeholder="0"
-          value={filters.tiempo_min ?? ''}
-          onChange={(e) => {
-            const v = e.target.value;
-            setFilter('tiempo_min', v === '' ? undefined : Number(v));
-          }}
-          className="bg-input border-input"
-        />
-        <Input
-          label="Tiempo máx (ms)"
-          type="number"
-          min={0}
-          placeholder="—"
-          value={filters.tiempo_max ?? ''}
-          onChange={(e) => {
-            const v = e.target.value;
-            setFilter('tiempo_max', v === '' ? undefined : Number(v));
-          }}
-          className="bg-input border-input"
         />
       </div>
     </div>

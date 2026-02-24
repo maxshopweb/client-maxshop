@@ -66,7 +66,7 @@ export default function ProductsCarousel({
   };
 
   return (
-    <SectionTitle title={title}>
+    <SectionTitle title={title} className="pb-0">
       {/* Carousel Container */}
       <div className="relative group overflow-visible">
         {/* Botón Anterior */}
@@ -83,7 +83,7 @@ export default function ProductsCarousel({
         {/* Productos */}
         {isLoading ? (
           <div
-            className="flex gap-3 sm:gap-5 overflow-x-auto overflow-y-visible scrollbar-hide scroll-smooth pb-4 snap-x snap-mandatory"
+            className="flex gap-3 sm:gap-5 overflow-x-auto overflow-y-visible scrollbar-hide scroll-smooth snap-x snap-mandatory"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
@@ -106,7 +106,7 @@ export default function ProductsCarousel({
         ) : (
           <div
             ref={scrollContainerRef}
-            className="flex gap-3 sm:gap-5 overflow-x-auto overflow-y-visible scrollbar-hide scroll-smooth pb-4 snap-x snap-mandatory"
+            className="flex gap-3 sm:gap-5 overflow-x-auto overflow-y-visible scrollbar-hide scroll-smooth snap-x snap-mandatory"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
@@ -138,7 +138,7 @@ export default function ProductsCarousel({
 
       {/* Botón Ver Todos */}
       {showViewAllButton && productos.length > 0 && (
-        <div className="flex justify-center mt-10">
+        <div className="flex justify-center mt-8 md:mt-14">
           <Button 
             variant="primary" 
             size="sm"

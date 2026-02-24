@@ -49,8 +49,6 @@ export interface AuditoriaGetLogsParams {
     tabla_afectada?: string;
     method?: string;
     estado?: string;
-    tiempo_min?: number;
-    tiempo_max?: number;
 }
 
 const AuditoriaService = {
@@ -60,8 +58,6 @@ const AuditoriaService = {
         (['fecha_desde', 'fecha_hasta', 'accion', 'tabla_afectada', 'method', 'estado'] as const).forEach((key) => {
             if (rest[key] != null && rest[key] !== '') params[key] = rest[key] as string;
         });
-        if (rest.tiempo_min != null) params.tiempo_min = rest.tiempo_min;
-        if (rest.tiempo_max != null) params.tiempo_max = rest.tiempo_max;
         const response = await axiosInstance.get<AuditoriaLogsResponse>('/admin/auditoria', { params });
         return response.data;
     }

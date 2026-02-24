@@ -93,7 +93,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
                         onMouseDown={() => setIsOpen(!isOpen)}
                         onBlur={() => setIsOpen(false)}
                         className={`
-                            w-full px-3 py-2.5 rounded-xl
+                            w-full px-3 py-2.5 rounded-md
                             bg-transparent
                             text-sm
                             transition-all duration-200
