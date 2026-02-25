@@ -13,6 +13,7 @@ interface NavbarSearchContainerProps {
   children: React.ReactNode;
   maxResults?: number;
   debounceDelay?: number;
+  isLoading?: boolean;
 }
 
 export default function NavbarSearchContainer({
@@ -22,6 +23,7 @@ export default function NavbarSearchContainer({
   children,
   maxResults = 6,
   debounceDelay = 300,
+  isLoading = false,
 }: NavbarSearchContainerProps) {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -32,14 +34,14 @@ export default function NavbarSearchContainer({
     products,
   });
 
-  // Mostrar dropdown solo cuando hay query y resultados
+  // Mostrar dropdown cuando hay query y (hay resultados o está cargando)
   useEffect(() => {
-    if (debouncedQuery.trim().length > 0 && hasResults) {
+    if (debouncedQuery.trim().length > 0 && (hasResults || isLoading)) {
       setIsDropdownVisible(true);
-    } else {
+    } else if (debouncedQuery.trim().length === 0 || (!hasResults && !isLoading)) {
       setIsDropdownVisible(false);
     }
-  }, [debouncedQuery, hasResults]);
+  }, [debouncedQuery, hasResults, isLoading]);
 
   // Cerrar al hacer click fuera
   useEffect(() => {
@@ -71,6 +73,7 @@ export default function NavbarSearchContainer({
         searchQuery={debouncedQuery}
         maxResults={maxResults}
         onClose={handleClose}
+        isLoading={isLoading}
       />
     </div>
   );

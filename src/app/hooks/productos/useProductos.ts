@@ -3,7 +3,7 @@
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { productosService } from '@/app/services/producto.service';
-import type { IProductoFilters, IPaginatedResponse, IProductos, ICrearProductoContenido } from '@/app/types/producto.type';
+import type { IProductoFilters, IPaginatedResponse, IProductos } from '@/app/types/producto.type';
 
 export const productosKeys = {
     all: ['productos'] as const,

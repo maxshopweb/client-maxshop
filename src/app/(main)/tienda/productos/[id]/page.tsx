@@ -122,9 +122,9 @@ export default function ProductPage() {
     );
   }
 
-  // Main content
+  // Main content — pt-* para no quedar tapado por el navbar fijo
   return (
-    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 pt-10 sm:pt-10">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -135,8 +135,8 @@ export default function ProductPage() {
             <ProductBreadcrumbs producto={producto} />
           </div>
 
-          {/* Breadcrumbs desktop — superpuesto sobre el nav inferior transparente */}
-          <div className="hidden md:flex items-center -mt-[56px] h-14 relative z-40 mb-4 sm:mb-6">
+          {/* Breadcrumbs desktop */}
+          <div className="hidden md:flex items-center mb-4 sm:mb-6">
             <ProductBreadcrumbs producto={producto} />
           </div>
 

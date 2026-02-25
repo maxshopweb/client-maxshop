@@ -44,11 +44,12 @@ export default function UnifiedNavbar() {
   } = useNavbarLocation();
   const { isOpen: isMobileMenuOpen, toggle: toggleMobileMenu, close: closeMobileMenu } = useNavbarMobileMenu();
   const { cantidadItems, openCart, closeCart, isCartOpen } = useNavbarCart();
-  
-  // Obtener productos para la búsqueda
-  const { productos } = useProductos({
+
+  // Cargar productos para la búsqueda solo cuando el usuario usa el buscador (evita /productos?limit=100 en cada página)
+  const searchActive = (searchQuery?.trim().length ?? 0) >= 1;
+  const { productos, isLoading: isLoadingProductos } = useProductos({
     filters: { limit: 1000 },
-    enabled: true,
+    enabled: searchActive,
   });
 
   const handleLocationClick = () => {
@@ -71,6 +72,7 @@ export default function UnifiedNavbar() {
               products={productos || []}
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
+              isLoading={isLoadingProductos}
             >
               <NavbarSearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
             </NavbarSearchContainer>
@@ -133,6 +135,7 @@ export default function UnifiedNavbar() {
           products={productos || []}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
+          isLoading={isLoadingProductos}
         >
           <MobileMenuSearch searchQuery={searchQuery} onSearchChange={setSearchQuery} />
         </NavbarSearchContainer>

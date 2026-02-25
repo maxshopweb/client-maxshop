@@ -57,6 +57,7 @@ interface SearchResultsDropdownProps {
   searchQuery: string;
   maxResults?: number;
   onClose?: () => void;
+  isLoading?: boolean;
 }
 
 export default function SearchResultsDropdown({
@@ -65,8 +66,9 @@ export default function SearchResultsDropdown({
   searchQuery,
   maxResults = 6,
   onClose,
+  isLoading = false,
 }: SearchResultsDropdownProps) {
-  if (!isVisible || results.length === 0) {
+  if (!isVisible) {
     return null;
   }
 
@@ -75,15 +77,22 @@ export default function SearchResultsDropdown({
 
   return (
     <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-[60] max-h-[500px] overflow-hidden flex flex-col">
-      {/* Header con contador */}
+      {/* Header con contador o estado de carga */}
       <div className="px-4 py-2 border-b border-gray-200 bg-gray-50">
         <p className="text-xs text-gray-600">
-          {results.length} resultado{results.length !== 1 ? 's' : ''} para "{searchQuery}"
+          {isLoading
+            ? `Buscando...`
+            : `${results.length} resultado${results.length !== 1 ? 's' : ''} para "${searchQuery}"`}
         </p>
       </div>
 
-      {/* Lista de productos */}
+      {/* Lista de productos o mensaje vacío */}
       <div className="overflow-y-auto flex-1 p-2">
+        {isLoading ? (
+          <div className="py-6 text-center text-sm text-gray-500">Cargando productos...</div>
+        ) : results.length === 0 ? (
+          <div className="py-6 text-center text-sm text-gray-500">No hay resultados para "{searchQuery}"</div>
+        ) : (
         <div className="space-y-1">
           {displayResults.map((producto) => (
             <SearchProductItem
@@ -93,6 +102,7 @@ export default function SearchResultsDropdown({
             />
           ))}
         </div>
+        )}
       </div>
 
       {/* Footer si hay más resultados */}

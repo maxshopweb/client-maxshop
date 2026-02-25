@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ShoppingCart, Check, Minus, Plus, AlertCircle } from "lucide-react";
+import { ShoppingCart, Check, Minus, Plus, AlertCircle, Truck, CreditCard, Headphones } from "lucide-react";
 import { IProductos } from "@/app/types/producto.type";
 import { useCartStore } from "@/app/stores/cartStore";
 import { useCartSidebar } from "@/app/hooks/useCartSidebar";
@@ -231,11 +231,47 @@ export default function AddToCartSection({ producto }: AddToCartSectionProps) {
         </div>
       </div>
 
-      {/* Información adicional */}
-      <div className="pt-3 sm:pt-4 space-y-1 text-xs sm:text-sm text-terciario/60">
-        <p>✓ {getEnvioGratisMensaje(config)}</p>
-        <p>✓ {getCuotasSinInteresMensaje(config)}</p>
-        <p>✓ Soporte técnico incluido</p>
+      {/* Beneficios: debajo de botones, una columna en desktop, texto discreto */}
+      <div className="flex flex-col gap-2 sm:gap-2.5 pt-3 sm:pt-4">
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+          className="flex items-center gap-3 p-3 rounded-xl bg-terciario/5 shadow-sm hover:shadow-md transition-shadow"
+        >
+          <div className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center">
+            <Truck className="w-5 h-5 text-principal" />
+          </div>
+          <p className="text-xs sm:text-sm text-terciario/50 leading-tight">
+            {getEnvioGratisMensaje(config)}
+          </p>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.15 }}
+          className="flex items-center gap-3 p-3 rounded-xl bg-terciario/5 shadow-sm hover:shadow-md transition-shadow"
+        >
+          <div className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center">
+            <CreditCard className="w-5 h-5 text-principal" />
+          </div>
+          <p className="text-xs sm:text-sm text-terciario/50 leading-tight">
+            {getCuotasSinInteresMensaje(config)}
+          </p>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+          className="flex items-center gap-3 p-3 rounded-xl bg-terciario/5 shadow-sm hover:shadow-md transition-shadow"
+        >
+          <div className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center">
+            <Headphones className="w-5 h-5 text-principal" />
+          </div>
+          <p className="text-xs sm:text-sm text-terciario/50 leading-tight">
+            Soporte técnico incluido
+          </p>
+        </motion.div>
       </div>
     </motion.div>
   );
