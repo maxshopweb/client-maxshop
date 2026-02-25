@@ -4,7 +4,8 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Rutas de autenticación que son PÚBLICAS (no requieren autenticación)
-  const publicAuthRoutes = ['/register', '/login'];
+  // forgot-password y reset-password son para usuarios no logueados (recuperar contraseña)
+  const publicAuthRoutes = ['/register', '/login', '/forgot-password', '/reset-password'];
   const isPublicAuthRoute = publicAuthRoutes.some(route => pathname === route || pathname.startsWith(route + '/'));
 
   // Si es ruta pública de autenticación, permitir acceso
@@ -15,18 +16,14 @@ export function middleware(request: NextRequest) {
   // Rutas que requieren autenticación:
   // 1. /admin y todo lo que esté en admin
   // 2. /mi-cuenta y todo lo que esté en mi-cuenta
-  // 3. Rutas de auth protegidas: /register/verify-email, /register/complete-perfil, /forgot-password, /reset-password
+  // 3. Rutas de auth protegidas: /register/verify-email, /register/complete-perfil (forgot/reset son públicas)
   const isAdminRoute = pathname.startsWith('/admin');
   const isMiCuentaRoute = pathname === '/mi-cuenta' || pathname.startsWith('/mi-cuenta/');
   const isProtectedAuthRoute = 
     pathname === '/register/verify-email' || 
     pathname.startsWith('/register/verify-email/') ||
     pathname === '/register/complete-perfil' || 
-    pathname.startsWith('/register/complete-perfil/') ||
-    pathname === '/forgot-password' || 
-    pathname.startsWith('/forgot-password/') ||
-    pathname === '/reset-password' || 
-    pathname.startsWith('/reset-password/');
+    pathname.startsWith('/register/complete-perfil/');
 
   // Si es una ruta protegida, verificar autenticación
   if (isAdminRoute || isMiCuentaRoute || isProtectedAuthRoute) {
