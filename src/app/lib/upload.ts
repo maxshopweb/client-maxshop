@@ -6,14 +6,33 @@ export const FILES_BASE_URL =
   process.env.NEXT_PUBLIC_FILES_BASE_URL ?? 'https://files.maxshop.com.ar';
 
 /**
+ * Codifica cada segmento del path para URL (espacios → %20, etc.).
+ * Normaliza la extensión del archivo a minúsculas para coincidir con los archivos en FTP.
+ * Las barras se mantienen como separadores.
+ */
+function encodePathForUrl(path: string): string {
+  const trimmed = path.trim();
+  if (!trimmed) return '';
+  let normalized = trimmed.startsWith('/') ? trimmed.slice(1) : trimmed;
+  // Extensión en minúsculas para que la URL coincida con archivos en FTP (.PNG/.JPG en BD → .png/.jpg en URL)
+  normalized = normalized.replace(/\.[a-zA-Z0-9]+$/, (ext) => ext.toLowerCase());
+  return normalized
+    .split('/')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/');
+}
+
+/**
  * Construye la URL pública de una imagen a partir del path relativo guardado en BD.
+ * Codifica espacios y caracteres especiales (ej. nombres con espacios desde FTP/CSV).
  * Uso: <img src={buildImageUrl(producto.img_principal)} />
  */
 export function buildImageUrl(path: string | null | undefined): string {
-  if (!path || typeof path !== 'string' || path.trim() === '') return '';
+  if (!path || typeof path !== 'string') return '';
+  const encoded = encodePathForUrl(path);
+  if (!encoded) return '';
   const base = FILES_BASE_URL.replace(/\/$/, '');
-  const normalized = path.startsWith('/') ? path.slice(1) : path;
-  return `${base}/${normalized}`;
+  return `${base}/${encoded}`;
 }
 
 function isAbsoluteUrl(path: string): boolean {
