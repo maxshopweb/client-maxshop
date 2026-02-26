@@ -11,9 +11,10 @@ export interface Ciudad {
   codigoPostal?: string;
 }
 
+// value = nombre exacto de la tabla provincia en BD para que el Excel siempre resuelva codi_provincia
 export const provincias: Provincia[] = [
   {
-    value: "buenos-aires",
+    value: "BUENOS AIRES",
     label: "Buenos Aires",
     ciudades: [
       { value: "capital-federal", label: "Capital Federal", codigoPostal: "1000" },
@@ -24,7 +25,7 @@ export const provincias: Provincia[] = [
     ],
   },
   {
-    value: "cordoba",
+    value: "CÓRDOBA",
     label: "Córdoba",
     ciudades: [
       { value: "cordoba-capital", label: "Córdoba", codigoPostal: "5000" },
@@ -34,7 +35,7 @@ export const provincias: Provincia[] = [
     ],
   },
   {
-    value: "santa-fe",
+    value: "SANTA FE",
     label: "Santa Fe",
     ciudades: [
       { value: "rosario", label: "Rosario", codigoPostal: "2000" },
@@ -43,7 +44,7 @@ export const provincias: Provincia[] = [
     ],
   },
   {
-    value: "mendoza",
+    value: "MENDOZA",
     label: "Mendoza",
     ciudades: [
       { value: "mendoza-capital", label: "Mendoza", codigoPostal: "5500" },
@@ -51,21 +52,21 @@ export const provincias: Provincia[] = [
     ],
   },
   {
-    value: "tucuman",
+    value: "TUCUMÁN",
     label: "Tucumán",
     ciudades: [
       { value: "san-miguel-tucuman", label: "San Miguel de Tucumán", codigoPostal: "4000" },
     ],
   },
   {
-    value: "salta",
+    value: "SALTA",
     label: "Salta",
     ciudades: [
       { value: "salta-capital", label: "Salta", codigoPostal: "4400" },
     ],
   },
   {
-    value: "entre-rios",
+    value: "ENTRE RÍOS",
     label: "Entre Ríos",
     ciudades: [
       { value: "parana", label: "Paraná", codigoPostal: "3100" },
@@ -73,49 +74,49 @@ export const provincias: Provincia[] = [
     ],
   },
   {
-    value: "misiones",
+    value: "MISIONES",
     label: "Misiones",
     ciudades: [
       { value: "posadas", label: "Posadas", codigoPostal: "3300" },
     ],
   },
   {
-    value: "corrientes",
+    value: "CORRIENTES",
     label: "Corrientes",
     ciudades: [
       { value: "corrientes-capital", label: "Corrientes", codigoPostal: "3400" },
     ],
   },
   {
-    value: "chaco",
+    value: "CHACO",
     label: "Chaco",
     ciudades: [
       { value: "resistencia", label: "Resistencia", codigoPostal: "3500" },
     ],
   },
   {
-    value: "santiago-del-estero",
+    value: "SANTIAGO DEL ESTERO",
     label: "Santiago del Estero",
     ciudades: [
       { value: "santiago-capital", label: "Santiago del Estero", codigoPostal: "4200" },
     ],
   },
   {
-    value: "san-juan",
+    value: "SAN JUAN",
     label: "San Juan",
     ciudades: [
       { value: "san-juan-capital", label: "San Juan", codigoPostal: "5400" },
     ],
   },
   {
-    value: "jujuy",
+    value: "JUJUY",
     label: "Jujuy",
     ciudades: [
       { value: "san-salvador-jujuy", label: "San Salvador de Jujuy", codigoPostal: "4600" },
     ],
   },
   {
-    value: "rio-negro",
+    value: "RÍO NEGRO",
     label: "Río Negro",
     ciudades: [
       { value: "viedma", label: "Viedma", codigoPostal: "8500" },
@@ -123,21 +124,21 @@ export const provincias: Provincia[] = [
     ],
   },
   {
-    value: "formosa",
+    value: "FORMOSA",
     label: "Formosa",
     ciudades: [
       { value: "formosa-capital", label: "Formosa", codigoPostal: "3600" },
     ],
   },
   {
-    value: "neuquen",
+    value: "NEUQUÉN",
     label: "Neuquén",
     ciudades: [
       { value: "neuquen-capital", label: "Neuquén", codigoPostal: "8300" },
     ],
   },
   {
-    value: "chubut",
+    value: "CHUBUT",
     label: "Chubut",
     ciudades: [
       { value: "rawson", label: "Rawson", codigoPostal: "9103" },
@@ -145,42 +146,42 @@ export const provincias: Provincia[] = [
     ],
   },
   {
-    value: "san-luis",
+    value: "SAN LUIS",
     label: "San Luis",
     ciudades: [
       { value: "san-luis-capital", label: "San Luis", codigoPostal: "5700" },
     ],
   },
   {
-    value: "catamarca",
+    value: "CATAMARCA",
     label: "Catamarca",
     ciudades: [
       { value: "catamarca-capital", label: "San Fernando del Valle de Catamarca", codigoPostal: "4700" },
     ],
   },
   {
-    value: "la-rioja",
+    value: "LA RIOJA",
     label: "La Rioja",
     ciudades: [
       { value: "la-rioja-capital", label: "La Rioja", codigoPostal: "5300" },
     ],
   },
   {
-    value: "la-pampa",
+    value: "LA PAMPA",
     label: "La Pampa",
     ciudades: [
       { value: "santa-rosa", label: "Santa Rosa", codigoPostal: "6300" },
     ],
   },
   {
-    value: "santa-cruz",
+    value: "SANTA CRUZ",
     label: "Santa Cruz",
     ciudades: [
       { value: "rio-gallegos", label: "Río Gallegos", codigoPostal: "9400" },
     ],
   },
   {
-    value: "tierra-del-fuego",
+    value: "TIERRA DEL FUEGO",
     label: "Tierra del Fuego",
     ciudades: [
       { value: "ushuaia", label: "Ushuaia", codigoPostal: "9410" },
