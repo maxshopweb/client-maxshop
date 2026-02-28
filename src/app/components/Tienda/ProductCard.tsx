@@ -41,6 +41,12 @@ export default function ProductCard({ producto }: ProductCardProps) {
   const esOferta = listaActiva?.es_oferta === true;
   const esCampanya = listaActiva?.es_campanya === true;
   const esDestacado = producto.destacado;
+  const ref = producto.precio_venta_referencia;
+  const mostrarTachado = ref != null && ref > precioFinal;
+  const porcentajeOff =
+    mostrarTachado && ref != null && ref > 0
+      ? Math.round((1 - precioFinal / ref) * 100)
+      : 0;
 
   return (
     <Link 
@@ -106,9 +112,9 @@ export default function ProductCard({ producto }: ProductCardProps) {
           </p>
         )}
 
-        {/* Precio */}
+        {/* Precio: primero actual, después tachado y % OFF */}
         <div className="mt-auto space-y-2 sm:space-y-3">
-          <div>
+          <div className="flex items-baseline gap-2 flex-wrap">
             <span
               className={`text-lg sm:text-xl md:text-2xl font-bold ${
                 esOferta ? "text-amber-600" : esCampanya ? "text-emerald-700" : "text-principal"
@@ -116,12 +122,24 @@ export default function ProductCard({ producto }: ProductCardProps) {
             >
               {formatCurrencyARS(precioFinal)}
             </span>
-            {precioSinImpuestos > 0 && (
-              <p className="text-xs text-terciario/60 mt-1">
-                Sin impuestos: {formatCurrencyARS(precioSinImpuestos)}
-              </p>
+            {mostrarTachado && (
+              <>
+                <span className="text-sm text-terciario/50 line-through">
+                  {formatCurrencyARS(ref)}
+                </span>
+                {porcentajeOff > 0 && (
+                  <span className="text-xs font-semibold text-amber-600">
+                    {porcentajeOff}% OFF
+                  </span>
+                )}
+              </>
             )}
           </div>
+          {precioSinImpuestos > 0 && (
+            <p className="text-xs text-terciario/60 mt-1">
+              Sin impuestos: {formatCurrencyARS(precioSinImpuestos)}
+            </p>
+          )}
           
           {/* Botón Agregar al Carrito */}
           <div onClick={(e) => e.stopPropagation()}>

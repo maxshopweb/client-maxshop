@@ -313,7 +313,7 @@ export function useProductFilters(): UseProductFiltersReturn {
                 estado: "estado",
                 publicado: "publicado",
                 destacado: "destacado",
-                financiacion: "financiacion",
+                oferta: "oferta",
                 stock_bajo: "stockBajo",
                 page: "page",
                 limit: "limit",
@@ -427,6 +427,7 @@ export function useProductFilters(): UseProductFiltersReturn {
         if (filters.stockBajo !== undefined) backend.stock_bajo = filters.stockBajo;
         if (filters.financiacion !== undefined) backend.financiacion = filters.financiacion;
         if (filters.subcategoria !== undefined) backend.id_subcat = filters.subcategoria;
+        if (filters.oferta !== undefined) backend.oferta = filters.oferta;
 
         if (sort) {
             backend.order_by = sort.field as IProductoFilters["order_by"];
@@ -452,7 +453,6 @@ export function useProductFilters(): UseProductFiltersReturn {
             filters.estado !== undefined ||
             filters.publicado !== undefined ||
             filters.stockBajo === true ||
-            filters.financiacion === true ||
             filters.subcategoria !== undefined,
         [filters]
     );
@@ -471,7 +471,6 @@ export function useProductFilters(): UseProductFiltersReturn {
         if (filters.estado !== undefined) count++;
         if (filters.publicado !== undefined) count++;
         if (filters.stockBajo === true) count++;
-        if (filters.financiacion === true) count++;
         return count;
     }, [filters]);
 
@@ -486,7 +485,7 @@ export function useProductFilters(): UseProductFiltersReturn {
         const estadoFromUrl = searchParams.get("estado");
         const publicadoFromUrl = searchParams.get("publicado");
         const destacadoFromUrl = searchParams.get("destacado");
-        const financiacionFromUrl = searchParams.get("financiacion");
+        const ofertaFromUrl = searchParams.get("oferta");
         const stockBajoFromUrl = searchParams.get("stockBajo") || searchParams.get("stock_bajo") || null;
 
         return {
@@ -504,8 +503,8 @@ export function useProductFilters(): UseProductFiltersReturn {
             stock_bajo: stockBajoFromUrl ? parseBoolean(stockBajoFromUrl) : (filters.stockBajo ?? backendFilters.stock_bajo ?? undefined),
             estado: estadoFromUrl !== null ? (parseNumber(estadoFromUrl) as EstadoGeneral) : (filters.estado ?? backendFilters.estado ?? undefined),
             publicado: publicadoFromUrl !== null ? parseBoolean(publicadoFromUrl) : (filters.publicado ?? backendFilters.publicado ?? undefined),
-            financiacion: financiacionFromUrl !== null ? parseBoolean(financiacionFromUrl) : (filters.financiacion ?? backendFilters.financiacion ?? undefined),
             destacado: destacadoFromUrl !== null ? parseBoolean(destacadoFromUrl) : (filters.destacado ?? backendFilters.destacado ?? undefined),
+            oferta: ofertaFromUrl !== null ? parseBoolean(ofertaFromUrl) : (filters.oferta ?? backendFilters.oferta ?? undefined),
         } as ProductFilters & IProductoFilters;
     }, [filters, backendFilters, searchParams]);
 

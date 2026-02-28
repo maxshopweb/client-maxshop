@@ -197,11 +197,32 @@ export const getProductosColumns = (
             accessorKey: 'precio',
             header: 'Precio',
             cell: ({ row }) => {
+                const producto = row.original;
                 const precio = row.getValue('precio') as number | null;
+                const ref = producto.precio_venta_referencia;
+                const mostrarTachado = ref != null && precio != null && ref > precio;
+                const porcentajeOff =
+                    mostrarTachado && ref != null && ref > 0 && precio != null
+                        ? Math.round((1 - precio / ref) * 100)
+                        : 0;
                 return (
-                    <span className="font-semibold text-text">
-                        {formatearPrecio(precio)}
-                    </span>
+                    <div className="flex items-baseline gap-1.5 flex-wrap">
+                        <span className="font-semibold text-text">
+                            {formatearPrecio(precio)}
+                        </span>
+                        {mostrarTachado && (
+                            <>
+                                <span className="text-sm text-gray-400 line-through">
+                                    {formatearPrecio(ref)}
+                                </span>
+                                {porcentajeOff > 0 && (
+                                    <span className="text-xs font-semibold text-amber-600">
+                                        {porcentajeOff}% OFF
+                                    </span>
+                                )}
+                            </>
+                        )}
+                    </div>
                 );
             },
         },

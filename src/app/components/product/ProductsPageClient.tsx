@@ -45,6 +45,7 @@ function ProductsPageContent() {
       precio_max: backendFilters.precio_max,
       destacado: backendFilters.destacado,
       financiacion: backendFilters.financiacion,
+      oferta: backendFilters.oferta,
     };
     return final;
   }, [backendFilters, page, limit]);
@@ -62,23 +63,11 @@ function ProductsPageContent() {
     useTiendaEndpoint: true,
   });
 
-  // Filtrar productos por oferta en el cliente (el backend no tiene campo directo)
-  // Un producto está en oferta si precio < precio_minorista
-  const productosConOfertaFiltrada = useMemo(() => {
-    if (!filters.oferta) return productos;
-    
-    return productos.filter((producto) => {
-      const precio = producto.precio || 0;
-      const precioMinorista = producto.precio_minorista || 0;
-      return precio < precioMinorista;
-    });
-  }, [productos, filters.oferta]);
-
-  // Calcular índices para mostrar en el header
-  // Si hay filtro de oferta, el total puede cambiar porque se filtra en cliente
-  const totalProductos = filters.oferta ? productosConOfertaFiltrada.length : (pagination?.total || 0);
+  // Con oferta=true el backend ya filtra por lista Especial (O); usamos directamente la respuesta
+  const productosToShow = productos;
+  const totalProductos = pagination?.total ?? 0;
   const startIndex = pagination ? (pagination.page - 1) * pagination.limit + 1 : 0;
-  const endIndex = pagination ? startIndex + productosConOfertaFiltrada.length - 1 : 0;
+  const endIndex = pagination ? Math.min(startIndex + productosToShow.length - 1, totalProductos) : 0;
 
   const handlePageChange = useCallback((newPage: number) => {
     const params = new URLSearchParams(window.location.search);
@@ -176,13 +165,13 @@ function ProductsPageContent() {
           />
 
           <div className="space-y-6">
-            {isLoading && productosConOfertaFiltrada.length === 0 ? (
+            {isLoading && productosToShow.length === 0 ? (
               <ProductsGrid 
                 productos={[]} 
                 isLoading={true}
                 itemsPerPage={limit} 
               />
-            ) : productosConOfertaFiltrada.length === 0 ? (
+            ) : productosToShow.length === 0 ? (
               <div className="text-center py-20 bg-gray-100">
                 <p className="text-lg text-foreground/60">
                   No se encontraron productos con los filtros aplicados
@@ -191,7 +180,7 @@ function ProductsPageContent() {
             ) : (
               <>
                 <ProductsGrid 
-                  productos={productosConOfertaFiltrada} 
+                  productos={productosToShow} 
                   itemsPerPage={limit} 
                 />
                 {pagination && pagination.totalPages > 1 && (

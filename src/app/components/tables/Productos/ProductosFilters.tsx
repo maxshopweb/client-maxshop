@@ -322,9 +322,9 @@ export function ProductosFilters() {
                             <div className="space-y-2.5 pt-3 border-t border-card">
                                 <label className="flex items-center gap-3 cursor-pointer group">
                                     <Checkbox.Root
-                                        checked={filters.destacado || false}
+                                        checked={filters.destacado === true}
                                         onCheckedChange={(checked) =>
-                                            setFilter('destacado', checked ? true : undefined)
+                                            setFilter('destacado', checked === true ? true : undefined)
                                         }
                                         className="flex h-5 w-5 items-center justify-center rounded border-2 border-input group-hover:border-principal data-[state=checked]:bg-principal data-[state=checked]:border-principal transition-all"
                                     >
@@ -339,9 +339,9 @@ export function ProductosFilters() {
 
                                 <label className="flex items-center gap-3 cursor-pointer group">
                                     <Checkbox.Root
-                                        checked={filters.financiacion || false}
+                                        checked={filters.oferta === true}
                                         onCheckedChange={(checked) =>
-                                            setFilter('financiacion', checked ? true : undefined)
+                                            setFilter('oferta', checked === true ? true : undefined)
                                         }
                                         className="flex h-5 w-5 items-center justify-center rounded border-2 border-input group-hover:border-principal data-[state=checked]:bg-principal data-[state=checked]:border-principal transition-all"
                                     >
@@ -350,15 +350,15 @@ export function ProductosFilters() {
                                         </Checkbox.Indicator>
                                     </Checkbox.Root>
                                     <span className="text-sm text-input group-hover:text-principal transition-colors">
-                                        Con financiación disponible
+                                        Solo productos en oferta
                                     </span>
                                 </label>
 
                                 <label className="flex items-center gap-3 cursor-pointer group">
                                     <Checkbox.Root
-                                        checked={filters.stock_bajo || false}
+                                        checked={filters.stock_bajo === true}
                                         onCheckedChange={(checked) =>
-                                            setFilter('stock_bajo', checked ? true : undefined)
+                                            setFilter('stock_bajo', checked === true ? true : undefined)
                                         }
                                         className="flex h-5 w-5 items-center justify-center rounded border-2 border-input group-hover:border-principal data-[state=checked]:bg-principal data-[state=checked]:border-principal transition-all"
                                     >
@@ -448,21 +448,21 @@ export function ProductosFilters() {
                         />
                     )}
 
-                    {filters.destacado && (
+                    {filters.destacado === true && (
                         <FilterChip
                             label="Destacados"
                             onRemove={() => setFilter('destacado', undefined)}
                         />
                     )}
 
-                    {filters.financiacion && (
+                    {filters.oferta === true && (
                         <FilterChip
-                            label="Con financiación"
-                            onRemove={() => setFilter('financiacion', undefined)}
+                            label="En oferta"
+                            onRemove={() => setFilter('oferta', undefined)}
                         />
                     )}
 
-                    {filters.stock_bajo && (
+                    {filters.stock_bajo === true && (
                         <FilterChip
                             label="Stock bajo"
                             onRemove={() => setFilter('stock_bajo', undefined)}

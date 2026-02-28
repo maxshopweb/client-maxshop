@@ -42,6 +42,7 @@ class ProductosService {
     if (filters.precio_max !== undefined) params.append('precio_max', filters.precio_max.toString());
     if (filters.destacado !== undefined) params.append('destacado', filters.destacado.toString());
     if (filters.financiacion !== undefined) params.append('financiacion', filters.financiacion.toString());
+    if (filters.oferta !== undefined) params.append('oferta', filters.oferta.toString());
 
     const url = `/productos/tienda?${params.toString()}`;
     const response = await axiosInstance.get<IPaginatedResponse<IProductos>>(url);
@@ -74,6 +75,7 @@ class ProductosService {
     if (filters.precio_max !== undefined) params.append('precio_max', filters.precio_max.toString());
     if (filters.destacado !== undefined) params.append('destacado', filters.destacado.toString());
     if (filters.financiacion !== undefined) params.append('financiacion', filters.financiacion.toString());
+    if (filters.oferta !== undefined) params.append('oferta', filters.oferta.toString());
     if (filters.stock_bajo !== undefined) params.append('stock_bajo', filters.stock_bajo.toString());
     if (filters.publicado !== undefined) params.append('publicado', filters.publicado.toString());
     if (filters.activo) params.append('activo', filters.activo);

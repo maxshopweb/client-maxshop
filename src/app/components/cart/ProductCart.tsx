@@ -53,6 +53,14 @@ export default function ProductCart({
     tieneDescuento
   } = useNormalizeProduct({ product });
 
+  // Precio lista Venta para tachar (solo cuando el item trae producto con precio_venta_referencia)
+  const precioVentaRef = 'producto' in product ? (product as ICartItem).producto?.precio_venta_referencia : undefined;
+  const mostrarPrecioTachado = precioVentaRef != null && precioVentaRef > precio_unitario;
+  const porcentajeOff =
+    mostrarPrecioTachado && precioVentaRef != null && precioVentaRef > 0
+      ? Math.round((1 - precio_unitario / precioVentaRef) * 100)
+      : 0;
+
   // Verificar si este item es el que se está eliminando
   const isDeleting = itemToDelete === id_prod;
   const totalSinImpuestos = subtotal_sin_iva ?? (precio_unitario_sin_iva || 0) * cantidad;
@@ -78,8 +86,20 @@ export default function ProductCart({
           {marca && (
             <p className="text-xs text-foreground/50 capitalize">{marca.nombre}</p>
           )}
-          <p className="text-sm font-semibold text-foreground mt-1">
-            {formatCurrencyARS(precio_unitario)} c/u
+          <p className="text-sm font-semibold text-foreground mt-1 flex items-baseline gap-1.5 flex-wrap">
+            <span>{formatCurrencyARS(precio_unitario)} c/u</span>
+            {mostrarPrecioTachado && (
+              <>
+                <span className="text-xs text-foreground/40 line-through">
+                  {formatCurrencyARS(precioVentaRef)} c/u
+                </span>
+                {porcentajeOff > 0 && (
+                  <span className="text-xs font-semibold text-amber-600">
+                    {porcentajeOff}% OFF
+                  </span>
+                )}
+              </>
+            )}
           </p>
           {precio_unitario_sin_iva > 0 && (
             <p className="text-[11px] text-foreground/45">
@@ -121,22 +141,36 @@ export default function ProductCart({
               )}
             </div>
 
-            {/* Precio */}
+            {/* Precio: primero actual, después tachado y % OFF */}
             <div className="mb-2">
-              {tieneDescuento ? (
-                <div className="flex items-baseline gap-1.5 flex-wrap">
+              <div className="flex items-baseline gap-1.5 flex-wrap">
+                {tieneDescuento ? (
+                  <>
+                    <span className="text-base font-bold text-principal">
+                      {formatCurrencyARS(precio_unitario)} c/u
+                    </span>
+                    <span className="text-xs text-foreground/40 line-through">
+                      {formatCurrencyARS(precio_unitario * cantidad + descuento)}
+                    </span>
+                  </>
+                ) : (
                   <span className="text-base font-bold text-principal">
                     {formatCurrencyARS(precio_unitario)} c/u
                   </span>
-                  <span className="text-xs text-foreground/40 line-through">
-                    {formatCurrencyARS(precio_unitario * cantidad + descuento)}
-                  </span>
-                </div>
-              ) : (
-                <span className="text-base font-bold text-principal">
-                  {formatCurrencyARS(precio_unitario)} c/u
-                </span>
-              )}
+                )}
+                {mostrarPrecioTachado && (
+                  <>
+                    <span className="text-xs text-foreground/40 line-through">
+                      {formatCurrencyARS(precioVentaRef)} c/u
+                    </span>
+                    {porcentajeOff > 0 && (
+                      <span className="text-xs font-semibold text-amber-600">
+                        {porcentajeOff}% OFF
+                      </span>
+                    )}
+                  </>
+                )}
+              </div>
               {precio_unitario_sin_iva > 0 && (
                 <p className="text-[11px] text-foreground/45 mt-0.5">
                   Sin impuestos: {formatCurrencyARS(precio_unitario_sin_iva)} c/u

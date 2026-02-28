@@ -34,6 +34,8 @@ export interface IProductos {
     precio_evento?: number | null;
     precio?: number | null;
     precio_sin_iva?: number | null;
+    /** Precio lista Venta (V) con IVA; solo cuando lista activa no es Venta, para mostrar tachado */
+    precio_venta_referencia?: number | null;
     iva_monto?: number | null;
     stock?: number | null;
     stock_min?: number | null;
@@ -91,6 +93,8 @@ export interface IProductoFilters {
     destacado?: boolean;
     publicado?: boolean;
     financiacion?: boolean;
+    /** Tienda: solo productos con lista Especial/Oferta (lista O) */
+    oferta?: boolean;
 
     // Filtro por stock
     stock_bajo?: boolean;

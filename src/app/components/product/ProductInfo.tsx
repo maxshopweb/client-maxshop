@@ -24,12 +24,24 @@ export default function ProductInfo({ producto }: ProductInfoProps) {
   const esCampanya = listaActiva?.es_campanya === true;
   const esDestacado = producto.destacado;
 
+  // Precio tachado: lista Venta cuando la activa no es Venta (backend envía precio_venta_referencia)
+  const precioTachado =
+    producto.precio_venta_referencia != null && producto.precio != null && producto.precio_venta_referencia > producto.precio
+      ? producto.precio_venta_referencia
+      : null;
   const precioOriginal =
+    precioTachado == null &&
     producto.precio_minorista &&
     producto.precio != null &&
     producto.precio < producto.precio_minorista
       ? producto.precio_minorista
       : null;
+  const mostrarTachado = precioTachado ?? precioOriginal;
+  const porcentajeOff =
+    mostrarTachado != null && precioFinal > 0 && mostrarTachado > precioFinal
+      ? Math.round((1 - precioFinal / mostrarTachado) * 100)
+      : 0;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -64,10 +76,17 @@ export default function ProductInfo({ producto }: ProductInfoProps) {
           >
             {formatCurrencyARS(precioFinal)}
           </span>
-          {precioOriginal != null && (
-            <span className="text-base sm:text-lg text-terciario/40 line-through">
-              {formatPrecio(precioOriginal)}
-            </span>
+          {mostrarTachado != null && (
+            <>
+              <span className="text-base sm:text-lg text-terciario/40 line-through">
+                {formatCurrencyARS(mostrarTachado)}
+              </span>
+              {porcentajeOff > 0 && (
+                <span className="text-sm font-semibold text-amber-600">
+                  {porcentajeOff}% OFF
+                </span>
+              )}
+            </>
           )}
         </div>
         {precioSinImpuestos != null && precioSinImpuestos > 0 && (

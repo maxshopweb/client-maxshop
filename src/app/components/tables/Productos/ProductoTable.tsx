@@ -122,9 +122,8 @@ export function ProductosTable({
                                     return (
                                         <th
                                             key={header.id}
-                                            className={`px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider ${densityClass} ${
-                                                canSort ? 'cursor-pointer select-none hover:bg-gray-100' : ''
-                                            }`}
+                                            className={`px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider ${densityClass} ${canSort ? 'cursor-pointer select-none hover:bg-gray-100' : ''
+                                                }`}
                                             style={{ width: header.getSize() !== 150 ? header.getSize() : undefined }}
                                             onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
                                         >
@@ -132,9 +131,9 @@ export function ProductosTable({
                                                 {header.isPlaceholder
                                                     ? null
                                                     : flexRender(
-                                                          header.column.columnDef.header,
-                                                          header.getContext()
-                                                      )}
+                                                        header.column.columnDef.header,
+                                                        header.getContext()
+                                                    )}
                                                 {canSort && (
                                                     <span className="flex flex-col">
                                                         {isSorted === 'asc' ? (
