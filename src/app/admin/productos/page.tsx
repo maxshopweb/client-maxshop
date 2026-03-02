@@ -11,7 +11,7 @@ import { EditProductoModal } from '@/app/components/modals/Producto/EditWrapper'
 import { CambiarImagenModal } from '@/app/components/modals/Producto/CambiarImagenModal';
 import { DeleteProductoModal } from '@/app/components/modals/Producto/DeleteProduct';
 import { BulkDeleteProductosModal } from '@/app/components/modals/Producto/BulkDeleteProductosModal';
-import { useToggleDestacado } from '@/app/hooks/productos/useProductosMutations';
+import { useToggleDestacado, useRestaurarPreciosDesdeExcel } from '@/app/hooks/productos/useProductosMutations';
 import { useTogglePublicado } from '@/app/hooks/productos/usePublicadoMutations';
 import { useProductos } from '@/app/hooks/productos/useProductos';
 import { useProductFilters } from '@/app/hooks/productos/useProductFilters';
@@ -46,6 +46,7 @@ function ProductosPageContent() {
     const openStockDialog = (producto: IProductos) => setModal({ type: 'stock', producto });
     const { toggleDestacado } = useToggleDestacado();
     const { togglePublicado } = useTogglePublicado();
+    const { restaurarPreciosDesdeExcel } = useRestaurarPreciosDesdeExcel();
 
     const closeModal = () => {
         setModal({ type: null });
@@ -63,6 +64,10 @@ function ProductosPageContent() {
 
     const handleTogglePublicado = (producto: IProductos) => {
         togglePublicado(producto.id_prod);
+    };
+
+    const handleRestaurarPreciosExcel = (producto: IProductos) => {
+        restaurarPreciosDesdeExcel(producto.id_prod);
     };
 
     return (
@@ -96,6 +101,7 @@ function ProductosPageContent() {
                         onTogglePublicado={handleTogglePublicado}
                         onUpdateStock={openStockDialog}
                         onCambiarImagen={openCambiarImagenModal}
+                        onRestaurarPreciosExcel={handleRestaurarPreciosExcel}
                         onBulkDelete={openBulkDeleteDialog}
                     />
             </AdminPageContainer>

@@ -223,6 +223,19 @@ class ProductosService {
     return response.data.data;
   }
 
+  /** Limpia el flag de precios editados manualmente; la próxima sync traerá precios del CSV/FTP. */
+  async restaurarPreciosDesdeExcel(id: number): Promise<IProductos> {
+    const response = await axiosInstance.patch<IApiResponse<IProductos>>(
+      `/productos/${id}/restaurar-precios-excel`
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.error || 'Error al restaurar precios desde Excel');
+    }
+
+    return response.data.data;
+  }
+
   async togglePublicado(id: number): Promise<IProductos> {
     const response = await axiosInstance.patch<IApiResponse<IProductos>>(
       `/productos/${id}/publicado`

@@ -15,6 +15,7 @@ interface ProductosTableWrapperProps {
     onTogglePublicado: (producto: IProductos) => void;
     onUpdateStock: (producto: IProductos) => void;
     onCambiarImagen?: (producto: IProductos) => void;
+    onRestaurarPreciosExcel?: (producto: IProductos) => void;
     onBulkDelete: (ids: number[]) => void;
 }
 

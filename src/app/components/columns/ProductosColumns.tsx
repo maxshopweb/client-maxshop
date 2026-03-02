@@ -1,5 +1,5 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Edit, Trash2, Star, ImageIcon } from 'lucide-react';
+import { MoreHorizontal, Edit, Trash2, Star, ImageIcon, FileSpreadsheet } from 'lucide-react';
 import * as Checkbox from '@radix-ui/react-checkbox';
 import * as Switch from '@radix-ui/react-switch';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
@@ -17,6 +17,7 @@ interface ProductosTableActions {
     onTogglePublicado: (producto: IProductos) => void;
     onUpdateStock: (producto: IProductos) => void;
     onCambiarImagen?: (producto: IProductos) => void;
+    onRestaurarPreciosExcel?: (producto: IProductos) => void;
     categorias?: any[];
     marcas?: any[];
 }
@@ -341,6 +342,16 @@ export const getProductosColumns = (
                                     >
                                         <ImageIcon className="mr-2 h-4 w-4" />
                                         Cambiar imagen
+                                    </DropdownMenu.Item>
+                                )}
+
+                                {actions.onRestaurarPreciosExcel && (
+                                    <DropdownMenu.Item
+                                        className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
+                                        onClick={() => actions.onRestaurarPreciosExcel?.(producto)}
+                                    >
+                                        <FileSpreadsheet className="mr-2 h-4 w-4" />
+                                        Restaurar precios desde Excel
                                     </DropdownMenu.Item>
                                 )}
 

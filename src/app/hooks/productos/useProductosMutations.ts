@@ -342,6 +342,47 @@ export function useBulkUpdateEstado(options: UseBulkUpdateEstadoOptions = {}) {
     };
 }
 
+interface UseRestaurarPreciosDesdeExcelOptions {
+    onSuccess?: (data: IProductos) => void;
+    onError?: (error: Error) => void;
+}
+
+export function useRestaurarPreciosDesdeExcel(options: UseRestaurarPreciosDesdeExcelOptions = {}) {
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: (id: number) => productosService.restaurarPreciosDesdeExcel(id),
+
+        onSuccess: (data, id) => {
+            queryClient.setQueryData(productosKeys.detail(id), data);
+            queryClient.invalidateQueries({ queryKey: productosKeys.lists() });
+
+            toast.success('Precios restaurados desde Excel', {
+                description: 'Los precios de este producto se actualizarán en la próxima sincronización con el FTP.',
+            });
+
+            options.onSuccess?.(data);
+        },
+
+        onError: (error: Error) => {
+            toast.error('Error al restaurar precios', {
+                description: error.message || 'Ocurrió un error inesperado',
+            });
+            options.onError?.(error);
+        },
+    });
+
+    return {
+        restaurarPreciosDesdeExcel: mutation.mutate,
+        restaurarPreciosDesdeExcelAsync: mutation.mutateAsync,
+        isRestaurando: mutation.isPending,
+        isSuccess: mutation.isSuccess,
+        isError: mutation.isError,
+        error: mutation.error,
+        reset: mutation.reset,
+    };
+}
+
 interface UseToggleDestacadoOptions {
     onSuccess?: (data: IProductos) => void;
     onError?: (error: Error) => void;

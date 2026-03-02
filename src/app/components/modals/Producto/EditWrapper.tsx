@@ -8,8 +8,10 @@ import {
     createProductoSchema,
     type CreateProductoData
 } from '@/app/schemas/producto.schema';
-import { useUpdateProducto } from '@/app/hooks/productos/useProductosMutations';
+import { useUpdateProducto, useRestaurarPreciosDesdeExcel } from '@/app/hooks/productos/useProductosMutations';
 import type { IProductos } from '@/app/types/producto.type';
+import { Button } from '@/app/components/ui/Button';
+import { FileSpreadsheet } from 'lucide-react';
 
 interface EditProductoModalProps {
     producto: IProductos;
@@ -66,6 +68,8 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
             console.error('❌ Error al actualizar producto:', error);
         }
     });
+
+    const { restaurarPreciosDesdeExcel, isRestaurando } = useRestaurarPreciosDesdeExcel();
 
     const validateStepOne = async () => {
         const fields = ['nombre'];
@@ -152,7 +156,25 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
                 },
                 {
                     title: 'Precios y Stock',
-                    content: <StepTwoPricing form={form} />,
+                    content: (
+                        <div className="space-y-4">
+                            <StepTwoPricing form={form} />
+                            <div className="mt-4 pt-4 border-t border-border">
+                                <p className="text-sm text-muted-foreground mb-2">
+                                    Si editaste precios manualmente y querés que vuelvan a tomarse del Excel/FTP en la próxima sincronización:
+                                </p>
+                                <Button
+                                    type="button"
+                                    variant="outline-primary"
+                                    onClick={() => restaurarPreciosDesdeExcel(producto.id_prod)}
+                                    disabled={isRestaurando}
+                                >
+                                    <FileSpreadsheet className="size-4 mr-2" />
+                                    {isRestaurando ? 'Restaurando...' : 'Restaurar precios desde Excel'}
+                                </Button>
+                            </div>
+                        </div>
+                    ),
                     onNext: validateStepTwo,
                 },
                 {
