@@ -7,20 +7,7 @@ import {
   CheckoutResultStatus,
   MercadoPagoStatus,
   LocalPaymentMethod,
-  IBankDetails 
 } from "../../types/checkout-result.type";
-
-// Datos bancarios por defecto (deberían venir de configuración/backend)
-const DEFAULT_BANK_DETAILS: IBankDetails = {
-  banco: "Banco de Ejemplo",
-  tipo_cuenta: "Cuenta Corriente",
-  numero_cuenta: "1234567890",
-  cbu: "0123456789012345678901",
-  alias: "MAXSHOP.CB",
-  titular: "MaxShop S.A.",
-  cuit: "20-12345678-9",
-  instrucciones: "Por favor, incluye el número de pedido en el concepto de la transferencia."
-};
 
 /**
  * Hook para obtener el resultado del checkout desde los parámetros de la URL
@@ -68,19 +55,11 @@ export function useCheckoutResult(): ICheckoutResult {
       }
     }
 
-    // Construir resultado
-    const result: ICheckoutResult = {
+    return {
       status: finalStatus,
       id_venta: id_venta || undefined,
       metodo_pago: metodo_pago || metodo || undefined,
     };
-
-    // Agregar datos bancarios si es transferencia o efectivo
-    if (finalStatus === 'transferencia' || finalStatus === 'efectivo') {
-      result.datos_bancarios = DEFAULT_BANK_DETAILS;
-    }
-
-    return result;
   }, [searchParams]);
 }
 

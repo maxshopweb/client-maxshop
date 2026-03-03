@@ -10,6 +10,7 @@ import { ConfigSection } from "@/app/components/Admin/Config/ConfigSection";
 import { ConfigCard } from "@/app/components/Admin/Config/ConfigCard";
 import { IntegrationCard } from "@/app/components/Admin/Config/IntegrationCard";
 import { BannersPanel } from "@/app/components/Admin/Config/Banners/BannersPanel";
+import { DatosBancariosPanel } from "@/app/components/Admin/Config/DatosBancariosPanel";
 
 const INTEGRATIONS = [
     {
@@ -49,6 +50,8 @@ export default function ConfigPage() {
                     <IntegrationCard key={integration.name} {...integration} />
                 ))}
             </ConfigSection>
+
+            <DatosBancariosPanel config={config} isLoading={isLoading} mutation={mutation} />
 
             <ConfigSection title="Reglas de negocio" columns={3}>
                 <ConfigCard title="Envíos gratis" status="Activo">
