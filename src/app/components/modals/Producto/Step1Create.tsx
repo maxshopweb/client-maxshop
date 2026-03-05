@@ -10,9 +10,11 @@ import Select from '@/app/components/ui/Select';
 
 interface StepOneProps {
     form: UseFormReturn<CreateProductoData>;
+    /** ID del producto (solo en edición). Se muestra como "ID interno" en solo lectura. */
+    idProd?: number;
 }
 
-export function StepOneBasicInfo({ form }: StepOneProps) {
+export function StepOneBasicInfo({ form, idProd }: StepOneProps) {
     const { register, watch, setValue, formState: { errors } } = form;
 
     const idCatSelected = watch('id_cat');
@@ -39,10 +41,10 @@ export function StepOneBasicInfo({ form }: StepOneProps) {
                 Información básica del producto
             </h3>
 
-            {/* FILA 1 */}
+            {/* FILA 1: SKU (código de artículo) + Nombre */}
             <div className="grid grid-cols-2 gap-3">
                 <Input
-                    label="Codigo de articulo *"
+                    label="SKU *"
                     placeholder="Ej: ART-001"
                     icon={Tag}
                     {...register('codi_arti')}
@@ -57,12 +59,17 @@ export function StepOneBasicInfo({ form }: StepOneProps) {
                 />
             </div>
 
+            {/* FILA 2: ID interno (solo lectura, id_prod) + Modelo */}
             <div className="grid grid-cols-2 gap-3">
-                <Input
-                    label="Id interno"
-                    placeholder="INT-001"
-                    {...register('id_interno')}
-                />
+                <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-medium text-input">ID interno</label>
+                    <div
+                        className="w-full px-3 py-2.5 rounded-sm bg-input/50 border border-input text-sm text-foreground/80"
+                        style={{ borderColor: 'var(--outline-subtle)' }}
+                    >
+                        {idProd != null ? idProd : '—'}
+                    </div>
+                </div>
                 <Input
                     label="Modelo"
                     placeholder="Ej: DCD771C2"
@@ -71,14 +78,10 @@ export function StepOneBasicInfo({ form }: StepOneProps) {
                 />
             </div>
 
-            <div className='grid grid-cols-2 gap-3'>
+            {/* Código de barras */}
+            <div className="grid grid-cols-2 gap-3">
                 <Input
-                    label="Codigo sku"
-                    placeholder="SKU-001"
-                    {...register('cod_sku')}
-                />
-                <Input
-                    label="Codigo de barras"
+                    label="Código de barras"
                     placeholder="1234567890123"
                     {...register('codi_barras')}
                 />

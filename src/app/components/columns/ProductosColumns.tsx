@@ -1,4 +1,5 @@
 import { ColumnDef } from '@tanstack/react-table';
+import Link from 'next/link';
 import { MoreHorizontal, Edit, Trash2, Star, ImageIcon, FileSpreadsheet } from 'lucide-react';
 import * as Checkbox from '@radix-ui/react-checkbox';
 import * as Switch from '@radix-ui/react-switch';
@@ -15,6 +16,7 @@ interface ProductosTableActions {
     onDelete: (producto: IProductos) => void;
     onToggleDestacado: (producto: IProductos) => void;
     onTogglePublicado: (producto: IProductos) => void;
+    onToggleCuotas?: (producto: IProductos) => void;
     onUpdateStock: (producto: IProductos) => void;
     onCambiarImagen?: (producto: IProductos) => void;
     onRestaurarPreciosExcel?: (producto: IProductos) => void;
@@ -91,10 +93,14 @@ export const getProductosColumns = (
                 return (
                     <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
-                            <span className="font-medium text-text">{nombre}</span>
-                            {/* {destacado && (
-                                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                            )} */}
+                            <Link
+                                href={`/tienda/productos/${row.original.id_prod}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="font-medium text-text hover:underline text-[var(--principal)]"
+                            >
+                                {nombre}
+                            </Link>
                         </div>
                         {sku && (
                             <span className="text-xs text-gray-400">SKU: {sku}</span>
@@ -195,6 +201,30 @@ export const getProductosColumns = (
             },
         },
         {
+            id: 'financiacion',
+            accessorKey: 'cuotas_habilitadas',
+            header: 'Financiación',
+            cell: ({ row }) => {
+                const producto = row.original;
+                const v = producto.cuotas_habilitadas;
+                const checked = v === true;
+
+                if (actions.onToggleCuotas) {
+                    return (
+                        <Switch.Root
+                            checked={checked}
+                            onCheckedChange={() => actions.onToggleCuotas?.(producto)}
+                            className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-gray-300 bg-gray-200 transition-colors duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-[var(--principal)] focus:ring-offset-2 data-[state=checked]:bg-[var(--principal)] data-[state=checked]:border-[var(--principal)]"
+                        >
+                            <Switch.Thumb className="pointer-events-none block h-5 w-5 rounded-full border-2 border-gray-300 bg-white shadow-md ring-0 transition-[transform] duration-200 ease-out translate-x-0.5 data-[state=checked]:translate-x-5 data-[state=checked]:border-white/80" />
+                        </Switch.Root>
+                    );
+                }
+                return checked ? <TableBadge variant="success">Sí</TableBadge> : <TableBadge variant="secondary">No</TableBadge>;
+            },
+            enableSorting: false,
+        },
+        {
             accessorKey: 'precio',
             header: 'Precio',
             cell: ({ row }) => {
@@ -250,10 +280,11 @@ export const getProductosColumns = (
             accessorKey: 'estado',
             header: 'Estado',
             cell: ({ row }) => {
-                const estado = row.getValue('estado') as 0 | 1 | 2 | undefined;
+                const estado = row.getValue('estado') as 0 | 1 | 2 | 3 | undefined;
                 const estadoConfig: Record<number, { label: string; variant: BadgeVariant }> = {
                     1: { label: 'Activo', variant: 'success' },
                     2: { label: 'Inactivo', variant: 'warning' },
+                    3: { label: 'Pausado', variant: 'neutral' },
                     0: { label: 'Eliminado', variant: 'error' },
                 };
                 const config = estadoConfig[estado ?? 2] ?? { label: 'Inactivo', variant: 'warning' as BadgeVariant };
@@ -394,6 +425,7 @@ export const defaultColumnVisibility = {
     'marca.nombre': true,
     'subcategoria.nombre': true,
     destacado: true,
+    financiacion: true,
     publicado: true,
     estado: true,
 };
@@ -408,6 +440,7 @@ export const defaultColumnOrder = [
     'stock',
     'estado',
     'destacado',
+    'financiacion',
     'publicado',
     'actions',
 ];

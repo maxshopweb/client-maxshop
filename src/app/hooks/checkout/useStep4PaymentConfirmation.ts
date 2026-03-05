@@ -102,10 +102,8 @@ export function useStep4PaymentConfirmation() {
     }));
     const idCliente = user?.uid || undefined;
     const fullPhone = `${personalData.phoneArea}${personalData.phone}`;
-    const observaciones =
-      shippingData.tipoEntrega === "envio"
-        ? `Tel: ${fullPhone}, Dirección: ${shippingData.address}, ${shippingData.city}, ${shippingData.state}, Tipo: Envío`
-        : `Tel: ${fullPhone}, Tipo: Retiro en tienda`;
+    // Observaciones solo para notas del pedido; tel y dirección van en direccion/telefono
+    const observaciones = "";
 
     const direccionData =
       shippingData.tipoEntrega === "envio" && shippingData.postalCode

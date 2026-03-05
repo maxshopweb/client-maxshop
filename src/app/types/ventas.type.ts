@@ -30,6 +30,9 @@ export interface IVenta {
         id_cliente?: string | null;
         id_usuario: string;
         direccion?: string | null;
+        altura?: string | null;
+        piso?: string | null;
+        dpto?: string | null;
         cod_postal?: number | null;
         ciudad?: string | null;
         provincia?: string | null;
@@ -37,6 +40,8 @@ export interface IVenta {
     } | null;
     detalles?: IVentaDetalle[];
     envio?: IEnvios | null;
+    /** Pagos de Mercado Pago asociados (código transacción = payment_id) */
+    mercado_pago_payments?: { payment_id: string; [key: string]: unknown }[];
 }
 
 export interface IVentaDetalle {
@@ -110,6 +115,9 @@ export interface IVentaFilters {
     // Filtros por rango
     total_min?: number;
     total_max?: number;
+
+    /** Incluir ventas dadas de baja (estado_pago cancelado). Por defecto el backend no las lista. */
+    incluir_canceladas?: boolean;
 }
 
 // ========================================

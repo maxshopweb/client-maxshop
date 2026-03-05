@@ -1,9 +1,10 @@
 "use client";
-//! Hook solo de lectura
+//! Hooks de clientes (lectura y mutaciones)
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { clientesService } from '@/app/services/cliente.service';
-import type { IClienteFilters, IPaginatedResponse, ICliente } from '@/app/types/cliente.type';
+import type { IClienteFilters, ICliente, IUpdateClienteDTO } from '@/app/types/cliente.type';
 
 export const clientesKeys = {
     all: ['clientes'] as const,
@@ -132,6 +133,43 @@ export function useClienteStats({ id, enabled = true }: UseClienteOptions) {
         isError: query.isError,
         error: query.error,
         refetch: query.refetch,
+    };
+}
+
+interface UseUpdateClienteOptions {
+    onSuccess?: (data: ICliente) => void;
+    onError?: (error: Error) => void;
+}
+
+export function useUpdateCliente(options: UseUpdateClienteOptions = {}) {
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: ({ id, data }: { id: string; data: IUpdateClienteDTO }) =>
+            clientesService.update(id, data),
+        onSuccess: (data, variables) => {
+            queryClient.setQueryData(clientesKeys.detail(variables.id), data);
+            queryClient.invalidateQueries({ queryKey: clientesKeys.lists() });
+            toast.success('Cliente actualizado', {
+                description: 'Los datos se guardaron correctamente.',
+            });
+            options.onSuccess?.(data);
+        },
+        onError: (error: Error) => {
+            toast.error('Error al actualizar cliente', {
+                description: error.message || 'No se pudieron guardar los cambios.',
+            });
+            options.onError?.(error);
+        },
+    });
+
+    return {
+        updateCliente: mutation.mutate,
+        updateClienteAsync: mutation.mutateAsync,
+        isUpdating: mutation.isPending,
+        isSuccess: mutation.isSuccess,
+        isError: mutation.isError,
+        error: mutation.error,
     };
 }
 

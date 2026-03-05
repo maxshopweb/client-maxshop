@@ -261,6 +261,19 @@ class ProductosService {
     return response.data.data;
   }
 
+  async bulkUpdateCuotas(ids: number[], cuotas_habilitadas: boolean | null): Promise<{ updated: number }> {
+    const response = await axiosInstance.patch<IApiResponse<{ updated: number }>>(
+      '/productos/bulk/cuotas',
+      { ids, cuotas_habilitadas }
+    );
+
+    if (!response.data.success || response.data.data === undefined) {
+      throw new Error(response.data.error || 'Error al actualizar cuotas');
+    }
+
+    return response.data.data;
+  }
+
   async getRelatedProducts(id: number, limit: number = 4): Promise<IProductos[]> {
     try {
       // Obtener el producto actual para usar su categoría/marca

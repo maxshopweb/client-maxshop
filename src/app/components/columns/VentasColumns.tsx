@@ -54,10 +54,15 @@ export const getVentasColumns = (
             header: 'ID',
             cell: ({ row }) => {
                 const id = row.getValue('id_venta') as number;
+                const venta = row.original;
                 return (
-                    <span className="text-sm font-mono text-gray-600 font-semibold">
+                    <button
+                        type="button"
+                        onClick={() => actions.onView(venta)}
+                        className="text-sm font-mono text-gray-600 font-semibold underline decoration-gray-400 hover:decoration-gray-600 cursor-pointer text-left"
+                    >
                         #{id}
-                    </span>
+                    </button>
                 );
             },
         },
@@ -82,11 +87,16 @@ export const getVentasColumns = (
                 const cliente = venta.cliente;
 
                 if (cliente?.usuario) {
+                    const nombreCompleto = [cliente.usuario.nombre, cliente.usuario.apellido].filter(Boolean).join(' ') || 'Cliente';
                     return (
                         <div className="flex flex-col gap-1">
-                            <span className="text-sm font-medium text-text">
-                                {cliente.usuario.nombre} {cliente.usuario.apellido}
-                            </span>
+                            <button
+                                type="button"
+                                onClick={() => actions.onView(venta)}
+                                className="text-sm font-medium text-text underline decoration-gray-400 hover:decoration-gray-600 cursor-pointer text-left"
+                            >
+                                {nombreCompleto}
+                            </button>
                             {cliente.usuario.email && (
                                 <span className="text-xs text-gray-400">{cliente.usuario.email}</span>
                             )}
@@ -199,11 +209,13 @@ export const getVentasColumns = (
                                 <DropdownMenu.Separator className="h-px bg-[var(--card-border)] my-1" />
 
                                 <DropdownMenu.Item
-                                    className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-red-500/10 rounded outline-none text-red-600 transition-colors"
-                                    onClick={() => actions.onDelete(venta)}
+                                    disabled={venta.estado_pago === 'cancelado'}
+                                    className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-red-500/10 rounded outline-none text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                                    onClick={() => venta.estado_pago !== 'cancelado' && actions.onDelete(venta)}
+                                    title={venta.estado_pago === 'cancelado' ? 'La venta ya está dada de baja' : undefined}
                                 >
                                     <Trash2 className="mr-2 h-4 w-4" />
-                                    Eliminar
+                                    {venta.estado_pago === 'cancelado' ? 'Ya dada de baja' : 'Dar de baja'}
                                 </DropdownMenu.Item>
                             </DropdownMenu.Content>
                         </DropdownMenu.Portal>

@@ -12,12 +12,13 @@ interface VentasTableWrapperProps {
     onDelete: (venta: IVenta) => void;
     onView: (venta: IVenta) => void;
     onBulkDelete: (ids: number[]) => void;
+    onBulkDownload: (ids: number[]) => void;
     highlightId?: number;
 }
 
 export function VentasTableWrapper(props: VentasTableWrapperProps) {
     const { filters } = useVentasFilters();
-    const { pagination } = useVentas({ filters });
+    const { ventas, pagination } = useVentas({ filters });
     const tableState = useVentasTable();
     const { highlightId, ...tableProps } = props;
 
@@ -26,8 +27,10 @@ export function VentasTableWrapper(props: VentasTableWrapperProps) {
             {tableState.selectedIds.length > 0 && (
                 <BulkActions
                     selectedIds={tableState.selectedIds}
+                    ventas={ventas}
                     onClearSelection={tableState.clearSelection}
                     onBulkDelete={props.onBulkDelete}
+                    onBulkDownload={props.onBulkDownload}
                 />
             )}
 

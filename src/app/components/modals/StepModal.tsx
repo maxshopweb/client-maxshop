@@ -113,9 +113,9 @@ const StepModal = ({
                             </div>
                         </div>
 
-                        <div className="overflow-hidden">
+                        <div className="overflow-x-hidden overflow-y-visible">
                             <div key={currentStep} className={`animate-slide-${slideDirection}`}>
-                                <div className="mb-8">
+                                <div className="mb-8 min-h-0">
                                     {steps[currentStep].content}
                                 </div>
                             </div>

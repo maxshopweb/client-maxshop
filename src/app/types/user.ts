@@ -14,4 +14,11 @@ export interface IUsuario {
   img: string | null;
   rol: UserRole;
   estado?: UserEstado | null;
+  numero_documento?: string | null;
+  tipo_documento?: string | null;
+  creado_en?: Date | string | null;
+  ultimo_login?: Date | string | null;
 }
+
+/** Alias usado en cliente/venta */
+export type IUsuarios = IUsuario;

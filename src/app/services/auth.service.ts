@@ -1,6 +1,7 @@
 import { auth } from '../lib/firebase.config';
 import {
   GoogleAuthProvider,
+  EmailAuthProvider,
   createUserWithEmailAndPassword,
   sendEmailVerification,
   sendPasswordResetEmail,
@@ -10,6 +11,7 @@ import {
   signOut,
   confirmPasswordReset,
   applyActionCode,
+  reauthenticateWithCredential,
   type User,
   type UserCredential
 } from 'firebase/auth';
@@ -265,6 +267,25 @@ class AuthService {
       };
     } catch (error) {
       const message = this.mapFirebaseError(error, 'Error al iniciar sesión como invitado.');
+      return { success: false, data: null, error: message };
+    }
+  }
+
+  /** Reautentica al usuario actual con email y contraseña (para confirmar acciones sensibles). */
+  async reauthenticate(email: string, password: string): Promise<AuthResult<{ user: User }>> {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        return { success: false, data: null, error: 'No hay sesión activa.' };
+      }
+      if (!email?.trim() || !password?.trim()) {
+        return { success: false, data: null, error: 'Email y contraseña son requeridos.' };
+      }
+      const credential = EmailAuthProvider.credential(email.trim(), password);
+      await reauthenticateWithCredential(user, credential);
+      return { success: true, data: { user }, error: null };
+    } catch (error: any) {
+      const message = this.mapFirebaseError(error, 'Contraseña incorrecta.');
       return { success: false, data: null, error: message };
     }
   }

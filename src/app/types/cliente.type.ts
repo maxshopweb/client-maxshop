@@ -10,12 +10,29 @@ export interface ICliente {
     id_cliente?: string | null;
     id_usuario: string;
     direccion?: string | null;
+    altura?: string | null;
+    piso?: string | null;
+    dpto?: string | null;
     cod_postal?: number | null;
     ciudad?: string | null;
     provincia?: string | null;
     // Relaciones
     usuario?: IUsuarios | null;
     ventas?: IVenta[]; // Historial de ventas
+}
+
+/** Datos editables del cliente (teléfono, DNI, domicilio) */
+export interface IUpdateClienteDTO {
+    telefono?: string | null;
+    numero_documento?: string | null;
+    tipo_documento?: string | null;
+    direccion?: string | null;
+    altura?: string | null;
+    piso?: string | null;
+    dpto?: string | null;
+    ciudad?: string | null;
+    provincia?: string | null;
+    cod_postal?: number | null;
 }
 
 // ========================================

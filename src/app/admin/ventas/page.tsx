@@ -1,11 +1,14 @@
 'use client';
 
+import { useCallback, useState } from 'react';
 import { Plus, RefreshCw, ShoppingCart, DollarSign, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { VentasFilters } from '@/app/components/tables/Ventas/VentasFilters';
 import { VentasTableWrapper } from '@/app/components/tables/Ventas/VentasTableWrapper';
 import { Button } from '@/app/components/ui/Button';
 import { DeleteVentaModal } from '@/app/components/modals/Venta/DeleteVenta';
 import { BulkDeleteVentasModal } from '@/app/components/modals/Venta/BulkDeleteVentasModal';
+import { ConfirmActionWithPasswordModal } from '@/app/components/modals/ConfirmActionWithPasswordModal';
 import { CreateVentaModal } from '@/app/components/modals/Venta/CreateWrapper';
 import { EditVentaModal } from '@/app/components/modals/Venta/EditWrapper';
 import { ViewVentaModal } from '@/app/components/modals/Venta/ViewVentaModal';
@@ -15,6 +18,7 @@ import { AnimatedStatCard } from '@/app/components/ui/AnimatedStatCard';
 import { formatPrecio } from '@/app/types/ventas.type';
 import { AdminPageHeader } from '@/app/components/Admin/AdminPageHeader';
 import { AdminPageContainer } from '@/app/components/Admin/AdminPageContainer';
+import { ventasService } from '@/app/services/venta.service';
 
 export default function VentasPage() {
     const {
@@ -32,6 +36,44 @@ export default function VentasPage() {
     } = useVentasPage();
 
     const stats = useVentasStats();
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [pendingAction, setPendingAction] = useState<(() => () => Promise<void>) | null>(null);
+
+    const handleRequestPasswordConfirm = useCallback((perform: () => Promise<void>) => {
+        setPendingAction(() => perform);
+        setShowPasswordModal(true);
+        closeModal();
+    }, [closeModal]);
+
+    const handlePasswordConfirm = useCallback(async () => {
+        const getAction = pendingAction;
+        if (!getAction || typeof getAction !== 'function') return;
+        const action = getAction();
+        if (typeof action === 'function') {
+            await action();
+        }
+        setPendingAction(null);
+        setShowPasswordModal(false);
+    }, [pendingAction]);
+
+    const handleBulkDownload = useCallback(async (ids: number[]) => {
+        try {
+            const blob = await ventasService.exportVentas(ids);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ventas-${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            toast.success('Descarga iniciada', {
+                description: `${ids.length} venta(s) exportada(s) a CSV.`,
+            });
+        } catch (e) {
+            toast.error('Error al exportar', {
+                description: e instanceof Error ? e.message : 'No se pudo descargar el archivo.',
+            });
+        }
+    }, []);
 
     return (
         <div className="min-h-screen">
@@ -92,6 +134,7 @@ export default function VentasPage() {
                     onDelete={openDeleteDialog}
                     onView={openViewDialog}
                     onBulkDelete={openBulkDeleteDialog}
+                    onBulkDownload={handleBulkDownload}
                     highlightId={highlightId}
                 />
             </AdminPageContainer>
@@ -106,15 +149,32 @@ export default function VentasPage() {
             )}
 
             {modal.type === 'delete' && modal.venta && (
-                <DeleteVentaModal venta={modal.venta} onClose={closeModal} />
+                <DeleteVentaModal
+                    venta={modal.venta}
+                    onClose={closeModal}
+                    onRequestPasswordConfirm={handleRequestPasswordConfirm}
+                />
             )}
 
             {modal.type === 'bulk-delete' && bulkDeleteIds.length > 0 && (
                 <BulkDeleteVentasModal
                     ventaIds={bulkDeleteIds}
                     onClose={closeModal}
+                    onRequestPasswordConfirm={handleRequestPasswordConfirm}
                 />
             )}
+
+            <ConfirmActionWithPasswordModal
+                isOpen={showPasswordModal}
+                onClose={() => {
+                    setShowPasswordModal(false);
+                    setPendingAction(null);
+                }}
+                title="Confirmar con tu contraseña"
+                message="Para completar la acción, ingresá tu contraseña actual."
+                confirmLabel="Confirmar y ejecutar"
+                onConfirm={handlePasswordConfirm}
+            />
 
             {modal.type === 'view' && modal.venta && (
                 <ViewVentaModal

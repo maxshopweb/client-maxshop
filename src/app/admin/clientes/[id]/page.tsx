@@ -1,7 +1,8 @@
 "use client";
 
-import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Mail, Phone, MapPin, Calendar, Clock, ExternalLink, Home, MapPinned, ShoppingCart, DollarSign, TrendingUp, Package } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { ArrowLeft, Mail, Phone, MapPin, Calendar, Clock, ExternalLink, Home, MapPinned, ShoppingCart, DollarSign, TrendingUp, Package, Edit3, FileText } from 'lucide-react';
 import { Button } from '@/app/components/ui/Button';
 import { useCliente, useClienteStats, useClienteVentas } from '@/app/hooks/clientes/useClientes';
 import { getClienteNombreCompleto, getClienteEmail, formatFecha } from '@/app/types/cliente.type';
@@ -11,15 +12,22 @@ import { formatPrecio } from '@/app/types/ventas.type';
 import { AnimatedStatCard } from '@/app/components/ui/AnimatedStatCard';
 import { TableBadge } from '@/app/components/ui/TableBadge';
 import { AdminPageContainer } from '@/app/components/Admin/AdminPageContainer';
+import { EditClienteModal } from '@/app/components/modals/Cliente/EditClienteModal';
 
 export default function ClienteDetailPage() {
     const params = useParams();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const id = params.id as string;
+    const [editModalOpen, setEditModalOpen] = useState(false);
 
-    const { cliente, isLoading: isLoadingCliente } = useCliente({ id });
+    const { cliente, isLoading: isLoadingCliente, refetch: refetchCliente } = useCliente({ id });
     const { stats, isLoading: isLoadingStats } = useClienteStats({ id });
     const { ventas, pagination, isLoading: isLoadingVentas } = useClienteVentas(id, { limit: 10, page: 1 });
+
+    useEffect(() => {
+        if (searchParams.get('edit') === '1') setEditModalOpen(true);
+    }, [searchParams]);
 
     if (isLoadingCliente) {
         return (
@@ -48,18 +56,28 @@ export default function ClienteDetailPage() {
         <AdminPageContainer>
             {/* Header */}
             <div className="bg-white dark:bg-secundario p-6 rounded-2xl shadow-lg border border-principal/10 dark:border-white/10">
-                <div className="mb-6">
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <Button
+                            variant="ghost"
+                            onClick={() => router.push('/admin/clientes')}
+                            className="flex items-center gap-2 mb-4"
+                        >
+                            <ArrowLeft className="w-4 h-4" />
+                            Volver
+                        </Button>
+                        <h1 className="text-2xl font-bold text-text">
+                            Perfil del cliente
+                        </h1>
+                    </div>
                     <Button
-                        variant="ghost"
-                        onClick={() => router.push('/admin/clientes')}
-                        className="flex items-center gap-2 mb-4"
+                        variant="outline-primary"
+                        onClick={() => setEditModalOpen(true)}
+                        className="flex items-center gap-2"
                     >
-                        <ArrowLeft className="w-4 h-4" />
-                        Volver
+                        <Edit3 className="w-4 h-4" />
+                        Editar datos
                     </Button>
-                    <h1 className="text-2xl font-bold text-text">
-                        Perfil del cliente
-                    </h1>
                 </div>
 
                 {/* Información básica */}
@@ -89,6 +107,15 @@ export default function ClienteDetailPage() {
                                         <span className="text-text">{cliente.usuario.telefono}</span>
                                     </div>
                                 )}
+                                {(cliente.usuario?.numero_documento || cliente.usuario?.tipo_documento) && (
+                                    <div className="flex items-center gap-2 text-sm">
+                                        <FileText className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                                        <span className="text-text">
+                                            {cliente.usuario.tipo_documento ? `${cliente.usuario.tipo_documento} ` : ''}
+                                            {cliente.usuario.numero_documento || ''}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -101,11 +128,11 @@ export default function ClienteDetailPage() {
                                         <Home className="w-4 h-4 text-gray-500 flex-shrink-0 mt-0.5" />
                                         <span>
                                             {cliente.direccion}
-                                            {(cliente as any).altura && ` ${(cliente as any).altura}`}
-                                            {((cliente as any).piso || (cliente as any).dpto) && (
+                                            {cliente.altura && ` ${cliente.altura}`}
+                                            {(cliente.piso || cliente.dpto) && (
                                                 <span>
-                                                    {((cliente as any).piso && `, Piso ${(cliente as any).piso}`) || ''}
-                                                    {((cliente as any).dpto && ` Depto ${(cliente as any).dpto}`) || ''}
+                                                    {cliente.piso && `, Piso ${cliente.piso}`}
+                                                    {cliente.dpto && ` Depto ${cliente.dpto}`}
                                                 </span>
                                             )}
                                         </span>
@@ -149,6 +176,16 @@ export default function ClienteDetailPage() {
                     </div>
                 </div>
             </div>
+
+            {editModalOpen && (
+                <EditClienteModal
+                    cliente={cliente}
+                    onClose={() => {
+                        setEditModalOpen(false);
+                        refetchCliente();
+                    }}
+                />
+            )}
 
             {/* Estadísticas */}
             {isLoadingStats ? (

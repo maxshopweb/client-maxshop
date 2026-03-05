@@ -33,6 +33,7 @@ export function CreateProductoModal({ onClose }: CreateProductoModalProps) {
             financiacion: false,
             stock: 0,
             lista_precio_activa: 'V',
+            estado: 2,
         },
     });
 
@@ -90,6 +91,7 @@ export function CreateProductoModal({ onClose }: CreateProductoModalProps) {
                 id_subcat: rawData.id_subcat ? Number(rawData.id_subcat) : undefined,
                 id_marca: rawData.id_marca ? Number(rawData.id_marca) : undefined,
                 id_iva: rawData.id_iva ? Number(rawData.id_iva) : undefined,
+                estado: rawData.estado != null ? Number(rawData.estado) : undefined,
             };
 
             const created = await productosService.create(data);

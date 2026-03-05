@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import StepModal from '@/app/components/modals/StepModal';
 import { StepOneBasicInfo } from './Step1Create';
@@ -20,7 +20,7 @@ interface EditProductoModalProps {
 
 export function EditProductoModal({ producto, onClose }: EditProductoModalProps) {
     const form = useForm<CreateProductoData>({
-        resolver: zodResolver(createProductoSchema),
+        resolver: zodResolver(createProductoSchema) as Resolver<CreateProductoData>,
         mode: 'onChange',
         defaultValues: {
             codi_arti: producto.codi_arti || '',
@@ -36,11 +36,11 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
             unidad_medida: producto.unidad_medida || '',
             unidades_por_producto: producto.unidades_por_producto || undefined,
             descripcion: producto.descripcion || '',
-            id_cat: producto.id_cat?.toString() || '',
-            id_subcat: producto.id_subcat?.toString() || '',
-            id_marca: producto.id_marca?.toString() || '',
-            destacado: producto.destacado === true || producto.destacado === 1,
-            financiacion: producto.financiacion === true || producto.financiacion === 1,
+            id_cat: producto.id_cat ?? undefined,
+            id_subcat: producto.id_subcat ?? undefined,
+            id_marca: producto.id_marca ?? undefined,
+            destacado: Boolean(producto.destacado === true || (producto as { destacado?: boolean | number }).destacado === 1),
+            financiacion: Boolean(producto.financiacion === true || (producto as { financiacion?: boolean | number }).financiacion === 1),
             precio_venta: producto.precio_venta ?? undefined,
             precio_especial: producto.precio_especial ?? undefined,
             precio_pvp: producto.precio_pvp ?? undefined,
@@ -53,10 +53,11 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
             stock: producto.stock ?? 0,
             stock_min: producto.stock_min ?? undefined,
             stock_mayorista: producto.stock_mayorista ?? undefined,
-            id_iva: producto.id_iva ?? undefined,
-            estado: producto.estado ?? undefined,
+            id_iva: producto.iva?.id_iva ?? undefined,
+            estado: (producto.stock ?? 0) <= 0 ? 2 : (producto.estado ?? 1),
             publicado: producto.publicado ?? false,
-        } as any,
+            cuotas_habilitadas: producto.cuotas_habilitadas === true ? 'si' : producto.cuotas_habilitadas === false ? 'no' : 'regla',
+        },
     });
 
     const { updateProducto, isUpdating } = useUpdateProducto({
@@ -127,6 +128,7 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
             codi_grupo: rawData.codi_grupo,
             codi_impuesto: rawData.codi_impuesto,
             publicado: rawData.publicado,
+            cuotas_habilitadas: rawData.cuotas_habilitadas === 'si' ? true : rawData.cuotas_habilitadas === 'no' ? false : null,
             id_cat: rawData.id_cat ? Number(rawData.id_cat) : undefined,
             id_subcat: rawData.id_subcat ? Number(rawData.id_subcat) : undefined,
             id_marca: rawData.id_marca ? Number(rawData.id_marca) : undefined,
@@ -151,7 +153,7 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
             steps={[
                 {
                     title: 'Información Básica',
-                    content: <StepOneBasicInfo form={form} />,
+                    content: <StepOneBasicInfo form={form} idProd={producto.id_prod} />,
                     onNext: validateStepOne,
                 },
                 {
@@ -159,17 +161,18 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
                     content: (
                         <div className="space-y-4">
                             <StepTwoPricing form={form} />
-                            <div className="mt-4 pt-4 border-t border-border">
+                            <div className="mt-4 pt-4 pb-6 border-t border-border">
                                 <p className="text-sm text-muted-foreground mb-2">
                                     Si editaste precios manualmente y querés que vuelvan a tomarse del Excel/FTP en la próxima sincronización:
                                 </p>
                                 <Button
                                     type="button"
                                     variant="outline-primary"
+                                    className="hover:scale-100"
                                     onClick={() => restaurarPreciosDesdeExcel(producto.id_prod)}
                                     disabled={isRestaurando}
                                 >
-                                    <FileSpreadsheet className="size-4 mr-2" />
+                                    <FileSpreadsheet className="size-4 mr-2 shrink-0" />
                                     {isRestaurando ? 'Restaurando...' : 'Restaurar precios desde Excel'}
                                 </Button>
                             </div>

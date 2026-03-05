@@ -1,6 +1,7 @@
-import { Trash2, Power, PowerOff, Globe, GlobeLock, X } from 'lucide-react';
+import { Trash2, Power, PowerOff, Globe, GlobeLock, X, CreditCard, Ban } from 'lucide-react';
 import { useBulkUpdateEstado } from '@/app/hooks/productos/useProductosMutations';
-import { useBulkSetPublicado } from '@/app/hooks/productos/usePublicadoMutations';
+import { useBulkSetPublicado, useBulkUpdateCuotas } from '@/app/hooks/productos/usePublicadoMutations';
+import { useConfigTienda } from '@/app/hooks/config/useConfigTienda';
 import { Button } from '../../ui/Button';
 
 interface BulkActionsProps {
@@ -22,6 +23,15 @@ export function BulkActions({ selectedIds, onClearSelection, onBulkDelete }: Bul
         },
     });
 
+    const { bulkUpdateCuotas, isUpdating: isBulkUpdatingCuotas } = useBulkUpdateCuotas({
+        onSuccess: () => {
+            onClearSelection();
+        },
+    });
+
+    const { data: config } = useConfigTienda();
+    const numCuotas = config?.cuotas_sin_interes != null ? Math.max(1, Math.trunc(Number(config.cuotas_sin_interes))) : 3;
+
     const selectedCount = selectedIds.length;
 
     const handleActivar = () => {
@@ -40,7 +50,14 @@ export function BulkActions({ selectedIds, onClearSelection, onBulkDelete }: Bul
         bulkSetPublicado({ ids: selectedIds, publicado: false });
     };
 
-    const isLoading = isBulkUpdatingEstado || isBulkUpdatingPublicado;
+    const handleCuotasHabilitar = () => {
+        bulkUpdateCuotas({ ids: selectedIds, cuotas_habilitadas: true });
+    };
+    const handleCuotasDeshabilitar = () => {
+        bulkUpdateCuotas({ ids: selectedIds, cuotas_habilitadas: false });
+    };
+
+    const isLoading = isBulkUpdatingEstado || isBulkUpdatingPublicado || isBulkUpdatingCuotas;
 
     return (
         <div className="bg-[var(--principal)] text-white px-4 py-3 rounded-lg shadow-lg flex items-center justify-between">
@@ -90,6 +107,26 @@ export function BulkActions({ selectedIds, onClearSelection, onBulkDelete }: Bul
                     >
                         <GlobeLock className="w-4 h-4" />
                         <span className="text-sm">Despublicar</span>
+                    </Button>
+
+                    {/* Cuotas sin interés (número según config) */}
+                    <Button
+                        onClick={handleCuotasHabilitar}
+                        disabled={isLoading}
+                        title={`Habilitar ${numCuotas} cuotas para seleccionados`}
+                        variant='secondary'
+                    >
+                        <CreditCard className="w-4 h-4" />
+                        <span className="text-sm">{numCuotas} cuotas sí</span>
+                    </Button>
+                    <Button
+                        onClick={handleCuotasDeshabilitar}
+                        disabled={isLoading}
+                        title={`Deshabilitar ${numCuotas} cuotas para seleccionados`}
+                        variant='secondary'
+                    >
+                        <Ban className="w-4 h-4" />
+                        <span className="text-sm">{numCuotas} cuotas no</span>
                     </Button>
 
                     {/* Eliminar */}

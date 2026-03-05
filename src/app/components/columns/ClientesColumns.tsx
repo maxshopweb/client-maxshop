@@ -144,22 +144,42 @@ export const createClientesColumns = (
         },
         size: 120,
     },
-    // Ubicación
+    // DNI
     {
-        id: "ubicacion",
-        header: "Ubicación",
+        id: "dni",
+        header: "DNI",
         cell: ({ row }) => {
-            const cliente = row.original;
-            const ciudad = cliente.ciudad || "-";
-            const provincia = cliente.provincia || "";
+            const u = row.original.usuario;
+            const tipo = u?.tipo_documento;
+            const num = u?.numero_documento;
+            if (!num) return <div className="text-sm text-gray-400">-</div>;
             return (
                 <div className="text-sm">
-                    {ciudad}
-                    {provincia && <span className="text-gray-500">, {provincia}</span>}
+                    {tipo ? `${tipo} ` : ""}{num}
                 </div>
             );
         },
-        size: 150,
+        size: 140,
+    },
+    // Domicilio
+    {
+        id: "domicilio",
+        header: "Domicilio",
+        cell: ({ row }) => {
+            const c = row.original;
+            const parts: string[] = [];
+            if (c.direccion) parts.push(c.direccion);
+            if (c.altura) parts.push(c.altura);
+            if (parts.length === 0 && c.ciudad) parts.push(c.ciudad);
+            if (c.provincia) parts.push(c.provincia);
+            const line = parts.join(", ") || "-";
+            return (
+                <div className="text-sm max-w-[200px] truncate" title={line}>
+                    {line}
+                </div>
+            );
+        },
+        size: 200,
     },
     // Fecha de Registro
     {
@@ -179,32 +199,6 @@ export const createClientesColumns = (
         },
         cell: ({ row }) => {
             const fecha = row.original.usuario?.creado_en;
-            return (
-                <div className="text-sm">
-                    {formatFecha(fecha)}
-                </div>
-            );
-        },
-        size: 150,
-    },
-    // Último Login
-    {
-        accessorKey: "usuario.ultimo_login",
-        id: "ultimo_login",
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                    className="h-8 px-2 lg:px-3"
-                >
-                    Último Acceso
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-            );
-        },
-        cell: ({ row }) => {
-            const fecha = row.original.usuario?.ultimo_login;
             return (
                 <div className="text-sm">
                     {formatFecha(fecha)}

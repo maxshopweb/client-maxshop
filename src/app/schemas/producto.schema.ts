@@ -44,6 +44,8 @@ export const productoStepOneSchema = z.object({
   financiacion: z.boolean().default(false),
   estado: selectNumberField,
   publicado: z.boolean().optional(),
+  /** 'regla' = null (usar monto mínimo), 'si' = true, 'no' = false */
+  cuotas_habilitadas: z.enum(['regla', 'si', 'no']).optional(),
 });
 
 export const productoStepTwoSchema = z

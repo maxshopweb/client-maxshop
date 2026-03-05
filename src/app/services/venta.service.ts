@@ -28,6 +28,7 @@ class VentasService {
     if (filters.tipo_venta) params.append('tipo_venta', filters.tipo_venta);
     if (filters.total_min !== undefined) params.append('total_min', filters.total_min.toString());
     if (filters.total_max !== undefined) params.append('total_max', filters.total_max.toString());
+    if (filters.incluir_canceladas === true) params.append('incluir_canceladas', 'true');
 
     const response = await axiosInstance.get<IPaginatedResponse<IVenta>>(
       `/ventas?${params.toString()}`
@@ -128,6 +129,17 @@ class VentasService {
 
   async deleteMultiple(ids: number[]): Promise<void> {
     await Promise.all(ids.map(id => this.delete(id)));
+  }
+
+  /** Exporta ventas seleccionadas a CSV (solo no canceladas). Devuelve blob para descarga. */
+  async exportVentas(ids: number[]): Promise<Blob> {
+    if (ids.length === 0) throw new Error('Ninguna venta seleccionada');
+    const params = new URLSearchParams();
+    params.set('ids', ids.join(','));
+    const response = await axiosInstance.get(`/ventas/export?${params.toString()}`, {
+      responseType: 'blob',
+    });
+    return response.data as Blob;
   }
 
   async getByCliente(idCliente: string, filters: IVentaFilters = {}): Promise<IPaginatedResponse<IVenta>> {

@@ -47,6 +47,8 @@ export interface IProductos {
     imagenes?: string[] | null; // JSONB
     destacado?: boolean | null;
     publicado?: boolean | null;
+    /** null = regla general, true = siempre 3 cuotas, false = no 3 cuotas */
+    cuotas_habilitadas?: boolean | null;
     financiacion?: boolean | null;
     activo?: string | null;
     creado_en?: Date | null;
@@ -147,6 +149,7 @@ export interface ICreateProductoDTO {
 
 export interface IUpdateProductoDTO extends Partial<ICreateProductoDTO> {
     estado?: EstadoGeneral;
+    cuotas_habilitadas?: boolean | null;
 }
 
 // Responses

@@ -48,7 +48,7 @@ const ModalBase = ({
                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
                 backdropFilter: 'blur(4px)'
             }}
-            onClick={handleClose}
+            // onClick={handleClose}
         >
             <div
                 className={`relative w-full ${maxWidth} rounded-md shadow-2xl transition-all duration-300 ${isClosing || !shouldRender ? 'scale-95 opacity-0' : 'scale-100 opacity-100'

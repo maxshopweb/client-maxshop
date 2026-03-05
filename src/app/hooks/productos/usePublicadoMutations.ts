@@ -90,3 +90,42 @@ export function useBulkSetPublicado(options: UseBulkSetPublicadoOptions = {}) {
         error: mutation.error,
     };
 }
+
+export interface UseBulkUpdateCuotasOptions {
+    onSuccess?: (ids: number[], cuotas_habilitadas: boolean | null) => void;
+    onError?: (error: Error) => void;
+}
+
+export function useBulkUpdateCuotas(options: UseBulkUpdateCuotasOptions = {}) {
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: ({ ids, cuotas_habilitadas }: { ids: number[]; cuotas_habilitadas: boolean | null }) =>
+            productosService.bulkUpdateCuotas(ids, cuotas_habilitadas),
+
+        onSuccess: (data, { ids, cuotas_habilitadas }) => {
+            queryClient.invalidateQueries({ queryKey: productosKeys.lists() });
+            const label = cuotas_habilitadas === null ? 'regla general' : cuotas_habilitadas ? '3 cuotas habilitadas' : '3 cuotas deshabilitadas';
+            toast.success('Cuotas actualizadas', {
+                description: `${data.updated} producto(s): ${label}`,
+            });
+            options.onSuccess?.(ids, cuotas_habilitadas);
+        },
+
+        onError: (error: Error) => {
+            toast.error('Error al actualizar cuotas', {
+                description: error.message || 'Ocurrió un error inesperado',
+            });
+            options.onError?.(error);
+        },
+    });
+
+    return {
+        bulkUpdateCuotas: mutation.mutate,
+        bulkUpdateCuotasAsync: mutation.mutateAsync,
+        isUpdating: mutation.isPending,
+        isSuccess: mutation.isSuccess,
+        isError: mutation.isError,
+        error: mutation.error,
+    };
+}

@@ -75,10 +75,8 @@ export function useLocalPaymentHandler({ formData }: UseLocalPaymentHandlerOptio
     // Concatenar teléfono completo (área + número)
     const fullPhone = `${personalData.phoneArea}${personalData.phone}`;
 
-    // Preparar observaciones
-    const observaciones = shippingData.tipoEntrega === 'envio' 
-      ? `Tel: ${fullPhone}, Dirección: ${shippingData.address}, ${shippingData.city}, ${shippingData.state}, Tipo: ${shippingData.tipoEntrega === 'envio' ? 'Envío' : 'Retiro'}`
-      : `Tel: ${fullPhone}, Tipo: Retiro en tienda`;
+    // Observaciones solo para notas del pedido; tel y dirección van en direccion/telefono
+    const observaciones = "";
 
     // Preparar datos de dirección estructurados para actualizar el cliente (solo si es envío)
     const direccionData = shippingData.tipoEntrega === 'envio' && shippingData.postalCode ? {

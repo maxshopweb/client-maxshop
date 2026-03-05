@@ -16,25 +16,25 @@ export function SalesCategoryChart() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.5 }}
-            className="col-span-12 md:col-span-6 lg:col-span-3 bg-white dark:bg-terciario p-6 rounded-2xl shadow-lg border border-principal/10 dark:border-white/5"
+            className="col-span-12 md:col-span-6 lg:col-span-3 bg-white dark:bg-terciario p-4 rounded-2xl shadow-lg border border-principal/10 dark:border-white/5"
         >
-            <div className="mb-4">
-                <h3 className="text-lg font-bold text-secundario dark:text-white">Por categoría</h3>
-                <p className="text-sm text-secundario dark:text-white/80 font-medium">Ventas totales</p>
+            <div className="mb-2">
+                <h3 className="text-lg font-bold text-secundario dark:text-white leading-tight">Por categoría</h3>
+                <p className="text-sm text-secundario dark:text-white/80 font-medium leading-tight">Ventas totales</p>
             </div>
 
-            <div className="h-[250px] w-full relative">
+            <div className="h-[320px] min-h-[320px] w-full relative">
                 {isLoading ? (
                     <Skeleton circle height={200} width={200} className="mx-auto block" />
                 ) : (
                     <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
+                        <PieChart margin={{ top: 48, right: 16, left: 16, bottom: 56 }}>
                             <Pie
                                 data={data as any}
                                 cx="50%"
                                 cy="50%"
-                                innerRadius={60}
-                                outerRadius={80}
+                                innerRadius={52}
+                                outerRadius={72}
                                 paddingAngle={5}
                                 dataKey="total_vendido"
                                 nameKey="categoria"
@@ -64,7 +64,7 @@ export function SalesCategoryChart() {
                                 verticalAlign="bottom"
                                 align="center"
                                 iconSize={8}
-                                wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
+                                wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }}
                             />
                         </PieChart>
                     </ResponsiveContainer>

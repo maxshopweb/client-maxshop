@@ -4,7 +4,8 @@ import type {
   IClienteFilters,
   IPaginatedResponse,
   IApiResponse,
-  IClienteStats
+  IClienteStats,
+  IUpdateClienteDTO,
 } from '@/app/types/cliente.type';
 import type { IVenta, IVentaFilters } from '@/app/types/ventas.type';
 
@@ -85,6 +86,19 @@ class ClientesService {
     );
 
     return response.data;
+  }
+
+  async update(id: string, data: IUpdateClienteDTO): Promise<ICliente> {
+    const response = await axiosInstance.put<IApiResponse<ICliente>>(
+      `/clientes/${id}`,
+      data
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.error || 'Error al actualizar cliente');
+    }
+
+    return response.data.data;
   }
 
   async getMyPedidos(filters: IVentaFilters = {}): Promise<IPaginatedResponse<IVenta>> {

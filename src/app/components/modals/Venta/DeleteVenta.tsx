@@ -1,5 +1,5 @@
 import { AlertTriangle } from 'lucide-react';
-import { Button } from '../../ui/Button';
+import { Button } from '@/app/components/ui/Button';
 import { useUpdateVenta } from '@/app/hooks/ventas/useVentasMutations';
 import type { IVenta } from '@/app/types/ventas.type';
 import SimpleModal from '@/app/components/modals/SimpleModal';
@@ -7,23 +7,34 @@ import SimpleModal from '@/app/components/modals/SimpleModal';
 interface DeleteVentaModalProps {
     venta: IVenta;
     onClose: () => void;
+    /** Si se pasa, al confirmar "Dar de baja" se pide contraseña antes de ejecutar. */
+    onRequestPasswordConfirm?: (perform: () => Promise<void>) => void;
 }
 
-export function DeleteVentaModal({ venta, onClose }: DeleteVentaModalProps) {
-    const { updateVenta, isUpdating } = useUpdateVenta({
+export function DeleteVentaModal({ venta, onClose, onRequestPasswordConfirm }: DeleteVentaModalProps) {
+    const { updateVenta, updateVentaAsync, isUpdating } = useUpdateVenta({
         onSuccess: () => {
             onClose();
         },
     });
 
-    const handleDelete = () => {
-        // Soft delete: cambiar estado_pago a 'cancelado'
-        updateVenta({
+    const doAction = async () => {
+        await updateVentaAsync({
             id: venta.id_venta,
-            data: {
-                estado_pago: 'cancelado',
-            }
+            data: { estado_pago: 'cancelado' },
         });
+        onClose();
+    };
+
+    const handleConfirm = () => {
+        if (onRequestPasswordConfirm) {
+            onRequestPasswordConfirm(doAction);
+        } else {
+            updateVenta({
+                id: venta.id_venta,
+                data: { estado_pago: 'cancelado' },
+            });
+        }
     };
 
     return (
@@ -32,7 +43,7 @@ export function DeleteVentaModal({ venta, onClose }: DeleteVentaModalProps) {
             onClose={onClose}
             title={
                 <span className="flex items-center gap-2">
-                    <span className="flex-shrink-0 w-9 h-9 rounded-full bg-yellow-100 flex items-center justify-center">
+                    <span className="shrink-0 w-9 h-9 rounded-full bg-yellow-100 flex items-center justify-center">
                         <AlertTriangle className="w-5 h-5 text-yellow-600" />
                     </span>
                     Dar de baja venta
@@ -42,26 +53,28 @@ export function DeleteVentaModal({ venta, onClose }: DeleteVentaModalProps) {
             actions={(handleClose) => (
                 <>
                     <Button
+                        type="button"
                         onClick={handleClose}
-                        variant="outline-primary"
+                        variant="ghost"
                         disabled={isUpdating}
                     >
                         Cancelar
                     </Button>
                     <Button
-                        onClick={handleDelete}
+                        type="button"
+                        onClick={handleConfirm}
                         variant="primary"
                         disabled={isUpdating}
                     >
-                        {isUpdating ? 'Dando de baja...' : 'Dar de Baja'}
+                        {isUpdating ? 'Dando de baja...' : 'Dar de baja'}
                     </Button>
                 </>
             )}
         >
-            <p className="text-text mb-6">
+            <p className="text-foreground mb-6">
                 ¿Estás seguro de que deseas dar de baja la venta{' '}
                 <span className="font-semibold">#{venta.id_venta}</span>?
-                Esta acción marcará la venta como cancelada, pero no la eliminará permanentemente.
+                Esta acción marcará la venta como cancelada. Para continuar se pedirá tu contraseña.
             </p>
         </SimpleModal>
     );

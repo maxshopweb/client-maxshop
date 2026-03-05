@@ -11,7 +11,7 @@ import { EditProductoModal } from '@/app/components/modals/Producto/EditWrapper'
 import { CambiarImagenModal } from '@/app/components/modals/Producto/CambiarImagenModal';
 import { DeleteProductoModal } from '@/app/components/modals/Producto/DeleteProduct';
 import { BulkDeleteProductosModal } from '@/app/components/modals/Producto/BulkDeleteProductosModal';
-import { useToggleDestacado, useRestaurarPreciosDesdeExcel } from '@/app/hooks/productos/useProductosMutations';
+import { useToggleDestacado, useRestaurarPreciosDesdeExcel, useUpdateProducto } from '@/app/hooks/productos/useProductosMutations';
 import { useTogglePublicado } from '@/app/hooks/productos/usePublicadoMutations';
 import { useProductos } from '@/app/hooks/productos/useProductos';
 import { useProductFilters } from '@/app/hooks/productos/useProductFilters';
@@ -46,6 +46,7 @@ function ProductosPageContent() {
     const openStockDialog = (producto: IProductos) => setModal({ type: 'stock', producto });
     const { toggleDestacado } = useToggleDestacado();
     const { togglePublicado } = useTogglePublicado();
+    const { updateProducto } = useUpdateProducto();
     const { restaurarPreciosDesdeExcel } = useRestaurarPreciosDesdeExcel();
 
     const closeModal = () => {
@@ -64,6 +65,11 @@ function ProductosPageContent() {
 
     const handleTogglePublicado = (producto: IProductos) => {
         togglePublicado(producto.id_prod);
+    };
+
+    const handleToggleCuotas = (producto: IProductos) => {
+        const next = producto.cuotas_habilitadas === true ? false : true;
+        updateProducto({ id: producto.id_prod, data: { cuotas_habilitadas: next } });
     };
 
     const handleRestaurarPreciosExcel = (producto: IProductos) => {
@@ -99,6 +105,7 @@ function ProductosPageContent() {
                         onDelete={openDeleteDialog}
                         onToggleDestacado={handleToggleDestacado}
                         onTogglePublicado={handleTogglePublicado}
+                        onToggleCuotas={handleToggleCuotas}
                         onUpdateStock={openStockDialog}
                         onCambiarImagen={openCambiarImagenModal}
                         onRestaurarPreciosExcel={handleRestaurarPreciosExcel}

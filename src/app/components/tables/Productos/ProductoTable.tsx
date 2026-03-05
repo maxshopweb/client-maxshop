@@ -17,6 +17,7 @@ interface ProductosTableProps {
     onDelete: (producto: IProductos) => void;
     onToggleDestacado: (producto: IProductos) => void;
     onTogglePublicado: (producto: IProductos) => void;
+    onToggleCuotas?: (producto: IProductos) => void;
     onUpdateStock: (producto: IProductos) => void;
     onCambiarImagen?: (producto: IProductos) => void;
     onRestaurarPreciosExcel?: (producto: IProductos) => void;
@@ -28,6 +29,7 @@ export function ProductosTable({
     onDelete,
     onToggleDestacado,
     onTogglePublicado,
+    onToggleCuotas,
     onUpdateStock,
     onCambiarImagen,
     onRestaurarPreciosExcel,
@@ -53,6 +55,7 @@ export function ProductosTable({
         onDelete,
         onToggleDestacado,
         onTogglePublicado,
+        onToggleCuotas,
         onUpdateStock,
         onCambiarImagen,
         onRestaurarPreciosExcel,
