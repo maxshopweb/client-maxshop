@@ -34,6 +34,7 @@ export function CreateProductoModal({ onClose }: CreateProductoModalProps) {
             stock: 0,
             lista_precio_activa: 'V',
             estado: 2,
+            codi_impuesto: '01', // IVA 21% por defecto (no se muestra en el formulario)
         },
     });
 
@@ -69,7 +70,7 @@ export function CreateProductoModal({ onClose }: CreateProductoModalProps) {
                 descripcion: rawData.descripcion,
                 cod_sku: rawData.cod_sku,
                 id_interno: rawData.id_interno,
-                modelo: rawData.modelo,
+                modelo: rawData.modelo?.trim() || undefined,
                 precio_venta: rawData.precio_venta ?? undefined,
                 precio_especial: rawData.precio_especial ?? undefined,
                 precio_pvp: rawData.precio_pvp ?? undefined,
@@ -86,7 +87,7 @@ export function CreateProductoModal({ onClose }: CreateProductoModalProps) {
                 codi_categoria: rawData.codi_categoria,
                 codi_marca: rawData.codi_marca,
                 codi_grupo: rawData.codi_grupo,
-                codi_impuesto: rawData.codi_impuesto,
+                codi_impuesto: rawData.codi_impuesto ?? '01',
                 id_cat: rawData.id_cat ? Number(rawData.id_cat) : undefined,
                 id_subcat: rawData.id_subcat ? Number(rawData.id_subcat) : undefined,
                 id_marca: rawData.id_marca ? Number(rawData.id_marca) : undefined,

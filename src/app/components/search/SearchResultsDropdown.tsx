@@ -40,6 +40,9 @@ const SearchProductItem = ({ producto, onClick }: SearchProductItemProps) => {
         <h3 className="font-medium text-sm text-terciario line-clamp-2 group-hover:text-principal transition-colors">
           {nombre}
         </h3>
+        {producto.modelo?.trim() && (
+          <p className="text-xs text-terciario/70 mt-0.5 line-clamp-1">{producto.modelo.trim()}</p>
+        )}
         {marca && (
           <p className="text-xs text-gray-500 mt-0.5">{marca}</p>
         )}

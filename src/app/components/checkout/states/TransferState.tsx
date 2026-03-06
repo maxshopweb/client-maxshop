@@ -11,6 +11,7 @@ import { useCheckoutStore } from "@/app/hooks/checkout/useCheckoutStore";
 
 interface TransferStateProps {
   id_venta?: string | number;
+  cod_interno?: string | null;
   datos_bancarios?: IBankDetails;
   metodo: 'transferencia' | 'efectivo';
 }
@@ -19,7 +20,7 @@ interface TransferStateProps {
  * Componente para mostrar el resultado de pedidos con transferencia o efectivo
  * Usa configuración centralizada desde useCheckoutResultConfig
  */
-export default function TransferState({ id_venta, datos_bancarios, metodo }: TransferStateProps) {
+export default function TransferState({ id_venta, cod_interno, datos_bancarios, metodo }: TransferStateProps) {
   const { isGuest } = useAuth();
   const wasGuest = useCheckoutStore((state) => state.wasGuest);
   // Usar wasGuest del store si está disponible, sino usar isGuest del contexto
@@ -33,9 +34,9 @@ export default function TransferState({ id_venta, datos_bancarios, metodo }: Tra
         titulo={config.titulo}
         color={config.color}
       />
-      <ResultMessage mensaje={config.mensaje} id_venta={id_venta}>
+      <ResultMessage mensaje={config.mensaje} id_venta={id_venta} cod_interno={cod_interno}>
         {config.mostrarDatosBancarios && datos_bancarios && (
-          <BankDetails datos={datos_bancarios} id_venta={id_venta} metodo={metodo} />
+          <BankDetails datos={datos_bancarios} id_venta={id_venta} cod_interno={cod_interno} metodo={metodo} />
         )}
       </ResultMessage>
       <ResultActions acciones={config.acciones} />

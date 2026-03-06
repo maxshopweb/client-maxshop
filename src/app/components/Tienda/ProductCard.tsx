@@ -105,6 +105,13 @@ export default function ProductCard({ producto }: ProductCardProps) {
           {producto.nombre || "Producto sin nombre"}
         </h3>
 
+        {/* Modelo (opcional, debajo del nombre) */}
+        {producto.modelo?.trim() && (
+          <p className="text-xs sm:text-sm text-terciario/70 mb-1">
+            {producto.modelo.trim()}
+          </p>
+        )}
+
         {/* Marca */}
         {producto.marca && (
           <p className="text-xs text-terciario/50 mb-2 sm:mb-4 capitalize">

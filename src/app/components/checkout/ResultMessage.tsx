@@ -3,13 +3,26 @@
 import { motion } from "framer-motion";
 import { ReactNode } from "react";
 
+/** Devuelve el código de operación a mostrar: cod_interno o "MAX-" + id_venta a 8 dígitos */
+function getNumeroPedidoDisplay(cod_interno?: string | null, id_venta?: string | number): string | null {
+  if (cod_interno) return cod_interno;
+  if (id_venta != null && id_venta !== "") {
+    const n = Number(id_venta);
+    if (!Number.isNaN(n)) return "MAX-" + String(n).padStart(8, "0");
+  }
+  return null;
+}
+
 interface ResultMessageProps {
   mensaje: string;
   children?: ReactNode;
   id_venta?: string | number;
+  cod_interno?: string | null;
 }
 
-export default function ResultMessage({ mensaje, children, id_venta }: ResultMessageProps) {
+export default function ResultMessage({ mensaje, children, id_venta, cod_interno }: ResultMessageProps) {
+  const numeroPedido = getNumeroPedidoDisplay(cod_interno, id_venta);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -29,12 +42,12 @@ export default function ResultMessage({ mensaje, children, id_venta }: ResultMes
           {mensaje}
         </p>
 
-        {/* ID de venta si existe */}
-        {id_venta && (
+        {/* Número de pedido (cod_interno tipo MAX-00000001) */}
+        {numeroPedido && (
           <div className="mt-4 pt-4 border-t" style={{ borderColor: "rgba(23, 28, 53, 0.1)" }}>
             <p className="text-sm text-foreground/60 text-center">
               <span className="font-semibold">Número de pedido:</span>{" "}
-              <span className="font-mono text-principal">#{id_venta}</span>
+              <span className="font-mono text-principal">{numeroPedido}</span>
             </p>
           </div>
         )}

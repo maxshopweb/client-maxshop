@@ -2,7 +2,7 @@
 
 import { UseFormReturn } from 'react-hook-form';
 import Input from '@/app/components/ui/Input';
-import { DollarSign, Package, List, Percent } from 'lucide-react';
+import { DollarSign, Package, List } from 'lucide-react';
 import type { CreateProductoData } from '@/app/schemas/producto.schema';
 import Select from '../../ui/Select';
 import { useContenidoCrearProducto } from '@/app/hooks/productos/useProductos';
@@ -21,7 +21,7 @@ interface StepTwoProps {
 
 export function StepTwoPricing({ form }: StepTwoProps) {
   const { register, watch, setValue, formState: { errors } } = form;
-  const { listasPrecio, situacionesFiscales, isLoading: loadingContenido } = useContenidoCrearProducto();
+  const { listasPrecio, isLoading: loadingContenido } = useContenidoCrearProducto();
 
   // Listas que tienen precio en el producto (V, O, P, Q)
   const listasConPrecio = listasPrecio.filter((l) => ['V', 'O', 'P', 'Q'].includes(l.codi_lista));
@@ -96,43 +96,6 @@ export function StepTwoPricing({ form }: StepTwoProps) {
           disabled={loadingContenido}
           value={String(watch('lista_precio_activa') ?? '')}
           onChange={(value) => setValue('lista_precio_activa', (value as string) || undefined, { shouldDirty: true })}
-        />
-      </div>
-
-      {/* Situación fiscal (IVA) - id_sifi como value para claves únicas */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 text-input font-medium">
-          <Percent className="size-4" />
-          <span>Situación fiscal (IVA)</span>
-        </div>
-        <Select
-          label="IVA"
-          options={[
-            { value: '', label: 'Sin IVA' },
-            ...situacionesFiscales
-              .filter((s) => (s.codi_impuesto ?? s.codi_sifi))
-              .map((s) => ({
-                value: String(s.id_sifi),
-                label: s.nombre ? `${s.nombre} (${s.codi_impuesto ?? s.codi_sifi})` : (s.codi_impuesto ?? s.codi_sifi),
-              })),
-          ]}
-          placeholder="Seleccionar IVA"
-          disabled={loadingContenido}
-          value={(() => {
-            const codi = watch('codi_impuesto');
-            if (!codi) return '';
-            const found = situacionesFiscales.find((s) => s.codi_impuesto === codi || s.codi_sifi === codi);
-            return found ? String(found.id_sifi) : '';
-          })()}
-          onChange={(value) => {
-            const idStr = String(value);
-            if (!idStr) {
-              setValue('codi_impuesto', undefined, { shouldDirty: true });
-              return;
-            }
-            const found = situacionesFiscales.find((s) => String(s.id_sifi) === idStr);
-            setValue('codi_impuesto', found?.codi_impuesto ?? found?.codi_sifi ?? undefined, { shouldDirty: true });
-          }}
         />
       </div>
 

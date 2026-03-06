@@ -23,6 +23,7 @@ export function useCheckoutResult(): ICheckoutResult {
     const status = searchParams.get('status') as MercadoPagoStatus | null;
     const metodo = searchParams.get('metodo') as LocalPaymentMethod | null;
     const id_venta = searchParams.get('id_venta');
+    const cod_interno = searchParams.get('cod_interno') || undefined;
     const metodo_pago = searchParams.get('metodo_pago');
     const payment_status = searchParams.get('payment_status'); // Alternativo de Mercado Pago
 
@@ -58,6 +59,7 @@ export function useCheckoutResult(): ICheckoutResult {
     return {
       status: finalStatus,
       id_venta: id_venta || undefined,
+      cod_interno: cod_interno || undefined,
       metodo_pago: metodo_pago || metodo || undefined,
     };
   }, [searchParams]);

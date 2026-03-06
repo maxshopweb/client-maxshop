@@ -102,7 +102,7 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
             descripcion: rawData.descripcion,
             cod_sku: rawData.cod_sku,
             id_interno: rawData.id_interno,
-            modelo: rawData.modelo,
+            modelo: rawData.modelo?.trim() || null,
             precio_venta: rawData.precio_venta ?? undefined,
             precio_especial: rawData.precio_especial ?? undefined,
             precio_pvp: rawData.precio_pvp ?? undefined,

@@ -12,6 +12,7 @@ import { formatPrecio } from '@/app/types/ventas.type';
 import { AnimatedStatCard } from '@/app/components/ui/AnimatedStatCard';
 import { TableBadge } from '@/app/components/ui/TableBadge';
 import { AdminPageContainer } from '@/app/components/Admin/AdminPageContainer';
+import { getNumeroPedidoDisplay } from '@/app/utils/venta.utils';
 import { EditClienteModal } from '@/app/components/modals/Cliente/EditClienteModal';
 
 export default function ClienteDetailPage() {
@@ -267,8 +268,8 @@ export default function ClienteDetailPage() {
                             <tbody className="divide-y divide-gray-200">
                                 {ventas.map((venta: any) => (
                                     <tr key={venta.id_venta} className="hover:bg-gray-50">
-                                        <td className="px-4 py-3 text-sm font-medium">
-                                            #{venta.id_venta}
+                                        <td className="px-4 py-3 text-sm font-medium font-mono">
+                                            {getNumeroPedidoDisplay(venta.cod_interno, venta.id_venta) ?? `#${venta.id_venta}`}
                                         </td>
                                         <td className="px-4 py-3 text-sm">
                                             {formatFecha(venta.fecha)}

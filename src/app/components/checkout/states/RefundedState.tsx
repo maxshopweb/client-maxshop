@@ -9,9 +9,10 @@ import { useCheckoutStore } from "@/app/hooks/checkout/useCheckoutStore";
 
 interface RefundedStateProps {
   id_venta?: string | number;
+  cod_interno?: string | null;
 }
 
-export default function RefundedState({ id_venta }: RefundedStateProps) {
+export default function RefundedState({ id_venta, cod_interno }: RefundedStateProps) {
   const { isGuest } = useAuth();
   const wasGuest = useCheckoutStore((state) => state.wasGuest);
   const isGuestUser = wasGuest || isGuest;
@@ -24,7 +25,7 @@ export default function RefundedState({ id_venta }: RefundedStateProps) {
         titulo={config.titulo}
         color={config.color}
       />
-      <ResultMessage mensaje={config.mensaje} id_venta={id_venta} />
+      <ResultMessage mensaje={config.mensaje} id_venta={id_venta} cod_interno={cod_interno} />
       <ResultActions acciones={config.acciones} />
     </>
   );

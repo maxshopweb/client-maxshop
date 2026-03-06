@@ -9,6 +9,8 @@ import type { IVenta } from './ventas.type';
 export interface ICliente {
     id_cliente?: string | null;
     id_usuario: string;
+    /** ID numérico único por cliente (gestión / listados) */
+    numero_cliente?: number | null;
     direccion?: string | null;
     altura?: string | null;
     piso?: string | null;

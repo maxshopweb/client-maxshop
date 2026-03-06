@@ -8,6 +8,8 @@ import type { IProductos } from './producto.type';
 
 export interface IVenta {
     id_venta: number;
+    /** Código de operación para el cliente (ej. MAX-00000001) */
+    cod_interno?: string | null;
     id_usuario?: string | null;
     fecha?: Date | null;
     id_cliente?: string | null;

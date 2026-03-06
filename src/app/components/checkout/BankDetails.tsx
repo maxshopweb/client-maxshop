@@ -5,9 +5,20 @@ import { Copy, Check } from "lucide-react";
 import { IBankDetails } from "../../types/checkout-result.type";
 import { useClipboard } from "../../hooks/checkout/useClipboard";
 
+/** Devuelve el código de operación a mostrar: cod_interno o "MAX-" + id_venta a 8 dígitos */
+function getNumeroPedidoDisplay(cod_interno?: string | null, id_venta?: string | number): string | null {
+  if (cod_interno) return cod_interno;
+  if (id_venta != null && id_venta !== "") {
+    const n = Number(id_venta);
+    if (!Number.isNaN(n)) return "MAX-" + String(n).padStart(8, "0");
+  }
+  return null;
+}
+
 interface BankDetailsProps {
   datos: IBankDetails;
   id_venta?: string | number;
+  cod_interno?: string | null;
   metodo?: 'transferencia' | 'efectivo';
 }
 
@@ -15,8 +26,9 @@ interface BankDetailsProps {
  * Componente presentacional para mostrar datos bancarios
  * La lógica de copiado está en el hook useClipboard
  */
-export default function BankDetails({ datos, id_venta, metodo }: BankDetailsProps) {
+export default function BankDetails({ datos, id_venta, cod_interno, metodo }: BankDetailsProps) {
   const { copy, copied } = useClipboard();
+  const numeroPedido = getNumeroPedidoDisplay(cod_interno, id_venta);
 
   const titulo = metodo === 'efectivo' 
     ? "Datos para pago en RapiPago o Pago Fácil"
@@ -109,9 +121,9 @@ export default function BankDetails({ datos, id_venta, metodo }: BankDetailsProp
           <div className="mt-6 pt-6 border-t" style={{ borderColor: "rgba(23, 28, 53, 0.1)" }}>
             <p className="text-sm text-foreground/70 leading-relaxed">
               <strong className="text-foreground">Importante:</strong> {datos.instrucciones}
-              {id_venta && (
+              {numeroPedido && (
                 <span className="block mt-2 font-mono text-principal font-semibold">
-                  Incluye el número de pedido: #{id_venta}
+                  Incluye el número de pedido: {numeroPedido}
                 </span>
               )}
             </p>

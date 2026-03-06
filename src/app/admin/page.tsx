@@ -14,6 +14,7 @@ import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { dashboardKeys } from '../hooks/dashboard/dashboardKeys';
 import { toast } from 'sonner';
+import { getNumeroPedidoDisplay } from '@/app/utils/venta.utils';
 
 export default function AdminPage() {
     // Manejo de eventos en tiempo real
@@ -28,8 +29,12 @@ export default function AdminPage() {
             queryClient.invalidateQueries({ queryKey: dashboardKeys.orderStatus({}) });
             queryClient.invalidateQueries({ queryKey: dashboardKeys.alerts() });
 
+            const ordenDisplay = getNumeroPedidoDisplay(
+                lastSaleEvent.cod_interno,
+                lastSaleEvent.id_venta
+            ) ?? `#${lastSaleEvent.id_venta}`;
             toast.success(`Nueva venta recibida!`, {
-                description: `Orden #${lastSaleEvent.id_venta}`
+                description: `Orden ${ordenDisplay}`
             });
         }
     }, [lastSaleEvent, queryClient]);

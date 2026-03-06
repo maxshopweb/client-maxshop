@@ -19,6 +19,7 @@ import type { IVenta } from '@/app/types/ventas.type';
 import type { IUpdateClienteDTO } from '@/app/types/cliente.type';
 import { ESTADO_PAGO_OPTIONS, METODO_PAGO_OPTIONS, TIPO_VENTA_OPTIONS } from '@/app/types/ventas.type';
 import { Button } from '@/app/components/ui/Button';
+import { getNumeroPedidoDisplay } from '@/app/utils/venta.utils';
 
 type FormData = UpdateVentaData & IUpdateClienteDTO;
 
@@ -107,7 +108,7 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
             onClose={onClose}
             title={
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span>Editar venta #{venta.id_venta}</span>
+                    <span>Editar venta {getNumeroPedidoDisplay(venta.cod_interno, venta.id_venta) ?? `#${venta.id_venta}`}</span>
                     {venta.cliente?.id_usuario && (
                         <Link
                             href={`/admin/clientes/${venta.cliente.id_usuario}?edit=1`}

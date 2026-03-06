@@ -54,7 +54,11 @@ export default function ProductInfo({ producto }: ProductInfoProps) {
         <h1 className="text-xl sm:text-2xl md:text-3xl font-medium text-terciario mb-2 capitalize">
           {producto.nombre || "Producto sin nombre"}
         </h1>
-        
+        {producto.modelo?.trim() && (
+          <p className="text-sm sm:text-base text-terciario/70 mb-2">
+            {producto.modelo.trim()}
+          </p>
+        )}
         {/* SKU y Marca */}
         <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-terciario/50">
           {producto.cod_sku && (

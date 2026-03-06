@@ -24,6 +24,8 @@ export type CheckoutResultStatus =
 export interface ICheckoutResult {
   status: CheckoutResultStatus;
   id_venta?: string | number;
+  /** Código de operación para el cliente (ej. MAX-00000001). Si no viene, se deriva de id_venta. */
+  cod_interno?: string | null;
   metodo_pago?: string;
   mensaje?: string;
   // Para transferencia/efectivo

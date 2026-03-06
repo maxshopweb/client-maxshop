@@ -100,7 +100,12 @@ export function useCreateOrderFromCheckout(options: UseCreateOrderFromCheckoutOp
         ? venta.metodo_pago
         : 'mercadopago';
 
-      const redirectUrl = `/checkout/resultado?metodo=${metodo}&id_venta=${venta.id_venta}`;
+      const params = new URLSearchParams({
+        metodo,
+        id_venta: String(venta.id_venta),
+      });
+      if (venta.cod_interno) params.set('cod_interno', venta.cod_interno);
+      const redirectUrl = `/checkout/resultado?${params.toString()}`;
 
       options.onSuccess?.(venta);
       setIsCreatingOrder(false);

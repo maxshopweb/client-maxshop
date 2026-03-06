@@ -110,6 +110,18 @@ export const getProductosColumns = (
             },
         },
         {
+            accessorKey: 'modelo',
+            header: 'Modelo',
+            cell: ({ row }) => {
+                const modelo = row.original.modelo?.trim();
+                return (
+                    <span className="text-sm text-gray-600">
+                        {modelo || '—'}
+                    </span>
+                );
+            },
+        },
+        {
             id: 'categoria',
             accessorKey: 'codi_categoria',
             header: 'Categoría',
@@ -434,6 +446,7 @@ export const defaultColumnOrder = [
     'select',
     'img_principal',
     'nombre',
+    'modelo',
     'subcategoria.nombre',
     'marca.nombre',
     'precio',

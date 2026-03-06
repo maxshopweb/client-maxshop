@@ -5,6 +5,7 @@ import { formatPrecio, formatFecha, getEstadoPagoColor, getEstadoEnvioColor } fr
 import { ESTADO_PAGO_OPTIONS, ESTADO_ENVIO_OPTIONS, METODO_PAGO_OPTIONS, TIPO_VENTA_OPTIONS } from '@/app/types/ventas.type';
 import ModalBase from '@/app/components/modals/BaseModal';
 import { ventasService } from '@/app/services/venta.service';
+import { getNumeroPedidoDisplay } from '@/app/utils/venta.utils';
 
 interface ViewVentaModalProps {
     venta: IVenta;
@@ -76,7 +77,7 @@ export function ViewVentaModal({ venta: ventaInitial, onClose, isOpen }: ViewVen
                             </div>
                             <div>
                                 <h2 className="text-2xl font-bold text-foreground">
-                                    Detalles de venta #{venta.id_venta}
+                                    Detalles de venta {getNumeroPedidoDisplay(venta.cod_interno, venta.id_venta) ?? `#${venta.id_venta}`}
                                 </h2>
                                 <p className="text-sm text-foreground/60 mt-1">
                                     {formatFecha(venta.fecha)}
@@ -271,6 +272,7 @@ export function ViewVentaModal({ venta: ventaInitial, onClose, isOpen }: ViewVen
                                                             </h4>
                                                             <div className="flex flex-wrap gap-4 text-sm text-foreground/60 mt-2">
                                                                 {detalle.producto?.codi_arti && <span>Código: {detalle.producto.codi_arti}</span>}
+                                                                {detalle.producto?.modelo?.trim() && <span>Modelo: {detalle.producto.modelo.trim()}</span>}
                                                                 {detalle.producto?.marca?.nombre && <span>Marca: {detalle.producto.marca.nombre}</span>}
                                                                 {detalle.producto?.categoria?.nombre && <span>Categoría: {detalle.producto.categoria.nombre}</span>}
                                                             </div>

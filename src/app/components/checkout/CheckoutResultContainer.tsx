@@ -18,43 +18,44 @@ interface CheckoutResultContainerProps {
 }
 
 export default function CheckoutResultContainer({ result }: CheckoutResultContainerProps) {
-  const { status, id_venta, datos_bancarios, metodo_pago } = result;
+  const { status, id_venta, cod_interno, datos_bancarios, metodo_pago } = result;
 
   // Renderizar según el estado de Mercado Pago o método local
   switch (status) {
     // Estados de Mercado Pago
     case 'approved':
-      return <ApprovedState id_venta={id_venta} />;
+      return <ApprovedState id_venta={id_venta} cod_interno={cod_interno} />;
 
     case 'pending':
-      return <PendingState id_venta={id_venta} />;
+      return <PendingState id_venta={id_venta} cod_interno={cod_interno} />;
 
     case 'authorized':
-      return <AuthorizedState id_venta={id_venta} />;
+      return <AuthorizedState id_venta={id_venta} cod_interno={cod_interno} />;
 
     case 'in_process':
-      return <InProcessState id_venta={id_venta} />;
+      return <InProcessState id_venta={id_venta} cod_interno={cod_interno} />;
 
     case 'in_mediation':
-      return <InMediationState id_venta={id_venta} />;
+      return <InMediationState id_venta={id_venta} cod_interno={cod_interno} />;
 
     case 'rejected':
-      return <RejectedState id_venta={id_venta} />;
+      return <RejectedState id_venta={id_venta} cod_interno={cod_interno} />;
 
     case 'cancelled':
-      return <CancelledState id_venta={id_venta} />;
+      return <CancelledState id_venta={id_venta} cod_interno={cod_interno} />;
 
     case 'refunded':
-      return <RefundedState id_venta={id_venta} />;
+      return <RefundedState id_venta={id_venta} cod_interno={cod_interno} />;
 
     case 'charged_back':
-      return <ChargedBackState id_venta={id_venta} />;
+      return <ChargedBackState id_venta={id_venta} cod_interno={cod_interno} />;
 
     // Métodos de pago locales
     case 'transferencia':
       return (
         <TransferState
           id_venta={id_venta}
+          cod_interno={cod_interno}
           datos_bancarios={datos_bancarios}
           metodo="transferencia"
         />
@@ -64,6 +65,7 @@ export default function CheckoutResultContainer({ result }: CheckoutResultContai
       return (
         <TransferState
           id_venta={id_venta}
+          cod_interno={cod_interno}
           datos_bancarios={datos_bancarios}
           metodo="efectivo"
         />
@@ -72,7 +74,7 @@ export default function CheckoutResultContainer({ result }: CheckoutResultContai
     // Estados de procesamiento/error
     case 'processing':
     default:
-      return <ProcessingState id_venta={id_venta} />;
+      return <ProcessingState id_venta={id_venta} cod_interno={cod_interno} />;
   }
 }
 

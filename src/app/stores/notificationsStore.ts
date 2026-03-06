@@ -7,6 +7,8 @@ import { create } from 'zustand';
 
 export interface SaleNotification {
   id_venta: number;
+  /** Código de operación para mostrar (ej. MAX-00000001). Si no viene, el UI lo deriva de id_venta. */
+  cod_interno?: string | null;
   estado_pago: 'pendiente' | 'aprobado' | 'cancelado';
   fecha: string;
   created_at: string;

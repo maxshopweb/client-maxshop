@@ -7,9 +7,10 @@ import { useCheckoutResultConfig } from "@/app/hooks/checkout/useCheckoutResultC
 
 interface ProcessingStateProps {
   id_venta?: string | number;
+  cod_interno?: string | null;
 }
 
-export default function ProcessingState({ id_venta }: ProcessingStateProps) {
+export default function ProcessingState({ id_venta, cod_interno }: ProcessingStateProps) {
   const config = useCheckoutResultConfig('processing');
 
   return (
@@ -56,7 +57,7 @@ export default function ProcessingState({ id_venta }: ProcessingStateProps) {
           {config.titulo}
         </motion.h1>
       </motion.div>
-      <ResultMessage mensaje={config.mensaje} id_venta={id_venta} />
+      <ResultMessage mensaje={config.mensaje} id_venta={id_venta} cod_interno={cod_interno} />
     </>
   );
 }

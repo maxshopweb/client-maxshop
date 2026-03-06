@@ -74,6 +74,7 @@ export function StepOneBasicInfo({ form, idProd }: StepOneProps) {
                     label="Modelo"
                     placeholder="Ej: DCD771C2"
                     icon={FileText}
+                    maxLength={50}
                     {...register('modelo')}
                 />
             </div>

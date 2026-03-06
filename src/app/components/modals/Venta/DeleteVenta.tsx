@@ -3,6 +3,7 @@ import { Button } from '@/app/components/ui/Button';
 import { useUpdateVenta } from '@/app/hooks/ventas/useVentasMutations';
 import type { IVenta } from '@/app/types/ventas.type';
 import SimpleModal from '@/app/components/modals/SimpleModal';
+import { getNumeroPedidoDisplay } from '@/app/utils/venta.utils';
 
 interface DeleteVentaModalProps {
     venta: IVenta;
@@ -73,7 +74,7 @@ export function DeleteVentaModal({ venta, onClose, onRequestPasswordConfirm }: D
         >
             <p className="text-foreground mb-6">
                 ¿Estás seguro de que deseas dar de baja la venta{' '}
-                <span className="font-semibold">#{venta.id_venta}</span>?
+                <span className="font-semibold">{getNumeroPedidoDisplay(venta.cod_interno, venta.id_venta) ?? `#${venta.id_venta}`}</span>?
                 Esta acción marcará la venta como cancelada. Para continuar se pedirá tu contraseña.
             </p>
         </SimpleModal>

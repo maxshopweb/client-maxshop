@@ -48,10 +48,10 @@ export default function ProductTabs({ producto }: ProductTabsProps) {
               <dd className="text-sm sm:text-base text-terciario font-medium">{producto.id_interno}</dd>
             </div>
           )}
-          {producto.modelo && (
+          {producto.modelo?.trim() && (
             <div className="py-2 sm:py-3">
               <dt className="text-xs sm:text-sm font-medium text-terciario/60 mb-1">Modelo</dt>
-              <dd className="text-sm sm:text-base text-terciario font-medium">{producto.modelo}</dd>
+              <dd className="text-sm sm:text-base text-terciario font-medium">{producto.modelo.trim()}</dd>
             </div>
           )}
           {producto.marca?.nombre && (

@@ -7,6 +7,7 @@ import type { IVenta } from '@/app/types/ventas.type';
 import { formatPrecio, formatFecha } from '@/app/types/ventas.type';
 import { TIPO_VENTA_OPTIONS } from '@/app/types/ventas.type';
 import { TableBadge } from '@/app/components/ui/TableBadge';
+import { getNumeroPedidoDisplay } from '@/app/utils/venta.utils';
 
 interface VentasTableActions {
     onEdit: (venta: IVenta) => void;
@@ -51,17 +52,18 @@ export const getVentasColumns = (
         },
         {
             accessorKey: 'id_venta',
-            header: 'ID',
+            header: 'Pedido',
             cell: ({ row }) => {
-                const id = row.getValue('id_venta') as number;
                 const venta = row.original;
+                const display = getNumeroPedidoDisplay(venta.cod_interno, venta.id_venta);
+                if (!display) return <span className="text-gray-400">-</span>;
                 return (
                     <button
                         type="button"
                         onClick={() => actions.onView(venta)}
                         className="text-sm font-mono text-gray-600 font-semibold underline decoration-gray-400 hover:decoration-gray-600 cursor-pointer text-left"
                     >
-                        #{id}
+                        {display}
                     </button>
                 );
             },

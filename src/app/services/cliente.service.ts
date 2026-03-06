@@ -101,6 +101,32 @@ class ClientesService {
     return response.data.data;
   }
 
+  /**
+   * Exporta todos los clientes a Excel (descarga el archivo y lo sube al FTP en backend).
+   */
+  async exportExcel(): Promise<void> {
+    const response = await axiosInstance.get('/clientes/export', {
+      responseType: 'blob',
+    });
+    const contentType = response.headers['content-type'] || '';
+    if (contentType.includes('application/json')) {
+      const text = await (response.data as Blob).text();
+      const json = JSON.parse(text);
+      throw new Error(json.error || 'Error al exportar');
+    }
+    const blob = new Blob([response.data], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Clientes.xlsx';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   async getMyPedidos(filters: IVentaFilters = {}): Promise<IPaginatedResponse<IVenta>> {
     const params = new URLSearchParams();
     if (filters.page) params.append('page', filters.page.toString());
