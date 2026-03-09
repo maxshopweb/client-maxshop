@@ -97,7 +97,7 @@ export const getProductosColumns = (
                                 href={`/tienda/productos/${row.original.id_prod}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="font-medium text-text hover:underline text-[var(--principal)]"
+                                className="font-medium text-text hover:underline text-(--principal)"
                             >
                                 {nombre}
                             </Link>
@@ -226,13 +226,13 @@ export const getProductosColumns = (
                         <Switch.Root
                             checked={checked}
                             onCheckedChange={() => actions.onToggleCuotas?.(producto)}
-                            className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-gray-300 bg-gray-200 transition-colors duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-[var(--principal)] focus:ring-offset-2 data-[state=checked]:bg-[var(--principal)] data-[state=checked]:border-[var(--principal)]"
+                            className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-gray-300 bg-gray-200 transition-colors duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-(--principal) focus:ring-offset-2 data-[state=checked]:bg-(--principal) data-[state=checked]:border-(--principal)"
                         >
                             <Switch.Thumb className="pointer-events-none block h-5 w-5 rounded-full border-2 border-gray-300 bg-white shadow-md ring-0 transition-[transform] duration-200 ease-out translate-x-0.5 data-[state=checked]:translate-x-5 data-[state=checked]:border-white/80" />
                         </Switch.Root>
                     );
                 }
-                return checked ? <TableBadge variant="success">Sí</TableBadge> : <TableBadge variant="secondary">No</TableBadge>;
+                return checked ? <TableBadge variant="success">Sí</TableBadge> : <TableBadge variant="neutral">No</TableBadge>;
             },
             enableSorting: false,
         },
@@ -342,7 +342,7 @@ export const getProductosColumns = (
                     <Switch.Root
                         checked={checked}
                         onCheckedChange={() => actions.onTogglePublicado(producto)}
-                        className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-gray-300 bg-gray-200 transition-colors duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-[var(--principal)] focus:ring-offset-2 data-[state=checked]:bg-[var(--principal)] data-[state=checked]:border-[var(--principal)]"
+                        className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-gray-300 bg-gray-200 transition-colors duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-(--principal) focus:ring-offset-2 data-[state=checked]:bg-(--principal) data-[state=checked]:border-(--principal)"
                     >
                         <Switch.Thumb className="pointer-events-none block h-5 w-5 rounded-full border-2 border-gray-300 bg-white shadow-md ring-0 transition-[transform] duration-200 ease-out translate-x-0.5 data-[state=checked]:translate-x-5 data-[state=checked]:border-white/80" />
                     </Switch.Root>
@@ -414,7 +414,7 @@ export const getProductosColumns = (
                                     {producto.destacado ? 'Quitar destacado' : 'Destacar'}
                                 </DropdownMenu.Item> */}
 
-                                <DropdownMenu.Separator className="h-px bg-[var(--card-border)] my-1" />
+                                <DropdownMenu.Separator className="h-px bg-(--card-border) my-1" />
 
                                 <DropdownMenu.Item
                                     className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-red-500/10 rounded outline-none text-red-600 transition-colors"

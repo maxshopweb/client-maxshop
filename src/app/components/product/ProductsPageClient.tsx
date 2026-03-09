@@ -93,8 +93,8 @@ function ProductsPageContent() {
   }, [pagination?.hasNextPage, pagination?.page, isLoading, prefetchNextPage]);
 
   return (
-    <div className="min-h-screen bg-background pt-10">
-      <div className="container mx-auto px-4 flex flex-col lg:flex-row gap-6 py-6">
+    <div className="min-h-screen bg-background pt-0 lg:pt-10">
+      <div className="container mx-auto px-4 flex flex-col lg:flex-row gap-6 pt-2 pb-6 lg:py-6">
         {/* Overlay para mobile */}
         <AnimatePresence>
           {isFiltersOpen && (
@@ -203,8 +203,8 @@ export default function ProductsPageClient() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-background pt-10">
-          <div className="container mx-auto px-4 py-6">
+        <div className="min-h-screen bg-background pt-0 lg:pt-10">
+          <div className="container mx-auto px-4 pt-2 pb-6 lg:py-6">
             <ProductsGrid 
               productos={[]} 
               isLoading={true}
