@@ -19,11 +19,16 @@ export interface SaleNotification {
   total?: number;
 }
 
+export type AddNotificationOptions = {
+  /** Si es true, no se actualiza lastSaleEvent (útil al hidratar desde API para no disparar toasts) */
+  silent?: boolean;
+};
+
 interface NotificationsState {
   notifications: SaleNotification[];
   hasNewSales: boolean;
   lastSaleEvent: SaleNotification | null;
-  addNotification: (notification: Omit<SaleNotification, 'isRead' | 'created_at'>) => void;
+  addNotification: (notification: Omit<SaleNotification, 'isRead' | 'created_at'>, options?: AddNotificationOptions) => void;
   markAsRead: (id_venta: number) => void;
   markAllAsRead: () => void;
   removeNotification: (id_venta: number) => void;
@@ -36,7 +41,8 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
   hasNewSales: false,
   lastSaleEvent: null,
   
-  addNotification: (notification) => {
+  addNotification: (notification, options) => {
+    const silent = options?.silent === true;
     const newNotification: SaleNotification = {
       ...notification,
       isRead: false,
@@ -53,7 +59,7 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
       return {
         notifications: [newNotification, ...state.notifications].slice(0, 50), // Limitar a 50 notificaciones
         hasNewSales: true,
-        lastSaleEvent: newNotification,
+        ...(silent ? {} : { lastSaleEvent: newNotification }),
       };
     });
   },

@@ -37,7 +37,7 @@ const StepModal = ({
     };
 
     return (
-        <ModalBase isOpen={isOpen} onClose={handleModalClose} maxWidth="max-w-2xl">
+        <ModalBase isOpen={isOpen} onClose={handleModalClose} maxWidth="max-w-4xl">
             {({ handleClose }) => {
                 const handleNext = async () => { // ← HACER ASYNC
                     // Validar step actual si tiene validación
@@ -113,7 +113,7 @@ const StepModal = ({
                             </div>
                         </div>
 
-                        <div className="overflow-x-hidden overflow-y-visible">
+                        <div className="overflow-visible">
                             <div key={currentStep} className={`animate-slide-${slideDirection}`}>
                                 <div className="mb-8 min-h-0">
                                     {steps[currentStep].content}

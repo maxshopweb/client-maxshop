@@ -92,26 +92,6 @@ export function ClientesFilters() {
                                 />
                             </div>
 
-                            {/* CIUDAD */}
-                            <div>
-                                <Input
-                                    label="Ciudad"
-                                    placeholder="Filtrar por ciudad"
-                                    value={filters.ciudad || ''}
-                                    onChange={(e) => setFilter('ciudad', e.target.value || undefined)}
-                                />
-                            </div>
-
-                            {/* PROVINCIA */}
-                            <div>
-                                <Input
-                                    label="Provincia"
-                                    placeholder="Filtrar por provincia"
-                                    value={filters.provincia || ''}
-                                    onChange={(e) => setFilter('provincia', e.target.value || undefined)}
-                                />
-                            </div>
-
                             {/* ORDENAMIENTO */}
                             <div>
                                 <Select

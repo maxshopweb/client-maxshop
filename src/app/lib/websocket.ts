@@ -8,15 +8,31 @@
  * - Solo para admins
  */
 
-import { useNotificationsStore, SaleEvent } from '../stores/notificationsStore';
+import { useNotificationsStore } from '../stores/notificationsStore';
 import { getAuthToken } from '../utils/cookies';
 import { refreshFirebaseToken, isTokenNearExpiry } from '../utils/tokenRefresh';
+
+/** Payload que envía el backend en el evento SALE_CREATED */
+interface SaleCreatedPayload {
+  id_venta: number;
+  estado_pago: 'pendiente' | 'aprobado' | 'cancelado';
+  fecha: string;
+  venta?: {
+    id_venta: number;
+    cod_interno?: string | null;
+    estado_pago?: string;
+    fecha?: string;
+    total_neto?: number | null;
+    cliente?: { usuario?: { nombre?: string; apellido?: string; email?: string } } | null;
+    detalles?: { producto?: { nombre?: string } }[];
+  } | null;
+}
 
 interface WebSocketMessage {
   type: string;
   message?: string;
   event?: string;
-  payload?: SaleEvent;
+  payload?: SaleCreatedPayload;
 }
 
 class WebSocketClient {
@@ -217,10 +233,22 @@ class WebSocketClient {
         case 'event':
           if (message.event === 'SALE_CREATED' && message.payload) {
             const { addNotification } = useNotificationsStore.getState();
+            const p = message.payload;
+            const v = p.venta;
+            const cliente = v?.cliente?.usuario
+              ? [v.cliente.usuario.nombre, v.cliente.usuario.apellido].filter(Boolean).join(' ').trim() || v.cliente.usuario.email
+              : undefined;
+            const producto = v?.detalles?.length && v.detalles[0]?.producto?.nombre
+              ? v.detalles.length === 1 ? v.detalles[0].producto!.nombre : `${v.detalles.length} productos`
+              : undefined;
             addNotification({
-              id_venta: message.payload.id_venta,
-              estado_pago: message.payload.estado_pago,
-              fecha: message.payload.fecha,
+              id_venta: p.id_venta,
+              estado_pago: p.estado_pago,
+              fecha: p.fecha,
+              cod_interno: v?.cod_interno ?? undefined,
+              cliente: cliente ?? undefined,
+              producto,
+              total: v?.total_neto ?? undefined,
             });
           }
           break;

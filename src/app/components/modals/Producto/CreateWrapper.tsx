@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -26,7 +26,7 @@ export function CreateProductoModal({ onClose }: CreateProductoModalProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const form = useForm<CreateProductoData>({
-        resolver: zodResolver(createProductoSchema),
+        resolver: zodResolver(createProductoSchema) as Resolver<CreateProductoData>,
         mode: 'onChange',
         defaultValues: {
             destacado: false,
@@ -69,7 +69,6 @@ export function CreateProductoModal({ onClose }: CreateProductoModalProps) {
                 nombre: rawData.nombre,
                 descripcion: rawData.descripcion,
                 cod_sku: rawData.cod_sku,
-                id_interno: rawData.id_interno,
                 modelo: rawData.modelo?.trim() || undefined,
                 precio_venta: rawData.precio_venta ?? undefined,
                 precio_especial: rawData.precio_especial ?? undefined,

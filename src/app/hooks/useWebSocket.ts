@@ -12,7 +12,7 @@ import { useAuth } from '../context/AuthContext';
 export function useWebSocket() {
   const pathname = usePathname();
   const { user } = useAuth();
-  const { clearNotifications } = useNotificationsStore();
+  const markAllAsRead = useNotificationsStore((state) => state.markAllAsRead);
 
   useEffect(() => {
     // Solo conectar si el usuario es admin
@@ -23,17 +23,16 @@ export function useWebSocket() {
     // Conectar WebSocket
     websocketClient.connect();
 
-    // Limpiar notificaciones cuando se entra a /admin/ventas
+    // Al entrar a la lista de ventas, marcar como leídas (no borrar: se mantienen visibles)
     if (pathname === '/admin/ventas') {
-      clearNotifications();
+      markAllAsRead();
     }
 
     // Cleanup: desconectar al desmontar o cambiar de usuario
     return () => {
       // No desconectar aquí, mantener la conexión mientras el usuario esté en el admin
-      // Solo desconectar si el usuario cambia o se desmonta completamente
     };
-  }, [user?.rol, pathname, clearNotifications]);
+  }, [user?.rol, pathname, markAllAsRead]);
 
   // Desconectar cuando el usuario no es admin o se desmonta el componente
   useEffect(() => {

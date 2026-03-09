@@ -4,6 +4,7 @@ import Sidebar from "@/app/components/Admin/SideBar";
 import { AuthGuard } from "@/app/components/auth/AuthGuard";
 import AccesDenied from "@/app/components/auth/AccesDenied";
 import { useWebSocket } from "@/app/hooks/useWebSocket";
+import { useInitialNotifications } from "@/app/hooks/useInitialNotifications";
 import { AdminHeader } from "@/app/components/Admin/AdminHeader";
 
 export default function AdminLayout({
@@ -13,6 +14,8 @@ export default function AdminLayout({
 }) {
     // Inicializar WebSocket para admins
     useWebSocket();
+    // Cargar ventas recientes como notificaciones (por si hubo ventas antes de abrir el panel)
+    useInitialNotifications();
 
     return (
         <AuthGuard

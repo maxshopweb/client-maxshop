@@ -59,34 +59,51 @@ export function StepOneBasicInfo({ form, idProd }: StepOneProps) {
                 />
             </div>
 
-            {/* FILA 2: ID interno (solo lectura, id_prod) + Modelo */}
-            <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-input">ID interno</label>
-                    <div
-                        className="w-full px-3 py-2.5 rounded-sm bg-input/50 border border-input text-sm text-foreground/80"
-                        style={{ borderColor: 'var(--outline-subtle)' }}
-                    >
-                        {idProd != null ? idProd : '—'}
+            {/* CREAR: solo Modelo + Código de barras. EDITAR: ID interno + Modelo + Código de barras */}
+            {idProd != null ? (
+                <>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-sm font-medium text-input">ID interno</label>
+                            <div
+                                className="w-full px-3 py-2.5 rounded-sm bg-input/50 border border-input text-sm text-foreground/80"
+                                style={{ borderColor: 'var(--outline-subtle)' }}
+                            >
+                                {idProd}
+                            </div>
+                        </div>
+                        <Input
+                            label="Modelo"
+                            placeholder="Ej: DCD771C2"
+                            icon={FileText}
+                            maxLength={50}
+                            {...register('modelo')}
+                        />
                     </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <Input
+                            label="Código de barras"
+                            placeholder="1234567890123"
+                            {...register('codi_barras')}
+                        />
+                    </div>
+                </>
+            ) : (
+                <div className="grid grid-cols-2 gap-3">
+                    <Input
+                        label="Modelo"
+                        placeholder="Ej: DCD771C2"
+                        icon={FileText}
+                        maxLength={50}
+                        {...register('modelo')}
+                    />
+                    <Input
+                        label="Código de barras"
+                        placeholder="1234567890123"
+                        {...register('codi_barras')}
+                    />
                 </div>
-                <Input
-                    label="Modelo"
-                    placeholder="Ej: DCD771C2"
-                    icon={FileText}
-                    maxLength={50}
-                    {...register('modelo')}
-                />
-            </div>
-
-            {/* Código de barras */}
-            <div className="grid grid-cols-2 gap-3">
-                <Input
-                    label="Código de barras"
-                    placeholder="1234567890123"
-                    {...register('codi_barras')}
-                />
-            </div>
+            )}
 
             <div className="grid grid-cols-3 gap-3">
                 <Select

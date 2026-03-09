@@ -318,59 +318,66 @@ export function ProductosFilters() {
                                 </select>
                             </div>
 
-                            {/* CHECKBOXES */}
-                            <div className="space-y-2.5 pt-3 border-t border-card">
-                                <label className="flex items-center gap-3 cursor-pointer group">
-                                    <Checkbox.Root
-                                        checked={filters.destacado === true}
-                                        onCheckedChange={(checked) =>
-                                            setFilter('destacado', checked === true ? true : undefined)
-                                        }
-                                        className="flex h-5 w-5 items-center justify-center rounded border-2 border-input group-hover:border-principal data-[state=checked]:bg-principal data-[state=checked]:border-principal transition-all"
-                                    >
-                                        <Checkbox.Indicator>
-                                            <Check className="h-3.5 w-3.5 text-white" />
-                                        </Checkbox.Indicator>
-                                    </Checkbox.Root>
-                                    <span className="text-sm text-input group-hover:text-principal transition-colors">
-                                        Solo productos destacados
-                                    </span>
-                                </label>
+                            {/* CHECKBOXES — leer destacado/oferta/stock_bajo de filters (compatible con URL y backend) */}
+                            {(() => {
+                                const isDestacado = filters.destacado === true || (filters as Record<string, unknown>).destacado === true;
+                                const isOferta = filters.oferta === true || (filters as Record<string, unknown>).oferta === true;
+                                const isStockBajo = filters.stock_bajo === true || (filters as Record<string, unknown>).stockBajo === true;
+                                return (
+                                    <div className="space-y-2.5 pt-3 border-t border-card">
+                                        <label className="flex items-center gap-3 cursor-pointer group">
+                                            <Checkbox.Root
+                                                checked={isDestacado}
+                                                onCheckedChange={(checked) =>
+                                                    setFilter('destacado', checked === true ? true : undefined)
+                                                }
+                                                className="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-input group-hover:border-principal data-[state=checked]:bg-principal data-[state=checked]:border-principal data-[state=checked]:text-white transition-all"
+                                            >
+                                                <Checkbox.Indicator className="flex items-center justify-center text-white">
+                                                    <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                                                </Checkbox.Indicator>
+                                            </Checkbox.Root>
+                                            <span className="text-sm text-input group-hover:text-principal transition-colors">
+                                                Solo productos destacados
+                                            </span>
+                                        </label>
 
-                                <label className="flex items-center gap-3 cursor-pointer group">
-                                    <Checkbox.Root
-                                        checked={filters.oferta === true}
-                                        onCheckedChange={(checked) =>
-                                            setFilter('oferta', checked === true ? true : undefined)
-                                        }
-                                        className="flex h-5 w-5 items-center justify-center rounded border-2 border-input group-hover:border-principal data-[state=checked]:bg-principal data-[state=checked]:border-principal transition-all"
-                                    >
-                                        <Checkbox.Indicator>
-                                            <Check className="h-3.5 w-3.5 text-white" />
-                                        </Checkbox.Indicator>
-                                    </Checkbox.Root>
-                                    <span className="text-sm text-input group-hover:text-principal transition-colors">
-                                        Solo productos en oferta
-                                    </span>
-                                </label>
+                                        <label className="flex items-center gap-3 cursor-pointer group">
+                                            <Checkbox.Root
+                                                checked={isOferta}
+                                                onCheckedChange={(checked) =>
+                                                    setFilter('oferta', checked === true ? true : undefined)
+                                                }
+                                                className="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-input group-hover:border-principal data-[state=checked]:bg-principal data-[state=checked]:border-principal data-[state=checked]:text-white transition-all"
+                                            >
+                                                <Checkbox.Indicator className="flex items-center justify-center text-white">
+                                                    <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                                                </Checkbox.Indicator>
+                                            </Checkbox.Root>
+                                            <span className="text-sm text-input group-hover:text-principal transition-colors">
+                                                Solo productos en oferta
+                                            </span>
+                                        </label>
 
-                                <label className="flex items-center gap-3 cursor-pointer group">
-                                    <Checkbox.Root
-                                        checked={filters.stock_bajo === true}
-                                        onCheckedChange={(checked) =>
-                                            setFilter('stock_bajo', checked === true ? true : undefined)
-                                        }
-                                        className="flex h-5 w-5 items-center justify-center rounded border-2 border-input group-hover:border-principal data-[state=checked]:bg-principal data-[state=checked]:border-principal transition-all"
-                                    >
-                                        <Checkbox.Indicator>
-                                            <Check className="h-3.5 w-3.5 text-white" />
-                                        </Checkbox.Indicator>
-                                    </Checkbox.Root>
-                                    <span className="text-sm text-input group-hover:text-principal transition-colors">
-                                        Solo productos con stock bajo
-                                    </span>
-                                </label>
-                            </div>
+                                        <label className="flex items-center gap-3 cursor-pointer group">
+                                            <Checkbox.Root
+                                                checked={isStockBajo}
+                                                onCheckedChange={(checked) =>
+                                                    setFilter('stock_bajo', checked === true ? true : undefined)
+                                                }
+                                                className="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-input group-hover:border-principal data-[state=checked]:bg-principal data-[state=checked]:border-principal data-[state=checked]:text-white transition-all"
+                                            >
+                                                <Checkbox.Indicator className="flex items-center justify-center text-white">
+                                                    <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                                                </Checkbox.Indicator>
+                                            </Checkbox.Root>
+                                            <span className="text-sm text-input group-hover:text-principal transition-colors">
+                                                Solo productos con stock bajo
+                                            </span>
+                                        </label>
+                                    </div>
+                                );
+                            })()}
 
                             <Popover.Arrow className="fill-[var(--card-bg)]" />
                         </Popover.Content>
@@ -448,21 +455,21 @@ export function ProductosFilters() {
                         />
                     )}
 
-                    {filters.destacado === true && (
+                    {(filters.destacado === true || (filters as Record<string, unknown>).destacado === true) && (
                         <FilterChip
                             label="Destacados"
                             onRemove={() => setFilter('destacado', undefined)}
                         />
                     )}
 
-                    {filters.oferta === true && (
+                    {(filters.oferta === true || (filters as Record<string, unknown>).oferta === true) && (
                         <FilterChip
                             label="En oferta"
                             onRemove={() => setFilter('oferta', undefined)}
                         />
                     )}
 
-                    {filters.stock_bajo === true && (
+                    {(filters.stock_bajo === true || (filters as Record<string, unknown>).stockBajo === true) && (
                         <FilterChip
                             label="Stock bajo"
                             onRemove={() => setFilter('stock_bajo', undefined)}

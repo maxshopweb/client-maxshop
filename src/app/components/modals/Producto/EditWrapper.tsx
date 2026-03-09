@@ -161,20 +161,22 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
                     content: (
                         <div className="space-y-4">
                             <StepTwoPricing form={form} />
-                            <div className="mt-4 pt-4 pb-6 border-t border-border">
+                            <div className="mt-4 pt-4 pb-6 border-t border-border overflow-visible">
                                 <p className="text-sm text-muted-foreground mb-2">
                                     Si editaste precios manualmente y querés que vuelvan a tomarse del Excel/FTP en la próxima sincronización:
                                 </p>
-                                <Button
-                                    type="button"
-                                    variant="outline-primary"
-                                    className="hover:scale-100"
-                                    onClick={() => restaurarPreciosDesdeExcel(producto.id_prod)}
-                                    disabled={isRestaurando}
-                                >
-                                    <FileSpreadsheet className="size-4 mr-2 shrink-0" />
-                                    {isRestaurando ? 'Restaurando...' : 'Restaurar precios desde Excel'}
-                                </Button>
+                                <div className="overflow-visible py-1">
+                                    <Button
+                                        type="button"
+                                        variant="outline-primary"
+                                        className="hover:scale-100"
+                                        onClick={() => restaurarPreciosDesdeExcel(producto.id_prod)}
+                                        disabled={isRestaurando}
+                                    >
+                                        <FileSpreadsheet className="size-4 mr-2 shrink-0" />
+                                        {isRestaurando ? 'Restaurando...' : 'Restaurar precios desde Excel'}
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     ),
