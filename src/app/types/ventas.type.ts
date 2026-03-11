@@ -26,6 +26,10 @@ export interface IVenta {
     factura_url?: string | null;
     creado_en?: Date | null;
     actualizado_en?: Date | null;
+    /** Referencia de pago manual (ej. número de operación) cuando no viene de Mercado Pago. */
+    referencia_pago_manual?: string | null;
+    /** Referencia de facturación (ej. número de comprobante externo). */
+    referencia_facturacion?: string | null;
     // Relaciones
     usuario?: IUsuarios | null;
     cliente?: {
@@ -42,8 +46,41 @@ export interface IVenta {
     } | null;
     detalles?: IVentaDetalle[];
     envio?: IEnvios | null;
-    /** Pagos de Mercado Pago asociados (código transacción = payment_id) */
-    mercado_pago_payments?: { payment_id: string; [key: string]: unknown }[];
+    /** Direcciones asociadas a la venta (envío/facturación según tipo). */
+    direcciones?: IDireccionVenta[];
+    /** Pagos de Mercado Pago asociados (código transacción = payment_id, modo de pago, etc.). */
+    mercado_pago_payments?: IMercadoPagoPayment[];
+}
+
+/** Dirección asociada a una venta (respuesta del API). Permite discriminar envío vs facturación por tipo. */
+export interface IDireccionVenta {
+    id_direccion: string;
+    id_usuario?: string | null;
+    id_venta?: number | null;
+    nombre?: string | null;
+    direccion?: string | null;
+    altura?: string | null;
+    piso?: string | null;
+    dpto?: string | null;
+    cod_postal?: number | null;
+    ciudad?: string | null;
+    provincia?: string | null;
+    pais?: string | null;
+    /** Tipo de dirección: ej. "envio" | "facturacion" para discriminar en el admin. */
+    tipo?: string | null;
+    direccion_formateada?: string | null;
+}
+
+/** Pago de Mercado Pago asociado a una venta (para mostrar referencia y modo de pago en el admin). */
+export interface IMercadoPagoPayment {
+    payment_id: string;
+    payment_method_id?: string | null;
+    payment_type_id?: string | null;
+    status_mp?: string | null;
+    status_detail?: string | null;
+    date_approved?: string | null;
+    card_info?: { last_four_digits?: string; cardholder?: { name?: string } } | null;
+    [key: string]: unknown;
 }
 
 export interface IVentaDetalle {
@@ -56,6 +93,8 @@ export interface IVentaDetalle {
     sub_total?: number | null;
     evento_aplicado?: number | null;
     tipo_descuento?: 'porcentaje' | 'monto_fijo' | null;
+    /** Código de bonificación a aplicar en esta línea (para Excel/export). */
+    codi_bonificacion?: string | null;
     // Relaciones
     venta?: IVenta | null;
     producto?: IProductos | null;
@@ -140,6 +179,8 @@ export interface IVentaDetalleDTO {
     precio_unitario: number;
     descuento_aplicado?: number;
     evento_aplicado?: number;
+    /** Código de bonificación a aplicar en esta línea. Si no se envía, se usa el del producto. */
+    codi_bonificacion?: string | null;
 }
 
 export interface IUpdateVentaDTO {
@@ -148,6 +189,16 @@ export interface IUpdateVentaDTO {
     metodo_pago?: MetodoPago;
     observaciones?: string;
     id_envio?: string;
+    /** Referencia de pago manual (ej. número de operación bancaria). */
+    referencia_pago_manual?: string | null;
+    /** Referencia de facturación (ej. número de comprobante). */
+    referencia_facturacion?: string | null;
+}
+
+/** Payload para actualizar datos de envío (número de seguimiento, transporte). */
+export interface IUpdateEnvioDTO {
+    cod_seguimiento?: string | null;
+    empresa_envio?: string | null;
 }
 
 // ========================================

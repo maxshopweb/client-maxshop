@@ -54,7 +54,16 @@ export const productoStepTwoSchema = z
     precio_especial: optionalNumberField,
     precio_pvp: optionalNumberField,
     precio_campanya: optionalNumberField,
-    lista_precio_activa: z.string().optional(), // Con cuál lista se publica: V | O | P | Q
+    /** Precio cuando lista_precio_activa = 'E' (no se sobreescribe por sync). */
+    precio_manual: optionalNumberField,
+    lista_precio_activa: z.string().optional(), // Con cuál lista se publica: V | O | P | Q | E
+    /** Código de bonificación a aplicar (para Excel/export). */
+    codi_bonificacion: z
+      .string()
+      .max(10, 'Máximo 10 caracteres')
+      .optional()
+      .or(z.literal(''))
+      .transform((v) => (v === '' ? undefined : v)),
     precio_mayorista: optionalNumberField,
     precio_minorista: optionalNumberField,
     precio_evento: optionalNumberField,
@@ -69,14 +78,16 @@ export const productoStepTwoSchema = z
   })
   .refine(
     (data) => {
-      const hasPrice =
+      const hasListPrice =
         (data.precio_venta != null && data.precio_venta > 0) ||
         (data.precio_especial != null && data.precio_especial > 0) ||
         (data.precio_pvp != null && data.precio_pvp > 0) ||
         (data.precio_campanya != null && data.precio_campanya > 0);
-      return hasPrice;
+      const hasManualPrice = (data.lista_precio_activa === 'E' || data.lista_precio_activa === 'e')
+        && data.precio_manual != null && data.precio_manual > 0;
+      return hasListPrice || hasManualPrice;
     },
-    { message: 'Ingrese al menos un precio (por lista)', path: ['precio_venta'] }
+    { message: 'Ingrese al menos un precio (por lista o precio manual si lista E)', path: ['precio_venta'] }
   );
 
 export const createProductoSchema = productoStepOneSchema.merge(productoStepTwoSchema);

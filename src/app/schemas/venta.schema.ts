@@ -68,6 +68,8 @@ export const updateVentaSchema = z.object({
     metodo_pago: MetodoPagoEnum.optional(),
     observaciones: z.string().optional(),
     id_envio: z.string().optional(),
+    referencia_pago_manual: z.string().max(100).nullable().optional(),
+    referencia_facturacion: z.string().max(100).nullable().optional(),
 });
 
 // Tipos inferidos

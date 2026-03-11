@@ -288,22 +288,28 @@ export const getProductosColumns = (
                     mostrarTachado && ref != null && ref > 0 && precio != null
                         ? Math.round((1 - precio / ref) * 100)
                         : 0;
+                const esListaE = producto.lista_precio_activa === 'E' || producto.lista_activa?.codi_lista === 'E';
                 return (
-                    <div className="flex items-baseline gap-1.5 flex-wrap">
-                        <span className="font-semibold text-text">
-                            {formatearPrecio(precio)}
-                        </span>
-                        {mostrarTachado && (
-                            <>
-                                <span className="text-sm text-gray-400 line-through">
-                                    {formatearPrecio(ref)}
-                                </span>
-                                {porcentajeOff > 0 && (
-                                    <span className="text-xs font-semibold text-amber-600">
-                                        {porcentajeOff}% OFF
+                    <div className="flex flex-col gap-0.5">
+                        <div className="flex items-baseline gap-1.5 flex-wrap">
+                            <span className="font-semibold text-text">
+                                {formatearPrecio(precio)}
+                            </span>
+                            {mostrarTachado && (
+                                <>
+                                    <span className="text-sm text-gray-400 line-through">
+                                        {formatearPrecio(ref)}
                                     </span>
-                                )}
-                            </>
+                                    {porcentajeOff > 0 && (
+                                        <span className="text-xs font-semibold text-amber-600">
+                                            {porcentajeOff}% OFF
+                                        </span>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                        {esListaE && (
+                            <span className="text-xs text-muted-foreground">Lista E — Precio especial</span>
                         )}
                     </div>
                 );

@@ -23,8 +23,12 @@ export function StepTwoPricing({ form }: StepTwoProps) {
   const { register, watch, setValue, formState: { errors } } = form;
   const { listasPrecio, situacionesFiscales, isLoading: loadingContenido } = useContenidoCrearProducto();
 
-  // Listas que tienen precio en el producto (V, O, P, Q)
+  // Listas que tienen precio en el producto (V, O, P, Q) — inputs por lista
   const listasConPrecio = listasPrecio.filter((l) => ['V', 'O', 'P', 'Q'].includes(l.codi_lista));
+  // Listas para el selector "con la que se publica" (incluye E = Precio especial)
+  const listasParaPublicar = listasPrecio.filter((l) => ['V', 'O', 'P', 'Q', 'E'].includes(l.codi_lista));
+  const listaActiva = watch('lista_precio_activa');
+  const esListaE = (listaActiva === 'E' || listaActiva === 'e');
 
   const optionalNumberOptions = {
     valueAsNumber: true,
@@ -81,22 +85,54 @@ export function StepTwoPricing({ form }: StepTwoProps) {
           <span>Lista con la que se publica el producto</span>
         </div>
         <p className="text-sm text-muted-foreground">
-          Elegí qué precio mostrar en tienda (por defecto: Venta).
+          Elegí qué precio mostrar en tienda (por defecto: Venta). Si elegís &quot;Precio especial (E)&quot;, el precio no se sobreescribe por sincronización.
         </p>
         <Select
           label="Lista pública"
           options={[
             { value: '', label: 'Seleccionar' },
-            ...listasConPrecio.map((l: IListaPrecio) => ({
+            ...listasParaPublicar.map((l: IListaPrecio) => ({
               value: l.codi_lista,
-              label: l.nombre || `Lista ${l.codi_lista}`,
+              label: l.nombre || (l.codi_lista === 'E' ? 'Precio especial (E)' : `Lista ${l.codi_lista}`),
             })),
           ]}
           placeholder="Ej: Venta"
           disabled={loadingContenido}
           value={String(watch('lista_precio_activa') ?? '')}
-          onChange={(value) => setValue('lista_precio_activa', (value as string) || undefined, { shouldDirty: true })}
+          onChange={(value) => {
+            const v = (value as string) || undefined;
+            setValue('lista_precio_activa', v, { shouldDirty: true });
+            if (v !== 'E' && v !== 'e') setValue('precio_manual', undefined, { shouldDirty: true });
+          }}
         />
+        {esListaE && (
+          <div className="pt-2">
+            <Input
+              label="Precio manual (lista E) — no se sobreescribe por sincronización"
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+              icon={DollarSign}
+              {...register('precio_manual', optionalNumberOptions)}
+              error={errors.precio_manual?.message as string | undefined}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Bonificación a aplicar */}
+      <div className="space-y-2">
+        <Input
+          label="Bonificación a aplicar"
+          placeholder="Ej: B1, B2 (código para Excel)"
+          maxLength={10}
+          {...register('codi_bonificacion')}
+          error={errors.codi_bonificacion?.message as string | undefined}
+        />
+        <p className="text-xs text-muted-foreground">
+          Código de bonificación que se enviará en el Excel de ventas para este producto (opcional).
+        </p>
       </div>
 
       {/* Situación fiscal (IVA) - id_sifi como value para claves únicas */}

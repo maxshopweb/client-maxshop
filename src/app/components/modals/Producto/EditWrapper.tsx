@@ -44,7 +44,9 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
             precio_especial: producto.precio_especial ?? undefined,
             precio_pvp: producto.precio_pvp ?? undefined,
             precio_campanya: producto.precio_campanya ?? undefined,
+            precio_manual: (producto as { precio_manual?: number | null }).precio_manual ?? undefined,
             lista_precio_activa: producto.lista_precio_activa || 'V',
+            codi_bonificacion: producto.codi_bonificacion ?? undefined,
             precio_mayorista: producto.precio_mayorista ?? undefined,
             precio_minorista: producto.precio_minorista ?? undefined,
             precio_evento: producto.precio_evento ?? undefined,
@@ -77,7 +79,7 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
     };
 
     const validateStepTwo = async () => {
-        const fields = ['precio_venta', 'precio_especial', 'precio_pvp', 'precio_campanya', 'stock'];
+        const fields = ['precio_venta', 'precio_especial', 'precio_pvp', 'precio_campanya', 'precio_manual', 'stock'];
         return await form.trigger(fields as any);
     };
 
@@ -106,7 +108,9 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
             precio_especial: rawData.precio_especial ?? undefined,
             precio_pvp: rawData.precio_pvp ?? undefined,
             precio_campanya: rawData.precio_campanya ?? undefined,
+            precio_manual: (rawData.lista_precio_activa === 'E' || rawData.lista_precio_activa === 'e') ? (rawData.precio_manual ?? undefined) : undefined,
             lista_precio_activa: rawData.lista_precio_activa || undefined,
+            codi_bonificacion: rawData.codi_bonificacion ?? undefined,
             precio_mayorista: rawData.precio_mayorista ?? undefined,
             precio_minorista: rawData.precio_minorista ?? undefined,
             precio_evento: rawData.precio_evento ?? undefined,

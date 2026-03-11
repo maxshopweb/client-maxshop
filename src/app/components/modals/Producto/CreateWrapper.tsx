@@ -45,7 +45,7 @@ export function CreateProductoModal({ onClose }: CreateProductoModalProps) {
     };
 
     const validateStepTwo = async () => {
-        const fields = ['precio_venta', 'precio_especial', 'precio_pvp', 'precio_campanya', 'stock'];
+        const fields = ['precio_venta', 'precio_especial', 'precio_pvp', 'precio_campanya', 'precio_manual', 'stock'];
         const isValid = await form.trigger(fields as any);
         return isValid;
     };
@@ -74,7 +74,9 @@ export function CreateProductoModal({ onClose }: CreateProductoModalProps) {
                 precio_especial: rawData.precio_especial ?? undefined,
                 precio_pvp: rawData.precio_pvp ?? undefined,
                 precio_campanya: rawData.precio_campanya ?? undefined,
+                precio_manual: (rawData.lista_precio_activa === 'E' || rawData.lista_precio_activa === 'e') ? (rawData.precio_manual ?? undefined) : undefined,
                 lista_precio_activa: rawData.lista_precio_activa || undefined,
+                codi_bonificacion: rawData.codi_bonificacion ?? undefined,
                 stock: rawData.stock,
                 stock_min: rawData.stock_min ?? undefined,
                 stock_mayorista: rawData.stock_mayorista ?? undefined,

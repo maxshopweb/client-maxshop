@@ -5,6 +5,7 @@ import type {
   IPaginatedResponse,
   ICreateVentaDTO,
   IUpdateVentaDTO,
+  IUpdateEnvioDTO,
   IApiResponse
 } from '@/app/types/ventas.type';
 
@@ -122,6 +123,23 @@ class VentasService {
 
     if (!response.data.success || !response.data.data) {
       throw new Error(response.data.error || 'Error al actualizar estado de envío');
+    }
+
+    return response.data.data;
+  }
+
+  /**
+   * Actualiza datos de envío de una venta (número de seguimiento y/o empresa de transporte).
+   * PATCH /ventas/:id/envio
+   */
+  async updateEnvio(id: number, data: IUpdateEnvioDTO): Promise<IVenta> {
+    const response = await axiosInstance.patch<IApiResponse<IVenta>>(
+      `/ventas/${id}/envio`,
+      data
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.error || 'Error al actualizar envío');
     }
 
     return response.data.data;

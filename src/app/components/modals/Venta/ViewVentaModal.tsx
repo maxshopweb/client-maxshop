@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Package, DollarSign, User, Truck, CreditCard, ExternalLink, Search, MapPin, Phone, Mail } from 'lucide-react';
-import type { IVenta } from '@/app/types/ventas.type';
+import { Package, DollarSign, User, Truck, CreditCard, ExternalLink, Search, MapPin, Phone, Mail, FileText } from 'lucide-react';
+import type { IVenta, IDireccionVenta } from '@/app/types/ventas.type';
 import { formatPrecio, formatFecha, getEstadoPagoColor, getEstadoEnvioColor } from '@/app/types/ventas.type';
 import { ESTADO_PAGO_OPTIONS, ESTADO_ENVIO_OPTIONS, METODO_PAGO_OPTIONS, TIPO_VENTA_OPTIONS } from '@/app/types/ventas.type';
 import ModalBase from '@/app/components/modals/BaseModal';
 import { ventasService } from '@/app/services/venta.service';
 import { getNumeroPedidoDisplay } from '@/app/utils/venta.utils';
+import { getModoPagoDisplay } from '@/app/utils/paymentDisplay.utils';
 
 interface ViewVentaModalProps {
     venta: IVenta;
@@ -19,6 +20,37 @@ function getTipoClienteLabel(estado: number | null | undefined): string {
     if (estado === 3) return 'Usuario registrado';
     if (estado === 2) return 'Perfil incompleto';
     return '-';
+}
+
+/** Dirección de facturación: desde direcciones (tipo facturacion) o cliente */
+function getDireccionFacturacion(venta: IVenta): { direccion?: string; altura?: string; ciudad?: string; provincia?: string; cod_postal?: number; pais?: string } | null {
+    const dirs = venta.direcciones;
+    if (dirs?.length) {
+        const fact = dirs.find((d: IDireccionVenta) => d.tipo === 'facturacion') || dirs[0];
+        if (fact?.direccion || fact?.ciudad) return fact;
+    }
+    const c = venta.cliente;
+    if (c?.direccion || c?.ciudad) {
+        return { direccion: c.direccion ?? undefined, altura: c.altura ?? undefined, ciudad: c.ciudad ?? undefined, provincia: c.provincia ?? undefined, cod_postal: c.cod_postal ?? undefined };
+    }
+    return null;
+}
+
+/** Dirección de envío: desde direcciones (tipo envio) o primera/cliente */
+function getDireccionEnvio(venta: IVenta): { direccion?: string; altura?: string; piso?: string; dpto?: string; ciudad?: string; provincia?: string; cod_postal?: number } | null {
+    const dirs = venta.direcciones;
+    if (dirs?.length) {
+        const env = dirs.find((d: IDireccionVenta) => d.tipo === 'envio' || d.tipo === 'entrega') || dirs[0];
+        if (env?.direccion || env?.ciudad) return env;
+    }
+    const c = venta.cliente;
+    if (c?.direccion || c?.ciudad) {
+        return { direccion: c.direccion ?? undefined, altura: c.altura ?? undefined, piso: c.piso ?? undefined, dpto: c.dpto ?? undefined, ciudad: c.ciudad ?? undefined, provincia: c.provincia ?? undefined, cod_postal: c.cod_postal ?? undefined };
+    }
+    if (venta.envio?.direccion_envio) {
+        return { direccion: venta.envio.direccion_envio ?? undefined };
+    }
+    return null;
 }
 
 export function ViewVentaModal({ venta: ventaInitial, onClose, isOpen }: ViewVentaModalProps) {
@@ -58,7 +90,11 @@ export function ViewVentaModal({ venta: ventaInitial, onClose, isOpen }: ViewVen
     };
 
     const hasFacturaA = usuario?.tipo_documento === 'CUIT' || (usuario?.numero_documento && String(usuario.numero_documento).length >= 11);
-    const hasDatosEnvio = cliente?.direccion || cliente?.ciudad || envio?.direccion_envio || envio?.cod_seguimiento || venta.observaciones;
+    const dirFacturacion = getDireccionFacturacion(venta);
+    const dirEnvio = getDireccionEnvio(venta);
+    const hasDatosEnvio = dirEnvio || envio?.cod_seguimiento || envio?.empresa_envio || venta.observaciones;
+    const referenciaPago = mpPayment?.payment_id ?? venta.referencia_pago_manual ?? null;
+    const modoPagoLabel = getModoPagoDisplay(mpPayment, venta.metodo_pago);
 
     return (
         <ModalBase
@@ -92,13 +128,13 @@ export function ViewVentaModal({ venta: ventaInitial, onClose, isOpen }: ViewVen
                             <div className="flex items-center justify-center py-12 text-foreground/60">Cargando...</div>
                         ) : (
                             <>
-                                {/* Fila 1: Cliente | Datos de envío */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {/* Bloque Cliente */}
-                                    <div className="p-4 bg-background rounded-lg border border-input">
+                                {/* 4 bloques: Cliente | Facturación | Entrega | Pago — responsivo: 1 col móvil, 2 cols sm+ */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {/* 1. Datos de cliente */}
+                                    <div className="p-4 bg-background rounded-lg border border-input min-h-0">
                                         <div className="flex items-center gap-2 mb-3">
-                                            <User className="w-4 h-4 text-foreground/60" />
-                                            <h3 className="text-sm font-semibold text-foreground/60 uppercase">Cliente</h3>
+                                            <User className="w-4 h-4 text-foreground/60 shrink-0" aria-hidden />
+                                            <h3 className="text-sm font-semibold text-foreground/60 uppercase tracking-wide">Datos de cliente</h3>
                                         </div>
                                         {cliente?.usuario ? (
                                             <div className="space-y-2 text-sm">
@@ -106,16 +142,16 @@ export function ViewVentaModal({ venta: ventaInitial, onClose, isOpen }: ViewVen
                                                     {[usuario?.nombre, usuario?.apellido].filter(Boolean).join(' ') || 'Sin nombre'}
                                                 </p>
                                                 {usuario?.email && (
-                                                    <div className="flex items-center gap-2 text-foreground/80">
-                                                        <Mail className="w-3.5 h-3.5 shrink-0" />
+                                                    <div className="flex items-center gap-2 text-foreground/80 break-words">
+                                                        <Mail className="w-3.5 h-3.5 shrink-0" aria-hidden />
                                                         <span>{usuario.email}</span>
                                                     </div>
                                                 )}
                                                 {(usuario?.telefono || (cliente as { telefono?: string })?.telefono) && (
                                                     <div className="flex items-center gap-2 text-foreground/80">
-                                                        <Phone className="w-3.5 h-3.5 shrink-0" />
+                                                        <Phone className="w-3.5 h-3.5 shrink-0" aria-hidden />
                                                         <span>{usuario?.telefono || (cliente as { telefono?: string })?.telefono}</span>
-                                                        <span className="text-foreground/50">/ WhatsApp</span>
+                                                        <span className="text-foreground/50 text-xs">/ WhatsApp</span>
                                                     </div>
                                                 )}
                                                 {(usuario?.tipo_documento || usuario?.numero_documento) && (
@@ -141,62 +177,92 @@ export function ViewVentaModal({ venta: ventaInitial, onClose, isOpen }: ViewVen
                                         )}
                                     </div>
 
-                                    {/* Bloque Datos de envío (arriba, jerarquizado) */}
-                                    <div className="p-4 bg-background rounded-lg border border-input">
+                                    {/* 2. Datos de facturación */}
+                                    <div className="p-4 bg-background rounded-lg border border-input min-h-0">
                                         <div className="flex items-center gap-2 mb-3">
-                                            <MapPin className="w-4 h-4 text-foreground/60" />
-                                            <h3 className="text-sm font-semibold text-foreground/60 uppercase">Datos de envío</h3>
+                                            <FileText className="w-4 h-4 text-foreground/60 shrink-0" aria-hidden />
+                                            <h3 className="text-sm font-semibold text-foreground/60 uppercase tracking-wide">Datos de facturación</h3>
+                                        </div>
+                                        {dirFacturacion ? (
+                                            <div className="space-y-1.5 text-sm">
+                                                {dirFacturacion.direccion && (
+                                                    <p className="text-foreground"><span className="text-foreground/60">Calle: </span>{dirFacturacion.direccion}{dirFacturacion.altura ? ` ${dirFacturacion.altura}` : ''}</p>
+                                                )}
+                                                {dirFacturacion.ciudad && (
+                                                    <p className="text-foreground"><span className="text-foreground/60">Ciudad: </span>{dirFacturacion.ciudad}</p>
+                                                )}
+                                                {dirFacturacion.cod_postal != null && (
+                                                    <p className="text-foreground"><span className="text-foreground/60">C.P.: </span>{dirFacturacion.cod_postal}</p>
+                                                )}
+                                                {dirFacturacion.provincia && (
+                                                    <p className="text-foreground"><span className="text-foreground/60">Provincia: </span>{dirFacturacion.provincia}</p>
+                                                )}
+                                                {venta.referencia_facturacion && (
+                                                    <div className="pt-2 border-t border-input/50">
+                                                        <p className="text-foreground/60 text-xs uppercase mb-0.5">Referencia / Comprobante</p>
+                                                        <p className="font-mono text-foreground font-medium break-all">{venta.referencia_facturacion}</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : venta.referencia_facturacion ? (
+                                            <div className="space-y-1.5 text-sm">
+                                                <p className="text-foreground/60 text-xs uppercase">Referencia / Comprobante</p>
+                                                <p className="font-mono text-foreground font-medium break-all">{venta.referencia_facturacion}</p>
+                                            </div>
+                                        ) : (
+                                            <p className="text-sm text-foreground/40">Sin datos de facturación</p>
+                                        )}
+                                    </div>
+
+                                    {/* 3. Datos de entrega */}
+                                    <div className="p-4 bg-background rounded-lg border border-input min-h-0">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <MapPin className="w-4 h-4 text-foreground/60 shrink-0" aria-hidden />
+                                            <h3 className="text-sm font-semibold text-foreground/60 uppercase tracking-wide">Datos de entrega</h3>
                                         </div>
                                         {hasDatosEnvio ? (
                                             <div className="space-y-1.5 text-sm">
-                                                {cliente?.direccion && (
-                                                    <p className="text-foreground"><span className="text-foreground/60">Calle: </span>{cliente.direccion}</p>
+                                                {dirEnvio?.direccion && (
+                                                    <p className="text-foreground"><span className="text-foreground/60">Calle: </span>{dirEnvio.direccion}{dirEnvio.altura ? ` ${dirEnvio.altura}` : ''}</p>
                                                 )}
-                                                {cliente?.altura && (
-                                                    <p className="text-foreground"><span className="text-foreground/60">Número: </span>{cliente.altura}</p>
+                                                {(dirEnvio?.piso || dirEnvio?.dpto) && (
+                                                    <p className="text-foreground"><span className="text-foreground/60">Piso / Dpto: </span>{[dirEnvio.piso, dirEnvio.dpto].filter(Boolean).join(' ') || '-'}</p>
                                                 )}
-                                                {(cliente?.piso || cliente?.dpto) && (
-                                                    <p className="text-foreground">
-                                                        <span className="text-foreground/60">Piso / Dpto: </span>
-                                                        {[cliente.piso, cliente.dpto].filter(Boolean).join(' ') || '-'}
-                                                    </p>
-                                                )}
-                                                {cliente?.ciudad && (
-                                                    <p className="text-foreground"><span className="text-foreground/60">Ciudad: </span>{cliente.ciudad}</p>
-                                                )}
-                                                {cliente?.provincia && (
-                                                    <p className="text-foreground"><span className="text-foreground/60">Provincia: </span>{cliente.provincia}</p>
-                                                )}
-                                                {cliente?.cod_postal != null && (
-                                                    <p className="text-foreground"><span className="text-foreground/60">Código postal: </span>{cliente.cod_postal}</p>
-                                                )}
-                                                {!cliente?.direccion && envio?.direccion_envio && (
+                                                {dirEnvio?.ciudad && <p className="text-foreground"><span className="text-foreground/60">Ciudad: </span>{dirEnvio.ciudad}</p>}
+                                                {dirEnvio?.provincia && <p className="text-foreground"><span className="text-foreground/60">Provincia: </span>{dirEnvio.provincia}</p>}
+                                                {dirEnvio?.cod_postal != null && <p className="text-foreground"><span className="text-foreground/60">C.P.: </span>{dirEnvio.cod_postal}</p>}
+                                                {!dirEnvio?.direccion && envio?.direccion_envio && (
                                                     <p className="text-foreground"><span className="text-foreground/60">Dirección: </span>{envio.direccion_envio}</p>
+                                                )}
+                                                {(envio?.cod_seguimiento || envio?.empresa_envio) && (
+                                                    <div className="pt-2 border-t border-input/50 space-y-1">
+                                                        {envio.empresa_envio && (
+                                                            <p className="text-foreground"><span className="text-foreground/60">Transporte: </span><span className="font-medium">{envio.empresa_envio}</span></p>
+                                                        )}
+                                                        {envio.cod_seguimiento && (
+                                                            <p className="text-foreground">
+                                                                <span className="text-foreground/60">Nº de seguimiento: </span>
+                                                                <span className="font-mono font-semibold break-all">{envio.cod_seguimiento}</span>
+                                                            </p>
+                                                        )}
+                                                        <div className="flex flex-wrap gap-2 pt-1">
+                                                            {envio.consultaUrl && (
+                                                                <a href={envio.consultaUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 min-h-[44px] min-w-[44px] px-3 py-2 bg-principal/10 hover:bg-principal/20 text-principal rounded text-xs font-medium touch-manipulation">
+                                                                    <Search className="w-3.5 h-3.5" aria-hidden /> Consultar <ExternalLink className="w-3 h-3" aria-hidden />
+                                                                </a>
+                                                            )}
+                                                            {envio.trackingUrl && (
+                                                                <a href={envio.trackingUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 min-h-[44px] min-w-[44px] px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 rounded text-xs font-medium touch-manipulation">
+                                                                    <Truck className="w-3.5 h-3.5" aria-hidden /> Tracking <ExternalLink className="w-3 h-3" aria-hidden />
+                                                                </a>
+                                                            )}
+                                                        </div>
+                                                    </div>
                                                 )}
                                                 {(venta.observaciones || envio?.observaciones) && (
                                                     <div className="pt-2 border-t border-input/50">
                                                         <p className="text-foreground/60 text-xs uppercase mb-0.5">Observaciones</p>
-                                                        <p className="text-foreground whitespace-pre-wrap">{venta.observaciones || envio?.observaciones}</p>
-                                                    </div>
-                                                )}
-                                                {envio?.cod_seguimiento && (
-                                                    <div className="pt-2 border-t border-input/50 space-y-1">
-                                                        <p className="text-foreground">
-                                                            <span className="text-foreground/60">Nº etiqueta Andreani: </span>
-                                                            <span className="font-mono font-semibold">{envio.cod_seguimiento}</span>
-                                                        </p>
-                                                        <div className="flex flex-wrap gap-2">
-                                                            {envio.consultaUrl && (
-                                                                <a href={envio.consultaUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-principal/10 hover:bg-principal/20 text-principal rounded text-xs font-medium">
-                                                                    <Search className="w-3 h-3" /> Consultar <ExternalLink className="w-3 h-3" />
-                                                                </a>
-                                                            )}
-                                                            {envio.trackingUrl && (
-                                                                <a href={envio.trackingUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 rounded text-xs font-medium">
-                                                                    <Truck className="w-3 h-3" /> Tracking <ExternalLink className="w-3 h-3" />
-                                                                </a>
-                                                            )}
-                                                        </div>
+                                                        <p className="text-foreground whitespace-pre-wrap break-words">{venta.observaciones || envio?.observaciones}</p>
                                                     </div>
                                                 )}
                                                 {envio?.costo_envio != null && (
@@ -204,49 +270,49 @@ export function ViewVentaModal({ venta: ventaInitial, onClose, isOpen }: ViewVen
                                                 )}
                                             </div>
                                         ) : (
-                                            <p className="text-sm text-foreground/40">Sin datos de envío</p>
+                                            <p className="text-sm text-foreground/40">Sin datos de entrega</p>
                                         )}
+                                    </div>
+
+                                    {/* 4. Datos de pago */}
+                                    <div className="p-4 bg-background rounded-lg border border-input min-h-0">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <CreditCard className="w-4 h-4 text-foreground/60 shrink-0" aria-hidden />
+                                            <h3 className="text-sm font-semibold text-foreground/60 uppercase tracking-wide">Datos de pago</h3>
+                                        </div>
+                                        <div className="space-y-2 text-sm">
+                                            <p className="text-base font-semibold text-foreground">{metodoPagoOption?.label || venta.metodo_pago || '-'}</p>
+                                            <div className="pt-1 border-t border-input/50">
+                                                <p className="text-foreground/60 text-xs uppercase mb-0.5">Modo de pago</p>
+                                                <p className="text-foreground font-medium">{modoPagoLabel}</p>
+                                            </div>
+                                            <div className="pt-1 border-t border-input/50">
+                                                <p className="text-foreground/60 text-xs uppercase mb-0.5">Referencia de pago</p>
+                                                <p className="font-mono text-foreground font-semibold break-all">{referenciaPago || '—'}</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* Fila 2: 3 columnas — Método de pago | Tipo de venta | Estados */}
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {/* Fila: Tipo de venta | Estados */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="p-4 bg-background rounded-lg border border-input">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <CreditCard className="w-4 h-4 text-foreground/60" />
-                                            <h3 className="text-sm font-semibold text-foreground/60 uppercase">Método de pago</h3>
-                                        </div>
-                                        <p className="text-base font-semibold text-foreground capitalize">
-                                            {metodoPagoOption?.label || venta.metodo_pago || '-'}
-                                        </p>
-                                        {venta.metodo_pago === 'mercadopago' && (mpPayment?.payment_id || !loading) && (
-                                            <div className="mt-2 pt-2 border-t border-input/50">
-                                                <p className="text-xs text-foreground/60 uppercase mb-0.5">Cód. transacción Mercado Pago</p>
-                                                <p className="font-mono text-sm font-semibold text-foreground break-all">
-                                                    {mpPayment?.payment_id || '-'}
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="p-4 bg-background rounded-lg border border-input">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <Package className="w-4 h-4 text-foreground/60" />
+                                            <Package className="w-4 h-4 text-foreground/60" aria-hidden />
                                             <h3 className="text-sm font-semibold text-foreground/60 uppercase">Tipo de venta</h3>
                                         </div>
-                                        <p className="text-base font-semibold text-foreground">
-                                            {tipoVentaOption?.label || venta.tipo_venta || '-'}
-                                        </p>
+                                        <p className="text-base font-semibold text-foreground">{tipoVentaOption?.label || venta.tipo_venta || '-'}</p>
                                     </div>
                                     <div className="p-4 bg-background rounded-lg border border-input">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <Truck className="w-4 h-4 text-foreground/60" />
+                                            <Truck className="w-4 h-4 text-foreground/60" aria-hidden />
                                             <h3 className="text-sm font-semibold text-foreground/60 uppercase">Estados</h3>
                                         </div>
                                         <div className="flex flex-wrap gap-2 mt-2">
-                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border ${colorClasses[estadoPagoColor] || colorClasses.gray}`}>
+                                            <span className={`inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-medium border ${colorClasses[estadoPagoColor] || colorClasses.gray}`}>
                                                 Pago: {estadoPagoOption?.label || venta.estado_pago || '-'}
                                             </span>
-                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border ${colorClasses[estadoEnvioColor] || colorClasses.gray}`}>
+                                            <span className={`inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-medium border ${colorClasses[estadoEnvioColor] || colorClasses.gray}`}>
                                                 Envío: {estadoEnvioOption?.label || venta.estado_envio || '-'}
                                             </span>
                                         </div>
