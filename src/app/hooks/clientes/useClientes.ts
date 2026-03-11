@@ -171,7 +171,8 @@ export function useUpdateCliente(options: UseUpdateClienteOptions = {}) {
                     };
                 }
             );
-            queryClient.invalidateQueries({ queryKey: clientesKeys.lists() });
+            // No invalidar la lista: el refetch traería la respuesta cacheada del servidor (Redis)
+            // y sobrescribiría la actualización optimista, volviendo a mostrar el estado anterior.
             toast.success('Cliente actualizado', {
                 description: 'Los datos se guardaron correctamente.',
             });
