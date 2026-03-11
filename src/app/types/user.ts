@@ -14,6 +14,8 @@ export interface IUsuario {
   img: string | null;
   rol: UserRole;
   estado?: UserEstado | null;
+  /** Si false, no puede iniciar sesión ni realizar compras (cuenta suspendida) */
+  activo?: boolean | null;
   numero_documento?: string | null;
   tipo_documento?: string | null;
   creado_en?: Date | string | null;

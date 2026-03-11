@@ -20,11 +20,11 @@ export default function ProductBreadcrumbs({ producto }: ProductBreadcrumbsProps
           },
         ]
       : []),
-    ...(producto.subcategoria?.nombre
+    ...(producto.grupo?.nombre && producto.codi_grupo
       ? [
           {
-            label: producto.subcategoria.nombre,
-            href: `/tienda/productos?subcategoria=${producto.subcategoria.id_subcat}`,
+            label: producto.grupo.nombre,
+            href: `/tienda/productos?grupo=${encodeURIComponent(producto.codi_grupo)}`,
           },
         ]
       : []),

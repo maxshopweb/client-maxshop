@@ -66,10 +66,10 @@ export default function ProductTabs({ producto }: ProductTabsProps) {
               <dd className="text-sm sm:text-base text-terciario font-medium capitalize">{producto.categoria.nombre}</dd>
             </div>
           )}
-          {producto.subcategoria?.nombre && (
+          {producto.grupo?.nombre && (
             <div className="py-2 sm:py-3">
-              <dt className="text-xs sm:text-sm font-medium text-terciario/60 mb-1">Subcategoría</dt>
-              <dd className="text-sm sm:text-base text-terciario font-medium capitalize">{producto.subcategoria.nombre}</dd>
+              <dt className="text-xs sm:text-sm font-medium text-terciario/60 mb-1">Grupo</dt>
+              <dd className="text-sm sm:text-base text-terciario font-medium capitalize">{producto.grupo.nombre}</dd>
             </div>
           )}
           {producto.unidad_medida && (

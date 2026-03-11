@@ -37,7 +37,6 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
             unidades_por_producto: producto.unidades_por_producto || undefined,
             descripcion: producto.descripcion || '',
             id_cat: producto.id_cat ?? undefined,
-            id_subcat: producto.id_subcat ?? undefined,
             id_marca: producto.id_marca ?? undefined,
             destacado: Boolean(producto.destacado === true || (producto as { destacado?: boolean | number }).destacado === 1),
             financiacion: Boolean(producto.financiacion === true || (producto as { financiacion?: boolean | number }).financiacion === 1),
@@ -130,7 +129,6 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
             publicado: rawData.publicado,
             cuotas_habilitadas: rawData.cuotas_habilitadas === 'si' ? true : rawData.cuotas_habilitadas === 'no' ? false : null,
             id_cat: rawData.id_cat ? Number(rawData.id_cat) : undefined,
-            id_subcat: rawData.id_subcat ? Number(rawData.id_subcat) : undefined,
             id_marca: rawData.id_marca ? Number(rawData.id_marca) : undefined,
             id_iva: rawData.id_iva ? Number(rawData.id_iva) : undefined,
         };

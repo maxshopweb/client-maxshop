@@ -7,7 +7,7 @@ import {
     flexRender,
 } from '@tanstack/react-table';
 import { Users } from 'lucide-react';
-import { useClientes } from '@/app/hooks/clientes/useClientes';
+import { useClientes, useUpdateCliente } from '@/app/hooks/clientes/useClientes';
 import { useClientesFilters } from '@/app/hooks/clientes/useClientesFilters';
 import { useClientesTable } from '@/app/hooks/clientes/useClientesTable';
 import { createClientesColumns } from '../../columns/ClientesColumns';
@@ -22,6 +22,7 @@ export function ClientesTable({ tableState }: ClientesTableProps) {
     // Hooks
     const { filters } = useClientesFilters();
     const { clientes, isLoading, isError, error } = useClientes({ filters });
+    const { updateClienteAsync } = useUpdateCliente();
 
     const {
         rowSelection,
@@ -36,6 +37,10 @@ export function ClientesTable({ tableState }: ClientesTableProps) {
         selectAll,
     } = tableState;
 
+    const handleToggleActivo = (id: string, activo: boolean) => {
+        updateClienteAsync({ id, data: { activo } }).catch(() => {});
+    };
+
     // Columnas
     const columns = createClientesColumns(
         undefined, // onView - no necesario, usamos link directo
@@ -47,7 +52,8 @@ export function ClientesTable({ tableState }: ClientesTableProps) {
                 setRowSelection({});
             }
         },
-        selectedIds.length
+        selectedIds.length,
+        handleToggleActivo
     );
 
     // Instancia de la tabla

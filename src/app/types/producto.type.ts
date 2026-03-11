@@ -1,7 +1,43 @@
-import { ICategoria, ISubcategoria } from "./categoria.type";
+import { ICategoria } from "./categoria.type";
 import { EstadoGeneral } from "./estados.type";
 import { IIva } from "./iva.type";
 import { IMarca } from "./marca.type";
+import type { IGrupo } from "./grupo.type";
+
+export interface IListaPrecio {
+    id_lista: number;
+    codi_lista: string;
+    nombre?: string | null;
+    tipo_lista?: string | null;
+    venta_lista?: string | null;
+    codi_forma_pago?: string | null;
+    activo_lista?: string | null;
+    porc_descuento?: number | null;
+    porc_descuento_m?: number | null;
+    activo?: boolean | null;
+    creado_en?: Date | null;
+    actualizado_en?: Date | null;
+}
+
+export interface ISituacionFiscal {
+    id_sifi: number;
+    codi_sifi: string;
+    nombre?: string | null;
+    codi_impuesto?: string | null;
+    activo?: boolean | null;
+    creado_en?: Date | null;
+    actualizado_en?: Date | null;
+}
+
+/** Contenido para el formulario de crear producto (listas, IVA, situaciones fiscales, etc.) */
+export interface ICrearProductoContenido {
+    marcas: IMarca[];
+    categorias: ICategoria[];
+    grupos: IGrupo[];
+    ivas: IIva[];
+    listasPrecio: IListaPrecio[];
+    situacionesFiscales: ISituacionFiscal[];
+}
 
 /** Info de la lista activa solo para UI (oferta/campaña). Nombre de lista no se expone. */
 export interface IListaActivaInfo {
@@ -61,9 +97,7 @@ export interface IProductos {
     iva?: IIva | null;
     // Campos legacy para compatibilidad (deprecated, usar códigos)
     id_cat?: number | null;
-    id_subcat?: number | null;
     id_marca?: number | null;
-    subcategoria?: ISubcategoria | null;
 }
 // Filtros
 export interface IProductoFilters {
@@ -81,7 +115,6 @@ export interface IProductoFilters {
     busqueda?: string;
 
     // Filtros por relaciones - acepta códigos o IDs
-    id_subcat?: number; // Deprecated - mantener por compatibilidad
     id_cat?: number | string; // Puede ser ID o código
     id_marca?: number | string; // Puede ser ID o código
     codi_grupo?: string; // Código de grupo
@@ -142,7 +175,6 @@ export interface ICreateProductoDTO {
     financiacion?: boolean;
     // Campos legacy para compatibilidad
     id_cat?: number;
-    id_subcat?: number;
     id_marca?: number;
     id_iva?: number;
 }

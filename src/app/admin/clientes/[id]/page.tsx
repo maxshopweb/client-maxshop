@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Mail, Phone, MapPin, Calendar, Clock, ExternalLink, Home, MapPinned, ShoppingCart, DollarSign, TrendingUp, Package, Edit3, FileText } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, MapPin, Calendar, Clock, ExternalLink, Home, MapPinned, ShoppingCart, DollarSign, TrendingUp, Package, Edit3, FileText, UserCheck, UserX } from 'lucide-react';
 import { Button } from '@/app/components/ui/Button';
-import { useCliente, useClienteStats, useClienteVentas } from '@/app/hooks/clientes/useClientes';
+import { useCliente, useClienteStats, useClienteVentas, useUpdateCliente } from '@/app/hooks/clientes/useClientes';
 import { getClienteNombreCompleto, getClienteEmail, formatFecha } from '@/app/types/cliente.type';
 import Link from 'next/link';
 import TableSkeleton from '@/app/components/skeletons/TableProductSkeleton';
@@ -25,6 +25,7 @@ export default function ClienteDetailPage() {
     const { cliente, isLoading: isLoadingCliente, refetch: refetchCliente } = useCliente({ id });
     const { stats, isLoading: isLoadingStats } = useClienteStats({ id });
     const { ventas, pagination, isLoading: isLoadingVentas } = useClienteVentas(id, { limit: 10, page: 1 });
+    const { updateClienteAsync, isUpdating } = useUpdateCliente();
 
     useEffect(() => {
         if (searchParams.get('edit') === '1') setEditModalOpen(true);
@@ -67,18 +68,43 @@ export default function ClienteDetailPage() {
                             <ArrowLeft className="w-4 h-4" />
                             Volver
                         </Button>
-                        <h1 className="text-2xl font-bold text-text">
-                            Perfil del cliente
-                        </h1>
+                        <div className="flex items-center gap-3 flex-wrap">
+                            <h1 className="text-2xl font-bold text-text">
+                                Perfil del cliente
+                            </h1>
+                            <TableBadge variant={cliente.usuario?.activo !== false ? 'success' : 'warning'}>
+                                {cliente.usuario?.activo !== false ? 'Activo' : 'Inactivo'}
+                            </TableBadge>
+                        </div>
                     </div>
-                    <Button
-                        variant="outline-primary"
-                        onClick={() => setEditModalOpen(true)}
-                        className="flex items-center gap-2"
-                    >
-                        <Edit3 className="w-4 h-4" />
-                        Editar datos
-                    </Button>
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <Button
+                            variant="outline-primary"
+                            onClick={() => updateClienteAsync({ id, data: { activo: cliente.usuario?.activo === false } })}
+                            disabled={isUpdating}
+                            className="flex items-center gap-2"
+                        >
+                            {cliente.usuario?.activo !== false ? (
+                                <>
+                                    <UserX className="h-4 w-4 shrink-0" aria-hidden />
+                                    Desactivar
+                                </>
+                            ) : (
+                                <>
+                                    <UserCheck className="h-4 w-4 shrink-0" aria-hidden />
+                                    Activar
+                                </>
+                            )}
+                        </Button>
+                        <Button
+                            variant="outline-primary"
+                            onClick={() => setEditModalOpen(true)}
+                            className="flex items-center gap-2"
+                        >
+                            <Edit3 className="h-4 w-4" aria-hidden />
+                            Editar datos
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Información básica */}

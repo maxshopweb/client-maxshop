@@ -64,7 +64,6 @@ class ProductosService {
     if (filters.order) params.append('order', filters.order);
     if (filters.estado !== undefined) params.append('estado', filters.estado.toString());
     if (filters.busqueda) params.append('busqueda', filters.busqueda);
-    if (filters.id_subcat) params.append('id_subcat', filters.id_subcat.toString());
     if (filters.id_cat) params.append('id_cat', filters.id_cat.toString());
     // id_marca puede ser número (ID) o string (código de marca, ej: "004" para INGCO)
     if (filters.id_marca !== undefined && filters.id_marca !== null && filters.id_marca !== '') {

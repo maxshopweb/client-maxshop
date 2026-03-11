@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { Plus, RefreshCw } from 'lucide-react';
 import { Button } from '@/app/components/ui/Button';
-import { UtilidadesTabs } from './UtilidadesTabs';
+import { UtilidadesTabs, type UtilidadesTabKind } from './UtilidadesTabs';
 import { MaestrosTable } from './MaestrosTable';
+import { ListasPrecioTable } from './ListasPrecioTable';
 import { MaestrosFilterInput } from './MaestrosFilterInput';
 import { CreateMaestroModal } from './CreateMaestroModal';
 import { EditMaestroModal } from './EditMaestroModal';
@@ -14,6 +15,7 @@ import { MAESTRO_LABELS } from '@/app/types/maestro.type';
 import { useMarcas } from '@/app/hooks/marcas/useMarcas';
 import { useCategorias } from '@/app/hooks/categorias/useCategorias';
 import { useGrupos } from '@/app/hooks/grupos/useGrupos';
+import { useListasPrecio } from '@/app/hooks/listas-precio/useListasPrecio';
 import { useMaestrosFilters } from '@/app/hooks/maestros/useMaestrosFilters';
 import type { MarcasSSRResponse, CategoriasSSRResponse, GruposSSRResponse } from '@/app/lib/getMaestros';
 import { AdminPageHeader } from '@/app/components/Admin/AdminPageHeader';
@@ -32,7 +34,7 @@ export function UtilidadesPageClient({
   initialCategorias,
   initialGrupos,
 }: UtilidadesPageClientProps) {
-  const [activeTab, setActiveTab] = useState<MaestroKind>('marca');
+  const [activeTab, setActiveTab] = useState<UtilidadesTabKind>('marca');
   const [modal, setModal] = useState<{ type: ModalType; item?: MaestroItem }>({ type: null });
 
   const { busquedaInput, setBusquedaInput, filterItems, clearBusqueda } = useMaestrosFilters();
@@ -40,28 +42,35 @@ export function UtilidadesPageClient({
   const marcasQuery = useMarcas({ initialData: initialMarcas });
   const categoriasQuery = useCategorias({ initialData: initialCategorias });
   const gruposQuery = useGrupos({ initialData: initialGrupos });
+  const { listas, isLoading: listasLoading, isFetching: listasFetching, refetch: listasRefetch } = useListasPrecio(false);
+
+  const isListaTab = activeTab === 'lista_precio';
 
   const allItems =
     activeTab === 'marca' ? (marcasQuery.data?.data ?? []) :
     activeTab === 'categoria' ? (categoriasQuery.data?.data ?? []) :
-    (gruposQuery.data?.data ?? []);
+    activeTab === 'grupo' ? (gruposQuery.data?.data ?? []) :
+    [];
 
-  const items = filterItems(allItems as MaestroItem[], activeTab);
+  const items = isListaTab ? [] : filterItems(allItems as MaestroItem[], activeTab as MaestroKind);
 
   const isLoading =
     activeTab === 'marca' ? marcasQuery.isLoading :
     activeTab === 'categoria' ? categoriasQuery.isLoading :
-    gruposQuery.isLoading;
+    activeTab === 'grupo' ? gruposQuery.isLoading :
+    listasLoading;
 
   const refetch =
     activeTab === 'marca' ? marcasQuery.refetch :
     activeTab === 'categoria' ? categoriasQuery.refetch :
-    gruposQuery.refetch;
+    activeTab === 'grupo' ? gruposQuery.refetch :
+    listasRefetch;
 
   const isFetching =
     activeTab === 'marca' ? marcasQuery.isFetching :
     activeTab === 'categoria' ? categoriasQuery.isFetching :
-    gruposQuery.isFetching;
+    activeTab === 'grupo' ? gruposQuery.isFetching :
+    listasFetching;
 
   const openCreate = () => setModal({ type: 'create' });
   const openEdit = (item: MaestroItem) => setModal({ type: 'edit', item });
@@ -72,14 +81,14 @@ export function UtilidadesPageClient({
     refetch();
   };
 
-  const label = MAESTRO_LABELS[activeTab];
+  const label = isListaTab ? null : MAESTRO_LABELS[activeTab as MaestroKind];
 
   return (
     <div className="min-h-screen">
       <AdminPageContainer>
         <AdminPageHeader
           title="Utilidades"
-          description="Gestioná marcas, categorías y grupos"
+          description={isListaTab ? 'Activá o desactivá listas de precio para productos' : 'Gestioná marcas, categorías y grupos'}
         >
           <Button
             onClick={() => refetch()}
@@ -90,26 +99,34 @@ export function UtilidadesPageClient({
             <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
             Refrescar
           </Button>
-          <Button onClick={openCreate} className="flex items-center gap-2">
-            <Plus className="h-5 w-5" />
-            Crear {label.singular}
-          </Button>
+          {!isListaTab && label && (
+            <Button onClick={openCreate} className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Crear {label.singular}
+            </Button>
+          )}
         </AdminPageHeader>
 
         <UtilidadesTabs activeTab={activeTab} onTabChange={setActiveTab} />
-        <MaestrosFilterInput
-          value={busquedaInput}
-          onChange={setBusquedaInput}
-          onClear={clearBusqueda}
-          placeholder="Buscar por nombre o código..."
-        />
-        <MaestrosTable
-          kind={activeTab}
-          items={items as MaestroItem[]}
-          isLoading={isLoading}
-          onEdit={openEdit}
-          onDelete={openDelete}
-        />
+        {isListaTab ? (
+          <ListasPrecioTable listas={listas} isLoading={listasLoading} />
+        ) : (
+          <>
+            <MaestrosFilterInput
+              value={busquedaInput}
+              onChange={setBusquedaInput}
+              onClear={clearBusqueda}
+              placeholder="Buscar por nombre o código..."
+            />
+            <MaestrosTable
+              kind={activeTab as MaestroKind}
+              items={items as MaestroItem[]}
+              isLoading={isLoading}
+              onEdit={openEdit}
+              onDelete={openDelete}
+            />
+          </>
+        )}
       </AdminPageContainer>
 
       {modal.type === 'create' && (

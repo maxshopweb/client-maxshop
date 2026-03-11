@@ -4,7 +4,7 @@
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { clientesService } from '@/app/services/cliente.service';
-import type { IClienteFilters, ICliente, IUpdateClienteDTO } from '@/app/types/cliente.type';
+import type { IClienteFilters, ICliente, IUpdateClienteDTO, IPaginatedResponse } from '@/app/types/cliente.type';
 
 export const clientesKeys = {
     all: ['clientes'] as const,
@@ -148,12 +148,34 @@ export function useUpdateCliente(options: UseUpdateClienteOptions = {}) {
         mutationFn: ({ id, data }: { id: string; data: IUpdateClienteDTO }) =>
             clientesService.update(id, data),
         onSuccess: (data, variables) => {
-            queryClient.setQueryData(clientesKeys.detail(variables.id), data);
+            const nuevoActivo = variables.data.activo !== undefined ? variables.data.activo : data.usuario?.activo;
+            const merged: ICliente = {
+                ...data,
+                usuario: data.usuario
+                    ? { ...data.usuario, activo: nuevoActivo }
+                    : data.usuario,
+            };
+            queryClient.setQueryData(clientesKeys.detail(variables.id), merged);
+            // Actualizar en caché todas las listas de clientes que tengan a este cliente (optimista)
+            queryClient.setQueriesData<IPaginatedResponse<ICliente>>(
+                { queryKey: clientesKeys.lists() },
+                (oldData) => {
+                    if (!oldData?.data?.length) return oldData;
+                    return {
+                        ...oldData,
+                        data: oldData.data.map((c) =>
+                            c.id_usuario === variables.id
+                                ? { ...c, usuario: c.usuario ? { ...c.usuario, activo: nuevoActivo } : c.usuario }
+                                : c
+                        ),
+                    };
+                }
+            );
             queryClient.invalidateQueries({ queryKey: clientesKeys.lists() });
             toast.success('Cliente actualizado', {
                 description: 'Los datos se guardaron correctamente.',
             });
-            options.onSuccess?.(data);
+            options.onSuccess?.(merged);
         },
         onError: (error: Error) => {
             toast.error('Error al actualizar cliente', {

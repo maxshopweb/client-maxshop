@@ -100,7 +100,7 @@ export interface IVentaFilters {
     order?: 'asc' | 'desc';
 
     // Filtros básicos
-    busqueda?: string; // Buscar por ID de venta, cliente, etc.
+    busqueda?: string; // Buscar por ID de venta, cliente, DNI, CUIT, etc.
     id_cliente?: string;
     id_usuario?: string;
 

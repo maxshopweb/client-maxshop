@@ -2,20 +2,28 @@
 
 import type { MaestroKind } from '@/app/types/maestro.type';
 import { MAESTRO_LABELS } from '@/app/types/maestro.type';
-import { Tag, Package, Layers } from 'lucide-react';
+import { Tag, Package, Layers, List } from 'lucide-react';
 
-const TAB_ICONS: Record<MaestroKind, React.ComponentType<{ className?: string }>> = {
+export type UtilidadesTabKind = MaestroKind | 'lista_precio';
+
+const TAB_ICONS: Record<UtilidadesTabKind, React.ComponentType<{ className?: string }>> = {
   marca: Tag,
   categoria: Layers,
   grupo: Package,
+  lista_precio: List,
+};
+
+const TAB_LABELS: Record<UtilidadesTabKind, string> = {
+  ...MAESTRO_LABELS,
+  lista_precio: 'Listas de precios',
 };
 
 interface UtilidadesTabsProps {
-  activeTab: MaestroKind;
-  onTabChange: (tab: MaestroKind) => void;
+  activeTab: UtilidadesTabKind;
+  onTabChange: (tab: UtilidadesTabKind) => void;
 }
 
-const TABS: MaestroKind[] = ['marca', 'categoria', 'grupo'];
+const TABS: UtilidadesTabKind[] = ['marca', 'categoria', 'grupo', 'lista_precio'];
 
 export function UtilidadesTabs({ activeTab, onTabChange }: UtilidadesTabsProps) {
   return (
@@ -25,7 +33,7 @@ export function UtilidadesTabs({ activeTab, onTabChange }: UtilidadesTabsProps) 
     >
       {TABS.map((tab) => {
         const Icon = TAB_ICONS[tab];
-        const label = MAESTRO_LABELS[tab].plural;
+        const label = tab === 'lista_precio' ? TAB_LABELS[tab] : MAESTRO_LABELS[tab].plural;
         const isActive = activeTab === tab;
         return (
           <button

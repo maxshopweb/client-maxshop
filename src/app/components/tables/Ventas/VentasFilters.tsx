@@ -25,7 +25,7 @@ export function VentasFilters() {
                 <div className="flex-1">
                     <Input
                         type="text"
-                        placeholder="Buscar por ID de venta, cliente..."
+                        placeholder="Buscar por ID de venta, cliente, DNI o CUIT..."
                         value={filters.busqueda || ''}
                         onChange={(e) => setFilter('busqueda', e.target.value)}
                         icon={Search}

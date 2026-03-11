@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState, useEffect, useTransition, useRef } from
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import type { IProductoFilters } from "@/app/types/producto.type";
 import { EstadoGeneral } from "@/app/types/estados.type";
-import { useCategorias, useSubcategorias } from "@/app/hooks/categorias/useCategorias";
+import { useCategorias } from "@/app/hooks/categorias/useCategorias";
 import { useMarcas } from "@/app/hooks/marcas/useMarcas";
 import { useGrupos } from "@/app/hooks/grupos/useGrupos";
 
@@ -29,7 +29,6 @@ export interface ProductFilters {
     publicado?: boolean; // Publicado en tienda: true = publicado, false = no publicado
     stockBajo?: boolean;
     financiacion?: boolean;
-    subcategoria?: number;
 }
 
 export interface SortOption {
@@ -63,11 +62,9 @@ export interface UseProductFiltersReturn {
     activeFiltersCount: number;
     // Datos del backend
     categorias: any[];
-    subcategorias: any[];
     marcas: any[];
     grupos: any[];
     loadingCategorias: boolean;
-    loadingSubcategorias: boolean;
     loadingMarcas: boolean;
     loadingGrupos: boolean;
 }
@@ -115,14 +112,8 @@ export function useProductFilters(): UseProductFiltersReturn {
     const { data: marcasResponse, isLoading: loadingMarcas } = useMarcas();
     const { data: gruposResponse, isLoading: loadingGrupos } = useGrupos();
 
-    // Obtener subcategorías según la categoría seleccionada
-    const categoriaFromUrl = searchParams.get("categoria");
-    const categoriaId = categoriaFromUrl ? (isNaN(Number(categoriaFromUrl)) ? undefined : Number(categoriaFromUrl)) : undefined;
-    const { data: subcategoriasResponse, isLoading: loadingSubcategorias } = useSubcategorias(categoriaId);
-
     // Extraer los arrays de data
     const categorias = categoriasResponse?.data || [];
-    const subcategorias = subcategoriasResponse?.data || [];
     const marcas = marcasResponse?.data || [];
     const grupos = gruposResponse?.data || [];
 
@@ -225,7 +216,6 @@ export function useProductFilters(): UseProductFiltersReturn {
                 publicado: searchParams.get("publicado") !== null ? parseBoolean(searchParams.get("publicado")) : undefined,
                 stockBajo: parseBoolean(searchParams.get("stockBajo")),
                 financiacion: parseBoolean(searchParams.get("financiacion")),
-                subcategoria: parseNumber(searchParams.get("subcategoria")),
             };
         },
         [searchParams]
@@ -309,7 +299,6 @@ export function useProductFilters(): UseProductFiltersReturn {
                 id_cat: "categoria",
                 id_marca: "marca",
                 codi_grupo: "grupo",
-                id_subcat: "subcategoria",
                 estado: "estado",
                 publicado: "publicado",
                 destacado: "destacado",
@@ -399,6 +388,16 @@ export function useProductFilters(): UseProductFiltersReturn {
         });
     }, [searchParams, pathname, router]);
 
+    // Resolver codi_grupo: si la URL tiene "3" y en DB está "03", usar el valor real de la lista
+    const resolvedCodiGrupo = useMemo(() => {
+        if (!filters.grupo || !grupos?.length) return filters.grupo;
+        const normalized = String(filters.grupo).trim().replace(/^0+/, '') || '0';
+        const g = grupos.find((gr: { codi_grupo?: string }) =>
+            String(gr.codi_grupo || '').trim().replace(/^0+/, '') === normalized
+        );
+        return g ? String(g.codi_grupo || '') : filters.grupo;
+    }, [filters.grupo, grupos]);
+
     // Backend filters
     const backendFilters = useMemo<IProductoFilters>(() => {
         const backend: IProductoFilters = { page, limit };
@@ -419,14 +418,13 @@ export function useProductFilters(): UseProductFiltersReturn {
         if (filters.marca !== undefined && filters.marca !== null && filters.marca !== '') {
             backend.id_marca = filters.marca;
         }
-        if (filters.grupo) backend.codi_grupo = filters.grupo;
+        if (resolvedCodiGrupo) backend.codi_grupo = resolvedCodiGrupo;
         if (filters.destacado !== undefined) backend.destacado = filters.destacado;
         // Filtros adicionales del admin
         if (filters.estado !== undefined) backend.estado = filters.estado;
         if (filters.publicado !== undefined) backend.publicado = filters.publicado;
         if (filters.stockBajo !== undefined) backend.stock_bajo = filters.stockBajo;
         if (filters.financiacion !== undefined) backend.financiacion = filters.financiacion;
-        if (filters.subcategoria !== undefined) backend.id_subcat = filters.subcategoria;
         if (filters.oferta !== undefined) backend.oferta = filters.oferta;
 
         if (sort) {
@@ -438,7 +436,7 @@ export function useProductFilters(): UseProductFiltersReturn {
         }
 
         return backend;
-    }, [filters, sort, page, limit, pathname]);
+    }, [filters, sort, page, limit, pathname, resolvedCodiGrupo]);
 
     const hasActiveFilters = useMemo(
         () =>
@@ -452,8 +450,7 @@ export function useProductFilters(): UseProductFiltersReturn {
             filters.oferta === true ||
             filters.estado !== undefined ||
             filters.publicado !== undefined ||
-            filters.stockBajo === true ||
-            filters.subcategoria !== undefined,
+            filters.stockBajo === true,
         [filters]
     );
 
@@ -463,7 +460,6 @@ export function useProductFilters(): UseProductFiltersReturn {
         if (filters.search) count++;
         if (filters.minPrice !== undefined || filters.maxPrice !== undefined) count++;
         if (filters.categoria) count++;
-        if (filters.subcategoria !== undefined) count++;
         if (filters.marca) count++;
         if (filters.grupo) count++;
         if (filters.destacado === true) count++;
@@ -481,7 +477,6 @@ export function useProductFilters(): UseProductFiltersReturn {
         const marcaFromUrl = searchParams.get("marca") || searchParams.get("id_marca") || null;
         const grupoFromUrl = searchParams.get("grupo") || searchParams.get("codi_grupo") || null;
         const searchFromUrl = searchParams.get("search") || searchParams.get("busqueda") || null;
-        const subcategoriaFromUrl = searchParams.get("subcategoria") || searchParams.get("id_subcat") || null;
         const estadoFromUrl = searchParams.get("estado");
         const publicadoFromUrl = searchParams.get("publicado");
         const destacadoFromUrl = searchParams.get("destacado");
@@ -499,7 +494,6 @@ export function useProductFilters(): UseProductFiltersReturn {
             id_cat: categoriaFromUrl || filters.categoria || backendFilters.id_cat || undefined,
             id_marca: marcaFromUrl || filters.marca || backendFilters.id_marca || undefined,
             codi_grupo: grupoFromUrl || filters.grupo || backendFilters.codi_grupo || undefined,
-            id_subcat: subcategoriaFromUrl ? parseNumber(subcategoriaFromUrl) : (filters.subcategoria ?? backendFilters.id_subcat ?? undefined),
             stock_bajo: stockBajoFromUrl ? parseBoolean(stockBajoFromUrl) : (filters.stockBajo ?? backendFilters.stock_bajo ?? undefined),
             estado: estadoFromUrl !== null ? (parseNumber(estadoFromUrl) as EstadoGeneral) : (filters.estado ?? backendFilters.estado ?? undefined),
             publicado: publicadoFromUrl !== null ? parseBoolean(publicadoFromUrl) : (filters.publicado ?? backendFilters.publicado ?? undefined),
@@ -534,11 +528,9 @@ export function useProductFilters(): UseProductFiltersReturn {
         activeFiltersCount,
         // Datos del backend
         categorias,
-        subcategorias,
         marcas,
         grupos,
         loadingCategorias,
-        loadingSubcategorias,
         loadingMarcas,
         loadingGrupos,
     };

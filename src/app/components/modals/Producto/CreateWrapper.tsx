@@ -88,7 +88,6 @@ export function CreateProductoModal({ onClose }: CreateProductoModalProps) {
                 codi_grupo: rawData.codi_grupo,
                 codi_impuesto: rawData.codi_impuesto ?? '01',
                 id_cat: rawData.id_cat ? Number(rawData.id_cat) : undefined,
-                id_subcat: rawData.id_subcat ? Number(rawData.id_subcat) : undefined,
                 id_marca: rawData.id_marca ? Number(rawData.id_marca) : undefined,
                 id_iva: rawData.id_iva ? Number(rawData.id_iva) : undefined,
                 estado: rawData.estado != null ? Number(rawData.estado) : undefined,

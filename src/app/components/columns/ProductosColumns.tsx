@@ -2,8 +2,8 @@ import { ColumnDef } from '@tanstack/react-table';
 import Link from 'next/link';
 import { MoreHorizontal, Edit, Trash2, Star, ImageIcon, FileSpreadsheet } from 'lucide-react';
 import * as Checkbox from '@radix-ui/react-checkbox';
-import * as Switch from '@radix-ui/react-switch';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import { Switch } from '@/app/components/ui/Switch';
 import { Check } from 'lucide-react';
 import type { IProductos } from '@/app/types/producto.type';
 import { formatearPrecio, getStockInfo } from '@/app/utils/producto.utils';
@@ -22,6 +22,7 @@ interface ProductosTableActions {
     onRestaurarPreciosExcel?: (producto: IProductos) => void;
     categorias?: any[];
     marcas?: any[];
+    grupos?: any[];
 }
 
 export const getProductosColumns = (
@@ -213,6 +214,47 @@ export const getProductosColumns = (
             },
         },
         {
+            id: 'grupo',
+            accessorKey: 'codi_grupo',
+            header: 'Grupo',
+            cell: ({ row }) => {
+                const producto = row.original;
+                const grupo = producto.grupo;
+                let nombreGrupo = grupo?.nombre;
+
+                if (nombreGrupo) {
+                    return (
+                        <div className="flex flex-col gap-1">
+                            <span className="text-sm font-medium">{nombreGrupo}</span>
+                            {grupo?.codi_grupo && (
+                                <span className="text-xs text-gray-400">Cód: {grupo.codi_grupo}</span>
+                            )}
+                        </div>
+                    );
+                }
+
+                if (producto.codi_grupo && actions.grupos) {
+                    const g = actions.grupos.find((gr: any) => gr.codi_grupo === producto.codi_grupo);
+                    if (g?.nombre) {
+                        return (
+                            <div className="flex flex-col gap-1">
+                                <span className="text-sm font-medium">{g.nombre}</span>
+                                {producto.codi_grupo && (
+                                    <span className="text-xs text-gray-400">Cód: {producto.codi_grupo}</span>
+                                )}
+                            </div>
+                        );
+                    }
+                }
+
+                return producto.codi_grupo ? (
+                    <span className="text-sm text-gray-600">{producto.codi_grupo}</span>
+                ) : (
+                    <span className="text-gray-400">-</span>
+                );
+            },
+        },
+        {
             id: 'financiacion',
             accessorKey: 'cuotas_habilitadas',
             header: 'Financiación',
@@ -223,13 +265,11 @@ export const getProductosColumns = (
 
                 if (actions.onToggleCuotas) {
                     return (
-                        <Switch.Root
+                        <Switch
                             checked={checked}
                             onCheckedChange={() => actions.onToggleCuotas?.(producto)}
-                            className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-gray-300 bg-gray-200 transition-colors duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-(--principal) focus:ring-offset-2 data-[state=checked]:bg-(--principal) data-[state=checked]:border-(--principal)"
-                        >
-                            <Switch.Thumb className="pointer-events-none block h-5 w-5 rounded-full border-2 border-gray-300 bg-white shadow-md ring-0 transition-[transform] duration-200 ease-out translate-x-0.5 data-[state=checked]:translate-x-5 data-[state=checked]:border-white/80" />
-                        </Switch.Root>
+                            aria-label="Financiación"
+                        />
                     );
                 }
                 return checked ? <TableBadge variant="success">Sí</TableBadge> : <TableBadge variant="neutral">No</TableBadge>;
@@ -277,12 +317,12 @@ export const getProductosColumns = (
                 const stockInfo = getStockInfo(producto);
 
                 return (
-                    <div className="flex items-center gap-2">
+                    <div className="inline-flex flex-nowrap items-center gap-1.5 whitespace-nowrap">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${stockInfo.color}`}>
-                            {stockInfo.cantidad} / u
+                            {stockInfo.cantidad} u
                         </span>
                         {stockInfo.status === 'stock_bajo' && (
-                            <span className="text-xs text-yellow-600">⚠️</span>
+                            <span className="text-xs text-yellow-600" title="Stock bajo">⚠</span>
                         )}
                     </div>
                 );
@@ -339,13 +379,11 @@ export const getProductosColumns = (
                 const checked = publicado ?? false;
 
                 return (
-                    <Switch.Root
+                    <Switch
                         checked={checked}
                         onCheckedChange={() => actions.onTogglePublicado(producto)}
-                        className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-gray-300 bg-gray-200 transition-colors duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-(--principal) focus:ring-offset-2 data-[state=checked]:bg-(--principal) data-[state=checked]:border-(--principal)"
-                    >
-                        <Switch.Thumb className="pointer-events-none block h-5 w-5 rounded-full border-2 border-gray-300 bg-white shadow-md ring-0 transition-[transform] duration-200 ease-out translate-x-0.5 data-[state=checked]:translate-x-5 data-[state=checked]:border-white/80" />
-                    </Switch.Root>
+                        aria-label="Publicado"
+                    />
                 );
             },
             enableSorting: false,
@@ -435,7 +473,7 @@ export const getProductosColumns = (
 
 export const defaultColumnVisibility = {
     'marca.nombre': true,
-    'subcategoria.nombre': true,
+    grupo: true,
     destacado: true,
     financiacion: true,
     publicado: true,
@@ -447,8 +485,9 @@ export const defaultColumnOrder = [
     'img_principal',
     'nombre',
     'modelo',
-    'subcategoria.nombre',
-    'marca.nombre',
+    'categoria',
+    'marca',
+    'grupo',
     'precio',
     'stock',
     'estado',

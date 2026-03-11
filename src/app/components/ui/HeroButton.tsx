@@ -1,7 +1,8 @@
 "use client";
 
-import { ButtonHTMLAttributes, ReactElement } from "react";
+import { ButtonHTMLAttributes } from "react";
 import { LucideIcon } from "lucide-react";
+import { IconType } from "react-icons";
 import Link from "next/link";
 
 type HeroButtonVariant = 
@@ -14,7 +15,7 @@ type HeroButtonVariant =
 
 interface HeroButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
   variant?: HeroButtonVariant;
-  icon: LucideIcon;
+  icon: LucideIcon | IconType;
   children: React.ReactNode;
   href?: string;
   className?: string;

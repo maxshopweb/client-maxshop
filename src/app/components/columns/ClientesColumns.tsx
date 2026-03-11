@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import * as Checkbox from "@radix-ui/react-checkbox";
 import { Button } from "@/app/components/ui/Button";
-import { ArrowUpDown, MoreHorizontal, Eye, ExternalLink, Check } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal, Eye, ExternalLink, Check, UserX, UserCheck } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import type { ICliente } from "@/app/types/cliente.type";
 import { getClienteNombreCompleto, getClienteEmail, formatFecha } from "@/app/types/cliente.type";
@@ -15,7 +15,8 @@ export const createClientesColumns = (
     onView?: (cliente: ICliente) => void,
     isAllSelected?: boolean,
     onSelectAll?: (checked: boolean) => void,
-    selectedCount?: number
+    selectedCount?: number,
+    onToggleActivo?: (id: string, activo: boolean) => void | Promise<void>
 ): ColumnDef<ICliente>[] => [
     // Columna de selección
     {
@@ -207,21 +208,23 @@ export const createClientesColumns = (
         },
         size: 150,
     },
-    // Estado
+    // Estado (activo/inactivo: controla login y compras)
     {
-        accessorKey: "usuario.estado",
+        accessorKey: "usuario.activo",
+        id: "estado",
         header: "Estado",
         cell: ({ row }) => {
-            const estado = row.original.usuario?.estado;
-            const estadoConfig: Record<number, { label: string; variant: BadgeVariant }> = {
-                1: { label: "Activo", variant: "success" },
-                2: { label: "Inactivo", variant: "warning" },
-                0: { label: "Eliminado", variant: "error" },
-            };
-            const config = estadoConfig[estado ?? 0] ?? { label: "Desconocido", variant: "neutral" as BadgeVariant };
+            const usuario = row.original.usuario;
+            const activo = usuario?.activo !== false;
+            const estado = usuario?.estado;
+            if (estado === 0) {
+                return (
+                    <TableBadge variant="error">Eliminado</TableBadge>
+                );
+            }
             return (
-                <TableBadge variant={config.variant}>
-                    {config.label}
+                <TableBadge variant={activo ? "success" : "warning"}>
+                    {activo ? "Activo" : "Inactivo"}
                 </TableBadge>
             );
         },
@@ -257,6 +260,28 @@ export const createClientesColumns = (
                                     Ver Perfil
                                 </Link>
                             </DropdownMenu.Item>
+                            {onToggleActivo && (
+                                <DropdownMenu.Item
+                                    className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
+                                    onSelect={(e) => {
+                                        e.preventDefault();
+                                        const activo = cliente.usuario?.activo !== false;
+                                        onToggleActivo(cliente.id_usuario, !activo);
+                                    }}
+                                >
+                                    {cliente.usuario?.activo !== false ? (
+                                        <>
+                                            <UserX className="mr-2 h-4 w-4" />
+                                            Desactivar
+                                        </>
+                                    ) : (
+                                        <>
+                                            <UserCheck className="mr-2 h-4 w-4" />
+                                            Activar
+                                        </>
+                                    )}
+                                </DropdownMenu.Item>
+                            )}
                             {cliente.ventas && cliente.ventas.length > 0 && (
                                 <DropdownMenu.Item
                                     className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"

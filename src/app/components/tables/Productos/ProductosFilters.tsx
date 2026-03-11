@@ -19,11 +19,11 @@ export function ProductosFilters() {
         localSearch,
         localPriceRange,
         categorias,
-        subcategorias,
         marcas,
+        grupos,
         loadingCategorias,
-        loadingSubcategorias,
         loadingMarcas,
+        loadingGrupos,
     } = useProductFilters();
 
     const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
@@ -87,6 +87,19 @@ export function ProductosFilters() {
             return codiMatch || idMatch;
         }) || null;
     };
+
+    // Grupo: comparar ignorando ceros a la izquierda para que "3" y "03" coincidan
+    const findSelectedGrupo = () => {
+        if (!filters.codi_grupo && filters.grupo === undefined) return null;
+        const raw = String(filters.codi_grupo ?? filters.grupo ?? '').trim();
+        if (!raw) return null;
+        const normalized = raw.replace(/^0+/, '') || '0';
+        return grupos?.find((g: { codi_grupo?: string }) =>
+            String(g.codi_grupo || '').trim().replace(/^0+/, '') === normalized
+        ) || null;
+    };
+
+    const normalizedGrupoValue = findSelectedGrupo() ? String(findSelectedGrupo()!.codi_grupo || '') : (filters.codi_grupo || filters.grupo ? String(filters.codi_grupo ?? filters.grupo) : '');
 
     // Normalizar valores para que coincidan con las opciones
     const normalizedCategoryValue = normalizeFilterValue(
@@ -192,12 +205,7 @@ export function ProductosFilters() {
                                             options={categoriaOptions}
                                             value={normalizedCategoryValue}
                                             onChange={(value) => {
-                                                // El backend acepta códigos o IDs
                                                 setFilter('id_cat', value ? String(value) : undefined);
-                                                // Limpiar subcategoría al cambiar categoría
-                                                if (filters.id_subcat) {
-                                                    setFilter('id_subcat', undefined);
-                                                }
                                             }}
                                             disabled={loadingCategorias}
                                             placeholder={loadingCategorias ? "Cargando..." : "Seleccionar categoría"}
@@ -206,27 +214,24 @@ export function ProductosFilters() {
                                 })()}
                             </div>
 
-                            {/* SUBCATEGORÍA */}
-                            {filters.id_cat && (
-                                <div>
-                                    <Select
-                                        label="Subcategoría"
-                                        options={[
-                                            { value: '', label: 'Todas las subcategorías' },
-                                            ...(subcategorias?.map((subcat: any) => ({
-                                                value: String(subcat.id_subcat || ''),
-                                                label: subcat.nombre || 'Sin nombre',
-                                            })) || [])
-                                        ]}
-                                        value={filters.id_subcat ? String(filters.id_subcat) : ''}
-                                        onChange={(value) => {
-                                            setFilter('id_subcat', value ? Number(value) : undefined);
-                                        }}
-                                        disabled={loadingSubcategorias}
-                                        placeholder={loadingSubcategorias ? "Cargando..." : "Seleccionar subcategoría"}
-                                    />
-                                </div>
-                            )}
+                            {/* GRUPO */}
+                            <div>
+                                <Select
+                                    label="Grupo"
+                                    preserveString
+                                    options={[
+                                        { value: '', label: 'Todos los grupos' },
+                                        ...(grupos?.map((g: { codi_grupo?: string; nombre?: string }) => ({
+                                            value: String(g.codi_grupo || ''),
+                                            label: g.nombre || g.codi_grupo || 'Sin nombre',
+                                        })) || [])
+                                    ]}
+                                    value={normalizedGrupoValue}
+                                    onChange={(value) => setFilter('codi_grupo', value !== '' && value != null ? String(value) : undefined)}
+                                    disabled={loadingGrupos}
+                                    placeholder={loadingGrupos ? "Cargando..." : "Seleccionar grupo"}
+                                />
+                            </div>
 
                             {/* MARCA */}
                             <div>
@@ -421,15 +426,13 @@ export function ProductosFilters() {
                         );
                     })()}
 
-                    {filters.id_subcat && (() => {
-                        const subcategoriaSeleccionada = subcategorias?.find((subcat: any) => 
-                            String(subcat.id_subcat) === String(filters.id_subcat)
-                        );
+                    {(filters.codi_grupo || filters.grupo) && (() => {
+                        const grupoSeleccionado = findSelectedGrupo();
                         return (
                             <FilterChip
-                                key="subcategoria-chip"
-                                label={`Subcategoría: ${subcategoriaSeleccionada?.nombre || filters.id_subcat}`}
-                                onRemove={() => setFilter('id_subcat', undefined)}
+                                key="grupo-chip"
+                                label={`Grupo: ${grupoSeleccionado?.nombre ?? filters.codi_grupo ?? filters.grupo}`}
+                                onRemove={() => setFilter('codi_grupo', undefined)}
                             />
                         );
                     })()}

@@ -45,7 +45,7 @@ export default function Footer() {
                 <div className="flex items-start gap-3">
                   <MapPin className="w-4 h-4 text-neutral-400 mt-0.5 flex-shrink-0" />
                   <p className="text-neutral-600 text-sm leading-relaxed">
-                    Punta del Sauce 1826<br />
+                    Av. Leandro Alem 1646 Local 2<br />
                     Córdoba Capital, Argentina
                   </p>
                 </div>

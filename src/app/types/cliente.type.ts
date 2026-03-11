@@ -23,7 +23,7 @@ export interface ICliente {
     ventas?: IVenta[]; // Historial de ventas
 }
 
-/** Datos editables del cliente (teléfono, DNI, domicilio) */
+/** Datos editables del cliente (teléfono, DNI, domicilio, activo) */
 export interface IUpdateClienteDTO {
     telefono?: string | null;
     numero_documento?: string | null;
@@ -35,6 +35,8 @@ export interface IUpdateClienteDTO {
     ciudad?: string | null;
     provincia?: string | null;
     cod_postal?: number | null;
+    /** Si false, el cliente no puede iniciar sesión ni realizar compras */
+    activo?: boolean | null;
 }
 
 // ========================================

@@ -36,7 +36,7 @@ export function ProductosTable({
     tableState,
 }: ProductosTableProps) {
     // Hooks
-    const { backendFilters: filters, setSort, categorias, marcas } = useProductFilters();
+    const { backendFilters: filters, setSort, categorias, marcas, grupos } = useProductFilters();
     const { productos, isLoading, isError, error } = useProductos({ filters });
 
     const {
@@ -61,6 +61,7 @@ export function ProductosTable({
         onRestaurarPreciosExcel,
         categorias,
         marcas,
+        grupos,
     });
 
     // Instancia de la tabla

@@ -1,15 +1,29 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useDashboardSalesByCategory } from '@/app/hooks/dashboard/useDashboardSalesByCategory';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import { motion } from 'framer-motion';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import type { ISalesByCategoryItem } from '@/app/types/dashboard.type';
 
 const COLORS = ['#e88a42', '#2563eb', '#22c55e', '#a855f7', '#ec4899', '#64748b'];
+const MAX_CATEGORIES = 5;
+
+function buildChartData(data: ISalesByCategoryItem[]) {
+    if (!data.length) return [];
+    const sorted = [...data].sort((a, b) => b.total_vendido - a.total_vendido);
+    const top = sorted.slice(0, MAX_CATEGORIES);
+    const rest = sorted.slice(MAX_CATEGORIES);
+    if (rest.length === 0) return top;
+    const otrosTotal = rest.reduce((sum, item) => sum + item.total_vendido, 0);
+    return [...top, { categoria: 'Otros', total_vendido: otrosTotal }];
+}
 
 export function SalesCategoryChart() {
     const { data, isLoading } = useDashboardSalesByCategory();
+    const chartData = useMemo(() => buildChartData(data), [data]);
 
     return (
         <motion.div
@@ -30,7 +44,7 @@ export function SalesCategoryChart() {
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart margin={{ top: 48, right: 16, left: 16, bottom: 56 }}>
                             <Pie
-                                data={data as any}
+                                data={chartData}
                                 cx="50%"
                                 cy="50%"
                                 innerRadius={52}
@@ -39,8 +53,8 @@ export function SalesCategoryChart() {
                                 dataKey="total_vendido"
                                 nameKey="categoria"
                             >
-                                {data.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} strokeWidth={0} />
+                                {chartData.map((entry, index) => (
+                                    <Cell key={`cell-${entry.categoria}-${index}`} fill={COLORS[index % COLORS.length]} strokeWidth={0} />
                                 ))}
                             </Pie>
                             <Tooltip

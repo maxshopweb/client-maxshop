@@ -20,6 +20,8 @@ interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'onC
     helperText?: string;
     icon?: LucideIcon;
     iconPosition?: 'left' | 'right';
+    /** Si true, no convierte valores numéricos a number (útil para códigos como codi_grupo "03") */
+    preserveString?: boolean;
 }
 
 const Select = forwardRef<HTMLSelectElement, SelectProps>(
@@ -35,6 +37,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
         helperText,
         icon: Icon,
         iconPosition = 'left',
+        preserveString = false,
         ...props 
     }, ref) => {
         const [isOpen, setIsOpen] = useState(false);
@@ -43,10 +46,11 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
         const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
             if (onChange) {
                 const newValue = e.target.value;
-                // Intentar convertir a número si es posible
-                const parsedValue = !isNaN(Number(newValue)) && newValue !== '' 
-                    ? Number(newValue) 
-                    : newValue;
+                const parsedValue = preserveString || newValue === ''
+                    ? newValue
+                    : !isNaN(Number(newValue))
+                        ? Number(newValue)
+                        : newValue;
                 onChange(parsedValue);
             }
             setIsOpen(false);

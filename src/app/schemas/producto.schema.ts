@@ -36,7 +36,6 @@ export const productoStepOneSchema = z.object({
   codi_impuesto: z.string().optional(),
   // Campos legacy para compatibilidad
   id_cat: selectNumberField,
-  id_subcat: selectNumberField,
   id_marca: selectNumberField,
   img_principal: z.string().optional(),
   imagenes: z.array(z.string()).optional(),

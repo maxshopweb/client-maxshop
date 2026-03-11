@@ -33,6 +33,7 @@ export function EditClienteModal({ cliente, onClose }: EditClienteModalProps) {
             ciudad: cliente.ciudad ?? '',
             provincia: cliente.provincia ?? '',
             cod_postal: cliente.cod_postal ?? undefined,
+            activo: cliente.usuario?.activo !== false,
         },
     });
 
@@ -48,6 +49,7 @@ export function EditClienteModal({ cliente, onClose }: EditClienteModalProps) {
             ciudad: data.ciudad || null,
             provincia: data.provincia || null,
             cod_postal: data.cod_postal ?? null,
+            activo: data.activo,
         };
         updateClienteAsync({ id: cliente.id_usuario, data: payload });
     };
@@ -70,6 +72,17 @@ export function EditClienteModal({ cliente, onClose }: EditClienteModalProps) {
             )}
         >
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <div className="flex items-center gap-2">
+                    <input
+                        type="checkbox"
+                        id="activo"
+                        className="h-4 w-4 rounded border-input"
+                        {...register('activo', { setValueAs: (v) => v === true || v === 'on' })}
+                    />
+                    <label htmlFor="activo" className="text-sm font-medium text-foreground">
+                        Cuenta activa (puede iniciar sesión y realizar compras)
+                    </label>
+                </div>
                 <Input
                     label="Teléfono"
                     icon={Phone}

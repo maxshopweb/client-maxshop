@@ -1,9 +1,10 @@
 "use client";
 
-import { Wrench, Building2, ArrowRight, MessageCircle } from "lucide-react";
+import { Wrench, Building2, ArrowRight } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { useRef, useEffect, useState } from "react";
 import HeroButton from "../ui/HeroButton";
+import { useWhatsapp } from "@/app/hooks/contact/useWhatsapp";
 
 function useFadeIn(delay = 0) {
   const ref = useRef<HTMLDivElement>(null);
@@ -45,7 +46,7 @@ const valueRows = [
     title: "Todo para tu\npróximo proyecto",
     description:
       "Materiales y soluciones integrales de construcción y renovación. Hablá con un asesor y encontrá lo que necesitás.",
-    cta: { label: "Hablar con un asesor", href: "https://wa.me/5491100000000", icon: FaWhatsapp, variant: "ghost-orange" as const },
+    cta: { label: "Hablar con un asesor", whatsapp: true, icon: FaWhatsapp, variant: "ghost-orange" as const },
     icon: Building2,
     imageLeft: true,
   },
@@ -54,8 +55,10 @@ const valueRows = [
 function ValueRow({ row }: { row: typeof valueRows[0] }) {
   const { ref: imgRef, visible: imgVisible } = useFadeIn(0);
   const { ref: textRef, visible: textVisible } = useFadeIn(180);
+  const whatsapp = useWhatsapp();
   const Icon = row.icon;
   const CtaIcon = row.cta.icon;
+  const ctaHref = "whatsapp" in row.cta && row.cta.whatsapp ? whatsapp.buildUrl() : row.cta.href;
 
   return (
     <div
@@ -115,7 +118,7 @@ function ValueRow({ row }: { row: typeof valueRows[0] }) {
           <p className="text-sm md:text-base text-foreground/60 leading-relaxed mb-8 max-w-2xl">
             {row.description}
           </p>
-          <HeroButton variant={row.cta.variant} icon={CtaIcon} href={row.cta.href}>
+          <HeroButton variant={row.cta.variant} icon={CtaIcon} href={ctaHref}>
             {row.cta.label}
           </HeroButton>
         </div>

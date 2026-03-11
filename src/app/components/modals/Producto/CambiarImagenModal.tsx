@@ -23,6 +23,9 @@ export function CambiarImagenModal({ product, onClose }: CambiarImagenModalProps
         Array.isArray(product.imagenes) ? [...product.imagenes] : []
     );
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showSecondarySection, setShowSecondarySection] = useState(
+        () => Array.isArray(product.imagenes) && product.imagenes.length > 0
+    );
 
     const handleSave = async () => {
         setIsSubmitting(true);
@@ -65,10 +68,10 @@ export function CambiarImagenModal({ product, onClose }: CambiarImagenModalProps
     };
 
     return (
-        <ModalBase isOpen={true} onClose={onClose} maxWidth="max-w-2xl">
+        <ModalBase isOpen={true} onClose={onClose} fitContent maxWidth="max-w-[92vw]">
             {({ handleClose }) => (
-                <div className="py-6 px-6 animate-bounce-in">
-                    <div className="mb-6">
+                <div className="flex flex-col flex-1 min-h-0 min-w-[320px] py-6 px-6 animate-bounce-in overflow-hidden">
+                    <div className="shrink-0 mb-4">
                         <h2 className="text-xl font-bold" style={{ color: 'var(--foreground)' }}>
                             Cambiar imágenes
                         </h2>
@@ -77,9 +80,10 @@ export function CambiarImagenModal({ product, onClose }: CambiarImagenModalProps
                         )}
                     </div>
 
-                    <div className="max-h-[65vh] overflow-y-auto pr-1">
+                    <div className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden flex flex-col pb-1 min-w-0">
                         <ProductoImagenesEditor
                             mode="edit"
+                            layout="row"
                             product={product}
                             mainFile={mainFile}
                             setMainFile={setMainFile}
@@ -87,10 +91,12 @@ export function CambiarImagenModal({ product, onClose }: CambiarImagenModalProps
                             setSecondaryFiles={setSecondaryFiles}
                             existingSecondaryPaths={existingSecondaryPaths}
                             setExistingSecondaryPaths={setExistingSecondaryPaths}
+                            showSecondarySection={showSecondarySection}
+                            onRequestSecondary={() => setShowSecondarySection(true)}
                         />
                     </div>
 
-                    <div className="flex justify-end gap-3 mt-6 pt-5 border-t border-input/40">
+                    <div className="shrink-0 flex justify-end gap-3 mt-4 pt-4 border-t border-input/40">
                         <button
                             type="button"
                             onClick={handleClose}
