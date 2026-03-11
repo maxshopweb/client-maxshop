@@ -124,14 +124,17 @@ export function StepTwoPricing({ form }: StepTwoProps) {
       {/* Bonificación a aplicar */}
       <div className="space-y-2">
         <Input
-          label="Bonificación a aplicar"
-          placeholder="Ej: B1, B2 (código para Excel)"
-          maxLength={10}
-          {...register('codi_bonificacion')}
-          error={errors.codi_bonificacion?.message as string | undefined}
+          label="Bonificación (%)"
+          placeholder="Ej: 10"
+          type="number"
+          min="0"
+          max="100"
+          step="0.01"
+          {...register('bonificacion_porcentaje', optionalNumberOptions)}
+          error={errors.bonificacion_porcentaje?.message as string | undefined}
         />
         <p className="text-xs text-muted-foreground">
-          Código de bonificación que se enviará en el Excel de ventas para este producto (opcional).
+          Porcentaje de bonificación por defecto para este producto. Se aplica sobre el total de la línea y se envía al Excel.
         </p>
       </div>
 

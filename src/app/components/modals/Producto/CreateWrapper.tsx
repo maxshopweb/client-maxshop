@@ -76,7 +76,7 @@ export function CreateProductoModal({ onClose }: CreateProductoModalProps) {
                 precio_campanya: rawData.precio_campanya ?? undefined,
                 precio_manual: (rawData.lista_precio_activa === 'E' || rawData.lista_precio_activa === 'e') ? (rawData.precio_manual ?? undefined) : undefined,
                 lista_precio_activa: rawData.lista_precio_activa || undefined,
-                codi_bonificacion: rawData.codi_bonificacion ?? undefined,
+                bonificacion_porcentaje: rawData.bonificacion_porcentaje ?? undefined,
                 stock: rawData.stock,
                 stock_min: rawData.stock_min ?? undefined,
                 stock_mayorista: rawData.stock_mayorista ?? undefined,

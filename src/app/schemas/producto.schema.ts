@@ -57,13 +57,9 @@ export const productoStepTwoSchema = z
     /** Precio cuando lista_precio_activa = 'E' (no se sobreescribe por sync). */
     precio_manual: optionalNumberField,
     lista_precio_activa: z.string().optional(), // Con cuál lista se publica: V | O | P | Q | E
-    /** Código de bonificación a aplicar (para Excel/export). */
-    codi_bonificacion: z
-      .string()
-      .max(10, 'Máximo 10 caracteres')
-      .optional()
-      .or(z.literal(''))
-      .transform((v) => (v === '' ? undefined : v)),
+    /** Bonificación porcentual por defecto del producto (0-100). */
+    bonificacion_porcentaje: optionalNumberField
+      .refine((v) => v === undefined || (v >= 0 && v <= 100), 'La bonificación debe estar entre 0 y 100'),
     precio_mayorista: optionalNumberField,
     precio_minorista: optionalNumberField,
     precio_evento: optionalNumberField,

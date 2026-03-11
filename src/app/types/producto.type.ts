@@ -65,8 +65,8 @@ export interface IProductos {
     precio_campanya?: number | null;
     /** Precio cuando lista_precio_activa = 'E'. No se sobreescribe por sync. */
     precio_manual?: number | null;
-    /** Código de bonificación a aplicar (para Excel/export). */
-    codi_bonificacion?: string | null;
+    /** Bonificación porcentual por defecto del producto (0-100). */
+    bonificacion_porcentaje?: number | null;
     lista_precio_activa?: string | null;
     lista_activa?: IListaActivaInfo | null;
     precio_mayorista?: number | null;
@@ -151,7 +151,7 @@ export interface ICreateProductoDTO {
     precio_pvp?: number | null;
     precio_campanya?: number | null;
     precio_manual?: number | null;
-    codi_bonificacion?: string | null;
+    bonificacion_porcentaje?: number | null;
     lista_precio_activa?: string | null; // Con cuál lista se publica: V | O | P | Q | E
 
     // Opcionales - usar códigos
