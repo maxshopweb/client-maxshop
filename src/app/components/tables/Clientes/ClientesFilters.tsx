@@ -34,7 +34,7 @@ export function ClientesFilters() {
                 <div className="flex-1">
                     <Input
                         type="text"
-                        placeholder="Buscar por nombre, email, teléfono..."
+                        placeholder="Buscar por nombre, email, teléfono o DNI..."
                         value={localBusqueda || ''}
                         onChange={(e) => setFilter('busqueda', e.target.value)}
                         icon={Search}

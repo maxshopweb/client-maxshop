@@ -11,6 +11,7 @@ import { ConfigCard } from "@/app/components/Admin/Config/ConfigCard";
 import { IntegrationCard } from "@/app/components/Admin/Config/IntegrationCard";
 import { BannersPanel } from "@/app/components/Admin/Config/Banners/BannersPanel";
 import { DatosBancariosPanel } from "@/app/components/Admin/Config/DatosBancariosPanel";
+import { Switch } from "@/app/components/ui/Switch";
 
 const INTEGRATIONS = [
     {
@@ -54,7 +55,16 @@ export default function ConfigPage() {
             <DatosBancariosPanel config={config} isLoading={isLoading} mutation={mutation} />
 
             <ConfigSection title="Reglas de negocio" columns={3}>
-                <ConfigCard title="Envíos gratis" status="Activo">
+                <ConfigCard title="Envíos gratis" status={promo.envioActivo ? "Activo" : "Inactivo"}>
+                    <div className="flex items-center justify-between gap-3">
+                        <span className="font-medium text-text">Regla activa</span>
+                        <Switch
+                            checked={promo.envioActivo}
+                            onCheckedChange={promo.setEnvioActivo}
+                            disabled={isLoading || mutation.isPending}
+                            aria-label="Activar o desactivar envío gratis"
+                        />
+                    </div>
                     <Input
                         label="Monto mínimo (pesos):"
                         type="text"
@@ -63,10 +73,24 @@ export default function ConfigPage() {
                         placeholder="100000"
                         disabled={isLoading}
                     />
+                    {!promo.envioActivo && (
+                        <p className="mt-1 text-xs text-text/60">
+                            La regla está desactivada: no se aplicará envío gratis por monto.
+                        </p>
+                    )}
                     <p className="mt-1 text-text/60">Todo el país</p>
                 </ConfigCard>
 
-                <ConfigCard title="Cuotas sin interés" status="Activo">
+                <ConfigCard title="Cuotas sin interés" status={promo.cuotasActivo ? "Activo" : "Inactivo"}>
+                    <div className="flex items-center justify-between gap-3">
+                        <span className="font-medium text-text">Regla activa</span>
+                        <Switch
+                            checked={promo.cuotasActivo}
+                            onCheckedChange={promo.setCuotasActivo}
+                            disabled={isLoading || mutation.isPending}
+                            aria-label="Activar o desactivar cuotas sin interés"
+                        />
+                    </div>
                     <Input
                         label="Cantidad de cuotas:"
                         type="number"
@@ -83,6 +107,11 @@ export default function ConfigPage() {
                         placeholder="80000"
                         disabled={isLoading}
                     />
+                    {!promo.cuotasActivo && (
+                        <p className="mt-1 text-xs text-text/60">
+                            La regla está desactivada: no se ofrecerán cuotas promocionales.
+                        </p>
+                    )}
                 </ConfigCard>
 
                 <div className="flex items-end">

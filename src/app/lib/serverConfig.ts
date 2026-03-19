@@ -19,7 +19,9 @@ export async function getConfigTiendaServer(): Promise<IConfigTienda> {
 function defaultConfig(): IConfigTienda {
   return {
     envio_gratis_minimo: null,
+    envio_gratis_activo: true,
     cuotas_sin_interes: null,
+    cuotas_sin_interes_activo: true,
     cuotas_sin_interes_minimo: null,
     datos_bancarios: null,
   };

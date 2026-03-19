@@ -7,19 +7,25 @@ type Mutation = UseMutationResult<any, Error, Partial<IConfigTienda>>;
 
 export function usePromoConfig(config: IConfigTienda | undefined, mutation: Mutation) {
     const [envioMin, setEnvioMin] = useState('');
+    const [envioActivo, setEnvioActivo] = useState(true);
     const [cuotas, setCuotas] = useState('');
+    const [cuotasActivo, setCuotasActivo] = useState(true);
     const [cuotasMin, setCuotasMin] = useState('');
 
     useEffect(() => {
         if (config) {
             setEnvioMin(String(config.envio_gratis_minimo ?? 100000));
+            setEnvioActivo(config.envio_gratis_activo ?? true);
             setCuotas(String(config.cuotas_sin_interes ?? 3));
+            setCuotasActivo(config.cuotas_sin_interes_activo ?? true);
             setCuotasMin(String(config.cuotas_sin_interes_minimo ?? 80000));
         }
     }, [config]);
 
     const defEnvio = config?.envio_gratis_minimo ?? 100000;
+    const defEnvioActivo = config?.envio_gratis_activo ?? true;
     const defCuotas = config?.cuotas_sin_interes ?? 3;
+    const defCuotasActivo = config?.cuotas_sin_interes_activo ?? true;
     const defCuotasMin = config?.cuotas_sin_interes_minimo ?? 80000;
 
     const envioVal = parseInt(envioMin.replace(/\D/g, ''), 10);
@@ -29,7 +35,9 @@ export function usePromoConfig(config: IConfigTienda | undefined, mutation: Muta
     const hasChanges =
         config != null &&
         ((Number.isNaN(envioVal) ? defEnvio : envioVal) !== defEnvio ||
+            envioActivo !== defEnvioActivo ||
             (Number.isNaN(cuotasVal) ? defCuotas : cuotasVal) !== defCuotas ||
+            cuotasActivo !== defCuotasActivo ||
             (Number.isNaN(cuotasMinVal) ? defCuotasMin : cuotasMinVal) !== defCuotasMin);
 
     const handleSave = async () => {
@@ -53,7 +61,9 @@ export function usePromoConfig(config: IConfigTienda | undefined, mutation: Muta
         try {
             await mutation.mutateAsync({
                 envio_gratis_minimo: envio,
+                envio_gratis_activo: envioActivo,
                 cuotas_sin_interes: nCuotas,
+                cuotas_sin_interes_activo: cuotasActivo,
                 cuotas_sin_interes_minimo: minCuotas,
             });
             toast.success('Configuración guardada. Los mensajes se actualizarán en toda la tienda.');
@@ -64,7 +74,9 @@ export function usePromoConfig(config: IConfigTienda | undefined, mutation: Muta
 
     return {
         envioMin, setEnvioMin,
+        envioActivo, setEnvioActivo,
         cuotas, setCuotas,
+        cuotasActivo, setCuotasActivo,
         cuotasMin, setCuotasMin,
         hasChanges,
         handleSave,
