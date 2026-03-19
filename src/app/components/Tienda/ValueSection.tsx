@@ -58,11 +58,12 @@ function ValueRow({ row }: { row: typeof valueRows[0] }) {
   const whatsapp = useWhatsapp();
   const Icon = row.icon;
   const CtaIcon = row.cta.icon;
-  const ctaHref = "whatsapp" in row.cta && row.cta.whatsapp ? whatsapp.buildUrl() : row.cta.href;
+  const ctaIsWhatsapp = "whatsapp" in row.cta && row.cta.whatsapp;
+  const ctaHref = ctaIsWhatsapp ? whatsapp.buildUrl() : row.cta.href;
 
   return (
     <div
-      className={`relative flex flex-col lg:h-screen overflow-hidden ${
+      className={`relative flex flex-col lg:flex-1 lg:min-h-0 overflow-hidden ${
         row.imageLeft ? "lg:flex-row" : "lg:flex-row-reverse"
       }`}
     >
@@ -118,7 +119,13 @@ function ValueRow({ row }: { row: typeof valueRows[0] }) {
           <p className="text-sm md:text-base text-foreground/60 leading-relaxed mb-8 max-w-2xl">
             {row.description}
           </p>
-          <HeroButton variant={row.cta.variant} icon={CtaIcon} href={ctaHref}>
+          <HeroButton
+            variant={row.cta.variant}
+            icon={CtaIcon}
+            href={ctaHref}
+            target={ctaIsWhatsapp ? "_blank" : undefined}
+            rel={ctaIsWhatsapp ? "noopener noreferrer" : undefined}
+          >
             {row.cta.label}
           </HeroButton>
         </div>
@@ -129,7 +136,7 @@ function ValueRow({ row }: { row: typeof valueRows[0] }) {
 
 export default function ValueSection() {
   return (
-    <section className="bg-background overflow-x-hidden">
+    <section className="bg-background overflow-x-hidden lg:h-screen lg:flex lg:flex-col lg:overflow-hidden">
       {valueRows.map((row, index) => (
         <ValueRow key={index} row={row} />
       ))}

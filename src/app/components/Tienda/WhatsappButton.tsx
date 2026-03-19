@@ -7,7 +7,7 @@ interface WhatsappButtonProps {
   message?: string;
 }
 
-export default function WhatsappButton({ message = "Hola! Tengo una consulta sobre MaxShop." }: WhatsappButtonProps) {
+export default function WhatsappButton({ message }: WhatsappButtonProps) {
   const { open, display } = useWhatsapp({ message });
 
   return (

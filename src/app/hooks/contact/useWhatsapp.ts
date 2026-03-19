@@ -1,23 +1,18 @@
-export const CONTACT_INFO = {
-  whatsapp: {
-    number: '+5491171506220',
-    display: '+54 9 11 7150-6220',
-  },
-  email: {
-    address: 'info@maxshop.com',
-    href: 'mailto:info@maxshop.com',
-  },
-} as const;
+import { CONTACT_CONFIG } from "@/app/config/contact.config";
+
+export const CONTACT_INFO = CONTACT_CONFIG as typeof CONTACT_CONFIG;
 
 interface UseWhatsappOptions {
   message?: string;
 }
 
-export function useWhatsapp({ message = '' }: UseWhatsappOptions = {}) {
+export function useWhatsapp({ message }: UseWhatsappOptions = {}) {
+  const defaultMessage = CONTACT_CONFIG.advisor.whatsappMessage;
   const { number, display } = CONTACT_INFO.whatsapp;
 
   const buildUrl = (customMessage?: string) => {
-    const text = encodeURIComponent(customMessage ?? message);
+    const effectiveMessage = customMessage ?? message ?? defaultMessage;
+    const text = encodeURIComponent(effectiveMessage);
     return `https://wa.me/${number.replace(/\D/g, '')}${text ? `?text=${text}` : ''}`;
   };
 

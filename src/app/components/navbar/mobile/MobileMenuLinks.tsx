@@ -9,6 +9,7 @@ interface MobileMenuLinksProps {
   pathname: string;
   isOpen: boolean;
   onLinkClick: () => void;
+  onOpenFilters: () => void;
 }
 
 export default function MobileMenuLinks({
@@ -16,12 +17,42 @@ export default function MobileMenuLinks({
   pathname,
   isOpen,
   onLinkClick,
+  onOpenFilters,
 }: MobileMenuLinksProps) {
   const activeSection = useActiveSection();
 
   return (
     <div className="p-4 space-y-2">
       {links.map((link, index) => {
+        if (link.href === "/tienda/productos") {
+          return (
+            <div key="tienda-categorias-mobile" className="space-y-2">
+              <Link
+                href={link.href}
+                onClick={onLinkClick}
+                className={`block py-4 px-4 rounded-lg transition-all duration-300 ${
+                  pathname === link.href || pathname.startsWith(link.href)
+                    ? "bg-white/20 text-white font-medium"
+                    : "text-white/80 hover:bg-white/10 hover:text-white"
+                }`}
+                style={{
+                  animationDelay: isOpen ? `${index * 50}ms` : "0ms",
+                }}
+              >
+                {link.label}
+              </Link>
+
+              <button
+                type="button"
+                onClick={onOpenFilters}
+                className="w-full text-left py-3 px-4 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-all duration-300 text-sm"
+              >
+                Categorías, grupos y marcas
+              </button>
+            </div>
+          );
+        }
+
         // Detectar si el link es activo
         let isActive = false;
         

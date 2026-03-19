@@ -15,6 +15,11 @@ import type { ICategoria } from "@/app/types/categoria.type";
 import type { IMarca } from "@/app/types/marca.type";
 import type { IGrupo } from "@/app/types/grupo.type";
 
+const truncateLabel = (value: string, maxLength = 28) => {
+  if (value.length <= maxLength) return value;
+  return `${value.slice(0, maxLength - 3)}...`;
+};
+
 export default function FiltersSidebar() {
   // Hook principal de filtros (URL como fuente de verdad)
   const {
@@ -42,7 +47,7 @@ export default function FiltersSidebar() {
     () =>
       (categoriasResponse?.data || []).map((cat: ICategoria) => ({
         value: cat.codi_categoria,
-        label: cat.nombre || cat.codi_categoria,
+        label: truncateLabel(cat.nombre || cat.codi_categoria),
       })),
     [categoriasResponse]
   );
@@ -51,7 +56,7 @@ export default function FiltersSidebar() {
     () =>
       (marcasResponse?.data || []).map((marca: IMarca) => ({
         value: marca.codi_marca,
-        label: marca.nombre || marca.codi_marca,
+        label: truncateLabel(marca.nombre || marca.codi_marca),
       })),
     [marcasResponse]
   );
@@ -60,7 +65,7 @@ export default function FiltersSidebar() {
     () =>
       (gruposResponse?.data || []).map((grupo: IGrupo) => ({
         value: grupo.codi_grupo,
-        label: grupo.nombre || grupo.codi_grupo,
+        label: truncateLabel(grupo.nombre || grupo.codi_grupo),
       })),
     [gruposResponse]
   );
@@ -177,7 +182,7 @@ export default function FiltersSidebar() {
           />
         </motion.div>
 
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemVariants} className="[&_h3]:text-sm [&_select]:text-xs">
           <FilterSelectSection
             title="Categorías"
             options={categoriasOptions}
@@ -187,7 +192,7 @@ export default function FiltersSidebar() {
           />
         </motion.div>
 
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemVariants} className="[&_h3]:text-sm [&_select]:text-xs">
           <FilterSelectSection
             title="Marcas"
             options={marcasOptions}
@@ -197,7 +202,7 @@ export default function FiltersSidebar() {
           />
         </motion.div>
 
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemVariants} className="[&_h3]:text-sm [&_select]:text-xs">
           <FilterSelectSection
             title="Grupos"
             options={gruposOptions}

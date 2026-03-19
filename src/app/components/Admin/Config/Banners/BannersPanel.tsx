@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Monitor, Smartphone, ImageOff } from 'lucide-react';
+import { toast } from 'sonner';
 import type { IBanner, BannerTipo } from '@/app/types/banner.type';
 import {
   useBannersAdmin,
@@ -20,6 +21,35 @@ const TIPOS: { key: BannerTipo; label: string; Icon: React.ElementType }[] = [
   { key: 'desktop', label: 'Desktop', Icon: Monitor },
   { key: 'mobile', label: 'Mobile', Icon: Smartphone },
 ];
+
+function normalizeInternalLink(rawLink: string): { ok: true; value: string } | { ok: false; error: string } {
+  const trimmed = rawLink.trim();
+  if (!trimmed) return { ok: true, value: '' };
+
+  // Si pegan URL completa (http/https), extraemos solo path+query+hash
+  if (/^https?:\/\//i.test(trimmed)) {
+    try {
+      const parsed = new URL(trimmed);
+      return { ok: true, value: `${parsed.pathname}${parsed.search}${parsed.hash}` || '/' };
+    } catch {
+      return { ok: false, error: 'URL inválida. Pegá una URL completa válida o una ruta interna.' };
+    }
+  }
+
+  // Bloquea otros esquemas no permitidos (javascript:, ftp:, etc.)
+  if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmed) || trimmed.includes('://')) {
+    return { ok: false, error: 'Solo se permiten rutas internas o URLs http(s).' };
+  }
+
+  const withSlash = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+
+  try {
+    const parsed = new URL(withSlash, 'http://local.maxshop');
+    return { ok: true, value: `${parsed.pathname}${parsed.search}${parsed.hash}` };
+  } catch {
+    return { ok: false, error: 'Ruta inválida. Usá un path interno como /tienda/productos/123.' };
+  }
+}
 
 export function BannersPanel() {
   const [tipoActivo, setTipoActivo] = useState<BannerTipo>('desktop');
@@ -65,6 +95,15 @@ export function BannersPanel() {
     const banner = bannersDelTipo.find((b) => b.id === id);
     if (!banner || banner.orden >= MAX_BANNERS) return;
     updateMutation.mutate({ id, dto: { orden: banner.orden + 1 } });
+  }
+
+  function handleUpdateLink(id: number, link: string) {
+    const normalized = normalizeInternalLink(link);
+    if (!normalized.ok) {
+      toast.error('Link inválido', { description: normalized.error });
+      return;
+    }
+    updateMutation.mutate({ id, dto: { link: normalized.value } });
   }
 
   function handleDeleteClick(banner: IBanner) {
@@ -127,8 +166,10 @@ export function BannersPanel() {
                 onToggleActivo={handleToggle}
                 onMoveUp={handleMoveUp}
                 onMoveDown={handleMoveDown}
+                onUpdateLink={handleUpdateLink}
                 onDeleteClick={handleDeleteClick}
                 totalBanners={bannersDelTipo.length}
+                isUpdating={updateMutation.isPending}
               />
             );
           })}

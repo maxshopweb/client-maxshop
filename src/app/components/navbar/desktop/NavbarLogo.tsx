@@ -22,9 +22,9 @@ export default function NavbarLogo({ pathname }: NavbarLogoProps) {
       <Image
         src="/logos/logo-positivo.svg"
         alt="MaxShop"
-        width={120}
-        height={40}
-        className="h-8 md:h-10 w-auto transition-transform duration-300 group-hover:scale-105 brightness-0 invert"
+        width={130}
+        height={45}
+        className="h-9 md:h-11 w-auto transition-transform duration-300 group-hover:scale-105 brightness-0 invert"
         style={{ width: "auto" }}
       />
     </Link>

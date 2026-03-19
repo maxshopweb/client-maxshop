@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Mail, Phone, MapPin, Facebook, Instagram } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { useWhatsapp } from "@/app/hooks/contact/useWhatsapp";
+import { CONTACT_CONFIG, SOCIAL_LINKS } from "@/app/config/contact.config";
 
 const LEGAL_LINKS = [
   { label: "Política de privacidad", href: "/" },
@@ -14,7 +15,7 @@ const LEGAL_LINKS = [
 ] as const;
 
 export default function Footer() {
-  const { display: whatsappDisplay, buildUrl } = useWhatsapp({ message: "Hola! Tengo una consulta sobre MaxShop." });
+  const { display: whatsappDisplay, buildUrl } = useWhatsapp();
 
   return (
     <>
@@ -43,7 +44,7 @@ export default function Footer() {
               </h3>
               <div className="space-y-3 md:space-y-4">
                 <div className="flex items-start gap-3">
-                  <MapPin className="w-4 h-4 text-neutral-400 mt-0.5 flex-shrink-0" />
+                  <MapPin className="w-4 h-4 text-neutral-400 mt-0.5 shrink-0" />
                   <p className="text-neutral-600 text-sm leading-relaxed">
                     Av. Leandro Alem 1646 Local 2<br />
                     Córdoba Capital, Argentina
@@ -51,7 +52,7 @@ export default function Footer() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Phone className="w-4 h-4 text-neutral-400 flex-shrink-0" />
+                  <Phone className="w-4 h-4 text-neutral-400 shrink-0" />
                   <Link
                     href={buildUrl()}
                     target="_blank"
@@ -63,12 +64,12 @@ export default function Footer() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Mail className="w-4 h-4 text-neutral-400 flex-shrink-0" />
+                  <Mail className="w-4 h-4 text-neutral-400 shrink-0" />
                   <Link
-                    href="mailto:info@maxshop.com"
+                    href={CONTACT_CONFIG.email.href}
                     className="text-neutral-600 hover:text-neutral-900 transition-colors text-sm"
                   >
-                    info@maxshop.com
+                    {CONTACT_CONFIG.email.address}
                   </Link>
                 </div>
               </div>
@@ -81,7 +82,7 @@ export default function Footer() {
               </h3>
               <div className="flex items-center gap-3">
                 <Link
-                  href="https://www.facebook.com/maxshop.ar"
+                  href={SOCIAL_LINKS.facebook}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-9 h-9 rounded-md bg-neutral-200 border border-neutral-300 flex items-center justify-center text-neutral-500 hover:text-neutral-900 hover:border-neutral-400 transition-all duration-300"
@@ -90,7 +91,7 @@ export default function Footer() {
                   <Facebook size={16} />
                 </Link>
                 <Link
-                  href="https://instagram.com/maxshop.ar/"
+                  href={SOCIAL_LINKS.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-9 h-9 rounded-md bg-neutral-200 border border-neutral-300 flex items-center justify-center text-neutral-500 hover:text-neutral-900 hover:border-neutral-400 transition-all duration-300"

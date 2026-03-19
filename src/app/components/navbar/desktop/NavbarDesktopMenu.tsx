@@ -52,8 +52,12 @@ export default function NavbarDesktopMenu({
             <span
               className={`text-sm lg:text-base tracking-wide transition-colors duration-200 ${
                 isActive
-                  ? shouldShowBackground ? "text-foreground font-medium" : "text-white font-medium"
-                  : shouldShowBackground ? "text-foreground/50 group-hover:text-foreground" : "text-white/60 group-hover:text-white"
+                  ? shouldShowBackground
+                    ? "text-foreground font-medium"
+                    : "text-white font-medium"
+                  : shouldShowBackground
+                    ? "text-foreground/50 group-hover:text-foreground"
+                    : "text-white/60 group-hover:text-white"
               }`}
             >
               {link.label}
@@ -61,9 +65,7 @@ export default function NavbarDesktopMenu({
             <span
               className={`block h-px transition-all duration-300 ${
                 shouldShowBackground ? "bg-principal" : "bg-white"
-              } ${
-                isActive ? "w-full" : "w-0 group-hover:w-full"
-              }`}
+              } ${isActive ? "w-full" : "w-0 group-hover:w-full"}`}
             />
           </Link>
         );

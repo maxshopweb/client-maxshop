@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { Upload, Trash2, Eye, EyeOff, ArrowUp, ArrowDown, ImageOff } from 'lucide-react';
 import type { IBanner } from '@/app/types/banner.type';
@@ -20,8 +20,10 @@ interface BannerSlotProps {
   onToggleActivo: (id: number, activo: boolean) => void;
   onMoveUp: (id: number) => void;
   onMoveDown: (id: number) => void;
+  onUpdateLink: (id: number, link: string) => void;
   onDeleteClick: (banner: IBanner) => void;
   totalBanners: number;
+  isUpdating: boolean;
 }
 
 export function BannerSlot({
@@ -35,16 +37,45 @@ export function BannerSlot({
   onToggleActivo,
   onMoveUp,
   onMoveDown,
+  onUpdateLink,
   onDeleteClick,
   totalBanners,
+  isUpdating,
 }: BannerSlotProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [linkValue, setLinkValue] = useState(banner?.link ?? '');
+
+  function normalizePastedLink(raw: string): string {
+    const trimmed = raw.trim();
+    if (!trimmed) return '';
+
+    if (/^https?:\/\//i.test(trimmed)) {
+      try {
+        const parsed = new URL(trimmed);
+        return `${parsed.pathname}${parsed.search}${parsed.hash}` || '/';
+      } catch {
+        return trimmed;
+      }
+    }
+
+    return trimmed;
+  }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !banner) return;
     onUpload(banner.id, file);
     e.target.value = '';
+  }
+
+  useEffect(() => {
+    setLinkValue(banner?.link ?? '');
+  }, [banner?.link]);
+
+  function handleSaveLink() {
+    if (!banner) return;
+    if (linkValue === (banner.link ?? '')) return;
+    onUpdateLink(banner.id, linkValue.trim());
   }
 
   if (!banner) {
@@ -140,6 +171,34 @@ export function BannerSlot({
           {!banner.path_img && (
             <Badge variant="warning">Sin imagen</Badge>
           )}
+        </div>
+        <div className="mt-2">
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={linkValue}
+              onChange={(e) => setLinkValue(e.target.value)}
+              onPaste={(e) => {
+                const pasted = e.clipboardData.getData('text');
+                const normalized = normalizePastedLink(pasted);
+                if (normalized !== pasted) {
+                  e.preventDefault();
+                  setLinkValue(normalized);
+                }
+              }}
+              disabled={isUpdating}
+              placeholder="/tienda/productos/26864647 o https://dominio.com/tienda/productos/123"
+              className="w-full rounded-md border border-principal/15 dark:border-white/15 bg-white/80 dark:bg-secundario/70 px-3 py-1.5 text-xs text-text placeholder:text-text/40 focus:outline-none focus:ring-2 focus:ring-principal/30"
+            />
+            <Button
+              variant="secondary"
+              className="text-xs px-3 py-1.5"
+              onClick={handleSaveLink}
+              disabled={isUpdating || linkValue === (banner.link ?? '')}
+            >
+              Guardar
+            </Button>
+          </div>
         </div>
       </div>
 

@@ -1,3 +1,6 @@
+// yitem68123@netoiu.com
+// Test1234!
+
 export type UserRole = 'ADMIN' | 'USER';
 
 // 0 = eliminado, 1 = invitado (checkout sin registro), 2 = perfil incompleto, 3 = dado de alta (usuario completo)

@@ -18,6 +18,8 @@ interface HeroButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 
   icon: LucideIcon | IconType;
   children: React.ReactNode;
   href?: string;
+  target?: string;
+  rel?: string;
   className?: string;
 }
 
@@ -59,6 +61,8 @@ export default function HeroButton({
   icon: Icon,
   children,
   href,
+  target,
+  rel,
   className = "",
   ...props
 }: HeroButtonProps) {
@@ -85,7 +89,6 @@ export default function HeroButton({
         hover:shadow-xl
         active:scale-95
         overflow-hidden
-        
         ${styles.button}
         ${className}
       `}
@@ -93,31 +96,59 @@ export default function HeroButton({
     >
       <span className="relative z-10 pr-10 md:pr-15">{children}</span>
       {/* Icono con fondo circular con espacio del borde - mismo radio que el botón */}
-      <div className={`
-        absolute
-        right-0.5
-        top-0.5
-        bottom-0.5
-        md:right-1
-        md:top-1
-        md:bottom-1
-        flex
-        items-center
-        justify-center
-        aspect-square
-        rounded-lg
-        ${styles.iconBg}
-        transition-all
-        duration-300
-      `}>
-        <Icon className={`w-4 h-4 md:w-6 md:h-6 ${styles.iconColor} transition-transform duration-300 group-hover:-rotate-90`} />
+      <div
+        className={`
+          absolute
+          right-0.5
+          top-0.5
+          bottom-0.5
+          md:right-1
+          md:top-1
+          md:bottom-1
+          flex
+          items-center
+          justify-center
+          aspect-square
+          rounded-lg
+          ${styles.iconBg}
+          transition-all
+          duration-300
+        `}
+      >
+        <Icon
+          className={`w-4 h-4 md:w-6 md:h-6 ${styles.iconColor} transition-transform duration-300 group-hover:-rotate-90`}
+        />
       </div>
     </button>
   );
 
   if (href) {
+    const isExternal = /^https?:\/\//i.test(href) || href.startsWith("mailto:");
+    const finalRel =
+      target === "_blank" ? rel ?? "noopener noreferrer" : rel;
+
+    // Keep same sizing/layout by wrapping the same buttonContent in an inline-block element.
+    if (isExternal) {
+      return (
+        <a
+          href={href}
+          target={target}
+          rel={finalRel}
+          className="inline-block"
+        >
+          {buttonContent}
+        </a>
+      );
+    }
+
     return (
-      <Link href={href} className="inline-block">
+      <Link
+        href={href}
+        className="inline-block"
+        // Next link supports these props on the rendered <a>.
+        target={target}
+        rel={finalRel}
+      >
         {buttonContent}
       </Link>
     );

@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import CartSidebar from "@/app/components/cart/CartSidebar";
 import LocationModal from "@/app/components/modals/LocationModal";
@@ -16,11 +17,13 @@ import NavbarLogo from "@/app/components/navbar/desktop/NavbarLogo";
 import NavbarSearchBar from "@/app/components/navbar/desktop/NavbarSearchBar";
 import NavbarUserActions from "@/app/components/navbar/desktop/NavbarUserActions";
 import NavbarLocationIndicator from "@/app/components/navbar/desktop/NavbarLocationIndicator";
+import NavbarFiltersMegaMenu from "@/app/components/navbar/desktop/NavbarFiltersMegaMenu";
 import NavbarDesktopMenu from "@/app/components/navbar/desktop/NavbarDesktopMenu";
 import MobileMenuOverlay from "@/app/components/navbar/mobile/MobileMenuOverlay";
 import MobileMenuHeader from "@/app/components/navbar/mobile/MobileMenuHeader";
 import MobileMenuSearch from "@/app/components/navbar/mobile/MobileMenuSearch";
 import MobileMenuLinks from "@/app/components/navbar/mobile/MobileMenuLinks";
+import MobileFiltersMenu from "@/app/components/navbar/mobile/MobileFiltersMenu";
 import MobileMenuFooter from "@/app/components/navbar/mobile/MobileMenuFooter";
 import MobileLocationButton from "@/app/components/navbar/mobile/MobileLocationButton";
 import NavbarSearchContainer from "@/app/components/search/NavbarSearchContainer";
@@ -28,6 +31,12 @@ import NavbarSearchContainer from "@/app/components/search/NavbarSearchContainer
 export default function UnifiedNavbar() {
   const pathname = usePathname();
   const actualTheme = "light" as "light" | "dark";
+  const primaryMenuLinks = MENU_LINKS.filter(
+    (link) => link.href === "/" || link.href === "/tienda/productos"
+  );
+  const secondaryMenuLinks = MENU_LINKS.filter(
+    (link) => link.href !== "/" && link.href !== "/tienda/productos"
+  );
 
   // Hooks
   const { shouldShowBackground } = useNavbarScroll();
@@ -44,6 +53,7 @@ export default function UnifiedNavbar() {
   } = useNavbarLocation();
   const { isOpen: isMobileMenuOpen, toggle: toggleMobileMenu, close: closeMobileMenu } = useNavbarMobileMenu();
   const { cantidadItems, openCart, closeCart, isCartOpen } = useNavbarCart();
+  const [mobileMenuView, setMobileMenuView] = useState<"menu" | "filters">("menu");
 
   // Cargar productos para la búsqueda solo cuando el usuario usa el buscador (evita /productos?limit=100 en cada página)
   const searchActive = (searchQuery?.trim().length ?? 0) >= 1;
@@ -60,6 +70,12 @@ export default function UnifiedNavbar() {
     openLocationModal();
     closeMobileMenu();
   };
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) {
+      setMobileMenuView("menu");
+    }
+  }, [isMobileMenuOpen]);
 
   return (
     <>
@@ -106,12 +122,27 @@ export default function UnifiedNavbar() {
                 onLocationClick={handleLocationClick}
               />
 
-              <NavbarDesktopMenu
-                links={MENU_LINKS}
-                pathname={pathname || ''}
-                shouldShowBackground={shouldShowBackground}
-                actualTheme={actualTheme}
-              />
+              <div className="flex items-center gap-4 lg:gap-6">
+                <NavbarDesktopMenu
+                  links={primaryMenuLinks}
+                  pathname={pathname || ''}
+                  shouldShowBackground={shouldShowBackground}
+                  actualTheme={actualTheme}
+                />
+                <Suspense fallback={null}>
+                  <NavbarFiltersMegaMenu
+                    shouldShowBackground={shouldShowBackground}
+                    actualTheme={actualTheme}
+                    triggerLabel="Categorías"
+                  />
+                </Suspense>
+                <NavbarDesktopMenu
+                  links={secondaryMenuLinks}
+                  pathname={pathname || ''}
+                  shouldShowBackground={shouldShowBackground}
+                  actualTheme={actualTheme}
+                />
+              </div>
             </div>
           </div>
         </nav>
@@ -145,6 +176,7 @@ export default function UnifiedNavbar() {
           pathname={pathname || ''}
           isOpen={isMobileMenuOpen}
           onLinkClick={closeMobileMenu}
+          onOpenFilters={() => setMobileMenuView("filters")}
         />
 
         <MobileMenuFooter
@@ -152,6 +184,15 @@ export default function UnifiedNavbar() {
           onClose={closeMobileMenu}
           onLogout={logout}
         />
+
+        {mobileMenuView === "filters" && (
+          <Suspense fallback={null}>
+            <MobileFiltersMenu
+              onBack={() => setMobileMenuView("menu")}
+              onApply={closeMobileMenu}
+            />
+          </Suspense>
+        )}
       </MobileMenuOverlay>
 
       {/* Cart Sidebar */}
