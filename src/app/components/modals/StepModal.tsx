@@ -68,7 +68,7 @@ const StepModal = ({
                 };
 
                 return (
-                    <div className="py-8 px-6">
+                    <div className="px-6 pt-8 pb-6 sm:pb-8">
                         <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--foreground)' }}>
                             {title}
                         </h2>
@@ -113,16 +113,16 @@ const StepModal = ({
                             </div>
                         </div>
 
-                        <div className="overflow-visible">
+                        <div className="min-h-0">
                             <div key={currentStep} className={`animate-slide-${slideDirection}`}>
-                                <div className="mb-8 min-h-0">
+                                <div className="mb-6 min-h-0 pb-1">
                                     {steps[currentStep].content}
                                 </div>
                             </div>
                         </div>
 
                         {/* Buttons */}
-                        <div className="flex gap-3 justify-end">
+                        <div className="mt-2 flex flex-wrap gap-3 justify-end border-t border-border/60 pt-4">
                             {currentStep > 0 && (
                                 <Button
                                     onClick={handlePrev}

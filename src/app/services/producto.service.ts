@@ -222,14 +222,34 @@ class ProductosService {
     return response.data.data;
   }
 
-  /** Limpia el flag de precios editados manualmente; la próxima sync traerá precios del CSV/FTP. */
-  async restaurarPreciosDesdeExcel(id: number): Promise<IProductos> {
+  /** Quita el bloqueo de sync FTP (`precio_editado_manualmente`); la próxima sync actualizará stock, precios y maestros. */
+  async reanudarSincronizacionErp(id: number): Promise<IProductos> {
     const response = await axiosInstance.patch<IApiResponse<IProductos>>(
-      `/productos/${id}/restaurar-precios-excel`
+      `/productos/${id}/reanudar-sync-erp`
     );
 
     if (!response.data.success || !response.data.data) {
-      throw new Error(response.data.error || 'Error al restaurar precios desde Excel');
+      throw new Error(response.data.error || 'Error al reanudar sincronización FTP');
+    }
+
+    return response.data.data;
+  }
+
+  /** @deprecated Usar `reanudarSincronizacionErp`. */
+  async restaurarPreciosDesdeExcel(id: number): Promise<IProductos> {
+    return this.reanudarSincronizacionErp(id);
+  }
+
+  /**
+   * Descarga CSV desde FTP y aplica datos al producto (POST).
+   */
+  async restaurarProductoDesdeErp(id: number): Promise<IProductos> {
+    const response = await axiosInstance.post<IApiResponse<IProductos>>(
+      `/productos/${id}/restaurar-desde-erp`
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.error || 'Error al actualizar producto desde FTP');
     }
 
     return response.data.data;

@@ -20,7 +20,8 @@ interface ProductosTableProps {
     onToggleCuotas?: (producto: IProductos) => void;
     onUpdateStock: (producto: IProductos) => void;
     onCambiarImagen?: (producto: IProductos) => void;
-    onRestaurarPreciosExcel?: (producto: IProductos) => void;
+    onReanudarSyncErp?: (producto: IProductos) => void;
+    onActualizarDesdeErp?: (producto: IProductos) => void;
     tableState: ReturnType<typeof useProductosTable>;
 }
 
@@ -32,7 +33,8 @@ export function ProductosTable({
     onToggleCuotas,
     onUpdateStock,
     onCambiarImagen,
-    onRestaurarPreciosExcel,
+    onReanudarSyncErp,
+    onActualizarDesdeErp,
     tableState,
 }: ProductosTableProps) {
     // Hooks
@@ -58,7 +60,8 @@ export function ProductosTable({
         onToggleCuotas,
         onUpdateStock,
         onCambiarImagen,
-        onRestaurarPreciosExcel,
+        onReanudarSyncErp,
+        onActualizarDesdeErp,
         categorias,
         marcas,
         grupos,

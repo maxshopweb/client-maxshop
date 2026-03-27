@@ -8,10 +8,15 @@ import {
     createProductoSchema,
     type CreateProductoData
 } from '@/app/schemas/producto.schema';
-import { useUpdateProducto, useRestaurarPreciosDesdeExcel } from '@/app/hooks/productos/useProductosMutations';
+import {
+    useUpdateProducto,
+    useReanudarSincronizacionErp,
+    useRestaurarProductoDesdeErp,
+} from '@/app/hooks/productos/useProductosMutations';
 import type { IProductos } from '@/app/types/producto.type';
 import { Button } from '@/app/components/ui/Button';
-import { FileSpreadsheet } from 'lucide-react';
+import { TableBadge } from '@/app/components/ui/TableBadge';
+import { Download, RefreshCw } from 'lucide-react';
 
 interface EditProductoModalProps {
     producto: IProductos;
@@ -71,7 +76,33 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
         }
     });
 
-    const { restaurarPreciosDesdeExcel, isRestaurando } = useRestaurarPreciosDesdeExcel();
+    const { reanudarSincronizacionErp, isReanudando } = useReanudarSincronizacionErp();
+    const { restaurarProductoDesdeErp, isRestaurandoDesdeErp } = useRestaurarProductoDesdeErp();
+
+    const manualErp = producto.precio_editado_manualmente === true;
+    const erpBusy = isReanudando || isRestaurandoDesdeErp;
+
+    const handleActualizarDesdeErp = () => {
+        if (
+            !window.confirm(
+                'Se conectará al FTP, se descargarán los datos y se aplicarán a este producto ahora. ¿Continuar?'
+            )
+        ) {
+            return;
+        }
+        restaurarProductoDesdeErp(producto.id_prod);
+    };
+
+    const handleReanudarProximaSync = () => {
+        if (
+            !window.confirm(
+                'Se quitará el bloqueo de sincronización FTP: stock y precios se actualizarán en la próxima importación automática (no ahora). ¿Continuar?'
+            )
+        ) {
+            return;
+        }
+        reanudarSincronizacionErp(producto.id_prod);
+    };
 
     const validateStepOne = async () => {
         const fields = ['nombre'];
@@ -96,7 +127,6 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
 
         const rawData = form.getValues();
 
-        // Preparar datos para el backend - precios por lista e IVA
         const data: any = {
             codi_arti: rawData.codi_arti,
             nombre: rawData.nombre,
@@ -137,8 +167,6 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
             id_iva: rawData.id_iva ? Number(rawData.id_iva) : undefined,
         };
 
-
-        // Ejecutar la mutación de actualización
         updateProducto({
             id: producto.id_prod,
             data: data
@@ -155,28 +183,69 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
             steps={[
                 {
                     title: 'Información Básica',
-                    content: <StepOneBasicInfo form={form} idProd={producto.id_prod} />,
+                    content: (
+                        <div className="space-y-3">
+                            {manualErp && (
+                                <div className="flex flex-wrap items-center gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-foreground">
+                                    <TableBadge variant="warning">Manual</TableBadge>
+                                    <span className="text-muted-foreground">
+                                        Este producto está en modo manual: los datos del FTP no lo actualizan hasta que reanudes la sync o
+                                        lo actualices desde FTP en el paso &quot;Precios&quot;.
+                                    </span>
+                                </div>
+                            )}
+                            <StepOneBasicInfo form={form} idProd={producto.id_prod} />
+                        </div>
+                    ),
                     onNext: validateStepOne,
                 },
                 {
                     title: 'Precios y Stock',
                     content: (
                         <div className="space-y-4">
+                            <div className="flex flex-wrap items-center gap-2">
+                                {manualErp ? (
+                                    <TableBadge variant="warning">Manual</TableBadge>
+                                ) : (
+                                    <TableBadge variant="info">FTP</TableBadge>
+                                )}
+                                <span className="text-xs text-muted-foreground">
+                                    {manualErp
+                                        ? 'Bloqueado para sync automática hasta reanudar o actualizar desde FTP.'
+                                        : 'Recibe datos del FTP en cada sincronización automática.'}
+                                </span>
+                            </div>
                             <StepTwoPricing form={form} />
-                            <div className="mt-4 pt-4 pb-6 border-t border-border overflow-visible">
-                                <p className="text-sm text-muted-foreground mb-2">
-                                    Si editaste precios manualmente y querés que vuelvan a tomarse del Excel/FTP en la próxima sincronización:
+                            <div className="mt-4 pt-4 pb-2 border-t border-border space-y-3">
+                                <p className="text-sm font-medium text-foreground">Sincronización con FTP</p>
+                                <p className="text-sm text-muted-foreground">
+                                    Actualización inmediata descarga el FTP y aplica datos a este producto. La opción ligera solo
+                                    prepara el producto para la próxima sync FTP.
                                 </p>
-                                <div className="overflow-visible py-1">
+                                <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-stretch">
+                                    <Button
+                                        type="button"
+                                        variant="primary"
+                                        className="w-full min-h-11 min-w-0 shrink-0 justify-center whitespace-normal px-3 py-2.5 text-center leading-snug lg:flex-1 lg:min-w-[min(100%,280px)]"
+                                        onClick={handleActualizarDesdeErp}
+                                        disabled={erpBusy}
+                                    >
+                                        <Download className="size-4 mr-2 shrink-0" />
+                                        <span>
+                                            {isRestaurandoDesdeErp
+                                                ? 'Actualizando…'
+                                                : 'Actualizar este producto desde FTP'}
+                                        </span>
+                                    </Button>
                                     <Button
                                         type="button"
                                         variant="outline-primary"
-                                        className="hover:scale-100"
-                                        onClick={() => restaurarPreciosDesdeExcel(producto.id_prod)}
-                                        disabled={isRestaurando}
+                                        className="w-full min-h-11 min-w-0 shrink-0 justify-center whitespace-normal px-3 py-2.5 text-center leading-snug lg:flex-1 lg:min-w-[min(100%,220px)]"
+                                        onClick={handleReanudarProximaSync}
+                                        disabled={erpBusy}
                                     >
-                                        <FileSpreadsheet className="size-4 mr-2 shrink-0" />
-                                        {isRestaurando ? 'Restaurando...' : 'Restaurar precios desde Excel'}
+                                        <RefreshCw className={`size-4 mr-2 shrink-0 ${isReanudando ? 'animate-spin' : ''}`} />
+                                        <span>{isReanudando ? 'Aplicando…' : 'Solo próxima sync FTP'}</span>
                                     </Button>
                                 </div>
                             </div>

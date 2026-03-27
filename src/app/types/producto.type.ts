@@ -89,6 +89,11 @@ export interface IProductos {
     publicado?: boolean | null;
     /** null = regla general, true = siempre 3 cuotas, false = no 3 cuotas */
     cuotas_habilitadas?: boolean | null;
+    /**
+     * true = edición desde panel bloquea sync FTP hasta reanudar o “actualizar desde FTP”.
+     * (Nombre histórico en BD: precio_editado_manualmente.)
+     */
+    precio_editado_manualmente?: boolean | null;
     financiacion?: boolean | null;
     activo?: string | null;
     creado_en?: Date | null;

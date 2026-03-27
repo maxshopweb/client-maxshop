@@ -1,6 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table';
 import Link from 'next/link';
-import { MoreHorizontal, Edit, Trash2, Star, ImageIcon, FileSpreadsheet } from 'lucide-react';
+import { MoreHorizontal, Edit, Trash2, Star, ImageIcon, FileSpreadsheet, Download, RefreshCw } from 'lucide-react';
 import * as Checkbox from '@radix-ui/react-checkbox';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { Switch } from '@/app/components/ui/Switch';
@@ -19,7 +19,8 @@ interface ProductosTableActions {
     onToggleCuotas?: (producto: IProductos) => void;
     onUpdateStock: (producto: IProductos) => void;
     onCambiarImagen?: (producto: IProductos) => void;
-    onRestaurarPreciosExcel?: (producto: IProductos) => void;
+    onReanudarSyncErp?: (producto: IProductos) => void;
+    onActualizarDesdeErp?: (producto: IProductos) => void;
     categorias?: any[];
     marcas?: any[];
     grupos?: any[];
@@ -91,9 +92,11 @@ export const getProductosColumns = (
                 const sku = row.original.cod_sku;
                 const destacado = row.original.destacado;
 
+                const manual = row.original.precio_editado_manualmente === true;
+
                 return (
                     <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-1.5 min-w-0">
                             <Link
                                 href={`/tienda/productos/${row.original.id_prod}`}
                                 target="_blank"
@@ -102,6 +105,11 @@ export const getProductosColumns = (
                             >
                                 {nombre}
                             </Link>
+                            {manual && (
+                                <TableBadge variant="warning" className="shrink-0">
+                                    Manual
+                                </TableBadge>
+                            )}
                         </div>
                         {sku && (
                             <span className="text-xs text-gray-400">SKU: {sku}</span>
@@ -432,13 +440,23 @@ export const getProductosColumns = (
                                     </DropdownMenu.Item>
                                 )}
 
-                                {actions.onRestaurarPreciosExcel && (
+                                {actions.onActualizarDesdeErp && (
                                     <DropdownMenu.Item
                                         className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
-                                        onClick={() => actions.onRestaurarPreciosExcel?.(producto)}
+                                        onClick={() => actions.onActualizarDesdeErp?.(producto)}
                                     >
-                                        <FileSpreadsheet className="mr-2 h-4 w-4" />
-                                        Restaurar precios desde Excel
+                                        <Download className="mr-2 h-4 w-4 shrink-0" />
+                                        <span className="leading-tight">Actualizar este producto desde FTP</span>
+                                    </DropdownMenu.Item>
+                                )}
+
+                                {actions.onReanudarSyncErp && (
+                                    <DropdownMenu.Item
+                                        className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
+                                        onClick={() => actions.onReanudarSyncErp?.(producto)}
+                                    >
+                                        <RefreshCw className="mr-2 h-4 w-4 shrink-0" />
+                                        <span className="leading-tight">Próxima sync FTP</span>
                                     </DropdownMenu.Item>
                                 )}
 

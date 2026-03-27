@@ -342,30 +342,31 @@ export function useBulkUpdateEstado(options: UseBulkUpdateEstadoOptions = {}) {
     };
 }
 
-interface UseRestaurarPreciosDesdeExcelOptions {
+interface UseReanudarSincronizacionErpOptions {
     onSuccess?: (data: IProductos) => void;
     onError?: (error: Error) => void;
 }
 
-export function useRestaurarPreciosDesdeExcel(options: UseRestaurarPreciosDesdeExcelOptions = {}) {
+export function useReanudarSincronizacionErp(options: UseReanudarSincronizacionErpOptions = {}) {
     const queryClient = useQueryClient();
 
     const mutation = useMutation({
-        mutationFn: (id: number) => productosService.restaurarPreciosDesdeExcel(id),
+        mutationFn: (id: number) => productosService.reanudarSincronizacionErp(id),
 
         onSuccess: (data, id) => {
             queryClient.setQueryData(productosKeys.detail(id), data);
             queryClient.invalidateQueries({ queryKey: productosKeys.lists() });
 
-            toast.success('Precios restaurados desde Excel', {
-                description: 'Los precios de este producto se actualizarán en la próxima sincronización con el FTP.',
+            toast.success('Sincronización FTP reanudada', {
+                description:
+                    'En la próxima sincronización FTP/CSV se volverán a actualizar stock, precios y datos maestros de este producto.',
             });
 
             options.onSuccess?.(data);
         },
 
         onError: (error: Error) => {
-            toast.error('Error al restaurar precios', {
+            toast.error('Error al reanudar sincronización FTP', {
                 description: error.message || 'Ocurrió un error inesperado',
             });
             options.onError?.(error);
@@ -373,15 +374,139 @@ export function useRestaurarPreciosDesdeExcel(options: UseRestaurarPreciosDesdeE
     });
 
     return {
-        restaurarPreciosDesdeExcel: mutation.mutate,
-        restaurarPreciosDesdeExcelAsync: mutation.mutateAsync,
-        isRestaurando: mutation.isPending,
+        reanudarSincronizacionErp: mutation.mutate,
+        reanudarSincronizacionErpAsync: mutation.mutateAsync,
+        isReanudando: mutation.isPending,
         isSuccess: mutation.isSuccess,
         isError: mutation.isError,
         error: mutation.error,
         reset: mutation.reset,
     };
 }
+
+/** @deprecated Usar `useReanudarSincronizacionErp`. */
+export const useRestaurarPreciosDesdeExcel = useReanudarSincronizacionErp;
+
+interface UseRestaurarProductoDesdeErpOptions {
+    onSuccess?: (data: IProductos) => void;
+    onError?: (error: Error) => void;
+}
+
+/** POST: FTP + aplicar datos del catálogo al producto (puede tardar). */
+export function useRestaurarProductoDesdeErp(options: UseRestaurarProductoDesdeErpOptions = {}) {
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: (id: number) => productosService.restaurarProductoDesdeErp(id),
+
+        onSuccess: (data, id) => {
+            queryClient.setQueryData(productosKeys.detail(id), data);
+            queryClient.invalidateQueries({ queryKey: productosKeys.lists() });
+
+            toast.success('Actualizado desde FTP', {
+                description:
+                    'Se descargaron los datos del servidor y se aplicaron a este producto.',
+            });
+
+            options.onSuccess?.(data);
+        },
+
+        onError: (error: Error) => {
+            toast.error('No se pudo actualizar desde FTP', {
+                description: error.message || 'Ocurrió un error inesperado',
+            });
+            options.onError?.(error);
+        },
+    });
+
+    return {
+        restaurarProductoDesdeErp: mutation.mutate,
+        restaurarProductoDesdeErpAsync: mutation.mutateAsync,
+        isRestaurandoDesdeErp: mutation.isPending,
+        isSuccess: mutation.isSuccess,
+        isError: mutation.isError,
+        error: mutation.error,
+        reset: mutation.reset,
+    };
+}
+
+interface UseBulkErpOptions {
+    onSuccess?: () => void;
+    onError?: (error: Error) => void;
+}
+
+/** PATCH reanudar sync para muchos ids (ligero; aplica en próxima sync FTP). */
+export function useBulkReanudarSincronizacionErp(options: UseBulkErpOptions = {}) {
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: async (ids: number[]) => {
+            for (const id of ids) {
+                await productosService.reanudarSincronizacionErp(id);
+            }
+            return { count: ids.length };
+        },
+
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: productosKeys.lists() });
+            toast.success('Sincronización FTP reanudada', {
+                description: `${data.count} producto(s): la próxima sync FTP/CSV aplicará cambios.`,
+            });
+            options.onSuccess?.();
+        },
+
+        onError: (error: Error) => {
+            toast.error('Error en acción masiva', {
+                description: error.message || 'Ocurrió un error inesperado',
+            });
+            options.onError?.(error);
+        },
+    });
+
+    return {
+        bulkReanudarErp: mutation.mutate,
+        bulkReanudarErpAsync: mutation.mutateAsync,
+        isBulkReanudandoErp: mutation.isPending,
+    };
+}
+
+/** POST restaurar desde FTP para cada id (pesado: una descarga por producto). */
+export function useBulkRestaurarDesdeErp(options: UseBulkErpOptions = {}) {
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: async (ids: number[]) => {
+            let count = 0;
+            for (const id of ids) {
+                await productosService.restaurarProductoDesdeErp(id);
+                count += 1;
+            }
+            return { count };
+        },
+
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: productosKeys.lists() });
+            toast.success('Productos actualizados desde FTP', {
+                description: `Se procesaron ${data.count} producto(s).`,
+            });
+            options.onSuccess?.();
+        },
+
+        onError: (error: Error) => {
+            toast.error('Error al actualizar desde FTP', {
+                description: error.message || 'Ocurrió un error inesperado',
+            });
+            options.onError?.(error);
+        },
+    });
+
+    return {
+        bulkRestaurarDesdeErp: mutation.mutate,
+        bulkRestaurarDesdeErpAsync: mutation.mutateAsync,
+        isBulkRestaurandoDesdeErp: mutation.isPending,
+    };
+}
+
 
 interface UseToggleDestacadoOptions {
     onSuccess?: (data: IProductos) => void;

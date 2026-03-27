@@ -54,7 +54,7 @@ const ModalBase = ({
             // onClick={handleClose}
         >
             <div
-                className={`relative ${fitContent ? 'w-max' : 'w-full'} ${maxWidth} max-h-[90vh] flex flex-col overflow-hidden rounded-md shadow-2xl transition-all duration-300 ${isClosing || !shouldRender ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
+                className={`relative ${fitContent ? 'w-max' : 'w-full'} ${maxWidth} max-h-[min(90vh,100dvh)] min-h-0 flex flex-col overflow-hidden rounded-md shadow-2xl transition-all duration-300 ${isClosing || !shouldRender ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
                     }`}
                 style={{
                     backgroundColor: 'var(--background)',
@@ -75,7 +75,10 @@ const ModalBase = ({
                     </button>
                 )}
 
-                {children({ isClosing, handleClose })}
+                {/* Cuerpo con scroll: evita recortar contenido largo (formularios multi-paso) */}
+                <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain">
+                    {children({ isClosing, handleClose })}
+                </div>
             </div>
 
             <style>{`

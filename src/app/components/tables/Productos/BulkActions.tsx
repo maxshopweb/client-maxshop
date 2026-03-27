@@ -1,4 +1,4 @@
-import { Trash2, Power, PowerOff, Globe, GlobeLock, X, CreditCard, Ban } from 'lucide-react';
+import { Trash2, Power, PowerOff, Globe, GlobeLock, X, CreditCard, Ban, RefreshCw, Download } from 'lucide-react';
 import { useBulkUpdateEstado } from '@/app/hooks/productos/useProductosMutations';
 import { useBulkSetPublicado, useBulkUpdateCuotas } from '@/app/hooks/productos/usePublicadoMutations';
 import { useConfigTienda } from '@/app/hooks/config/useConfigTienda';
@@ -8,9 +8,21 @@ interface BulkActionsProps {
     selectedIds: number[];
     onClearSelection: () => void;
     onBulkDelete: (ids: number[]) => void;
+    onBulkReanudarErp?: (ids: number[]) => void;
+    onBulkRestaurarDesdeErp?: (ids: number[]) => void;
+    isBulkReanudandoErp?: boolean;
+    isBulkRestaurandoDesdeErp?: boolean;
 }
 
-export function BulkActions({ selectedIds, onClearSelection, onBulkDelete }: BulkActionsProps) {
+export function BulkActions({
+    selectedIds,
+    onClearSelection,
+    onBulkDelete,
+    onBulkReanudarErp,
+    onBulkRestaurarDesdeErp,
+    isBulkReanudandoErp,
+    isBulkRestaurandoDesdeErp,
+}: BulkActionsProps) {
     const { bulkUpdateEstado, isUpdating: isBulkUpdatingEstado } = useBulkUpdateEstado({
         onSuccess: () => {
             onClearSelection();
@@ -57,97 +69,133 @@ export function BulkActions({ selectedIds, onClearSelection, onBulkDelete }: Bul
         bulkUpdateCuotas({ ids: selectedIds, cuotas_habilitadas: false });
     };
 
-    const isLoading = isBulkUpdatingEstado || isBulkUpdatingPublicado || isBulkUpdatingCuotas;
+    const isLoadingCore =
+        isBulkUpdatingEstado || isBulkUpdatingPublicado || isBulkUpdatingCuotas;
+    const isLoadingErp = Boolean(isBulkReanudandoErp || isBulkRestaurandoDesdeErp);
+    const isLoading = isLoadingCore || isLoadingErp;
 
     return (
-        <div className="bg-[var(--principal)] text-white px-4 py-3 rounded-lg shadow-lg flex items-center justify-between">
-            <div className="flex items-center gap-4">
-                <span className="font-medium">
-                    {selectedCount} producto{selectedCount !== 1 ? 's' : ''} seleccionado{selectedCount !== 1 ? 's' : ''}
+        <div className="bg-[var(--principal)] text-white px-3 py-3 sm:px-4 rounded-lg shadow-lg flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex flex-col gap-2 min-w-0 flex-1">
+                <span className="font-medium text-sm sm:text-base shrink-0">
+                    {selectedCount} producto{selectedCount !== 1 ? 's' : ''} seleccionado
+                    {selectedCount !== 1 ? 's' : ''}
                 </span>
 
-                <div className="flex items-center gap-2">
-                    {/* Activar */}
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                     <Button
                         onClick={handleActivar}
                         disabled={isLoading}
                         title="Activar seleccionados"
-                        variant='secondary'
+                        variant="secondary"
+                        className="h-8 px-2 sm:px-3 text-xs sm:text-sm"
                     >
-                        <Power className="w-4 h-4" />
-                        <span className="text-sm">Activar</span>
+                        <Power className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="sm:inline">Activar</span>
                     </Button>
 
-                    {/* Desactivar */}
                     <Button
                         onClick={handleDesactivar}
                         disabled={isLoading}
                         title="Desactivar seleccionados"
-                        variant='secondary'
+                        variant="secondary"
+                        className="h-8 px-2 sm:px-3 text-xs sm:text-sm"
                     >
-                        <PowerOff className="w-4 h-4" />
-                        <span className="text-sm">Desactivar</span>
+                        <PowerOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">Desactivar</span>
                     </Button>
 
-                    {/* Publicar / Despublicar */}
                     <Button
                         onClick={handlePublicar}
                         disabled={isLoading}
                         title="Publicar en tienda"
-                        variant='secondary'
+                        variant="secondary"
+                        className="h-8 px-2 sm:px-3 text-xs sm:text-sm"
                     >
-                        <Globe className="w-4 h-4" />
-                        <span className="text-sm">Publicar</span>
+                        <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">Publicar</span>
                     </Button>
                     <Button
                         onClick={handleDespublicar}
                         disabled={isLoading}
                         title="Despublicar de tienda"
-                        variant='secondary'
+                        variant="secondary"
+                        className="h-8 px-2 sm:px-3 text-xs sm:text-sm"
                     >
-                        <GlobeLock className="w-4 h-4" />
-                        <span className="text-sm">Despublicar</span>
+                        <GlobeLock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">Ocultar</span>
                     </Button>
 
-                    {/* Cuotas sin interés (número según config) */}
                     <Button
                         onClick={handleCuotasHabilitar}
                         disabled={isLoading}
-                        title={`Habilitar ${numCuotas} cuotas para seleccionados`}
-                        variant='secondary'
+                        title={`Habilitar ${numCuotas} cuotas`}
+                        variant="secondary"
+                        className="h-8 px-2 sm:px-3 text-xs sm:text-sm"
                     >
-                        <CreditCard className="w-4 h-4" />
-                        <span className="text-sm">{numCuotas} cuotas sí</span>
+                        <CreditCard className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="hidden md:inline">{numCuotas} cuot.</span>
+                        <span className="md:hidden">+cuot</span>
                     </Button>
                     <Button
                         onClick={handleCuotasDeshabilitar}
                         disabled={isLoading}
-                        title={`Deshabilitar ${numCuotas} cuotas para seleccionados`}
-                        variant='secondary'
+                        title={`Deshabilitar ${numCuotas} cuotas`}
+                        variant="secondary"
+                        className="h-8 px-2 sm:px-3 text-xs sm:text-sm"
                     >
-                        <Ban className="w-4 h-4" />
-                        <span className="text-sm">{numCuotas} cuotas no</span>
+                        <Ban className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="hidden md:inline">Sin cuot.</span>
+                        <span className="md:hidden">−cuot</span>
                     </Button>
 
-                    {/* Eliminar */}
+                    {onBulkReanudarErp && (
+                        <Button
+                            onClick={() => onBulkReanudarErp(selectedIds)}
+                            disabled={isLoading}
+                            title="Reanudar sync FTP: la próxima importación aplicará a estos productos"
+                            variant="secondary"
+                            className="h-8 px-2 sm:px-3 text-xs sm:text-sm border-white/30"
+                        >
+                            <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isBulkReanudandoErp ? 'animate-spin' : ''}`} />
+                            <span className="hidden min-[480px]:inline">Próx. sync</span>
+                            <span className="min-[480px]:hidden">Sync</span>
+                        </Button>
+                    )}
+
+                    {onBulkRestaurarDesdeErp && (
+                        <Button
+                            onClick={() => onBulkRestaurarDesdeErp(selectedIds)}
+                            disabled={isLoading}
+                            title="Descargar FTP y aplicar a cada producto (lento si hay muchos)"
+                            variant="secondary"
+                            className="h-8 px-2 sm:px-3 text-xs sm:text-sm border-amber-200/50 bg-white/15"
+                        >
+                            <Download className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isBulkRestaurandoDesdeErp ? 'animate-pulse' : ''}`} />
+                            <span className="hidden min-[520px]:inline">Desde FTP</span>
+                            <span className="min-[520px]:hidden">FTP</span>
+                        </Button>
+                    )}
+
                     <Button
                         onClick={() => onBulkDelete(selectedIds)}
                         disabled={isLoading}
                         title="Eliminar seleccionados"
-                        variant='secondary'
+                        variant="secondary"
+                        className="h-8 px-2 sm:px-3 text-xs sm:text-sm"
                     >
-                        <Trash2 className="w-4 h-4" />
-                        <span className="text-sm">Eliminar</span>
+                        <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">Eliminar</span>
                     </Button>
                 </div>
             </div>
 
-            {/* Botón para limpiar selección */}
             <button
                 onClick={onClearSelection}
                 disabled={isLoading}
-                className="p-2 hover:bg-white/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="self-end sm:self-start p-2 hover:bg-white/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                 title="Limpiar selección"
+                type="button"
             >
                 <X className="w-5 h-5" />
             </button>
