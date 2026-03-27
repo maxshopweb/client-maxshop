@@ -9,6 +9,11 @@ interface ModalBaseProps {
     /** Si true, el modal ocupa solo el ancho del contenido (hasta maxWidth) en lugar de full width */
     fitContent?: boolean;
     showCloseButton?: boolean;
+    /**
+     * Si es false, el cuerpo del modal no hace scroll (overflow hidden + flex).
+     * Usar cuando el hijo define su propia zona scroll (p. ej. cabecera/pie fijos).
+     */
+    bodyScroll?: boolean;
 }
 
 const ModalBase = ({
@@ -17,7 +22,8 @@ const ModalBase = ({
     children,
     maxWidth = 'max-w-md',
     fitContent = false,
-    showCloseButton = true
+    showCloseButton = true,
+    bodyScroll = true,
 }: ModalBaseProps) => {
     const [isClosing, setIsClosing] = useState(false);
     const [shouldRender, setShouldRender] = useState(false);
@@ -75,8 +81,14 @@ const ModalBase = ({
                     </button>
                 )}
 
-                {/* Cuerpo con scroll: evita recortar contenido largo (formularios multi-paso) */}
-                <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain">
+                {/* Cuerpo: con scroll por defecto; bodyScroll=false delega el scroll al hijo */}
+                <div
+                    className={
+                        bodyScroll
+                            ? 'min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain'
+                            : 'min-h-0 flex-1 flex flex-col overflow-hidden overflow-x-hidden'
+                    }
+                >
                     {children({ isClosing, handleClose })}
                 </div>
             </div>

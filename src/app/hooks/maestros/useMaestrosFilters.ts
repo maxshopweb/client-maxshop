@@ -7,6 +7,7 @@ import type { MaestroKind, MaestroItem } from '@/app/types/maestro.type';
 import { getMaestroCodigo, getMaestroNombre } from '@/app/types/maestro.type';
 
 const PARAM_BUSQUEDA = 'busqueda';
+const PARAM_PAGE = 'page';
 const MAX_BUSQUEDA_LENGTH = 80;
 const DEBOUNCE_MS = 300;
 
@@ -63,6 +64,7 @@ export function useMaestrosFilters(): UseMaestrosFiltersReturn {
       } else {
         params.set(PARAM_BUSQUEDA, validated);
       }
+      params.delete(PARAM_PAGE);
       const query = params.toString();
       router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
     },

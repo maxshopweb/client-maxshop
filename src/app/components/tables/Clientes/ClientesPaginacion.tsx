@@ -59,21 +59,18 @@ export function ClientesPaginacion({ pagination }: ClientesPaginacionProps) {
         return pages;
     };
 
-    if (totalPages <= 1) {
-        return null;
-    }
-
     return (
-        <div className="flex items-center justify-between px-4 py-3 bg-card border border-card rounded-lg">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 py-3 bg-card border border-card rounded-lg">
+            <div className="flex items-center gap-2 text-sm text-gray-600 shrink-0">
                 <span>
-                    Mostrando <span className="font-semibold">{startItem}</span> a{' '}
-                    <span className="font-semibold">{endItem}</span> de{' '}
+                    Mostrando <span className="font-semibold">{total === 0 ? 0 : startItem}</span> a{' '}
+                    <span className="font-semibold">{total === 0 ? 0 : endItem}</span> de{' '}
                     <span className="font-semibold">{total}</span> clientes
                 </span>
             </div>
 
-            <div className="flex items-center gap-2">
+            {totalPages <= 1 ? null : (
+            <div className="flex items-center gap-2 flex-wrap justify-end">
                 {/* Primera página */}
                 <Button
                     variant="ghost"
@@ -153,6 +150,7 @@ export function ClientesPaginacion({ pagination }: ClientesPaginacionProps) {
                     <ChevronsRight className="h-4 w-4" />
                 </Button>
             </div>
+            )}
         </div>
     );
 }

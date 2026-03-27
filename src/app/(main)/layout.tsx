@@ -80,8 +80,8 @@ export default function MainLayout({
       
       {/* Navbar Unificado */}
       <UnifiedNavbar />
-      <div className="flex flex-col min-h-screen pt-[160px]">
-        {children}
+      <div className="flex min-h-dvh flex-col pt-[160px]">
+        <main className="flex w-full flex-1 flex-col">{children}</main>
         <Footer />
       </div>
       <WhatsappButton />

@@ -5,7 +5,7 @@ import { StepOneVentaInfo } from './Step1Create';
 import { StepTwoVentaDetalles } from './Step2Create';
 import {
     createVentaSchema,
-    type CreateVentaData
+    type CreateVentaFormValues,
 } from '@/app/schemas/venta.schema';
 import { useCreateVenta } from '@/app/hooks/ventas/useVentasMutations';
 import type { ICreateVentaDTO } from '@/app/types/ventas.type';
@@ -15,10 +15,12 @@ interface CreateVentaModalProps {
 }
 
 export function CreateVentaModal({ onClose }: CreateVentaModalProps) {
-    const form = useForm<CreateVentaData>({
+    const form = useForm<CreateVentaFormValues>({
         resolver: zodResolver(createVentaSchema),
         mode: 'onChange',
         defaultValues: {
+            tipo_venta: '',
+            metodo_pago: '',
             detalles: [],
         },
     });
@@ -34,15 +36,11 @@ export function CreateVentaModal({ onClose }: CreateVentaModalProps) {
     });
 
     const validateStepOne = async () => {
-        const fields = ['tipo_venta', 'metodo_pago'];
-        const isValid = await form.trigger(fields as any);
-        return isValid;
+        return form.trigger(['tipo_venta', 'metodo_pago']);
     };
 
     const validateStepTwo = async () => {
-        const fields = ['detalles'];
-        const isValid = await form.trigger(fields as any);
-        return isValid;
+        return form.trigger('detalles');
     };
 
     const handleComplete = async () => {
@@ -51,15 +49,14 @@ export function CreateVentaModal({ onClose }: CreateVentaModalProps) {
             return;
         }
 
-        const rawData = form.getValues();
+        const rawData = createVentaSchema.parse(form.getValues());
 
-        // Preparar datos para el backend
         const data: ICreateVentaDTO = {
             id_cliente: rawData.id_cliente || undefined,
             metodo_pago: rawData.metodo_pago,
             tipo_venta: rawData.tipo_venta,
             observaciones: rawData.observaciones || undefined,
-            detalles: rawData.detalles.map(detalle => ({
+            detalles: rawData.detalles.map((detalle) => ({
                 id_prod: detalle.id_prod,
                 cantidad: detalle.cantidad,
                 precio_unitario: detalle.precio_unitario,

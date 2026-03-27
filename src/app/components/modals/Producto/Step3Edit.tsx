@@ -1,5 +1,7 @@
+import { useMemo } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import Select from '@/app/components/ui/Select';
+import { useConfigTienda } from '@/app/hooks/config/useConfigTienda';
 import type { CreateProductoData } from '@/app/schemas/producto.schema';
 import { ToggleLeft, Eye, CreditCard } from 'lucide-react';
 
@@ -9,6 +11,20 @@ interface StepThreeProps {
 
 export function StepThreeEstado({ form }: StepThreeProps) {
   const { formState: { errors } } = form;
+  const { data: config } = useConfigTienda();
+  const numCuotas =
+    config?.cuotas_sin_interes != null
+      ? Math.max(1, Math.trunc(Number(config.cuotas_sin_interes)))
+      : 3;
+
+  const cuotasOptions = useMemo(
+    () => [
+      { value: 'regla' as const, label: '📋 Regla general' },
+      { value: 'si' as const, label: `✅ Siempre ${numCuotas} cuotas` },
+      { value: 'no' as const, label: `❌ Sin ${numCuotas} cuotas` },
+    ],
+    [numCuotas]
+  );
 
   return (
     <div className="px-2 max-h-[min(60vh,480px)] overflow-y-auto">
@@ -69,24 +85,26 @@ export function StepThreeEstado({ form }: StepThreeProps) {
         <div className="bg-card p-4 rounded-xl border-2 border-card space-y-3 flex flex-col min-w-0">
           <div className="flex items-center gap-2 text-input font-medium shrink-0">
             <CreditCard className="size-4 shrink-0" />
-            <span className="text-sm">3 cuotas (MP)</span>
+            <span className="text-sm">{numCuotas} cuotas (MP)</span>
           </div>
           <Select
             label="Cuotas"
-            options={[
-              { value: 'regla', label: '📋 Regla general' },
-              { value: 'si', label: '✅ Siempre 3 cuotas' },
-              { value: 'no', label: '❌ No 3 cuotas' },
-            ]}
+            options={cuotasOptions}
             placeholder="Seleccionar"
             value={form.watch('cuotas_habilitadas') ?? 'regla'}
             onChange={(value) => form.setValue('cuotas_habilitadas', (value as 'regla' | 'si' | 'no') ?? 'regla')}
             error={errors.cuotas_habilitadas?.message}
           />
           <div className="p-3 bg-input/30 rounded-lg text-xs text-input space-y-1.5 flex-1 min-h-0">
-            <p><strong>Regla:</strong> Monto mínimo en Config.</p>
-            <p><strong>Siempre:</strong> Habilita 3 cuotas en este producto.</p>
-            <p><strong>No:</strong> No ofrece 3 cuotas en checkout.</p>
+            <p>
+              <strong>Regla:</strong> Igual que en Configuración: cantidad ({numCuotas}), monto mínimo y si la regla está activa en tienda.
+            </p>
+            <p>
+              <strong>Siempre:</strong> Ofrece {numCuotas} cuotas en este producto aunque no cumpla el mínimo global.
+            </p>
+            <p>
+              <strong>Sin {numCuotas}:</strong> No ofrece esas cuotas en checkout para este producto.
+            </p>
           </div>
         </div>
       </div>

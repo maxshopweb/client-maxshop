@@ -37,7 +37,6 @@ export interface GetAuditoriaLogsParams {
   limit?: number;
   fecha_desde?: string;
   fecha_hasta?: string;
-  accion?: string;
   tabla_afectada?: string;
   method?: string;
   estado?: string;
@@ -51,7 +50,7 @@ export async function getAuditoriaLogs(
     const search = new URLSearchParams();
     search.set('page', String(page));
     search.set('limit', String(limit));
-    (['fecha_desde', 'fecha_hasta', 'accion', 'tabla_afectada', 'method', 'estado'] as const).forEach((key) => {
+    (['fecha_desde', 'fecha_hasta', 'tabla_afectada', 'method', 'estado'] as const).forEach((key) => {
       if (rest[key] != null && rest[key] !== '') search.set(key, String(rest[key]));
     });
     const data = await fetchWithAuth(`/admin/auditoria?${search.toString()}`);

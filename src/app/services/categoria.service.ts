@@ -1,4 +1,5 @@
 import axiosInstance from '@/app/lib/axios';
+import type { PaginatedListResponse } from '@/app/types/admin-pagination.type';
 import {
     ICategoria,
     ICreateCategoriaDTO,
@@ -14,6 +15,15 @@ interface CategoriaApiResponse {
 }
 
 class CategoriaService {
+    async getPaginated(params: { page: number; limit: number; busqueda?: string }): Promise<PaginatedListResponse<ICategoria>> {
+        const search = new URLSearchParams();
+        search.set('page', String(params.page));
+        search.set('limit', String(params.limit));
+        if (params.busqueda?.trim()) search.set('busqueda', params.busqueda.trim());
+        const response = await axiosInstance.get<PaginatedListResponse<ICategoria>>(`/categorias?${search.toString()}`);
+        return response.data;
+    }
+
     async getAll(): Promise<CategoriaApiResponse> {
         const response = await axiosInstance.get<CategoriaApiResponse>('/categorias');
         return response.data;

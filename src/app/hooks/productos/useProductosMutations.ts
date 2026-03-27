@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { productosService } from '@/app/services/producto.service';
+import { getClientErrorMessage } from '@/app/utils/apiError';
 import { productosKeys } from './useProductos';
 import { useTogglePublicado, useBulkSetPublicado } from './usePublicadoMutations';
 import type {
@@ -541,8 +542,11 @@ export function useToggleDestacado(options: UseToggleDestacadoOptions = {}) {
         },
 
         onError: (error: Error) => {
-            toast.error('Error al cambiar estado destacado', {
-                description: error.message || 'Ocurrió un error inesperado',
+            toast.error('No se pudo cambiar el destacado', {
+                description: getClientErrorMessage(
+                    error,
+                    'Ocurrió un error inesperado'
+                ),
             });
 
             options.onError?.(error);

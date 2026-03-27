@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // Enums para validación
 const MetodoPagoEnum = z.enum(['efectivo', 'tarjeta_debito', 'tarjeta_credito', 'transferencia', 'mercadopago', 'otro']);
-const TipoVentaEnum = z.enum(['presencial', 'online', 'telefono']);
+const TipoVentaEnum = z.enum(['presencial', 'online', 'otro']);
 const EstadoPagoEnum = z.enum(['pendiente', 'aprobado', 'rechazado', 'cancelado']);
 const EstadoEnvioEnum = z.enum(['pendiente', 'preparando', 'enviado', 'en_transito', 'entregado', 'cancelado']);
 
@@ -76,6 +76,9 @@ export const updateVentaSchema = z.object({
 export type VentaDetalleData = z.infer<typeof ventaDetalleSchema>;
 export type VentaStepOneData = z.infer<typeof ventaStepOneSchema>;
 export type VentaStepTwoData = z.infer<typeof ventaStepTwoSchema>;
-export type CreateVentaData = z.infer<typeof createVentaSchema>;
+/** Valores del formulario (antes de transformar; incluye "" en enums hasta validar). */
+export type CreateVentaFormValues = z.input<typeof createVentaSchema>;
+/** Datos validados listos para API (después de refine/transform). */
+export type CreateVentaData = z.output<typeof createVentaSchema>;
 export type UpdateVentaData = z.infer<typeof updateVentaSchema>;
 

@@ -1,4 +1,5 @@
 import axiosInstance from '@/app/lib/axios';
+import { getClientErrorMessage } from '@/app/utils/apiError';
 import type {
   IProductos,
   IProductoFilters,
@@ -211,15 +212,21 @@ class ProductosService {
   }
 
   async toggleDestacado(id: number): Promise<IProductos> {
-    const response = await axiosInstance.patch<IApiResponse<IProductos>>(
-      `/productos/${id}/destacado`
-    );
+    try {
+      const response = await axiosInstance.patch<IApiResponse<IProductos>>(
+        `/productos/${id}/destacado`
+      );
 
-    if (!response.data.success || !response.data.data) {
-      throw new Error(response.data.error || 'Error al cambiar estado destacado');
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.error || 'Error al cambiar estado destacado');
+      }
+
+      return response.data.data;
+    } catch (error) {
+      throw new Error(
+        getClientErrorMessage(error, 'Error al cambiar estado destacado')
+      );
     }
-
-    return response.data.data;
   }
 
   /** Quita el bloqueo de sync FTP (`precio_editado_manualmente`); la próxima sync actualizará stock, precios y maestros. */

@@ -1,7 +1,17 @@
 import axiosInstance from '@/app/lib/axios';
+import type { PaginatedListResponse } from '@/app/types/admin-pagination.type';
 import { IGrupo, IGrupoResponse, ICreateGrupoDTO, IUpdateGrupoDTO } from '../types/grupo.type';
 
 class GrupoService {
+  async getPaginated(params: { page: number; limit: number; busqueda?: string }): Promise<PaginatedListResponse<IGrupo>> {
+    const search = new URLSearchParams();
+    search.set('page', String(params.page));
+    search.set('limit', String(params.limit));
+    if (params.busqueda?.trim()) search.set('busqueda', params.busqueda.trim());
+    const response = await axiosInstance.get<PaginatedListResponse<IGrupo>>(`/grupos?${search.toString()}`);
+    return response.data;
+  }
+
   async getAll(): Promise<IGrupoResponse> {
     const response = await axiosInstance.get<IGrupoResponse>('/grupos');
     return response.data;

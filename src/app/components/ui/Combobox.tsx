@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown, Check, Search, LucideIcon } from 'lucide-react';
 
 export interface ComboboxOption {
@@ -22,6 +23,8 @@ interface ComboboxProps {
     disabled?: boolean;
 }
 
+type MenuPosition = { top: number; left: number; width: number; maxHeight: number };
+
 export function Combobox({
     options,
     value,
@@ -36,7 +39,10 @@ export function Combobox({
 }: ComboboxProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [menuPosition, setMenuPosition] = useState<MenuPosition | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const triggerRef = useRef<HTMLButtonElement>(null);
+    const menuRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const selectedOption = options.find(opt => opt.value === value);
@@ -47,12 +53,43 @@ export function Combobox({
         )
         : options;
 
+    const updateMenuPosition = useCallback(() => {
+        const el = triggerRef.current;
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const gap = 4;
+        const preferredMax = 280;
+        const spaceBelow = window.innerHeight - rect.bottom - gap - 12;
+        const maxHeight = Math.min(preferredMax, Math.max(100, spaceBelow));
+        setMenuPosition({
+            top: rect.bottom + gap,
+            left: rect.left,
+            width: rect.width,
+            maxHeight,
+        });
+    }, []);
+
+    useLayoutEffect(() => {
+        if (!isOpen) {
+            setMenuPosition(null);
+            return;
+        }
+        updateMenuPosition();
+        window.addEventListener('scroll', updateMenuPosition, true);
+        window.addEventListener('resize', updateMenuPosition);
+        return () => {
+            window.removeEventListener('scroll', updateMenuPosition, true);
+            window.removeEventListener('resize', updateMenuPosition);
+        };
+    }, [isOpen, updateMenuPosition]);
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-                setIsOpen(false);
-                setSearchTerm('');
-            }
+            const t = event.target as Node;
+            if (containerRef.current?.contains(t)) return;
+            if (menuRef.current?.contains(t)) return;
+            setIsOpen(false);
+            setSearchTerm('');
         };
 
         if (isOpen) {
@@ -65,10 +102,10 @@ export function Combobox({
     }, [isOpen]);
 
     useEffect(() => {
-        if (isOpen && inputRef.current) {
+        if (isOpen && searchable && inputRef.current) {
             inputRef.current.focus();
         }
-    }, [isOpen]);
+    }, [isOpen, searchable, menuPosition]);
 
     const handleSelect = (option: ComboboxOption) => {
         if (option.disabled) return;
@@ -84,6 +121,73 @@ export function Combobox({
     };
 
     const displayError = error;
+
+    const menuContent =
+        isOpen && menuPosition && typeof document !== 'undefined'
+            ? createPortal(
+                <div
+                    ref={menuRef}
+                    className="fixed flex flex-col rounded-lg shadow-lg border border-gray-200 bg-white overflow-hidden"
+                    style={{
+                        top: menuPosition.top,
+                        left: menuPosition.left,
+                        width: menuPosition.width,
+                        maxHeight: menuPosition.maxHeight,
+                        zIndex: 130,
+                    }}
+                >
+                    {searchable && (
+                        <div className="p-2 border-b border-gray-200 shrink-0 bg-white">
+                            <div className="relative">
+                                <Search
+                                    size={16}
+                                    className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400"
+                                />
+                                <input
+                                    ref={inputRef}
+                                    type="text"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    placeholder="Buscar..."
+                                    className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-principal"
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex-1 min-h-0 overflow-y-auto py-1 overscroll-contain">
+                        {filteredOptions.length > 0 ? (
+                            filteredOptions.map((option) => (
+                                <button
+                                    key={option.value}
+                                    type="button"
+                                    onClick={() => handleSelect(option)}
+                                    disabled={option.disabled}
+                                    className={`
+                                            w-full px-3 py-2 text-sm text-left
+                                            flex items-center justify-between
+                                            hover:bg-gray-100
+                                            transition-colors
+                                            ${option.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                                            ${value === option.value ? 'bg-principal/10' : ''}
+                                        `}
+                                >
+                                    <span>{option.label}</span>
+                                    {value === option.value && (
+                                        <Check size={16} className="text-principal" />
+                                    )}
+                                </button>
+                            ))
+                        ) : (
+                            <div className="px-3 py-2 text-sm text-gray-500 text-center">
+                                No se encontraron resultados
+                            </div>
+                        )}
+                    </div>
+                </div>,
+                document.body
+            )
+            : null;
 
     return (
         <div className="flex flex-col gap-1.5 w-full">
@@ -117,6 +221,7 @@ export function Combobox({
                 )}
 
                 <button
+                    ref={triggerRef}
                     type="button"
                     onClick={() => !disabled && setIsOpen(!isOpen)}
                     disabled={disabled}
@@ -171,63 +276,9 @@ export function Combobox({
                         />
                     </div>
                 </button>
-
-                {isOpen && (
-                    <div
-                        className="absolute z-50 w-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-auto"
-                        style={{ top: '100%' }}
-                    >
-                        {searchable && (
-                            <div className="p-2 border-b border-gray-200 sticky top-0 bg-white">
-                                <div className="relative">
-                                    <Search
-                                        size={16}
-                                        className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400"
-                                    />
-                                    <input
-                                        ref={inputRef}
-                                        type="text"
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        placeholder="Buscar..."
-                                        className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-principal"
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="py-1">
-                            {filteredOptions.length > 0 ? (
-                                filteredOptions.map((option) => (
-                                    <button
-                                        key={option.value}
-                                        type="button"
-                                        onClick={() => handleSelect(option)}
-                                        disabled={option.disabled}
-                                        className={`
-                                            w-full px-3 py-2 text-sm text-left
-                                            flex items-center justify-between
-                                            hover:bg-gray-100
-                                            transition-colors
-                                            ${option.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-                                            ${value === option.value ? 'bg-principal/10' : ''}
-                                        `}
-                                    >
-                                        <span>{option.label}</span>
-                                        {value === option.value && (
-                                            <Check size={16} className="text-principal" />
-                                        )}
-                                    </button>
-                                ))
-                            ) : (
-                                <div className="px-3 py-2 text-sm text-gray-500 text-center">
-                                    No se encontraron resultados
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
             </div>
+
+            {menuContent}
 
             {displayError && (
                 <span className="text-xs text-error mt-0.5">
@@ -237,4 +288,3 @@ export function Combobox({
         </div>
     );
 }
-

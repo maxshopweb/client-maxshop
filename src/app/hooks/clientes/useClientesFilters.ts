@@ -2,7 +2,6 @@ import { useCallback, useMemo, useState, useEffect } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useDebounce } from '@/app/hooks/useDebounce';
 import type { IClienteFilters } from '@/app/types/cliente.type';
-import { EstadoGeneral } from '@/app/types/estados.type';
 
 const DEFAULT_FILTERS: IClienteFilters = {
     page: 1,
@@ -41,8 +40,9 @@ export function useClientesFilters() {
         const busqueda = searchParams.get('busqueda');
         if (busqueda) params.busqueda = busqueda;
 
-        const estado = searchParams.get('estado');
-        if (estado !== null) params.estado = Number(estado) as EstadoGeneral;
+        const activoParam = searchParams.get('activo');
+        if (activoParam === 'true' || activoParam === '1') params.activo = true;
+        else if (activoParam === 'false' || activoParam === '0') params.activo = false;
 
         const ciudad = searchParams.get('ciudad');
         if (ciudad) params.ciudad = ciudad;
@@ -104,7 +104,7 @@ export function useClientesFilters() {
 
             const newFilters = { ...filters, [key]: value };
 
-            if (key !== 'page' && key !== 'limit') {
+            if (key !== 'page') {
                 newFilters.page = 1;
             }
 
@@ -145,7 +145,7 @@ export function useClientesFilters() {
     const hasActiveFilters = useMemo(() => {
         return (
             !!localBusqueda ||
-            filters.estado !== undefined ||
+            filters.activo !== undefined ||
             !!filters.ciudad ||
             !!filters.provincia ||
             !!filters.creado_desde ||
@@ -158,7 +158,7 @@ export function useClientesFilters() {
     const activeFiltersCount = useMemo(() => {
         let count = 0;
         if (localBusqueda) count++;
-        if (filters.estado !== undefined) count++;
+        if (filters.activo !== undefined) count++;
         if (filters.ciudad) count++;
         if (filters.provincia) count++;
         if (filters.creado_desde || filters.creado_hasta) count++;

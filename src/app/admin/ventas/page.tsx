@@ -19,8 +19,17 @@ import { formatPrecio } from '@/app/types/ventas.type';
 import { AdminPageHeader } from '@/app/components/Admin/AdminPageHeader';
 import { AdminPageContainer } from '@/app/components/Admin/AdminPageContainer';
 import { ventasService } from '@/app/services/venta.service';
+import { VentasFiltersProvider } from '@/app/hooks/ventas/useVentasFilters';
 
 export default function VentasPage() {
+    return (
+        <VentasFiltersProvider>
+            <VentasPageContent />
+        </VentasFiltersProvider>
+    );
+}
+
+function VentasPageContent() {
     const {
         modal,
         bulkDeleteIds,

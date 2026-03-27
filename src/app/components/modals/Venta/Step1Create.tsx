@@ -3,7 +3,7 @@ import Select from '@/app/components/ui/Select';
 import { Combobox } from '@/app/components/ui/Combobox';
 import Textarea from '@/app/components/ui/Textarea';
 import { ShoppingCart, FileText, User } from 'lucide-react';
-import type { CreateVentaData } from '@/app/schemas/venta.schema';
+import type { CreateVentaFormValues } from '@/app/schemas/venta.schema';
 import { TIPO_VENTA_OPTIONS } from '@/app/types/ventas.type';
 import { useClientes } from '@/app/hooks/clientes/useClientes';
 import { MetodoPagoEfectivo } from './MetodoPagoEfectivo';
@@ -11,7 +11,7 @@ import { MetodoPagoTransferencia } from './MetodoPagoTransferencia';
 import { MetodoPagoMercadoPago } from './MetodoPagoMercadoPago';
 
 interface StepOneProps {
-    form: UseFormReturn<CreateVentaData>;
+    form: UseFormReturn<CreateVentaFormValues>;
 }
 
 export function StepOneVentaInfo({ form }: StepOneProps) {
@@ -32,7 +32,7 @@ export function StepOneVentaInfo({ form }: StepOneProps) {
     }));
 
     return (
-        <div className="space-y-4 max-h-[350px] overflow-y-auto px-2">
+        <div className="space-y-4 px-2">
             <h3 className="text-lg font-semibold text-input mb-4">
                 Información de la venta
             </h3>
@@ -49,7 +49,9 @@ export function StepOneVentaInfo({ form }: StepOneProps) {
                         }))
                     ]}
                     value={watch('tipo_venta') || ''}
-                    onChange={(value) => form.setValue('tipo_venta', value as any)}
+                    onChange={(value) =>
+                        form.setValue('tipo_venta', String(value) as CreateVentaFormValues['tipo_venta'])
+                    }
                     error={errors.tipo_venta?.message}
                     icon={ShoppingCart}
                 />
@@ -67,7 +69,9 @@ export function StepOneVentaInfo({ form }: StepOneProps) {
                 {/* Botón Mercado Pago */}
                 <MetodoPagoMercadoPago
                     isSelected={watch('metodo_pago') === 'mercadopago'}
-                    onClick={() => form.setValue('metodo_pago', 'mercadopago' as any)}
+                    onClick={() =>
+                        form.setValue('metodo_pago', 'mercadopago')
+                    }
                 />
 
                 {/* Separador */}
@@ -84,11 +88,11 @@ export function StepOneVentaInfo({ form }: StepOneProps) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <MetodoPagoEfectivo
                         isSelected={watch('metodo_pago') === 'efectivo'}
-                        onClick={() => form.setValue('metodo_pago', 'efectivo' as any)}
+                        onClick={() => form.setValue('metodo_pago', 'efectivo')}
                     />
                     <MetodoPagoTransferencia
                         isSelected={watch('metodo_pago') === 'transferencia'}
-                        onClick={() => form.setValue('metodo_pago', 'transferencia' as any)}
+                        onClick={() => form.setValue('metodo_pago', 'transferencia')}
                     />
                 </div>
             </div>

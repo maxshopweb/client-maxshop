@@ -2,12 +2,12 @@ import { UseFormReturn, useFieldArray } from 'react-hook-form';
 import { Plus, Trash2, Package } from 'lucide-react';
 import Input from '@/app/components/ui/Input';
 import { Button } from '@/app/components/ui/Button';
-import type { CreateVentaData } from '@/app/schemas/venta.schema';
+import type { CreateVentaFormValues } from '@/app/schemas/venta.schema';
 import { useProductos } from '@/app/hooks/productos/useProductos';
 import Select from '@/app/components/ui/Select';
 
 interface StepTwoProps {
-    form: UseFormReturn<CreateVentaData>;
+    form: UseFormReturn<CreateVentaFormValues>;
 }
 
 export function StepTwoVentaDetalles({ form }: StepTwoProps) {
@@ -77,7 +77,7 @@ export function StepTwoVentaDetalles({ form }: StepTwoProps) {
     };
 
     return (
-        <div className="space-y-4 max-h-[400px] overflow-y-auto px-2">
+        <div className="space-y-4 px-2">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-input">
                     Productos de la venta
@@ -114,8 +114,9 @@ export function StepTwoVentaDetalles({ form }: StepTwoProps) {
                                     <Button
                                         type="button"
                                         onClick={() => remove(index)}
-                                        variant="danger"
+                                        variant="ghost"
                                         size="sm"
+                                        className="!min-w-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </Button>

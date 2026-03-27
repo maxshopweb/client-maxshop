@@ -5,13 +5,11 @@ import * as Popover from '@radix-ui/react-popover';
 import Input from '../../ui/Input';
 import Select from '../../ui/Select';
 import { CLIENTE_ORDEN_OPTIONS, CLIENTE_LIMIT_OPTIONS } from '@/app/types/cliente.type';
-import { EstadoGeneral } from '@/app/types/estados.type';
 
-const ESTADO_OPTIONS = [
-    { value: '', label: 'Todos los estados' },
-    { value: '1', label: 'Activo' },
-    { value: '2', label: 'Inactivo' },
-    { value: '0', label: 'Eliminado' },
+const ACTIVO_OPTIONS = [
+    { value: '', label: 'Todos' },
+    { value: 'true', label: 'Activo' },
+    { value: 'false', label: 'Inactivo' },
 ];
 
 export function ClientesFilters() {
@@ -82,13 +80,21 @@ export function ClientesFilters() {
                             {/* ESTADO */}
                             <div>
                                 <Select
-                                    label="Estado"
-                                    options={ESTADO_OPTIONS}
-                                    value={filters.estado?.toString() || ''}
+                                    label="Estado de cuenta"
+                                    options={ACTIVO_OPTIONS}
+                                    value={
+                                        filters.activo === true
+                                            ? 'true'
+                                            : filters.activo === false
+                                              ? 'false'
+                                              : ''
+                                    }
                                     onChange={(value) => {
-                                        setFilter('estado', value ? (Number(value) as EstadoGeneral) : undefined);
+                                        if (value === 'true') setFilter('activo', true);
+                                        else if (value === 'false') setFilter('activo', false);
+                                        else setFilter('activo', undefined);
                                     }}
-                                    placeholder="Seleccionar estado"
+                                    placeholder="Seleccionar"
                                 />
                             </div>
 

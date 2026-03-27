@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Plus, RefreshCw } from 'lucide-react';
 import { Button } from '@/app/components/ui/Button';
 import { UtilidadesTabs, type UtilidadesTabKind } from './UtilidadesTabs';
@@ -10,6 +10,7 @@ import { MaestrosFilterInput } from './MaestrosFilterInput';
 import { CreateMaestroModal } from './CreateMaestroModal';
 import { EditMaestroModal } from './EditMaestroModal';
 import { DeleteMaestroModal } from './DeleteMaestroModal';
+import { UtilidadesPagination } from './UtilidadesPagination';
 import type { MaestroKind, MaestroItem } from '@/app/types/maestro.type';
 import { MAESTRO_LABELS } from '@/app/types/maestro.type';
 import { useMarcas } from '@/app/hooks/marcas/useMarcas';
@@ -17,60 +18,136 @@ import { useCategorias } from '@/app/hooks/categorias/useCategorias';
 import { useGrupos } from '@/app/hooks/grupos/useGrupos';
 import { useListasPrecio } from '@/app/hooks/listas-precio/useListasPrecio';
 import { useMaestrosFilters } from '@/app/hooks/maestros/useMaestrosFilters';
-import type { MarcasSSRResponse, CategoriasSSRResponse, GruposSSRResponse } from '@/app/lib/getMaestros';
+import { useUtilidadesPagination } from '@/app/hooks/utilidades/useUtilidadesPagination';
+import type {
+  MarcasPaginatedSSR,
+  CategoriasPaginatedSSR,
+  GruposPaginatedSSR,
+  ListasPrecioPaginatedSSR,
+} from '@/app/lib/getMaestros';
+import type { AdminPaginationMeta } from '@/app/types/admin-pagination.type';
+
+function pickPaginatedMeta(d: unknown): AdminPaginationMeta | undefined {
+  if (d && typeof d === 'object' && 'pagination' in d) {
+    return (d as { pagination: AdminPaginationMeta }).pagination;
+  }
+  return undefined;
+}
 import { AdminPageHeader } from '@/app/components/Admin/AdminPageHeader';
 import { AdminPageContainer } from '@/app/components/Admin/AdminPageContainer';
 
 type ModalType = 'create' | 'edit' | 'delete' | null;
 
+const PAGINATION_LABELS: Record<UtilidadesTabKind, string> = {
+  marca: 'marcas',
+  categoria: 'categorías',
+  grupo: 'grupos',
+  lista_precio: 'listas de precio',
+};
+
 interface UtilidadesPageClientProps {
-  initialMarcas?: MarcasSSRResponse;
-  initialCategorias?: CategoriasSSRResponse;
-  initialGrupos?: GruposSSRResponse;
+  initialMarcasPaginated: MarcasPaginatedSSR;
+  initialCategoriasPaginated: CategoriasPaginatedSSR;
+  initialGruposPaginated: GruposPaginatedSSR;
+  initialListasPaginated: ListasPrecioPaginatedSSR;
 }
 
 export function UtilidadesPageClient({
-  initialMarcas,
-  initialCategorias,
-  initialGrupos,
+  initialMarcasPaginated,
+  initialCategoriasPaginated,
+  initialGruposPaginated,
+  initialListasPaginated,
 }: UtilidadesPageClientProps) {
   const [activeTab, setActiveTab] = useState<UtilidadesTabKind>('marca');
   const [modal, setModal] = useState<{ type: ModalType; item?: MaestroItem }>({ type: null });
 
-  const { busquedaInput, setBusquedaInput, filterItems, clearBusqueda } = useMaestrosFilters();
+  const { busquedaInput, setBusquedaInput, clearBusqueda, busqueda } = useMaestrosFilters();
+  const { page, limit, setPage, setLimit, goToPage, nextPage, prevPage } = useUtilidadesPagination();
 
-  const marcasQuery = useMarcas({ initialData: initialMarcas });
-  const categoriasQuery = useCategorias({ initialData: initialCategorias });
-  const gruposQuery = useGrupos({ initialData: initialGrupos });
-  const { listas, isLoading: listasLoading, isFetching: listasFetching, refetch: listasRefetch } = useListasPrecio(false);
+  const adminListParams = useMemo(() => ({ page, limit, busqueda }), [page, limit, busqueda]);
+
+  const prevTabRef = useRef(activeTab);
+  useEffect(() => {
+    if (prevTabRef.current !== activeTab) {
+      prevTabRef.current = activeTab;
+      setPage(1);
+    }
+  }, [activeTab, setPage]);
+
+  const marcasQuery = useMarcas({
+    adminList: adminListParams,
+    initialPaginated: initialMarcasPaginated,
+    enabled: activeTab === 'marca',
+  });
+  const categoriasQuery = useCategorias({
+    adminList: adminListParams,
+    initialPaginated: initialCategoriasPaginated,
+    enabled: activeTab === 'categoria',
+  });
+  const gruposQuery = useGrupos({
+    adminList: adminListParams,
+    initialPaginated: initialGruposPaginated,
+    enabled: activeTab === 'grupo',
+  });
+
+  const listasAdminParams = useMemo(() => ({ page, limit, busqueda: '' as const }), [page, limit]);
+  const {
+    listas,
+    pagination: listasPagination,
+    isLoading: listasLoading,
+    isFetching: listasFetching,
+    refetch: listasRefetch,
+  } = useListasPrecio(false, listasAdminParams, {
+    enabled: activeTab === 'lista_precio',
+    initialPaginated: initialListasPaginated,
+  });
 
   const isListaTab = activeTab === 'lista_precio';
 
-  const allItems =
-    activeTab === 'marca' ? (marcasQuery.data?.data ?? []) :
-    activeTab === 'categoria' ? (categoriasQuery.data?.data ?? []) :
-    activeTab === 'grupo' ? (gruposQuery.data?.data ?? []) :
-    [];
+  const maestroItems =
+    activeTab === 'marca'
+      ? (marcasQuery.data?.data ?? [])
+      : activeTab === 'categoria'
+        ? (categoriasQuery.data?.data ?? [])
+        : activeTab === 'grupo'
+          ? (gruposQuery.data?.data ?? [])
+          : [];
 
-  const items = isListaTab ? [] : filterItems(allItems as MaestroItem[], activeTab as MaestroKind);
+  const maestroPagination =
+    activeTab === 'marca'
+      ? pickPaginatedMeta(marcasQuery.data)
+      : activeTab === 'categoria'
+        ? pickPaginatedMeta(categoriasQuery.data)
+        : activeTab === 'grupo'
+          ? pickPaginatedMeta(gruposQuery.data)
+          : undefined;
 
   const isLoading =
-    activeTab === 'marca' ? marcasQuery.isLoading :
-    activeTab === 'categoria' ? categoriasQuery.isLoading :
-    activeTab === 'grupo' ? gruposQuery.isLoading :
-    listasLoading;
+    activeTab === 'marca'
+      ? marcasQuery.isLoading
+      : activeTab === 'categoria'
+        ? categoriasQuery.isLoading
+        : activeTab === 'grupo'
+          ? gruposQuery.isLoading
+          : listasLoading;
 
   const refetch =
-    activeTab === 'marca' ? marcasQuery.refetch :
-    activeTab === 'categoria' ? categoriasQuery.refetch :
-    activeTab === 'grupo' ? gruposQuery.refetch :
-    listasRefetch;
+    activeTab === 'marca'
+      ? marcasQuery.refetch
+      : activeTab === 'categoria'
+        ? categoriasQuery.refetch
+        : activeTab === 'grupo'
+          ? gruposQuery.refetch
+          : listasRefetch;
 
   const isFetching =
-    activeTab === 'marca' ? marcasQuery.isFetching :
-    activeTab === 'categoria' ? categoriasQuery.isFetching :
-    activeTab === 'grupo' ? gruposQuery.isFetching :
-    listasFetching;
+    activeTab === 'marca'
+      ? marcasQuery.isFetching
+      : activeTab === 'categoria'
+        ? categoriasQuery.isFetching
+        : activeTab === 'grupo'
+          ? gruposQuery.isFetching
+          : listasFetching;
 
   const openCreate = () => setModal({ type: 'create' });
   const openEdit = (item: MaestroItem) => setModal({ type: 'edit', item });
@@ -78,20 +155,24 @@ export function UtilidadesPageClient({
   const closeModal = () => setModal({ type: null });
 
   const handleSuccess = () => {
-    refetch();
+    void refetch();
   };
 
   const label = isListaTab ? null : MAESTRO_LABELS[activeTab as MaestroKind];
+
+  const activePagination = isListaTab ? listasPagination : maestroPagination;
 
   return (
     <div className="min-h-screen">
       <AdminPageContainer>
         <AdminPageHeader
           title="Utilidades"
-          description={isListaTab ? 'Activá o desactivá listas de precio para productos' : 'Gestioná marcas, categorías y grupos'}
+          description={
+            isListaTab ? 'Activá o desactivá listas de precio para productos' : 'Gestioná marcas, categorías y grupos'
+          }
         >
           <Button
-            onClick={() => refetch()}
+            onClick={() => void refetch()}
             disabled={isFetching}
             variant="outline-primary"
             className="flex items-center gap-2 justify-center"
@@ -109,7 +190,19 @@ export function UtilidadesPageClient({
 
         <UtilidadesTabs activeTab={activeTab} onTabChange={setActiveTab} />
         {isListaTab ? (
-          <ListasPrecioTable listas={listas} isLoading={listasLoading} />
+          <>
+            <ListasPrecioTable listas={listas} isLoading={isLoading} />
+            {activePagination && (
+              <UtilidadesPagination
+                pagination={activePagination}
+                entityLabelPlural={PAGINATION_LABELS.lista_precio}
+                onPageChange={goToPage}
+                onLimitChange={setLimit}
+                onNextPage={nextPage}
+                onPrevPage={prevPage}
+              />
+            )}
+          </>
         ) : (
           <>
             <MaestrosFilterInput
@@ -120,33 +213,43 @@ export function UtilidadesPageClient({
             />
             <MaestrosTable
               kind={activeTab as MaestroKind}
-              items={items as MaestroItem[]}
+              items={maestroItems as MaestroItem[]}
               isLoading={isLoading}
               onEdit={openEdit}
               onDelete={openDelete}
             />
+            {activePagination && (
+              <UtilidadesPagination
+                pagination={activePagination}
+                entityLabelPlural={PAGINATION_LABELS[activeTab]}
+                onPageChange={goToPage}
+                onLimitChange={setLimit}
+                onNextPage={nextPage}
+                onPrevPage={prevPage}
+              />
+            )}
           </>
         )}
       </AdminPageContainer>
 
-      {modal.type === 'create' && (
+      {modal.type === 'create' && activeTab !== 'lista_precio' && (
         <CreateMaestroModal
-          kind={activeTab}
+          kind={activeTab as MaestroKind}
           onClose={closeModal}
           onSuccess={handleSuccess}
         />
       )}
-      {modal.type === 'edit' && modal.item && (
+      {modal.type === 'edit' && modal.item && activeTab !== 'lista_precio' && (
         <EditMaestroModal
-          kind={activeTab}
+          kind={activeTab as MaestroKind}
           item={modal.item}
           onClose={closeModal}
           onSuccess={handleSuccess}
         />
       )}
-      {modal.type === 'delete' && modal.item && (
+      {modal.type === 'delete' && modal.item && activeTab !== 'lista_precio' && (
         <DeleteMaestroModal
-          kind={activeTab}
+          kind={activeTab as MaestroKind}
           item={modal.item}
           onClose={closeModal}
           onSuccess={handleSuccess}

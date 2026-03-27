@@ -19,7 +19,8 @@ class ClientesService {
     if (filters.order_by) params.append('order_by', filters.order_by);
     if (filters.order) params.append('order', filters.order);
     if (filters.busqueda) params.append('busqueda', filters.busqueda);
-    if (filters.estado !== undefined) params.append('estado', filters.estado.toString());
+    if (filters.activo === true) params.append('activo', 'true');
+    if (filters.activo === false) params.append('activo', 'false');
     if (filters.ciudad) params.append('ciudad', filters.ciudad);
     if (filters.provincia) params.append('provincia', filters.provincia);
     if (filters.creado_desde) params.append('creado_desde', filters.creado_desde);

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { registerSchema, emailSchema, passwordSchema } from '@/app/schemas/auth.schema';
 import { useAuth } from "../../context/AuthContext";
 import { toast } from "sonner";
+import { getClientErrorMessage } from '@/app/utils/apiError';
 
 export const useHandleFlowRegister = () => {
     const router = useRouter(); 
@@ -46,8 +47,8 @@ export const useHandleFlowRegister = () => {
             } else {
                 toast.error(registerResult.message || 'Error al crear la cuenta');
             }
-        } catch (error: any) {
-            toast.error(error?.message || 'Error al crear la cuenta');
+        } catch (error: unknown) {
+            toast.error(getClientErrorMessage(error, 'No pudimos crear la cuenta. Intentá de nuevo.'));
         } finally {
             setLoading(false);
         }
@@ -68,8 +69,8 @@ export const useHandleFlowRegister = () => {
             } else {
                 toast.error(result.message || 'Error al registrarse con Google');
             }
-        } catch (error: any) {
-            toast.error(error?.message || 'Error al registrarse con Google');
+        } catch (error: unknown) {
+            toast.error(getClientErrorMessage(error, 'No pudimos registrarte con Google. Intentá de nuevo.'));
         } finally {
             setLoading(false);
         }

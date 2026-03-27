@@ -19,7 +19,7 @@ export default function ClientesPage() {
     const { clientes, pagination, refetch, isFetching, isLoading, isError, error } = useClientes({ filters });
 
     const totalClientes = pagination?.total || 0;
-    const clientesActivos = clientes.filter(c => c.usuario?.estado === 1).length;
+    const clientesActivos = clientes.filter(c => c.usuario?.activo !== false).length;
 
     const handleExportExcel = async () => {
         setIsExporting(true);

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { User } from 'firebase/auth';
+import { getClientErrorMessage } from '@/app/utils/apiError';
 import AuthService from './auth.service';
 import EmailValidationService from './emailValidation.service';
 import axiosInstance from '../lib/axios';
@@ -52,13 +53,7 @@ class AuthIntegrationService {
   }
 
   private extractErrorMessage(error: unknown, fallback: string): string {
-    if (axios.isAxiosError(error)) {
-      return (error.response?.data as { error?: string })?.error ?? error.message ?? fallback;
-    }
-    if (error instanceof Error) {
-      return error.message || fallback;
-    }
-    return fallback;
+    return getClientErrorMessage(error, fallback);
   }
 
   private async postAuthEndpoint(
@@ -72,20 +67,20 @@ class AuthIntegrationService {
     });
 
     if (!response.data?.success) {
-      const errorMessage = response.data?.error ?? 'Error en la sincronización con el backend.';
+      const errorMessage = response.data?.error ?? 'No pudimos sincronizar tu cuenta. Intentá de nuevo.';
       console.error(`❌ [postAuthEndpoint] ${path} - success: false`, { error: errorMessage, response: response.data });
       throw new Error(errorMessage);
     }
 
     if (!response.data?.data) {
       console.error(`❌ [postAuthEndpoint] ${path} - data es undefined`, { response: response.data });
-      throw new Error('El backend no devolvió datos en la respuesta.');
+      throw new Error('No pudimos completar la operación. Intentá de nuevo.');
     }
 
     // Verificar que data tenga la estructura correcta
     if (!response.data.data.user) {
       console.error(`❌ [postAuthEndpoint] ${path} - data.user es undefined`, { data: response.data.data });
-      throw new Error('El backend no devolvió los datos del usuario en la respuesta.');
+      throw new Error('No pudimos completar la operación. Intentá de nuevo.');
     }
 
     return {
@@ -525,12 +520,12 @@ class AuthIntegrationService {
         // Verificar que backendResult y backendResult.user existan
         if (!backendResult) {
           console.error('❌ [signInAsGuest] backendResult es undefined');
-          throw new Error('El backend no devolvió datos en la respuesta.');
+          throw new Error('No pudimos completar el registro. Intentá de nuevo.');
         }
 
         if (!backendResult.user) {
           console.error('❌ [signInAsGuest] backendResult.user es undefined', { backendResult });
-          throw new Error('El backend no devolvió los datos del usuario correctamente.');
+          throw new Error('No pudimos completar el registro. Intentá de nuevo.');
         }
 
         const usuario = this.mapBackendUserToUsuario(backendResult.user, backendResult.estado);

@@ -297,7 +297,7 @@ export const METODO_PAGO_OPTIONS: { value: MetodoPago; label: string }[] = [
 export const TIPO_VENTA_OPTIONS: { value: TipoVenta; label: string }[] = [
     { value: 'presencial', label: 'Presencial' },
     { value: 'online', label: 'Online' },
-    { value: 'telefono', label: 'Teléfono' },
+    { value: 'otro', label: 'Otro' },
 ];
 
 // ========================================

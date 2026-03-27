@@ -45,7 +45,6 @@ export interface AuditoriaGetLogsParams {
     limit?: number;
     fecha_desde?: string;
     fecha_hasta?: string;
-    accion?: string;
     tabla_afectada?: string;
     method?: string;
     estado?: string;
@@ -55,7 +54,7 @@ const AuditoriaService = {
     async getLogs(props: AuditoriaGetLogsParams = {}): Promise<AuditoriaLogsResponse> {
         const { page = 1, limit = 50, ...rest } = props;
         const params: Record<string, string | number> = { page, limit };
-        (['fecha_desde', 'fecha_hasta', 'accion', 'tabla_afectada', 'method', 'estado'] as const).forEach((key) => {
+        (['fecha_desde', 'fecha_hasta', 'tabla_afectada', 'method', 'estado'] as const).forEach((key) => {
             if (rest[key] != null && rest[key] !== '') params[key] = rest[key] as string;
         });
         const response = await axiosInstance.get<AuditoriaLogsResponse>('/admin/auditoria', { params });

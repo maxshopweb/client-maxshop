@@ -9,7 +9,6 @@ type SearchParamsAuditoria = {
   limit?: string;
   fecha_desde?: string;
   fecha_hasta?: string;
-  accion?: string;
   tabla_afectada?: string;
   method?: string;
   estado?: string;
@@ -30,7 +29,6 @@ export default async function AuditoriaPage({ searchParams }: AuditoriaPageProps
   const getParams: Parameters<typeof getAuditoriaLogs>[0] = { page, limit };
   if (params.fecha_desde) getParams.fecha_desde = params.fecha_desde;
   if (params.fecha_hasta) getParams.fecha_hasta = params.fecha_hasta;
-  if (params.accion) getParams.accion = params.accion;
   if (params.tabla_afectada) getParams.tabla_afectada = params.tabla_afectada;
   if (params.method) getParams.method = params.method;
   if (params.estado) getParams.estado = params.estado;

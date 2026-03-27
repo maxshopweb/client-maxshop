@@ -60,6 +60,97 @@ export const getProductosColumns = (
             enableHiding: false,
         },
         {
+            id: 'actions',
+            header: 'Acciones',
+            cell: ({ row }) => {
+                const producto = row.original;
+
+                return (
+                    <DropdownMenu.Root>
+                        <DropdownMenu.Trigger asChild>
+                            <button className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-input h-8 w-8 p-0 text-input">
+                                <MoreHorizontal className="h-4 w-4" />
+                            </button>
+                        </DropdownMenu.Trigger>
+
+                        <DropdownMenu.Portal>
+                            <DropdownMenu.Content
+                                className="min-w-[180px] bg-card rounded-md shadow-lg border border-card p-1"
+                                align="end"
+                                sideOffset={5}
+                            >
+                                <DropdownMenu.Item
+                                    className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
+                                    onClick={() => actions.onEdit(producto)}
+                                >
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Editar
+                                </DropdownMenu.Item>
+
+                                {actions.onCambiarImagen && (
+                                    <DropdownMenu.Item
+                                        className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
+                                        onClick={() => actions.onCambiarImagen?.(producto)}
+                                    >
+                                        <ImageIcon className="mr-2 h-4 w-4" />
+                                        Cambiar imagen
+                                    </DropdownMenu.Item>
+                                )}
+
+                                {actions.onActualizarDesdeErp && (
+                                    <DropdownMenu.Item
+                                        className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
+                                        onClick={() => actions.onActualizarDesdeErp?.(producto)}
+                                    >
+                                        <Download className="mr-2 h-4 w-4 shrink-0" />
+                                        <span className="leading-tight">Actualizar este producto desde FTP</span>
+                                    </DropdownMenu.Item>
+                                )}
+
+                                {actions.onReanudarSyncErp && (
+                                    <DropdownMenu.Item
+                                        className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
+                                        onClick={() => actions.onReanudarSyncErp?.(producto)}
+                                    >
+                                        <RefreshCw className="mr-2 h-4 w-4 shrink-0" />
+                                        <span className="leading-tight">Próxima sync FTP</span>
+                                    </DropdownMenu.Item>
+                                )}
+
+                                {/* <DropdownMenu.Item
+                                    className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
+                                    onClick={() => actions.onUpdateStock(producto)}
+                                >
+                                    <Package className="mr-2 h-4 w-4" />
+                                    Actualizar stock
+                                </DropdownMenu.Item>
+
+                                <DropdownMenu.Item
+                                    className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
+                                    onClick={() => actions.onToggleDestacado(producto)}
+                                >
+                                    <Star className="mr-2 h-4 w-4" />
+                                    {producto.destacado ? 'Quitar destacado' : 'Destacar'}
+                                </DropdownMenu.Item> */}
+
+                                <DropdownMenu.Separator className="h-px bg-(--card-border) my-1" />
+
+                                <DropdownMenu.Item
+                                    className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-red-500/10 rounded outline-none text-red-600 transition-colors"
+                                    onClick={() => actions.onDelete(producto)}
+                                >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Eliminar
+                                </DropdownMenu.Item>
+                            </DropdownMenu.Content>
+                        </DropdownMenu.Portal>
+                    </DropdownMenu.Root>
+                );
+            },
+            enableSorting: false,
+            enableHiding: false,
+        },
+        {
             accessorKey: 'img_principal',
             header: 'Imagen',
             cell: ({ row }) => {
@@ -68,7 +159,7 @@ export const getProductosColumns = (
 
                 return (
                     <div className="w-12 h-12 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center">
-                    <ProductImage imgPrincipal={imagen} nombre={nombre} />
+                        <ProductImage imgPrincipal={imagen} nombre={nombre} />
                     </div>
                 );
             },
@@ -401,97 +492,6 @@ export const getProductosColumns = (
                 );
             },
             enableSorting: false,
-        },
-        {
-            id: 'actions',
-            header: 'Acciones',
-            cell: ({ row }) => {
-                const producto = row.original;
-
-                return (
-                    <DropdownMenu.Root>
-                        <DropdownMenu.Trigger asChild>
-                            <button className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-input h-8 w-8 p-0 text-input">
-                                <MoreHorizontal className="h-4 w-4" />
-                            </button>
-                        </DropdownMenu.Trigger>
-
-                        <DropdownMenu.Portal>
-                            <DropdownMenu.Content
-                                className="min-w-[180px] bg-card rounded-md shadow-lg border border-card p-1"
-                                align="end"
-                                sideOffset={5}
-                            >
-                                <DropdownMenu.Item
-                                    className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
-                                    onClick={() => actions.onEdit(producto)}
-                                >
-                                    <Edit className="mr-2 h-4 w-4" />
-                                    Editar
-                                </DropdownMenu.Item>
-
-                                {actions.onCambiarImagen && (
-                                    <DropdownMenu.Item
-                                        className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
-                                        onClick={() => actions.onCambiarImagen?.(producto)}
-                                    >
-                                        <ImageIcon className="mr-2 h-4 w-4" />
-                                        Cambiar imagen
-                                    </DropdownMenu.Item>
-                                )}
-
-                                {actions.onActualizarDesdeErp && (
-                                    <DropdownMenu.Item
-                                        className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
-                                        onClick={() => actions.onActualizarDesdeErp?.(producto)}
-                                    >
-                                        <Download className="mr-2 h-4 w-4 shrink-0" />
-                                        <span className="leading-tight">Actualizar este producto desde FTP</span>
-                                    </DropdownMenu.Item>
-                                )}
-
-                                {actions.onReanudarSyncErp && (
-                                    <DropdownMenu.Item
-                                        className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
-                                        onClick={() => actions.onReanudarSyncErp?.(producto)}
-                                    >
-                                        <RefreshCw className="mr-2 h-4 w-4 shrink-0" />
-                                        <span className="leading-tight">Próxima sync FTP</span>
-                                    </DropdownMenu.Item>
-                                )}
-
-                                {/* <DropdownMenu.Item
-                                    className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
-                                    onClick={() => actions.onUpdateStock(producto)}
-                                >
-                                    <Package className="mr-2 h-4 w-4" />
-                                    Actualizar stock
-                                </DropdownMenu.Item>
-
-                                <DropdownMenu.Item
-                                    className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
-                                    onClick={() => actions.onToggleDestacado(producto)}
-                                >
-                                    <Star className="mr-2 h-4 w-4" />
-                                    {producto.destacado ? 'Quitar destacado' : 'Destacar'}
-                                </DropdownMenu.Item> */}
-
-                                <DropdownMenu.Separator className="h-px bg-(--card-border) my-1" />
-
-                                <DropdownMenu.Item
-                                    className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-red-500/10 rounded outline-none text-red-600 transition-colors"
-                                    onClick={() => actions.onDelete(producto)}
-                                >
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Eliminar
-                                </DropdownMenu.Item>
-                            </DropdownMenu.Content>
-                        </DropdownMenu.Portal>
-                    </DropdownMenu.Root>
-                );
-            },
-            enableSorting: false,
-            enableHiding: false,
         },
     ];
 

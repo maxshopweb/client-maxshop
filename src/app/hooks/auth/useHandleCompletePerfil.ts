@@ -3,6 +3,7 @@ import { completeProfileSchema } from "@/app/schemas/auth.schema";
 import { useAuthStore } from "@/app/stores/userStore";
 import { useState } from "react";
 import { toast } from "sonner";
+import { getClientErrorMessage } from '@/app/utils/apiError';
 import { useRouter } from "next/navigation";
 
 export const useHandleCompletePerfil = () => {
@@ -103,8 +104,8 @@ export const useHandleCompletePerfil = () => {
             } else {
                 toast.error(result.message || 'Error al completar el perfil');
             }
-        } catch (error: any) {
-            toast.error(error?.message || 'Error al completar el perfil');
+        } catch (error: unknown) {
+            toast.error(getClientErrorMessage(error, 'No pudimos guardar tu perfil. Intentá de nuevo.'));
         } finally {
             setLoading(false);
         }

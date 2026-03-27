@@ -73,7 +73,9 @@ export function ViewVentaModal({ venta: ventaInitial, onClose, isOpen }: ViewVen
     const estadoPagoOption = ESTADO_PAGO_OPTIONS.find(opt => opt.value === venta.estado_pago);
     const estadoEnvioOption = ESTADO_ENVIO_OPTIONS.find(opt => opt.value === venta.estado_envio);
     const metodoPagoOption = METODO_PAGO_OPTIONS.find(opt => opt.value === venta.metodo_pago);
-    const tipoVentaOption = TIPO_VENTA_OPTIONS.find(opt => opt.value === venta.tipo_venta);
+    const tipoRaw = venta.tipo_venta as string | null | undefined;
+    const tipoVentaKey = tipoRaw === 'telefono' ? 'otro' : venta.tipo_venta;
+    const tipoVentaOption = TIPO_VENTA_OPTIONS.find(opt => opt.value === tipoVentaKey);
     const mpPayment = venta.mercado_pago_payments?.[0];
     const cliente = venta.cliente;
     const usuario = cliente?.usuario;
@@ -102,9 +104,10 @@ export function ViewVentaModal({ venta: ventaInitial, onClose, isOpen }: ViewVen
             onClose={onClose}
             maxWidth="max-w-4xl"
             showCloseButton={true}
+            bodyScroll={false}
         >
             {({ handleClose }) => (
-                <div className="w-full max-h-[90vh] overflow-hidden flex flex-col">
+                <div className="flex min-h-0 flex-1 flex-col overflow-hidden w-full">
                     {/* Header */}
                     <div className="flex items-center justify-between p-6 border-b border-input">
                         <div className="flex items-center gap-3">
@@ -123,7 +126,7 @@ export function ViewVentaModal({ venta: ventaInitial, onClose, isOpen }: ViewVen
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                    <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-6 space-y-6">
                         {loading ? (
                             <div className="flex items-center justify-center py-12 text-foreground/60">Cargando...</div>
                         ) : (

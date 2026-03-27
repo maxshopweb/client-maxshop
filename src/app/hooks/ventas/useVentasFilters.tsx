@@ -1,4 +1,16 @@
-import { useCallback, useMemo, useState, useEffect } from 'react';
+'use client';
+
+import {
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useLayoutEffect,
+    useMemo,
+    useRef,
+    useState,
+    type ReactNode,
+} from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useDebounce } from '@/app/hooks/useDebounce';
 import type { IVentaFilters } from '@/app/types/ventas.type';
@@ -11,16 +23,24 @@ const DEFAULT_FILTERS: IVentaFilters = {
     order: 'desc',
 };
 
-export function useVentasFilters() {
+function parseTotalParam(s: string): number | undefined {
+    if (s === '') return undefined;
+    const n = Number(s);
+    return Number.isFinite(n) ? n : undefined;
+}
+
+function useVentasFiltersState() {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
-    // Estado local para búsqueda (sin actualizar URL)
     const [localBusqueda, setLocalBusqueda] = useState('');
+    const [localTotalMin, setLocalTotalMin] = useState('');
+    const [localTotalMax, setLocalTotalMax] = useState('');
 
-    // Debounce solo para la búsqueda
     const debouncedBusqueda = useDebounce(localBusqueda, 500);
+    const debouncedTotalMin = useDebounce(localTotalMin, 400);
+    const debouncedTotalMax = useDebounce(localTotalMax, 400);
 
     const filters = useMemo<IVentaFilters>(() => {
         const params: IVentaFilters = { ...DEFAULT_FILTERS };
@@ -37,7 +57,6 @@ export function useVentasFilters() {
         const order = searchParams.get('order');
         if (order) params.order = order as 'asc' | 'desc';
 
-        // Usar búsqueda debounced
         const busqueda = searchParams.get('busqueda');
         if (busqueda) params.busqueda = busqueda;
 
@@ -56,7 +75,7 @@ export function useVentasFilters() {
         const estadoPago = searchParams.get('estado_pago');
         if (estadoPago) params.estado_pago = estadoPago as EstadoPago;
 
-        const estadoEnvio = searchParams.get('estado_envi');
+        const estadoEnvio = searchParams.get('estado_envio');
         if (estadoEnvio) params.estado_envio = estadoEnvio as EstadoEnvio;
 
         const metodoPago = searchParams.get('metodo_pago');
@@ -74,19 +93,8 @@ export function useVentasFilters() {
         return params;
     }, [searchParams]);
 
-    // Sincronizar localBusqueda con URL al montar
-    useEffect(() => {
-        const busqueda = searchParams.get('busqueda');
-        setLocalBusqueda(busqueda || '');
-    }, [searchParams]);
-
-    // Actualizar URL solo cuando cambia el debounced
-    useEffect(() => {
-        if (debouncedBusqueda !== filters.busqueda) {
-            const newFilters = { ...filters, busqueda: debouncedBusqueda || undefined, page: 1 };
-            updateURL(newFilters);
-        }
-    }, [debouncedBusqueda]);
+    const filtersRef = useRef(filters);
+    filtersRef.current = filters;
 
     const updateURL = useCallback(
         (newFilters: IVentaFilters) => {
@@ -98,16 +106,86 @@ export function useVentasFilters() {
                 }
             });
 
-            router.push(`${pathname}?${params.toString()}`, { scroll: false });
+            const nextQs = params.toString();
+            const currentQs = searchParams.toString();
+            if (nextQs === currentQs) {
+                return;
+            }
+
+            router.push(nextQs ? `${pathname}?${nextQs}` : pathname, { scroll: false });
         },
-        [pathname, router]
+        [pathname, router, searchParams]
     );
+
+    useEffect(() => {
+        const busqueda = searchParams.get('busqueda');
+        setLocalBusqueda(busqueda || '');
+    }, [searchParams]);
+
+    useLayoutEffect(() => {
+        setLocalTotalMin(searchParams.get('total_min') ?? '');
+        setLocalTotalMax(searchParams.get('total_max') ?? '');
+    }, [searchParams]);
+
+    useEffect(() => {
+        const urlBusqueda = searchParams.get('busqueda')?.trim() || undefined;
+        const desired = debouncedBusqueda.trim() || undefined;
+        if (desired === urlBusqueda) return;
+
+        const newFilters: IVentaFilters = {
+            ...filtersRef.current,
+            busqueda: desired,
+            page: 1,
+        };
+        updateURL(newFilters);
+    }, [debouncedBusqueda, searchParams, updateURL]);
+
+    useEffect(() => {
+        if (debouncedTotalMin !== localTotalMin || debouncedTotalMax !== localTotalMax) {
+            return;
+        }
+
+        const urlMinN = parseTotalParam(searchParams.get('total_min') ?? '');
+        const urlMaxN = parseTotalParam(searchParams.get('total_max') ?? '');
+        const dMin = parseTotalParam(debouncedTotalMin);
+        const dMax = parseTotalParam(debouncedTotalMax);
+
+        if (dMin === urlMinN && dMax === urlMaxN) return;
+
+        const newFilters: IVentaFilters = {
+            ...filtersRef.current,
+            total_min: dMin,
+            total_max: dMax,
+            page: 1,
+        };
+        updateURL(newFilters);
+    }, [
+        debouncedTotalMin,
+        debouncedTotalMax,
+        localTotalMin,
+        localTotalMax,
+        searchParams,
+        updateURL,
+    ]);
 
     const setFilter = useCallback(
         <K extends keyof IVentaFilters>(key: K, value: IVentaFilters[K]) => {
-            // Si es búsqueda, solo actualizar estado local
             if (key === 'busqueda') {
-                setLocalBusqueda(value as string || '');
+                setLocalBusqueda((value as string) || '');
+                return;
+            }
+
+            if (key === 'total_min') {
+                setLocalTotalMin(value === undefined || value === null ? '' : String(value));
+                const newFilters = { ...filters, total_min: value as IVentaFilters['total_min'], page: 1 };
+                updateURL(newFilters);
+                return;
+            }
+
+            if (key === 'total_max') {
+                setLocalTotalMax(value === undefined || value === null ? '' : String(value));
+                const newFilters = { ...filters, total_max: value as IVentaFilters['total_max'], page: 1 };
+                updateURL(newFilters);
                 return;
             }
 
@@ -126,6 +204,21 @@ export function useVentasFilters() {
         (newFilters: Partial<IVentaFilters>) => {
             const updatedFilters = { ...filters, ...newFilters };
 
+            if ('total_min' in newFilters) {
+                setLocalTotalMin(
+                    newFilters.total_min === undefined || newFilters.total_min === null
+                        ? ''
+                        : String(newFilters.total_min)
+                );
+            }
+            if ('total_max' in newFilters) {
+                setLocalTotalMax(
+                    newFilters.total_max === undefined || newFilters.total_max === null
+                        ? ''
+                        : String(newFilters.total_max)
+                );
+            }
+
             if (!newFilters.page) {
                 updatedFilters.page = 1;
             }
@@ -137,11 +230,15 @@ export function useVentasFilters() {
 
     const clearFilters = useCallback(() => {
         setLocalBusqueda('');
+        setLocalTotalMin('');
+        setLocalTotalMax('');
         updateURL(DEFAULT_FILTERS);
     }, [updateURL]);
 
     const resetFilters = useCallback(() => {
         setLocalBusqueda('');
+        setLocalTotalMin('');
+        setLocalTotalMax('');
         const resetedFilters: IVentaFilters = {
             page: filters.page,
             limit: filters.limit,
@@ -154,6 +251,8 @@ export function useVentasFilters() {
     const hasActiveFilters = useMemo(() => {
         return (
             !!localBusqueda ||
+            !!localTotalMin ||
+            !!localTotalMax ||
             !!filters.id_cliente ||
             !!filters.id_usuario ||
             !!filters.fecha_desde ||
@@ -165,11 +264,14 @@ export function useVentasFilters() {
             filters.total_min !== undefined ||
             filters.total_max !== undefined
         );
-    }, [localBusqueda, filters]);
+    }, [localBusqueda, localTotalMin, localTotalMax, filters]);
 
     const activeFiltersCount = useMemo(() => {
         let count = 0;
         if (localBusqueda) count++;
+        if (localTotalMin || localTotalMax || filters.total_min !== undefined || filters.total_max !== undefined) {
+            count++;
+        }
         if (filters.id_cliente) count++;
         if (filters.id_usuario) count++;
         if (filters.fecha_desde || filters.fecha_hasta) count++;
@@ -177,9 +279,8 @@ export function useVentasFilters() {
         if (filters.estado_envio) count++;
         if (filters.metodo_pago) count++;
         if (filters.tipo_venta) count++;
-        if (filters.total_min !== undefined || filters.total_max !== undefined) count++;
         return count;
-    }, [localBusqueda, filters]);
+    }, [localBusqueda, localTotalMin, localTotalMax, filters]);
 
     const nextPage = useCallback(() => {
         setFilter('page', (filters.page || 1) + 1);
@@ -210,7 +311,11 @@ export function useVentasFilters() {
     );
 
     return {
-        filters: { ...filters, busqueda: localBusqueda }, // Retornar búsqueda local para el input
+        filters: { ...filters, busqueda: localBusqueda },
+        localTotalMin,
+        localTotalMax,
+        setLocalTotalMin,
+        setLocalTotalMax,
         setFilter,
         setFilters,
         clearFilters,
@@ -224,3 +329,19 @@ export function useVentasFilters() {
     };
 }
 
+export type VentasFiltersContextValue = ReturnType<typeof useVentasFiltersState>;
+
+const VentasFiltersContext = createContext<VentasFiltersContextValue | null>(null);
+
+export function VentasFiltersProvider({ children }: { children: ReactNode }) {
+    const value = useVentasFiltersState();
+    return <VentasFiltersContext.Provider value={value}>{children}</VentasFiltersContext.Provider>;
+}
+
+export function useVentasFilters() {
+    const ctx = useContext(VentasFiltersContext);
+    if (!ctx) {
+        throw new Error('useVentasFilters debe usarse dentro de VentasFiltersProvider');
+    }
+    return ctx;
+}

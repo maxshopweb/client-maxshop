@@ -30,6 +30,10 @@ const INTEGRATIONS = [
     },
 ];
 
+function onlyDigits(value: string) {
+    return value.replace(/\D/g, "");
+}
+
 export default function ConfigPage() {
     const { data: config, isLoading, isError, refetch } = useConfigTienda();
     const mutation = useConfigTiendaMutation();
@@ -83,8 +87,10 @@ export default function ConfigPage() {
                     <Input
                         label="Monto mínimo (pesos):"
                         type="text"
+                        inputMode="numeric"
+                        autoComplete="off"
                         value={promo.envioMin}
-                        onChange={(e) => promo.setEnvioMin(e.target.value)}
+                        onChange={(e) => promo.setEnvioMin(onlyDigits(e.target.value))}
                         placeholder="100000"
                         disabled={isLoading}
                     />
@@ -108,17 +114,20 @@ export default function ConfigPage() {
                     </div>
                     <Input
                         label="Cantidad de cuotas:"
-                        type="number"
-                        min={1}
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="off"
                         value={promo.cuotas}
-                        onChange={(e) => promo.setCuotas(e.target.value)}
+                        onChange={(e) => promo.setCuotas(onlyDigits(e.target.value))}
                         disabled={isLoading}
                     />
                     <Input
                         label="Monto mínimo (pesos):"
                         type="text"
+                        inputMode="numeric"
+                        autoComplete="off"
                         value={promo.cuotasMin}
-                        onChange={(e) => promo.setCuotasMin(e.target.value)}
+                        onChange={(e) => promo.setCuotasMin(onlyDigits(e.target.value))}
                         placeholder="80000"
                         disabled={isLoading}
                     />

@@ -325,9 +325,10 @@ export function ProductosFilters() {
 
                             {/* CHECKBOXES — leer destacado/oferta/stock_bajo de filters (compatible con URL y backend) */}
                             {(() => {
-                                const isDestacado = filters.destacado === true || (filters as Record<string, unknown>).destacado === true;
-                                const isOferta = filters.oferta === true || (filters as Record<string, unknown>).oferta === true;
-                                const isStockBajo = filters.stock_bajo === true || (filters as Record<string, unknown>).stockBajo === true;
+                                const isDestacado = filters.destacado === true;
+                                const isOferta = filters.oferta === true;
+                                const isStockBajo =
+                                    filters.stock_bajo === true || filters.stockBajo === true;
                                 return (
                                     <div className="space-y-2.5 pt-3 border-t border-card">
                                         <label className="flex items-center gap-3 cursor-pointer group">
@@ -458,21 +459,21 @@ export function ProductosFilters() {
                         />
                     )}
 
-                    {(filters.destacado === true || (filters as Record<string, unknown>).destacado === true) && (
+                    {filters.destacado === true && (
                         <FilterChip
                             label="Destacados"
                             onRemove={() => setFilter('destacado', undefined)}
                         />
                     )}
 
-                    {(filters.oferta === true || (filters as Record<string, unknown>).oferta === true) && (
+                    {filters.oferta === true && (
                         <FilterChip
                             label="En oferta"
                             onRemove={() => setFilter('oferta', undefined)}
                         />
                     )}
 
-                    {(filters.stock_bajo === true || (filters as Record<string, unknown>).stockBajo === true) && (
+                    {(filters.stock_bajo === true || filters.stockBajo === true) && (
                         <FilterChip
                             label="Stock bajo"
                             onRemove={() => setFilter('stock_bajo', undefined)}

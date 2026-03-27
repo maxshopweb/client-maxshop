@@ -231,7 +231,7 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
                                     <Input
                                         label="Tipo de venta"
                                         readOnly
-                                        value={TIPO_VENTA_OPTIONS.find(o => o.value === venta.tipo_venta)?.label || venta.tipo_venta || '-'}
+                                        value={TIPO_VENTA_OPTIONS.find(o => o.value === ((venta.tipo_venta as string | null | undefined) === 'telefono' ? 'otro' : venta.tipo_venta))?.label || venta.tipo_venta || '-'}
                                         className="bg-background"
                                     />
                                     <Input

@@ -71,13 +71,7 @@ export function EditMaestroModal({ kind, item, onClose, onSuccess }: EditMaestro
       maxWidth="max-w-md"
       actions={(handleClose) => (
         <>
-          <Button
-            type="button"
-            variant="outline-secondary"
-            onClick={handleClose}
-            className="border-foreground/30 hover:bg-foreground/10"
-            style={{ color: 'var(--foreground)' }}
-          >
+          <Button type="button" variant="outline-primary" onClick={handleClose}>
             Cancelar
           </Button>
           <Button type="submit" form="edit-maestro-form" disabled={isPending}>

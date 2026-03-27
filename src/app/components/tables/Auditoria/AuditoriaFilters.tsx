@@ -13,6 +13,21 @@ const METHOD_OPTIONS = [
   { value: 'DELETE', label: 'DELETE' },
 ];
 
+/** Valores alineados con `tabla_afectada` en la API (`auditService.record`). */
+const TABLA_OPTIONS = [
+  { value: '', label: 'Todas las tablas' },
+  { value: 'productos', label: 'Productos' },
+  { value: 'banners', label: 'Banners' },
+  { value: 'negocio', label: 'Negocio / tienda' },
+  { value: 'ventas_pendientes_factura', label: 'Ventas pendientes factura' },
+  { value: 'venta', label: 'Venta' },
+  { value: 'failed_webhooks', label: 'Webhooks fallidos' },
+  { value: 'usuarios', label: 'Usuarios' },
+  { value: 'marcas', label: 'Marcas' },
+  { value: 'categorias', label: 'Categorías' },
+  { value: 'grupos', label: 'Grupos' },
+];
+
 const ESTADO_OPTIONS = [
   { value: '', label: 'Todos los estados' },
   { value: 'SUCCESS', label: 'SUCCESS' },
@@ -52,7 +67,7 @@ export function AuditoriaFilters() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
         <Input
           label="Fecha desde"
           type="date"
@@ -67,24 +82,15 @@ export function AuditoriaFilters() {
           onChange={(e) => setFilter('fecha_hasta', e.target.value || undefined)}
           className="bg-input border-input"
         />
-        <Input
-          label="Acción"
-          type="text"
-          placeholder="Ej: UPDATE, CREATE..."
-          value={filters.accion ?? ''}
-          onChange={(e) => setFilter('accion', e.target.value || undefined)}
-          className="bg-input border-input"
-        />
-        <Input
+        <Select
           label="Tabla"
-          type="text"
-          placeholder="Ej: productos, usuarios"
+          options={TABLA_OPTIONS}
           value={filters.tabla_afectada ?? ''}
-          onChange={(e) => setFilter('tabla_afectada', e.target.value || undefined)}
-          className="bg-input border-input"
+          onChange={(value) => setFilter('tabla_afectada', value ? String(value) : undefined)}
+          placeholder="Tabla"
         />
         <Select
-          label="Método"
+          label="Tipo / Método"
           options={METHOD_OPTIONS}
           value={filters.method ?? ''}
           onChange={(value) => setFilter('method', value ? String(value) : undefined)}

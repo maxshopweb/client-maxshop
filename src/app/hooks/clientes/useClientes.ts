@@ -4,6 +4,7 @@
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { clientesService } from '@/app/services/cliente.service';
+import { getClientErrorMessage } from '@/app/utils/apiError';
 import type { IClienteFilters, ICliente, IUpdateClienteDTO, IPaginatedResponse } from '@/app/types/cliente.type';
 
 export const clientesKeys = {
@@ -179,9 +180,11 @@ export function useUpdateCliente(options: UseUpdateClienteOptions = {}) {
             options.onSuccess?.(merged);
         },
         onError: (error: Error) => {
-            toast.error('Error al actualizar cliente', {
-                description: error.message || 'No se pudieron guardar los cambios.',
-            });
+            const description = getClientErrorMessage(
+                error,
+                'No se pudieron guardar los cambios.'
+            );
+            toast.error('Error al actualizar cliente', { description });
             options.onError?.(error);
         },
     });

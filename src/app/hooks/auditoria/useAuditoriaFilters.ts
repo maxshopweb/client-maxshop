@@ -8,7 +8,6 @@ export interface AuditoriaFilters {
   limit: number;
   fecha_desde?: string;
   fecha_hasta?: string;
-  accion?: string;
   tabla_afectada?: string;
   method?: string;
   estado?: string;
@@ -22,7 +21,6 @@ const DEFAULT_FILTERS: AuditoriaFilters = {
 const FILTER_KEYS: (keyof Omit<AuditoriaFilters, 'page' | 'limit'>)[] = [
   'fecha_desde',
   'fecha_hasta',
-  'accion',
   'tabla_afectada',
   'method',
   'estado',
@@ -60,9 +58,6 @@ export function useAuditoriaFilters() {
 
     const fecha_hasta = searchParams.get('fecha_hasta');
     if (fecha_hasta) params.fecha_hasta = fecha_hasta;
-
-    const accion = searchParams.get('accion');
-    if (accion) params.accion = accion;
 
     const tabla_afectada = searchParams.get('tabla_afectada');
     if (tabla_afectada) params.tabla_afectada = tabla_afectada;

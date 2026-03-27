@@ -51,6 +51,61 @@ export const getVentasColumns = (
             enableHiding: false,
         },
         {
+            id: 'actions',
+            header: 'Acciones',
+            cell: ({ row }) => {
+                const venta = row.original;
+
+                return (
+                    <DropdownMenu.Root>
+                        <DropdownMenu.Trigger asChild>
+                            <button className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-input h-8 w-8 p-0 text-input">
+                                <MoreHorizontal className="h-4 w-4" />
+                            </button>
+                        </DropdownMenu.Trigger>
+
+                        <DropdownMenu.Portal>
+                            <DropdownMenu.Content
+                                className="min-w-[180px] bg-card rounded-md shadow-lg border border-card p-1"
+                                align="end"
+                                sideOffset={5}
+                            >
+                                <DropdownMenu.Item
+                                    className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
+                                    onClick={() => actions.onView(venta)}
+                                >
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    Ver detalles
+                                </DropdownMenu.Item>
+
+                                <DropdownMenu.Item
+                                    className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
+                                    onClick={() => actions.onEdit(venta)}
+                                >
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Editar
+                                </DropdownMenu.Item>
+
+                                <DropdownMenu.Separator className="h-px bg-[var(--card-border)] my-1" />
+
+                                <DropdownMenu.Item
+                                    disabled={venta.estado_pago === 'cancelado'}
+                                    className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-red-500/10 rounded outline-none text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                                    onClick={() => venta.estado_pago !== 'cancelado' && actions.onDelete(venta)}
+                                    title={venta.estado_pago === 'cancelado' ? 'La venta ya está dada de baja' : undefined}
+                                >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    {venta.estado_pago === 'cancelado' ? 'Ya dada de baja' : 'Dar de baja'}
+                                </DropdownMenu.Item>
+                            </DropdownMenu.Content>
+                        </DropdownMenu.Portal>
+                    </DropdownMenu.Root>
+                );
+            },
+            enableSorting: false,
+            enableHiding: false,
+        },
+        {
             accessorKey: 'id_venta',
             header: 'Pedido',
             cell: ({ row }) => {
@@ -150,7 +205,8 @@ export const getVentasColumns = (
             header: 'Tipo',
             cell: ({ row }) => {
                 const tipo = row.getValue('tipo_venta') as string | null;
-                const option = TIPO_VENTA_OPTIONS.find(opt => opt.value === tipo);
+                const tipoNorm = tipo === 'telefono' ? 'otro' : tipo;
+                const option = TIPO_VENTA_OPTIONS.find(opt => opt.value === tipoNorm);
                 return (
                     <span className="text-sm text-text">
                         {option?.label || tipo || '-'}
@@ -171,61 +227,6 @@ export const getVentasColumns = (
                 );
             },
             enableSorting: false,
-        },
-        {
-            id: 'actions',
-            header: 'Acciones',
-            cell: ({ row }) => {
-                const venta = row.original;
-
-                return (
-                    <DropdownMenu.Root>
-                        <DropdownMenu.Trigger asChild>
-                            <button className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-input h-8 w-8 p-0 text-input">
-                                <MoreHorizontal className="h-4 w-4" />
-                            </button>
-                        </DropdownMenu.Trigger>
-
-                        <DropdownMenu.Portal>
-                            <DropdownMenu.Content
-                                className="min-w-[180px] bg-card rounded-md shadow-lg border border-card p-1"
-                                align="end"
-                                sideOffset={5}
-                            >
-                                <DropdownMenu.Item
-                                    className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
-                                    onClick={() => actions.onView(venta)}
-                                >
-                                    <Eye className="mr-2 h-4 w-4" />
-                                    Ver detalles
-                                </DropdownMenu.Item>
-
-                                <DropdownMenu.Item
-                                    className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
-                                    onClick={() => actions.onEdit(venta)}
-                                >
-                                    <Edit className="mr-2 h-4 w-4" />
-                                    Editar
-                                </DropdownMenu.Item>
-
-                                <DropdownMenu.Separator className="h-px bg-[var(--card-border)] my-1" />
-
-                                <DropdownMenu.Item
-                                    disabled={venta.estado_pago === 'cancelado'}
-                                    className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-red-500/10 rounded outline-none text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-                                    onClick={() => venta.estado_pago !== 'cancelado' && actions.onDelete(venta)}
-                                    title={venta.estado_pago === 'cancelado' ? 'La venta ya está dada de baja' : undefined}
-                                >
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    {venta.estado_pago === 'cancelado' ? 'Ya dada de baja' : 'Dar de baja'}
-                                </DropdownMenu.Item>
-                            </DropdownMenu.Content>
-                        </DropdownMenu.Portal>
-                    </DropdownMenu.Root>
-                );
-            },
-            enableSorting: false,
-            enableHiding: false,
         },
     ];
 

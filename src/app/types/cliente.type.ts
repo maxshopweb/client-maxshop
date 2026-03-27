@@ -1,4 +1,3 @@
-import { EstadoGeneral } from './estados.type';
 import type { IUsuarios } from './user';
 import type { IVenta } from './ventas.type';
 
@@ -49,12 +48,13 @@ export interface IClienteFilters {
     limit?: number;
 
     // Ordenamiento
-    order_by?: 'nombre' | 'email' | 'creado_en' | 'ultimo_login';
+    order_by?: 'nombre' | 'email' | 'creado_en' | 'ultimo_login' | 'numero_cliente';
     order?: 'asc' | 'desc';
 
     // Filtros básicos
     busqueda?: string; // Buscar por nombre, email, teléfono
-    estado?: EstadoGeneral;
+    /** Cuenta activa (misma noción que la columna Estado: activo !== false) */
+    activo?: boolean;
     ciudad?: string;
     provincia?: string;
 

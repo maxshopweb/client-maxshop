@@ -9,6 +9,10 @@ import { ESTADO_PAGO_OPTIONS, ESTADO_ENVIO_OPTIONS, METODO_PAGO_OPTIONS, TIPO_VE
 export function VentasFilters() {
     const {
         filters,
+        localTotalMin,
+        localTotalMax,
+        setLocalTotalMin,
+        setLocalTotalMax,
         setFilter,
         clearFilters,
         hasActiveFilters,
@@ -180,18 +184,14 @@ export function VentasFilters() {
                                     <Input
                                         type="number"
                                         placeholder="Mínimo"
-                                        value={filters.total_min || ''}
-                                        onChange={(e) =>
-                                            setFilter('total_min', e.target.value ? Number(e.target.value) : undefined)
-                                        }
+                                        value={localTotalMin}
+                                        onChange={(e) => setLocalTotalMin(e.target.value)}
                                     />
                                     <Input
                                         type="number"
                                         placeholder="Máximo"
-                                        value={filters.total_max || ''}
-                                        onChange={(e) =>
-                                            setFilter('total_max', e.target.value ? Number(e.target.value) : undefined)
-                                        }
+                                        value={localTotalMax}
+                                        onChange={(e) => setLocalTotalMax(e.target.value)}
                                     />
                                 </div>
                             </div>
@@ -265,9 +265,12 @@ export function VentasFilters() {
                         />
                     )}
 
-                    {(filters.total_min || filters.total_max) && (
+                    {(localTotalMin ||
+                        localTotalMax ||
+                        filters.total_min !== undefined ||
+                        filters.total_max !== undefined) && (
                         <FilterChip
-                            label={`Total: ${filters.total_min || '0'} - ${filters.total_max || '∞'}`}
+                            label={`Total: ${localTotalMin !== '' ? localTotalMin : filters.total_min !== undefined ? String(filters.total_min) : '0'} - ${localTotalMax !== '' ? localTotalMax : filters.total_max !== undefined ? String(filters.total_max) : '∞'}`}
                             onRemove={() => {
                                 setFilter('total_min', undefined);
                                 setFilter('total_max', undefined);

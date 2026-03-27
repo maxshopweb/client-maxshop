@@ -4,6 +4,7 @@ import { useAuth } from '@/app/context/AuthContext';
 import { toast } from 'sonner';
 import { loginSchema, emailSchema } from '@/app/schemas/auth.schema';
 import { getUserRole } from '@/app/utils/cookies';
+import { getClientErrorMessage } from '@/app/utils/apiError';
 
 export function useLogin(redirect: string | null = null) {
     const [email, setEmail] = useState('');
@@ -74,8 +75,8 @@ export function useLogin(redirect: string | null = null) {
             } else {
                 toast.error(loginResult.message || 'Error al iniciar sesión. Verifica tus credenciales.');
             }
-        } catch (error: any) {
-            toast.error(error?.message || 'Error al iniciar sesión');
+        } catch (error: unknown) {
+            toast.error(getClientErrorMessage(error, 'No pudimos iniciar sesión. Intentá de nuevo.'));
         } finally {
             setLoading(false);
         }
@@ -123,8 +124,8 @@ export function useLogin(redirect: string | null = null) {
             } else {
                 toast.error(result.message || 'Error al iniciar sesión con Google');
             }
-        } catch (error: any) {
-            toast.error(error?.message || 'Error al iniciar sesión con Google');
+        } catch (error: unknown) {
+            toast.error(getClientErrorMessage(error, 'No pudimos iniciar sesión con Google. Intentá de nuevo.'));
         } finally {
             setLoading(false);
         }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState, useEffect, useTransition, useRef } from "react";
+import { useCallback, useMemo, useState, useEffect, useLayoutEffect, useTransition, useRef } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import type { IProductoFilters } from "@/app/types/producto.type";
 import { EstadoGeneral } from "@/app/types/estados.type";
@@ -79,9 +79,14 @@ function parseNumber(value: string | null): number | undefined {
     return isNaN(parsed) ? undefined : parsed;
 }
 
+/** Query flags: trim, case-insensitive; true / 1 / yes vs false / 0 / no */
 function parseBoolean(value: string | null): boolean | undefined {
-    if (!value) return undefined;
-    return value === "true";
+    if (value === null) return undefined;
+    const v = value.trim().toLowerCase();
+    if (v === "") return undefined;
+    if (v === "false" || v === "0" || v === "no") return false;
+    if (v === "true" || v === "1" || v === "yes") return true;
+    return undefined;
 }
 
 // ============================================================================
@@ -92,6 +97,7 @@ export function useProductFilters(): UseProductFiltersReturn {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+    const queryKey = searchParams.toString();
     const [, startTransition] = useTransition();
 
     // Estado local solo para inputs con debounce
@@ -117,16 +123,12 @@ export function useProductFilters(): UseProductFiltersReturn {
     const marcas = marcasResponse?.data || [];
     const grupos = gruposResponse?.data || [];
 
-    const paramsRef = useRef<URLSearchParams>(
-        new URLSearchParams(searchParams.toString())
-    );
+    const paramsRef = useRef<URLSearchParams>(new URLSearchParams(searchParams.toString()));
 
-    useEffect(() => {
-        paramsRef.current = new URLSearchParams(searchParams.toString());
-    }, [searchParams]);
+    useLayoutEffect(() => {
+        paramsRef.current = new URLSearchParams(queryKey);
+    }, [queryKey]);
 
-
-    // Función única para actualizar URL - SIN searchParams en deps
     const updateURL = useCallback(
         (updates: Record<string, string | number | boolean | undefined | null>) => {
             startTransition(() => {
@@ -165,7 +167,7 @@ export function useProductFilters(): UseProductFiltersReturn {
                 return prev;
             });
         }
-    }, [searchParams]);
+    }, [queryKey, searchParams]);
 
     // Debounce para search
     useEffect(() => {
@@ -211,14 +213,21 @@ export function useProductFilters(): UseProductFiltersReturn {
                 grupo: searchParams.get("grupo") || undefined,
                 destacado: parseBoolean(searchParams.get("destacado")),
                 oferta: parseBoolean(searchParams.get("oferta")),
-                // Filtros adicionales del admin
-                estado: searchParams.get("estado") !== null ? (parseNumber(searchParams.get("estado")) as EstadoGeneral) : undefined,
-                publicado: searchParams.get("publicado") !== null ? parseBoolean(searchParams.get("publicado")) : undefined,
-                stockBajo: parseBoolean(searchParams.get("stockBajo")),
+                estado:
+                    searchParams.get("estado") !== null
+                        ? (parseNumber(searchParams.get("estado")) as EstadoGeneral)
+                        : undefined,
+                publicado:
+                    searchParams.get("publicado") !== null
+                        ? parseBoolean(searchParams.get("publicado"))
+                        : undefined,
+                stockBajo: parseBoolean(
+                    searchParams.get("stockBajo") || searchParams.get("stock_bajo")
+                ),
                 financiacion: parseBoolean(searchParams.get("financiacion")),
             };
         },
-        [searchParams]
+        [queryKey, searchParams]
     );
 
     const sort = useMemo<SortOption | null>(() => {
@@ -226,10 +235,9 @@ export function useProductFilters(): UseProductFiltersReturn {
         const order = searchParams.get("order") as "asc" | "desc" | null;
         if (!orderBy || !order) return null;
         return { field: orderBy, order };
-    }, [searchParams]);
+    }, [queryKey, searchParams]);
 
     const page = parseNumber(searchParams.get("page")) || 1;
-    // Limitar el máximo de productos a 100 para evitar requests masivos
     const maxLimit = 100;
     const requestedLimit = parseNumber(searchParams.get("limit")) || 21;
     const limit = requestedLimit > maxLimit ? maxLimit : requestedLimit;
@@ -270,18 +278,11 @@ export function useProductFilters(): UseProductFiltersReturn {
     const setSort = useCallback(
         (field: string, order: "asc" | "desc" = "asc") => {
             startTransition(() => {
-                // Leer directamente de window.location para asegurar que tenemos TODOS los params actuales
-                const currentURL = new URL(window.location.href);
-                const params = new URLSearchParams(currentURL.search);
-
-                // SOLO actualizar order_by, order y page - NO tocar otros filtros
+                const params = new URLSearchParams(paramsRef.current.toString());
                 params.set("order_by", field);
                 params.set("order", order);
-                params.set("page", "1"); // Resetear página al cambiar ordenamiento
-
-                // Actualizar el ref para mantener sincronización
+                params.set("page", "1");
                 paramsRef.current = new URLSearchParams(params.toString());
-
                 router.replace(`${pathname}?${params.toString()}`, { scroll: false });
             });
         },
@@ -472,7 +473,6 @@ export function useProductFilters(): UseProductFiltersReturn {
 
     // Filtros combinados (compatible con ambos formatos: tienda y admin)
     const filtersCombined = useMemo<ProductFilters & IProductoFilters>(() => {
-        // Leer directamente de searchParams para soportar ambos formatos de URL (prioridad: URL > filters > backendFilters)
         const categoriaFromUrl = searchParams.get("categoria") || searchParams.get("id_cat") || null;
         const marcaFromUrl = searchParams.get("marca") || searchParams.get("id_marca") || null;
         const grupoFromUrl = searchParams.get("grupo") || searchParams.get("codi_grupo") || null;
@@ -481,26 +481,47 @@ export function useProductFilters(): UseProductFiltersReturn {
         const publicadoFromUrl = searchParams.get("publicado");
         const destacadoFromUrl = searchParams.get("destacado");
         const ofertaFromUrl = searchParams.get("oferta");
-        const stockBajoFromUrl = searchParams.get("stockBajo") || searchParams.get("stock_bajo") || null;
+        const stockBajoFromUrl =
+            searchParams.get("stockBajo") || searchParams.get("stock_bajo") || null;
 
         return {
-            ...filters, // Nombres en inglés (para la tienda)
-            ...backendFilters, // Nombres en español (para el admin)
-            // Mapeo bidireccional para compatibilidad completa
-            // Prioridad: URL > filters > backendFilters
+            ...filters,
+            ...backendFilters,
             busqueda: searchFromUrl || filters.search || backendFilters.busqueda || undefined,
-            precio_min: filters.minPrice ?? backendFilters.precio_min ?? parseNumber(searchParams.get("precio_min")) ?? undefined,
-            precio_max: filters.maxPrice ?? backendFilters.precio_max ?? parseNumber(searchParams.get("precio_max")) ?? undefined,
+            precio_min:
+                filters.minPrice ??
+                backendFilters.precio_min ??
+                parseNumber(searchParams.get("precio_min")) ??
+                undefined,
+            precio_max:
+                filters.maxPrice ??
+                backendFilters.precio_max ??
+                parseNumber(searchParams.get("precio_max")) ??
+                undefined,
             id_cat: categoriaFromUrl || filters.categoria || backendFilters.id_cat || undefined,
             id_marca: marcaFromUrl || filters.marca || backendFilters.id_marca || undefined,
             codi_grupo: grupoFromUrl || filters.grupo || backendFilters.codi_grupo || undefined,
-            stock_bajo: stockBajoFromUrl ? parseBoolean(stockBajoFromUrl) : (filters.stockBajo ?? backendFilters.stock_bajo ?? undefined),
-            estado: estadoFromUrl !== null ? (parseNumber(estadoFromUrl) as EstadoGeneral) : (filters.estado ?? backendFilters.estado ?? undefined),
-            publicado: publicadoFromUrl !== null ? parseBoolean(publicadoFromUrl) : (filters.publicado ?? backendFilters.publicado ?? undefined),
-            destacado: destacadoFromUrl !== null ? parseBoolean(destacadoFromUrl) : (filters.destacado ?? backendFilters.destacado ?? undefined),
-            oferta: ofertaFromUrl !== null ? parseBoolean(ofertaFromUrl) : (filters.oferta ?? backendFilters.oferta ?? undefined),
+            stock_bajo: stockBajoFromUrl
+                ? parseBoolean(stockBajoFromUrl)
+                : (filters.stockBajo ?? backendFilters.stock_bajo ?? undefined),
+            estado:
+                estadoFromUrl !== null
+                    ? (parseNumber(estadoFromUrl) as EstadoGeneral)
+                    : (filters.estado ?? backendFilters.estado ?? undefined),
+            publicado:
+                publicadoFromUrl !== null
+                    ? parseBoolean(publicadoFromUrl)
+                    : (filters.publicado ?? backendFilters.publicado ?? undefined),
+            destacado:
+                destacadoFromUrl !== null
+                    ? parseBoolean(destacadoFromUrl)
+                    : (filters.destacado ?? backendFilters.destacado ?? undefined),
+            oferta:
+                ofertaFromUrl !== null
+                    ? parseBoolean(ofertaFromUrl)
+                    : (filters.oferta ?? backendFilters.oferta ?? undefined),
         } as ProductFilters & IProductoFilters;
-    }, [filters, backendFilters, searchParams]);
+    }, [filters, backendFilters, queryKey, searchParams]);
 
     return {
         filters: filtersCombined,
