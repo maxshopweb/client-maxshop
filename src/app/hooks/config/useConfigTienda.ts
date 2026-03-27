@@ -14,8 +14,9 @@ export function useConfigTienda() {
       return data;
     },
     staleTime: STALE_TIME_MS,
-    refetchOnMount: false,
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
+    retry: 2,
   });
 }
 

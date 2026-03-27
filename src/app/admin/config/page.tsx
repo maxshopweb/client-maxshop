@@ -31,9 +31,9 @@ const INTEGRATIONS = [
 ];
 
 export default function ConfigPage() {
-    const { data: config, isLoading } = useConfigTienda();
+    const { data: config, isLoading, isError, refetch } = useConfigTienda();
     const mutation = useConfigTiendaMutation();
-    const promo = usePromoConfig(config, mutation);
+    const promo = usePromoConfig(config, mutation, isLoading);
 
     return (
         <AdminPageContainer>
@@ -55,6 +55,21 @@ export default function ConfigPage() {
             <DatosBancariosPanel config={config} isLoading={isLoading} mutation={mutation} />
 
             <ConfigSection title="Reglas de negocio" columns={3}>
+                {isError && (
+                    <div className="col-span-full rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-text">
+                        <p className="font-medium">No se pudo cargar la configuración desde el servidor.</p>
+                        <p className="mt-1 text-text/80">
+                            Podés editar y guardar con los valores por defecto o reintentar la carga.
+                        </p>
+                        <button
+                            type="button"
+                            onClick={() => void refetch()}
+                            className="mt-2 text-sm font-semibold text-principal underline underline-offset-2 hover:opacity-90"
+                        >
+                            Reintentar
+                        </button>
+                    </div>
+                )}
                 <ConfigCard title="Envíos gratis" status={promo.envioActivo ? "Activo" : "Inactivo"}>
                     <div className="flex items-center justify-between gap-3">
                         <span className="font-medium text-text">Regla activa</span>
