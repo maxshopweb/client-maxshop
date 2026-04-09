@@ -12,7 +12,8 @@ import { Button } from "@/app/components/ui/Button";
 import ConfirmModal from "@/app/components/modals/ConfirmModal";
 import { clearStorageExceptCartAndLocation } from "@/app/utils/checkoutStorage.utils";
 import AuthService from "@/app/services/auth.service";
-import { ShoppingCart, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import EmptyCartCheckoutState from "@/app/components/cart/EmptyCartCheckoutState";
 
 export default function Step1CartConfirmation() {
   const router = useRouter();
@@ -63,16 +64,7 @@ export default function Step1CartConfirmation() {
   };
 
   if (items.length === 0) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center py-12"
-      >
-        <ShoppingCart className="w-16 h-16 mx-auto mb-4 text-foreground/30" />
-        <p className="text-lg text-foreground/60">No hay productos en el carrito</p>
-      </motion.div>
-    );
+    return <EmptyCartCheckoutState />;
   }
 
   return (

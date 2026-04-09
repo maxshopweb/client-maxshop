@@ -5,6 +5,7 @@ import { useCartStore } from "@/app/stores/cartStore";
 import ProductCart from "../ProductCart";
 import CartSummary from "../CartSummary";
 import ConfirmModal from "../../modals/ConfirmModal";
+import EmptyCartCheckoutState from "../EmptyCartCheckoutState";
 import { useState } from "react";
 
 export default function Step1CartConfirmation() {
@@ -23,11 +24,7 @@ export default function Step1CartConfirmation() {
   };
 
   if (items.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-lg text-foreground/60">No hay productos en el carrito</p>
-      </div>
-    );
+    return <EmptyCartCheckoutState />;
   }
 
   return (

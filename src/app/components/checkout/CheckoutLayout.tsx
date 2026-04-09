@@ -1,17 +1,28 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCheckoutStore } from "@/app/hooks/checkout/useCheckoutStore";
+import { useCartStore } from "@/app/stores/cartStore";
+import EmptyCartCheckoutState from "@/app/components/cart/EmptyCartCheckoutState";
 import StepIndicator from "./StepIndicator";
 import Step1CartConfirmation from "./Step1CartConfirmation";
 import Step2PersonalInfo from "./Step2PersonalInfo";
 import Step3ShippingData from "./Step3ShippingData";
 import Step3PaymentConfirmation from "./Step3PaymentConfirmation";
 import CartSummary from "./CartSummary";
-import Step2ContactForm from "./Step2ContactForm";
 
 export default function CheckoutLayout() {
-  const { currentStep, completedSteps, setCurrentStep } = useCheckoutStore();
+  const { currentStep, completedSteps, setCurrentStep, setCartItems } = useCheckoutStore();
+  const cartItemsCount = useCartStore((s) => s.items.length);
+
+  useEffect(() => {
+    if (cartItemsCount === 0) {
+      setCartItems([]);
+    }
+  }, [cartItemsCount, setCartItems]);
+
+  const isCartEmpty = cartItemsCount === 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -56,16 +67,22 @@ export default function CheckoutLayout() {
             >
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={currentStep}
+                  key={isCartEmpty ? "empty" : currentStep}
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  {currentStep === 1 && <Step1CartConfirmation />}
-                  {currentStep === 2 && <Step2PersonalInfo />}
-                  {currentStep === 3 && <Step3ShippingData />}
-                  {currentStep === 4 && <Step3PaymentConfirmation />}
+                  {isCartEmpty ? (
+                    <EmptyCartCheckoutState />
+                  ) : (
+                    <>
+                      {currentStep === 1 && <Step1CartConfirmation />}
+                      {currentStep === 2 && <Step2PersonalInfo />}
+                      {currentStep === 3 && <Step3ShippingData />}
+                      {currentStep === 4 && <Step3PaymentConfirmation />}
+                    </>
+                  )}
                 </motion.div>
               </AnimatePresence>
             </div>
@@ -73,7 +90,7 @@ export default function CheckoutLayout() {
 
           {/* Columna Derecha: Summary */}
           <div className="sticky top-6 self-start">
-            <CartSummary />
+            {!isCartEmpty && <CartSummary />}
           </div>
         </div>
 
@@ -101,22 +118,28 @@ export default function CheckoutLayout() {
             >
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={currentStep}
+                  key={isCartEmpty ? "empty" : currentStep}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  {currentStep === 1 && <Step1CartConfirmation />}
-                  {currentStep === 2 && <Step2PersonalInfo />}
-                  {currentStep === 3 && <Step3ShippingData />}
-                  {currentStep === 4 && <Step3PaymentConfirmation />}
+                  {isCartEmpty ? (
+                    <EmptyCartCheckoutState />
+                  ) : (
+                    <>
+                      {currentStep === 1 && <Step1CartConfirmation />}
+                      {currentStep === 2 && <Step2PersonalInfo />}
+                      {currentStep === 3 && <Step3ShippingData />}
+                      {currentStep === 4 && <Step3PaymentConfirmation />}
+                    </>
+                  )}
                 </motion.div>
               </AnimatePresence>
             </div>
 
             <div>
-              <CartSummary />
+              {!isCartEmpty && <CartSummary />}
             </div>
           </div>
         </div>
@@ -144,22 +167,28 @@ export default function CheckoutLayout() {
           >
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={currentStep}
+                  key={isCartEmpty ? "empty" : currentStep}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  {currentStep === 1 && <Step1CartConfirmation />}
-                  {currentStep === 2 && <Step2PersonalInfo />}
-                  {currentStep === 3 && <Step3ShippingData />}
-                  {currentStep === 4 && <Step3PaymentConfirmation />}
+                  {isCartEmpty ? (
+                    <EmptyCartCheckoutState />
+                  ) : (
+                    <>
+                      {currentStep === 1 && <Step1CartConfirmation />}
+                      {currentStep === 2 && <Step2PersonalInfo />}
+                      {currentStep === 3 && <Step3ShippingData />}
+                      {currentStep === 4 && <Step3PaymentConfirmation />}
+                    </>
+                  )}
                 </motion.div>
               </AnimatePresence>
           </div>
 
           {/* Summary después del contenido en step 1 y step 4 */}
-          {(currentStep === 1 || currentStep === 4) && <CartSummary />}
+          {!isCartEmpty && (currentStep === 1 || currentStep === 4) && <CartSummary />}
         </div>
       </div>
     </div>
