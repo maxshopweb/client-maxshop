@@ -51,7 +51,7 @@ const valueRows = [
     imageLeft: true,
   },
   {
-    image: "/imgs/maxshop2.jpeg",
+    image: "/imgs/maxshop.jpg",
     badge: "Quiénes somos",
     title: "Trabajamos\npara vos.",
     description:
