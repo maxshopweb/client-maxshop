@@ -1,8 +1,10 @@
 "use client";
 
+/** Layout full-bleed anterior; el copy de “Quiénes somos” está en ValueSection (segunda fila). */
+
 import { Wrench, ShieldCheck, Headphones, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
-import HeroButton from "../ui/HeroButton";
+// import HeroButton from "../ui/HeroButton";
 import Image from "next/image";
 
 const featureItems = [
@@ -35,14 +37,14 @@ export default function AboutUs() {
     <section className="relative w-full h-screen overflow-hidden" id="about-us">
       {/* Foto full-width de fondo: mobile y desktop */}
       <Image
-        src="/imgs/about-mobile.jpg"
+        src="/imgs/maxshop.jpg"
         alt="MaxShop — quiénes somos"
         className="absolute inset-0 w-full h-full object-cover object-center md:hidden"
         width={1000}
         height={1000}
       />
       <Image
-        src="/imgs/about.jpg"
+        src="/imgs/maxshop2.jpeg"
         alt="MaxShop — quiénes somos"
         className="absolute inset-0 w-full h-full object-cover object-center hidden md:block"
         width={1000}

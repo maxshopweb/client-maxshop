@@ -80,7 +80,7 @@ export default function MainLayout({
       
       {/* Navbar Unificado */}
       <UnifiedNavbar />
-      <div className="flex min-h-dvh flex-col pt-[160px]">
+      <div className="flex min-h-dvh flex-col pt-[112px] md:pt-[172px]">
         <main className="flex w-full flex-1 flex-col">{children}</main>
         <Footer />
       </div>

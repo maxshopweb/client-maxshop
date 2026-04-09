@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, useSyncExternalStore } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useBannersPublic } from "@/app/hooks/banners";
 import { HeroBannerSlide } from "./HeroBannerSlide";
@@ -8,8 +8,43 @@ import { HeroBannerFallback } from "./HeroBannerFallback";
 
 const AUTOPLAY_MS = 5000;
 
+function subscribeMobileViewport(cb: () => void) {
+  const mq = window.matchMedia("(max-width: 767px)");
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+}
+
+function getMobileViewportSnapshot() {
+  return window.matchMedia("(max-width: 767px)").matches;
+}
+
+function getServerMobileViewportSnapshot() {
+  return false;
+}
+
+function useIsMobileViewport() {
+  return useSyncExternalStore(
+    subscribeMobileViewport,
+    getMobileViewportSnapshot,
+    getServerMobileViewportSnapshot
+  );
+}
+
 export default function HeroBanner() {
-  const { data: banners = [], isLoading } = useBannersPublic("desktop");
+  const isMobileViewport = useIsMobileViewport();
+  const { data: mobileBanners = [], isLoading: loadingMobile } = useBannersPublic("mobile");
+  const { data: desktopBanners = [], isLoading: loadingDesktop } = useBannersPublic("desktop");
+
+  const banners =
+    isMobileViewport && mobileBanners.length > 0 ? mobileBanners : desktopBanners;
+
+  const isLoading = useMemo(() => {
+    if (!isMobileViewport) return loadingDesktop;
+    if (loadingMobile) return true;
+    if (mobileBanners.length > 0) return false;
+    return loadingDesktop;
+  }, [isMobileViewport, mobileBanners.length, loadingMobile, loadingDesktop]);
+
   const [current, setCurrent] = useState(0);
 
   const next = useCallback(() => {
@@ -20,21 +55,19 @@ export default function HeroBanner() {
     setCurrent((c) => (c === 0 ? banners.length - 1 : c - 1));
   };
 
-  // Autoplay solo si hay más de un banner
   useEffect(() => {
     if (banners.length <= 1) return;
     const timer = setInterval(next, AUTOPLAY_MS);
     return () => clearInterval(timer);
   }, [banners.length, next]);
 
-  // Reset índice si cambia la cantidad de banners
   useEffect(() => {
     setCurrent(0);
   }, [banners.length]);
 
   if (isLoading) {
     return (
-      <div className="w-full h-[320px] sm:h-[420px] md:h-[520px] animate-pulse bg-secundario/50" />
+      <div className="w-full aspect-1920/600 animate-pulse bg-secundario/50" />
     );
   }
 
@@ -42,7 +75,6 @@ export default function HeroBanner() {
 
   return (
     <section className="relative bg-linear-to-r from-secundario via-terciario to-secundario text-white overflow-hidden">
-      {/* Fondo de patrón (siempre visible) */}
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <div
           className="absolute inset-0"
@@ -52,13 +84,14 @@ export default function HeroBanner() {
         />
       </div>
 
-      {/* Contenido */}
       {hasBanners ? (
         <>
-          {/* Slide activo */}
-          <HeroBannerSlide banner={banners[current]} priority={current === 0} />
+          <HeroBannerSlide
+            key={banners[current].id}
+            banner={banners[current]}
+            priority={current === 0}
+          />
 
-          {/* Controles: solo con más de un banner */}
           {banners.length > 1 && (
             <>
               <button
@@ -76,7 +109,6 @@ export default function HeroBanner() {
                 <ChevronRight size={24} />
               </button>
 
-              {/* Dots */}
               <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex gap-2">
                 {banners.map((_, i) => (
                   <button
@@ -97,21 +129,6 @@ export default function HeroBanner() {
       ) : (
         <HeroBannerFallback />
       )}
-
-      {/* Ola inferior */}
-      {/* <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
-        <svg
-          viewBox="0 0 1440 120"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-full"
-        >
-          <path
-            d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
-            fill="var(--background)"
-          />
-        </svg>
-      </div> */}
     </section>
   );
 }

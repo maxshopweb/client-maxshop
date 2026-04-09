@@ -6,7 +6,7 @@ import SmallCarousel from "../components/Tienda/SmallCarousel";
 import ValueSection from "../components/Tienda/ValueSection";
 import BenefitsCards from "../components/Tienda/BenefitsCards";
 import ScrollAnimate from "../components/ui/ScrollAnimate";
-import AboutUs from "../components/Tienda/AboutUs";
+// import AboutUs from "../components/Tienda/AboutUs"; /* contenido movido a ValueSection */
 import HeroBanner from "../components/Tienda/HeroBanner";
 
 export default function TiendaHome() {
@@ -18,7 +18,7 @@ export default function TiendaHome() {
        */}
 
       <div className="flex flex-col gap-8 md:gap-14">
-        <section className="w-full -mt-[160px]">
+        <section className="relative z-0 w-full md:-mt-[172px]">
           <HeroBanner />
         </section>
 
@@ -53,9 +53,9 @@ export default function TiendaHome() {
               <ValueSection />
             </ScrollAnimate>
 
-            <ScrollAnimate direction="up" delay={100}>
+            {/* <ScrollAnimate direction="up" delay={100}>
               <AboutUs />
-            </ScrollAnimate>
+            </ScrollAnimate> */}
           </div>
         </div>
       </div>

@@ -53,6 +53,7 @@ function ProductsPageContent() {
   const {
     productos,
     pagination,
+    priceRange: catalogPriceRange,
     isLoading,
     isFetching,
     prefetchNextPage,
@@ -111,7 +112,7 @@ function ProductsPageContent() {
 
         {/* Sidebar de Filtros - Desktop */}
         <div className="hidden lg:block lg:w-80 flex-shrink-0">
-          <MemoizedFiltersSidebar />
+          <MemoizedFiltersSidebar catalogPriceRange={catalogPriceRange} />
         </div>
 
         {/* Sidebar de Filtros - Mobile */}
@@ -148,7 +149,7 @@ function ProductsPageContent() {
                   </motion.button>
                 </motion.div>
                 <div className="flex-1 overflow-y-auto">
-                  <MemoizedFiltersSidebar />
+                  <MemoizedFiltersSidebar catalogPriceRange={catalogPriceRange} />
                 </div>
               </div>
             </motion.div>

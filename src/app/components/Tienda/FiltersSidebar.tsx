@@ -14,13 +14,23 @@ import { useGrupos } from "@/app/hooks/grupos/useGrupos";
 import type { ICategoria } from "@/app/types/categoria.type";
 import type { IMarca } from "@/app/types/marca.type";
 import type { IGrupo } from "@/app/types/grupo.type";
+import type { IPaginatedResponse } from "@/app/types/producto.type";
+
+const FALLBACK_PRICE_MAX = 100000;
 
 const truncateLabel = (value: string, maxLength = 28) => {
   if (value.length <= maxLength) return value;
   return `${value.slice(0, maxLength - 3)}...`;
 };
 
-export default function FiltersSidebar() {
+export interface FiltersSidebarProps {
+  /** Min/max del catálogo según el API (`priceRange` de `/productos/tienda`). */
+  catalogPriceRange?: IPaginatedResponse["priceRange"];
+}
+
+export default function FiltersSidebar({
+  catalogPriceRange,
+}: FiltersSidebarProps) {
   // Hook principal de filtros (URL como fuente de verdad)
   const {
     filters,
@@ -106,12 +116,22 @@ export default function FiltersSidebar() {
   // Valores actuales de los filtros
   // Usar localSearch para el input (actualización inmediata y fluida)
   const searchValue = localSearch;
-  // Usar localPriceRange para el slider (actualización inmediata)
-  const priceRange: [number, number] = [
-    localPriceRange[0] ?? 0,
-    localPriceRange[1] ?? 100000,
-  ];
-  const maxPrice = 100000; // TODO: Obtener del backend o calcular desde productos
+  const maxPrice =
+    catalogPriceRange != null &&
+    Number.isFinite(catalogPriceRange.max) &&
+    catalogPriceRange.max > 0
+      ? catalogPriceRange.max
+      : FALLBACK_PRICE_MAX;
+
+  // Usar localPriceRange para el slider (actualización inmediata), acotado al rango del catálogo
+  const rawLow = localPriceRange[0] ?? 0;
+  const rawHigh = localPriceRange[1] ?? maxPrice;
+  let low = Math.max(0, Math.min(rawLow, maxPrice));
+  let high = Math.max(0, Math.min(rawHigh, maxPrice));
+  if (low > high) {
+    low = high;
+  }
+  const priceRange: [number, number] = [low, high];
 
   // Handlers que actualizan la URL
   const onSearchChange = (value: string) => setSearch(value);

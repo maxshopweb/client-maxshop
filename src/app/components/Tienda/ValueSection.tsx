@@ -1,6 +1,6 @@
 "use client";
 
-import { Wrench, Building2, ArrowRight } from "lucide-react";
+import { Building2, ArrowRight, Users } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { useRef, useEffect, useState } from "react";
 import HeroButton from "../ui/HeroButton";
@@ -30,16 +30,16 @@ function useFadeIn(delay = 0) {
 }
 
 const valueRows = [
-  {
-    image: "/value/value-1.jpg",
-    badge: "Herramientas",
-    title: "Equipamiento para\nprofesionales",
-    description:
-      "La mayor variedad en herramientas eléctricas, de mano y accesorios. Calidad de marca, al alcance de tu presupuesto.",
-    cta: { label: "Ver productos", href: "/tienda/productos?categoria=herramientas", icon: ArrowRight, variant: "orange-white" as const },
-    icon: Wrench,
-    imageLeft: false,
-  },
+  // {
+  //   image: "/value/value-1.jpg",
+  //   badge: "Herramientas",
+  //   title: "Equipamiento para\nprofesionales",
+  //   description:
+  //     "La mayor variedad en herramientas eléctricas, de mano y accesorios. Calidad de marca, al alcance de tu presupuesto.",
+  //   cta: { label: "Ver productos", href: "/tienda/productos?categoria=herramientas", icon: ArrowRight, variant: "orange-white" as const },
+  //   icon: Wrench,
+  //   imageLeft: false,
+  // },
   {
     image: "/value/value-2.jpg",
     badge: "Construcción",
@@ -50,16 +50,31 @@ const valueRows = [
     icon: Building2,
     imageLeft: true,
   },
+  {
+    image: "/imgs/maxshop2.jpeg",
+    badge: "Quiénes somos",
+    title: "Trabajamos\npara vos.",
+    description:
+      "Equipamiento profesional y materiales de calidad para cada etapa de tu obra. Cada producto pasa por control antes de llegar a tus manos, y nuestro equipo te guía para elegir la solución adecuada a tu proyecto.",
+    cta: {
+      label: "Ver productos",
+      href: "/tienda/productos",
+      icon: ArrowRight,
+      variant: "orange-white" as const,
+    },
+    icon: Users,
+    imageLeft: false,
+  },
 ];
 
-function ValueRow({ row }: { row: typeof valueRows[0] }) {
+function ValueRow({ row }: { row: (typeof valueRows)[number] }) {
   const { ref: imgRef, visible: imgVisible } = useFadeIn(0);
   const { ref: textRef, visible: textVisible } = useFadeIn(180);
   const whatsapp = useWhatsapp();
   const Icon = row.icon;
   const CtaIcon = row.cta.icon;
   const ctaIsWhatsapp = "whatsapp" in row.cta && row.cta.whatsapp;
-  const ctaHref = ctaIsWhatsapp ? whatsapp.buildUrl() : row.cta.href;
+  const ctaHref = ctaIsWhatsapp ? whatsapp.buildUrl() : "href" in row.cta ? row.cta.href : "#";
 
   return (
     <div
