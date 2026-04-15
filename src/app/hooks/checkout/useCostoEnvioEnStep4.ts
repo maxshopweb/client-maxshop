@@ -17,10 +17,16 @@ export function useCostoEnvioEnStep4() {
   const lastCalculatedCPRef = useRef<string | null>(null);
   const prevCPFromStoreRef = useRef<string | null>(codigoPostal);
   const [isCalculando, setIsCalculando] = useState(false);
+  const isAndreaniManualMode = process.env.NEXT_PUBLIC_ANDREANI_MODO_MANUAL === 'true';
 
   useEffect(() => {
     if (tipoEntrega !== "envio") {
       if (tipoEntrega === "retiro") setCostoEnvio(0);
+      return;
+    }
+
+    if (isAndreaniManualMode) {
+      setCostoEnvio(0);
       return;
     }
 
@@ -69,9 +75,10 @@ export function useCostoEnvioEnStep4() {
         });
       })
       .finally(() => setIsCalculando(false));
-  }, [codigoPostal, tipoEntrega, items.length, setCostoEnvio, cotizarEnvioMutation.isPending]);
+  }, [codigoPostal, tipoEntrega, items.length, setCostoEnvio, cotizarEnvioMutation.isPending, isAndreaniManualMode]);
 
   const isCalculandoEnvio =
+    !isAndreaniManualMode &&
     tipoEntrega === "envio" &&
     codigoPostal != null &&
     (costoEnvio == null || costoEnvio === 0) &&

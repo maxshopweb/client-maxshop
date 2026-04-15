@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useCheckoutResult } from "@/app/hooks/checkout/useCheckoutResult";
 import { useCheckoutStore } from "@/app/hooks/checkout/useCheckoutStore";
@@ -20,8 +20,9 @@ function CheckoutResultContent({ initialConfig }: { initialConfig: IConfigTienda
   const router = useRouter();
   const result = useCheckoutResult();
   const { clearCart } = useCartStore();
-  const { resetCheckout, setWasGuest } = useCheckoutStore();
+  const { resetCheckout, setWasGuest, shippingData } = useCheckoutStore();
   const { logout } = useAuth();
+  const isRetiroFlowRef = useRef(shippingData?.tipoEntrega === "retiro");
 
   const resultWithBank = useMemo((): ICheckoutResult => {
     if (result.status === "transferencia" || result.status === "efectivo") {
@@ -101,6 +102,11 @@ function CheckoutResultContent({ initialConfig }: { initialConfig: IConfigTienda
             }}
           >
             <CheckoutResultContainer result={resultWithBank} />
+            {isRetiroFlowRef.current && (
+              <div className="mt-4 rounded-lg border border-input bg-background px-4 py-3 text-sm text-foreground/80">
+                Tu pedido estará disponible para retiro entre 24 y 48 horas hábiles.
+              </div>
+            )}
           </div>
         </motion.div>
       </div>

@@ -28,6 +28,7 @@ export function useAutoCotizarEnvio({ watch, enabled = true }: UseAutoCotizarEnv
   const city = watch('city');
   const state = watch('state');
   const postalCode = watch('postalCode');
+  const isAndreaniManualMode = process.env.NEXT_PUBLIC_ANDREANI_MODO_MANUAL === 'true';
 
   // Actualizar tipoEntrega en el store cuando cambie
   useEffect(() => {
@@ -43,6 +44,11 @@ export function useAutoCotizarEnvio({ watch, enabled = true }: UseAutoCotizarEnv
   // Cotizar automáticamente cuando TODOS los campos de dirección estén completos
   useEffect(() => {
     if (!enabled) return;
+
+    if (isAndreaniManualMode) {
+      if (tipoEntrega === 'envio') setCostoEnvio(0);
+      return;
+    }
 
     const shouldCotizar = 
       tipoEntrega === 'envio' &&
@@ -89,6 +95,7 @@ export function useAutoCotizarEnvio({ watch, enabled = true }: UseAutoCotizarEnv
     cotizarEnvioMutation.isPending,
     cotizarEnvioMutation,
     setCostoEnvio,
+    isAndreaniManualMode,
   ]);
 
   return {

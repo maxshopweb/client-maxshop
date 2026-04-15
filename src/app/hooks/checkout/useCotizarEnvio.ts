@@ -14,6 +14,7 @@ interface CotizacionResponse {
   precio: number;
   moneda: string;
   envioGratis?: boolean;
+  manual?: boolean;
   tarifaConIva?: {
     seguroDistribucion: string;
     distribucion: string;
@@ -23,10 +24,20 @@ interface CotizacionResponse {
 
 export function useCotizarEnvio() {
   const { items } = useCartStore();
+  const isAndreaniManualMode = process.env.NEXT_PUBLIC_ANDREANI_MODO_MANUAL === 'true';
 
   return useMutation({
     mutationKey: ['cotizarEnvio'],
     mutationFn: async (params: CotizarEnvioParams): Promise<CotizacionResponse> => {
+      if (isAndreaniManualMode) {
+        return {
+          precio: 0,
+          moneda: 'ARS',
+          envioGratis: false,
+          manual: true,
+        };
+      }
+
       // Validar que hay productos
       if (!items || items.length === 0) {
         throw new Error('No hay productos en el carrito para cotizar envío');

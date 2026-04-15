@@ -12,6 +12,7 @@ import { useStep3ShippingData } from "@/app/hooks/checkout/useStep3ShippingData"
 import { usePostalCodeSearch } from "@/app/hooks/cart/usePostalCodeSearch";
 
 export default function Step3ShippingData() {
+  const isAndreaniManualMode = process.env.NEXT_PUBLIC_ANDREANI_MODO_MANUAL === "true";
   const {
     form: { register, handleSubmit, errors, setValue, control, watch },
     tipoEntrega,
@@ -85,6 +86,12 @@ export default function Step3ShippingData() {
             style={{ borderColor: "rgba(23, 28, 53, 0.1)" }}
           >
             <h3 className="text-lg font-semibold text-foreground/90">Dirección de envío</h3>
+            {isAndreaniManualMode && (
+              <div className="rounded-lg border bg-foreground/[0.03] px-3 py-2 text-sm text-foreground/80" style={{ borderColor: "rgba(23, 28, 53, 0.1)" }}>
+                <p>Envío a domicilio disponible. El costo se confirmará por WhatsApp/soporte.</p>
+                <p>El código de seguimiento se enviará una vez despachado.</p>
+              </div>
+            )}
 
             {isAuthenticated && direcciones.length > 0 && (
               <div className="mb-4 p-4 rounded-lg border bg-foreground/[0.03]" style={{ borderColor: "rgba(23, 28, 53, 0.1)" }}>
@@ -227,7 +234,7 @@ export default function Step3ShippingData() {
             animate={{ opacity: 1 }}
             className="text-sm text-foreground/60"
           >
-            Retirarás tu pedido en nuestro local sin costo. Te contactaremos cuando esté listo.
+            Retirarás tu pedido en nuestro local sin costo. Tu pedido estará disponible para retiro entre 24 y 48 horas hábiles.
           </motion.p>
         )}
 

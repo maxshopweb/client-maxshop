@@ -13,7 +13,7 @@ import {
     updateVentaSchema,
     type UpdateVentaData
 } from '@/app/schemas/venta.schema';
-import { useUpdateVenta } from '@/app/hooks/ventas/useVentasMutations';
+import { useUpdateEnvio, useUpdateVenta } from '@/app/hooks/ventas/useVentasMutations';
 import { useUpdateCliente } from '@/app/hooks/clientes/useClientes';
 import type { IVenta } from '@/app/types/ventas.type';
 import type { IUpdateClienteDTO } from '@/app/types/cliente.type';
@@ -37,6 +37,8 @@ interface EditVentaModalProps {
 
 export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
     const [step, setStep] = useState<StepId>(1);
+    const [empresaEnvio, setEmpresaEnvio] = useState(venta.envio?.empresa_envio || 'andreani');
+    const [codigoSeguimiento, setCodigoSeguimiento] = useState(venta.envio?.cod_seguimiento || '');
     const c = venta.cliente;
 
     const form = useForm<FormData>({
@@ -63,8 +65,9 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
             console.error('❌ Error al actualizar venta:', error);
         }
     });
+    const { updateEnvioAsync, isUpdating: isUpdatingEnvio } = useUpdateEnvio();
     const { updateClienteAsync, isUpdating: isUpdatingCliente } = useUpdateCliente();
-    const isUpdating = isUpdatingVenta || isUpdatingCliente;
+    const isUpdating = isUpdatingVenta || isUpdatingCliente || isUpdatingEnvio;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -100,6 +103,20 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
         } catch {
             // toasts ya los muestran los hooks
         }
+    };
+
+    const handleGuardarSeguimiento = async () => {
+        const empresa = empresaEnvio.trim();
+        const tracking = codigoSeguimiento.trim();
+        if (!empresa && !tracking) return;
+
+        await updateEnvioAsync({
+            id: venta.id_venta,
+            data: {
+                empresa_envio: empresa || null,
+                cod_seguimiento: tracking || null,
+            },
+        });
     };
 
     return (
@@ -192,6 +209,38 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
                                 onChange={(value) => form.setValue('metodo_pago', value as any)}
                                 error={form.formState.errors.metodo_pago?.message}
                             />
+                        </div>
+                        <div className="space-y-3 rounded-lg border border-input bg-muted/20 p-4">
+                            <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                <Package className="w-4 h-4" />
+                                Seguimiento de envío (manual)
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <Input
+                                    label="Empresa de envío"
+                                    placeholder="Ej: Andreani"
+                                    className="bg-background"
+                                    value={empresaEnvio}
+                                    onChange={(e) => setEmpresaEnvio(e.target.value)}
+                                />
+                                <Input
+                                    label="Código de seguimiento"
+                                    placeholder="Ej: 360000102000579"
+                                    className="bg-background"
+                                    value={codigoSeguimiento}
+                                    onChange={(e) => setCodigoSeguimiento(e.target.value)}
+                                />
+                            </div>
+                            <div className="flex justify-end">
+                                <Button
+                                    type="button"
+                                    variant="outline-primary"
+                                    disabled={isUpdating || (!empresaEnvio.trim() && !codigoSeguimiento.trim())}
+                                    onClick={() => void handleGuardarSeguimiento()}
+                                >
+                                    Guardar seguimiento
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 )}

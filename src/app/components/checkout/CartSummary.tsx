@@ -10,6 +10,7 @@ import { formatCurrencyARS } from "@/app/utils/currency";
 export default function CartSummary() {
   const { cartItems, costoEnvio, tipoEntrega, codigoPostal } = useCheckoutStore();
   const isMutatingEnvio = useIsMutating({ mutationKey: ["cotizarEnvio"] });
+  const isAndreaniManualMode = process.env.NEXT_PUBLIC_ANDREANI_MODO_MANUAL === "true";
 
   const isCalculandoEnvio = useMemo(
     () =>
@@ -88,7 +89,9 @@ export default function CartSummary() {
         {tipoEntrega === "envio" && (
           <div className="flex justify-between text-sm">
             <span className="text-foreground/70">Costo de envío</span>
-            {isCalculandoEnvio ? (
+            {isAndreaniManualMode ? (
+              <span className="text-foreground/60 text-xs">Se confirmará por WhatsApp/soporte</span>
+            ) : isCalculandoEnvio ? (
               <span className="text-foreground/50 text-xs">Calculando...</span>
             ) : costoEnvio !== null && costoEnvio === 0 ? (
               <span className="text-foreground font-medium text-green-600">Envío gratis</span>

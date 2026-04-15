@@ -7,7 +7,8 @@ import { ventasKeys } from './useVentas';
 import type {
     IVenta,
     ICreateVentaDTO,
-    IUpdateVentaDTO
+    IUpdateVentaDTO,
+    IUpdateEnvioDTO,
 } from '@/app/types/ventas.type';
 import { EstadoPago, EstadoEnvio } from '@/app/types/estados.type';
 
@@ -292,6 +293,49 @@ export function useUpdateEstadoEnvio(options: UseUpdateEstadoEnvioOptions = {}) 
     return {
         updateEstadoEnvio: mutation.mutate,
         updateEstadoEnvioAsync: mutation.mutateAsync,
+        isUpdating: mutation.isPending,
+        isSuccess: mutation.isSuccess,
+        isError: mutation.isError,
+        error: mutation.error,
+    };
+}
+
+interface UseUpdateEnvioOptions {
+    onSuccess?: (data: IVenta) => void;
+    onError?: (error: Error) => void;
+}
+
+export function useUpdateEnvio(options: UseUpdateEnvioOptions = {}) {
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: ({ id, data }: { id: number; data: IUpdateEnvioDTO }) =>
+            ventasService.updateEnvio(id, data),
+
+        onSuccess: (data, variables) => {
+            queryClient.setQueryData(ventasKeys.detail(variables.id), data);
+            queryClient.invalidateQueries({
+                queryKey: ventasKeys.lists(),
+            });
+
+            toast.success('Seguimiento actualizado', {
+                description: `Venta #${data.id_venta} actualizada correctamente`,
+            });
+
+            options.onSuccess?.(data);
+        },
+
+        onError: (error: Error) => {
+            toast.error('Error al actualizar seguimiento', {
+                description: error.message || 'Ocurrió un error inesperado',
+            });
+            options.onError?.(error);
+        },
+    });
+
+    return {
+        updateEnvio: mutation.mutate,
+        updateEnvioAsync: mutation.mutateAsync,
         isUpdating: mutation.isPending,
         isSuccess: mutation.isSuccess,
         isError: mutation.isError,
