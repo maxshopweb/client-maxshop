@@ -17,8 +17,8 @@ export default function RegisterPage() {
 
   return (
     <AuthLayout title="Crear cuenta" subtitle="Únete a MaxShop hoy mismo">
-      <div className="flex flex-col h-full justify-between w-full">
-        <div className="flex flex-col gap-3 flex-1 justify-center">
+      <div className="flex flex-col w-full min-h-0">
+        <div className="flex flex-col gap-3">
 
         {/* 1. Primary CTA: Google Register */}
         <motion.div
@@ -58,7 +58,7 @@ export default function RegisterPage() {
               key="expand-btn-reg"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
+              exit={{ opacity: 0 }}
               onClick={() => setIsEmailExpanded(true)}
               className="w-full py-4 flex items-center justify-between px-6 rounded-xl border border-gray-200 hover:border-orange-300 hover:shadow-md hover:bg-white bg-gray-50/50 transition-all duration-300 group text-left cursor-pointer"
             >
@@ -78,10 +78,10 @@ export default function RegisterPage() {
           ) : (
             <motion.form
               key="email-form-reg"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
               onSubmit={handleSubmit}
               className="flex flex-col gap-6"
             >

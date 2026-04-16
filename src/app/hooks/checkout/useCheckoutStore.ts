@@ -170,7 +170,7 @@ export const useCheckoutStore = create<CheckoutStore>()(
         codigoPostal: state.codigoPostal,
         ciudad: state.ciudad,
         provincia: state.provincia,
-        wasGuest: state.wasGuest,
+        // wasGuest: no persistir — debe alinearse con auth (estado invitado), no con storage viejo
       }),
       version: 1,
       migrate: (persistedState: unknown, _version: number) => {

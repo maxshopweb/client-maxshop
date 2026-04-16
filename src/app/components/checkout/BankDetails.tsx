@@ -19,20 +19,17 @@ interface BankDetailsProps {
   datos: IBankDetails;
   id_venta?: string | number;
   cod_interno?: string | null;
-  metodo?: 'transferencia' | 'efectivo';
 }
+
+const TITULO_DATOS_BANCARIOS = "Datos para transferencia bancaria";
 
 /**
  * Componente presentacional para mostrar datos bancarios
  * La lógica de copiado está en el hook useClipboard
  */
-export default function BankDetails({ datos, id_venta, cod_interno, metodo }: BankDetailsProps) {
+export default function BankDetails({ datos, id_venta, cod_interno }: BankDetailsProps) {
   const { copy, copied } = useClipboard();
   const numeroPedido = getNumeroPedidoDisplay(cod_interno, id_venta);
-
-  const titulo = metodo === 'efectivo' 
-    ? "Datos para pago en RapiPago o Pago Fácil"
-    : "Datos para transferencia bancaria";
 
   return (
     <motion.div
@@ -49,7 +46,7 @@ export default function BankDetails({ datos, id_venta, cod_interno, metodo }: Ba
         }}
       >
         <h3 className="text-xl font-bold text-foreground mb-6 text-center">
-          {titulo}
+          {TITULO_DATOS_BANCARIOS}
         </h3>
 
         <div className="space-y-4">

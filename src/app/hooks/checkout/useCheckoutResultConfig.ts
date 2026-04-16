@@ -17,6 +17,28 @@ export function useCheckoutResultConfig(
   isGuest?: boolean
 ): IResultConfig {
   return useMemo(() => {
+    // Transferencia y efectivo comparten la misma UI y copy (datos bancarios de tienda)
+    const pedidoReservadoLocal: IResultConfig = {
+      titulo: "Pedido reservado",
+      mensaje:
+        "Tu pedido fue reservado exitosamente. Realiza la transferencia bancaria con los datos que aparecen a continuación. Una vez confirmado el pago, te notificaremos por email.",
+      icono: "CheckCircle2",
+      color: "info",
+      mostrarDatosBancarios: true,
+      acciones: [
+        {
+          label: "Ver mis pedidos",
+          variant: "primary",
+          href: "/mi-cuenta",
+        },
+        {
+          label: "Seguir comprando",
+          variant: "outline-primary",
+          href: "/tienda/productos",
+        },
+      ],
+    };
+
     // Configuraciones base por estado
     const configs: Record<CheckoutResultStatus, IResultConfig> = {
       // Estados de Mercado Pago
@@ -183,44 +205,8 @@ export function useCheckoutResultConfig(
         ],
       },
       // Métodos de pago locales
-      transferencia: {
-        titulo: "Pedido reservado",
-        mensaje: "Tu pedido fue reservado exitosamente. Realiza la transferencia bancaria con los datos que aparecen a continuación. Una vez confirmado el pago, te notificaremos por email.",
-        icono: "CheckCircle2",
-        color: "info",
-        mostrarDatosBancarios: true,
-        acciones: [
-          {
-            label: "Ver mis pedidos",
-            variant: "primary",
-            href: "/mi-cuenta",
-          },
-          {
-            label: "Seguir comprando",
-            variant: "outline-primary",
-            href: "/tienda/productos",
-          },
-        ],
-      },
-      efectivo: {
-        titulo: "Pedido reservado",
-        mensaje: "Tu pedido fue reservado exitosamente. Realiza el pago en RapiPago o Pago Fácil con los datos que aparecen a continuación. Una vez confirmado el pago, te notificaremos por email.",
-        icono: "CheckCircle2",
-        color: "info",
-        mostrarDatosBancarios: true,
-        acciones: [
-          {
-            label: "Ver mis pedidos",
-            variant: "primary",
-            href: "/mi-cuenta",
-          },
-          {
-            label: "Seguir comprando",
-            variant: "outline-primary",
-            href: "/tienda/productos",
-          },
-        ],
-      },
+      transferencia: pedidoReservadoLocal,
+      efectivo: pedidoReservadoLocal,
       // Estados de procesamiento/error
       processing: {
         titulo: "Procesando...",

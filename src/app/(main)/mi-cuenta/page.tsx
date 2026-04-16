@@ -62,8 +62,9 @@ function MiCuentaContent() {
 // Componente de layout común para evitar duplicación
 function PageLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-background py-6 sm:py-8 md:py-12 mt-10">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+    <div className="flex w-full min-h-screen flex-col bg-background my-10">
+      {/* Mismo ancho que secciones de la tienda (SectionTitle): container sin max-w-7xl */}
+      <div className="container mx-auto w-full px-4">
         {/* Header de la página */}
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground/90 mb-2">

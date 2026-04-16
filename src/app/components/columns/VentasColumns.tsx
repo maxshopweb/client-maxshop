@@ -1,5 +1,5 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Edit, Trash2, Eye, Package } from 'lucide-react';
+import { MoreHorizontal, Edit, Trash2, Eye, Package, Store, Truck } from 'lucide-react';
 import * as Checkbox from '@radix-ui/react-checkbox';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { Check } from 'lucide-react';
@@ -7,7 +7,9 @@ import type { IVenta } from '@/app/types/ventas.type';
 import { formatPrecio, formatFecha } from '@/app/types/ventas.type';
 import { TIPO_VENTA_OPTIONS } from '@/app/types/ventas.type';
 import { TableBadge } from '@/app/components/ui/TableBadge';
+import { Badge } from '@/app/components/ui/Badge';
 import { getNumeroPedidoDisplay } from '@/app/utils/venta.utils';
+import { isVentaRetiroEnTienda } from '@/app/utils/venta-envio.validation';
 
 interface VentasTableActions {
     onEdit: (venta: IVenta) => void;
@@ -201,6 +203,36 @@ export const getVentasColumns = (
             },
         },
         {
+            id: 'entrega',
+            header: 'Entrega',
+            cell: ({ row }) => {
+                const obs = row.original.observaciones;
+                const retiro = isVentaRetiroEnTienda(obs);
+                return (
+                    <span
+                        title={
+                            retiro
+                                ? 'Retiro en tienda (según observaciones)'
+                                : 'Envío a domicilio o sucursal / pick up courier'
+                        }
+                    >
+                        {retiro ? (
+                            <Badge variant="warning" className="gap-1.5 pl-2 pr-2.5 py-1">
+                                <Store className="w-3.5 h-3.5 shrink-0" aria-hidden />
+                                Pickup
+                            </Badge>
+                        ) : (
+                            <Badge variant="info" className="gap-1.5 pl-2 pr-2.5 py-1">
+                                <Truck className="w-3.5 h-3.5 shrink-0" aria-hidden />
+                                Envío
+                            </Badge>
+                        )}
+                    </span>
+                );
+            },
+            enableSorting: false,
+        },
+        {
             accessorKey: 'tipo_venta',
             header: 'Tipo',
             cell: ({ row }) => {
@@ -233,6 +265,7 @@ export const getVentasColumns = (
 export const defaultColumnVisibility = {
     'cliente': true,
     'metodo_pago': true,
+    'entrega': true,
     'tipo_venta': true,
     'detalles_count': true,
 };
@@ -246,6 +279,7 @@ export const defaultColumnOrder = [
     'metodo_pago',
     'estado_pago',
     'estado_envio',
+    'entrega',
     'tipo_venta',
     'detalles_count',
     'actions',

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/app/components/ui/Button";
 import Input from "@/app/components/ui/Input";
+import PasswordRequirements from "@/app/components/ui/PasswordRequirements";
 import { CheckCircle, X } from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
 import { toast } from "sonner";
@@ -123,6 +124,9 @@ export function GuestConversionPrompt({
                 : "1px solid rgba(23, 28, 53, 0.1)",
             }}
           />
+          <div className="mt-2">
+            <PasswordRequirements password={password} />
+          </div>
 
           <Input
             label="Confirmar contraseña"

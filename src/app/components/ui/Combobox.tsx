@@ -231,9 +231,9 @@ export function Combobox({
                         transition-all duration-200
                         focus:outline-none
                         text-left
-                        flex items-center justify-between
+                        flex items-center justify-between gap-2
                         ${Icon && iconPosition === 'left' ? 'pl-10' : ''}
-                        pr-10
+                        ${selectedOption && !disabled ? 'pr-16' : 'pr-10'}
                         ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}
                     `}
                     style={{
@@ -248,34 +248,35 @@ export function Combobox({
                             : 'rgba(255, 255, 255, 1)'
                     }}
                 >
-                    <span className={selectedOption ? 'text-foreground' : 'text-gray-400'}>
+                    <span
+                        className={`min-w-0 flex-1 truncate ${selectedOption ? 'text-foreground' : 'text-gray-400'}`}
+                    >
                         {selectedOption ? selectedOption.label : placeholder}
                     </span>
-                    <div className="flex items-center gap-1">
-                        {selectedOption && !disabled && (
-                            <button
-                                type="button"
-                                onClick={handleClear}
-                                className="p-0.5 hover:bg-gray-200 rounded"
-                                style={{ color: 'rgba(107, 114, 128, 0.7)' }}
-                            >
-                                <span className="text-xs">×</span>
-                            </button>
-                        )}
-                        <ChevronDown
-                            size={18}
-                            strokeWidth={2}
-                            className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}
-                            style={{
-                                color: displayError
-                                    ? 'rgb(239, 68, 68)'
-                                    : disabled
-                                        ? 'rgba(0, 0, 0, 0.3)'
-                                        : 'rgba(0, 0, 0, 0.5)'
-                            }}
-                        />
-                    </div>
+                    <ChevronDown
+                        size={18}
+                        strokeWidth={2}
+                        className={`shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                        style={{
+                            color: displayError
+                                ? 'rgb(239, 68, 68)'
+                                : disabled
+                                    ? 'rgba(0, 0, 0, 0.3)'
+                                    : 'rgba(0, 0, 0, 0.5)'
+                        }}
+                    />
                 </button>
+                {selectedOption && !disabled && (
+                    <button
+                        type="button"
+                        onClick={handleClear}
+                        className="absolute right-9 top-1/2 z-10 -translate-y-1/2 rounded p-0.5 hover:bg-gray-200"
+                        style={{ color: 'rgba(107, 114, 128, 0.7)' }}
+                        aria-label="Limpiar selección"
+                    >
+                        <span className="text-xs leading-none">×</span>
+                    </button>
+                )}
             </div>
 
             {menuContent}

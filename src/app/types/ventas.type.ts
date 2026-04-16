@@ -176,7 +176,8 @@ export interface ICreateVentaDTO {
 export interface IVentaDetalleDTO {
     id_prod: number;
     cantidad: number;
-    precio_unitario: number;
+    /** Precio final unitario (con IVA). En checkout online el API lo ignora y usa el catálogo. */
+    precio_unitario?: number;
     descuento_aplicado?: number;
     evento_aplicado?: number;
     /** Bonificación porcentual de la línea (0-100). Si no se envía, se usa la del producto. */

@@ -18,6 +18,7 @@ export default function Step3PaymentConfirmation() {
     handleConfirmOrder,
     isCalculandoEnvio,
     isCreating,
+    carritoStockOk,
   } = useStep4PaymentConfirmation();
 
   if (!guard.isValid) {
@@ -91,10 +92,22 @@ export default function Step3PaymentConfirmation() {
           variant="primary"
           size="lg"
           onClick={handleConfirmOrder}
-          disabled={!selectedMethod || isCreating || isCalculandoEnvio}
+          disabled={!selectedMethod || isCreating || isCalculandoEnvio || !carritoStockOk}
           className="rounded-lg flex-1"
         >
-          {isCreating ? "Procesando..." : isCalculandoEnvio ? "Calculando envío..." : "Confirmar pedido"}
+          {isCreating ? (
+            "Procesando..."
+          ) : isCalculandoEnvio ? (
+            <>
+              <span className="sm:hidden">Calculando...</span>
+              <span className="hidden sm:inline">Calculando envío...</span>
+            </>
+          ) : (
+            <>
+              <span className="sm:hidden">Confirmar</span>
+              <span className="hidden sm:inline">Confirmar pedido</span>
+            </>
+          )}
         </Button>
       </div>
     </motion.div>

@@ -17,6 +17,7 @@ import { useAuthStore } from '../stores/userStore';
 import { type IUsuario, type UserRole } from '../types/user';
 import { syncAuthCookies, clearAuthCookies } from '../utils/cookies';
 import { toast } from 'sonner';
+import { useCheckoutStore } from '../hooks/checkout/useCheckoutStore';
 
 type GuestData = {
   email: string;
@@ -59,6 +60,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const loginStore = useAuthStore((state) => state.login);
   const logoutStore = useAuthStore((state) => state.logout);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (usuario?.estado != null && usuario.estado !== 1) {
+      useCheckoutStore.getState().setWasGuest(false);
+    }
+  }, [usuario?.estado]);
 
   // Sincronizar Firebase con backend cuando cambia el estado de autenticación
   useEffect(() => {

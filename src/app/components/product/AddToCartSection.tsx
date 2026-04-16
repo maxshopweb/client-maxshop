@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ShoppingCart, Check, Minus, Plus, AlertCircle, Truck, CreditCard, Headphones } from "lucide-react";
+import { ShoppingCart, Check, Minus, Plus, Truck, CreditCard, Headphones } from "lucide-react";
 import { IProductos } from "@/app/types/producto.type";
 import { useCartStore } from "@/app/stores/cartStore";
 import { useCartSidebar } from "@/app/hooks/useCartSidebar";
@@ -10,6 +10,7 @@ import { Button } from "../ui/Button";
 import { toast } from "sonner";
 import { useConfigTienda } from "@/app/hooks/config/useConfigTienda";
 import { getEnvioGratisMensaje, getCuotasSinInteresMensaje } from "@/app/utils/promos-messages";
+import { validateAgregarAlCarrito } from "@/app/utils/stock";
 
 interface AddToCartSectionProps {
   producto: IProductos;
@@ -20,13 +21,24 @@ export default function AddToCartSection({ producto }: AddToCartSectionProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [added, setAdded] = useState(false);
   const { addItem } = useCartStore();
+  const cantidadEnCarrito = useCartStore((s) => s.items.find((i) => i.id_prod === producto.id_prod)?.cantidad ?? 0);
   const { open } = useCartSidebar();
   const { data: config } = useConfigTienda();
 
   const stock = producto.stock ?? 0;
-  const maxQuantity = stock;
+  /** Unidades que aún se pueden sumar al carrito (stock menos lo ya agregado). */
+  const maxQuantity = Math.max(0, stock - cantidadEnCarrito);
   const isOutOfStock = stock === 0;
   const isInactive = producto.activo !== "S" && producto.estado !== 1;
+  /** No se puede sumar más al carrito (sin stock, inactivo o ya cubierto el stock en carrito). */
+  const cannotPurchase =
+    isOutOfStock || isInactive || maxQuantity === 0;
+
+  useEffect(() => {
+    if (maxQuantity > 0 && quantity > maxQuantity) {
+      setQuantity(maxQuantity);
+    }
+  }, [maxQuantity, producto.id_prod]);
 
   const handleDecrease = () => {
     if (quantity > 1) {
@@ -35,26 +47,26 @@ export default function AddToCartSection({ producto }: AddToCartSectionProps) {
   };
 
   const handleIncrease = () => {
+    if (maxQuantity <= 0) {
+      toast.error("No disponible");
+      return;
+    }
     if (quantity < maxQuantity) {
       setQuantity(quantity + 1);
     } else {
-      toast.error(`Solo hay ${maxQuantity} unidades disponibles`);
+      toast.error("No disponible");
     }
   };
 
   const handleAddToCart = async () => {
-    if (isOutOfStock) {
-      toast.error("Este producto no tiene stock disponible");
+    if (cannotPurchase) {
+      toast.error("No disponible");
       return;
     }
 
-    if (isInactive) {
-      toast.error("Este producto no está disponible");
-      return;
-    }
-
-    if (quantity > maxQuantity) {
-      toast.error(`Solo puedes agregar hasta ${maxQuantity} unidades`);
+    const stockErr = validateAgregarAlCarrito(producto, cantidadEnCarrito, quantity);
+    if (stockErr) {
+      toast.error("No disponible");
       return;
     }
 
@@ -89,8 +101,8 @@ export default function AddToCartSection({ producto }: AddToCartSectionProps) {
   };
 
   const handleBuyNow = () => {
-    if (isOutOfStock || isInactive) {
-      toast.error("Este producto no está disponible para compra");
+    if (cannotPurchase) {
+      toast.error("No disponible");
       return;
     }
 
@@ -114,7 +126,7 @@ export default function AddToCartSection({ producto }: AddToCartSectionProps) {
         <div className="flex items-center gap-2 sm:gap-3">
           <motion.button
             onClick={handleDecrease}
-            disabled={quantity <= 1 || isOutOfStock}
+            disabled={cannotPurchase || quantity <= 1}
             className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-card-border/50 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:bg-principal/10 hover:border-principal transition-colors"
             whileHover={{ scale: quantity > 1 ? 1.05 : 1 }}
             whileTap={{ scale: quantity > 1 ? 0.95 : 1 }}
@@ -125,24 +137,25 @@ export default function AddToCartSection({ producto }: AddToCartSectionProps) {
           <motion.input
             type="number"
             min="1"
-            max={maxQuantity}
+            max={maxQuantity > 0 ? maxQuantity : 1}
             value={quantity}
             onChange={(e) => {
               const value = parseInt(e.target.value) || 1;
+              if (maxQuantity <= 0) return;
               if (value >= 1 && value <= maxQuantity) {
                 setQuantity(value);
               } else if (value > maxQuantity) {
                 setQuantity(maxQuantity);
-                toast.error(`Solo hay ${maxQuantity} unidades disponibles`);
+                toast.error("No disponible");
               }
             }}
             className="w-16 sm:w-20 text-center text-base sm:text-lg font-semibold border border-card-border/50 rounded-lg py-1.5 sm:py-2 focus:outline-none focus:border-principal bg-input text-input-text [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-            disabled={isOutOfStock}
+            disabled={cannotPurchase}
           />
 
           <motion.button
             onClick={handleIncrease}
-            disabled={quantity >= maxQuantity || isOutOfStock}
+            disabled={cannotPurchase || quantity >= maxQuantity}
             className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-card-border/50 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:bg-principal/10 hover:border-principal transition-colors"
             whileHover={{ scale: quantity < maxQuantity ? 1.05 : 1 }}
             whileTap={{ scale: quantity < maxQuantity ? 0.95 : 1 }}
@@ -150,34 +163,7 @@ export default function AddToCartSection({ producto }: AddToCartSectionProps) {
             <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-terciario" />
           </motion.button>
         </div>
-        <p className="text-xs text-terciario/50">
-          Máximo: {maxQuantity} unidades
-        </p>
       </div>
-
-      {/* Mensaje de error si no hay stock */}
-      {isOutOfStock && (
-        <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="flex items-center gap-2 p-2 sm:p-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-xs sm:text-sm"
-        >
-          <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-          <span>Este producto no tiene stock disponible</span>
-        </motion.div>
-      )}
-
-      {/* Mensaje si está inactivo */}
-      {isInactive && !isOutOfStock && (
-        <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="flex items-center gap-2 p-2 sm:p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-xs sm:text-sm"
-        >
-          <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-          <span>Este producto no está disponible actualmente</span>
-        </motion.div>
-      )}
 
       {/* Botones de acción */}
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
@@ -188,7 +174,7 @@ export default function AddToCartSection({ producto }: AddToCartSectionProps) {
         >
           <Button
             onClick={handleAddToCart}
-            disabled={isOutOfStock || isInactive || isAdding || added}
+            disabled={cannotPurchase || isAdding || added}
             variant="primary"
             size="lg"
             fullWidth
@@ -208,10 +194,12 @@ export default function AddToCartSection({ producto }: AddToCartSectionProps) {
                 <Check className="w-4 h-4" />
                 Agregado
               </span>
+            ) : cannotPurchase ? (
+              <span>No disponible</span>
             ) : (
               <span className="flex items-center gap-2">
                 <ShoppingCart className="w-4 h-4" />
-                Agregar al Carrito
+                Agregar al carrito
               </span>
             )}
           </Button>
@@ -220,13 +208,13 @@ export default function AddToCartSection({ producto }: AddToCartSectionProps) {
         <div className="flex-1">
           <Button
             onClick={handleBuyNow}
-            disabled={isOutOfStock || isInactive || isAdding}
+            disabled={cannotPurchase || isAdding}
             variant="outline-primary"
             size="lg"
             fullWidth
             className="text-xs sm:text-sm"
           >
-            Comprar Ahora
+            {cannotPurchase ? "No disponible" : "Comprar Ahora"}
           </Button>
         </div>
       </div>

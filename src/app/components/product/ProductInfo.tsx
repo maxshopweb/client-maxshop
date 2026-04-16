@@ -1,10 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Package, CreditCard, Tag, Sparkles } from "lucide-react";
+import { CreditCard, Tag, Sparkles } from "lucide-react";
 import { FaStar } from "react-icons/fa";
 import { IProductos } from "@/app/types/producto.type";
-import { formatPrecio, getStockInfo } from "@/app/types/producto.type";
+import { formatPrecio } from "@/app/types/producto.type";
 import { getPrecioConImpuestos, getPrecioSinImpuestos } from "@/app/utils/producto.utils";
 import { formatCurrencyARS } from "@/app/utils/currency";
 
@@ -13,7 +13,9 @@ interface ProductInfoProps {
 }
 
 export default function ProductInfo({ producto }: ProductInfoProps) {
-  const stockInfo = getStockInfo(producto);
+  const sinStock = (producto.stock ?? 0) === 0;
+  const isInactive = producto.activo !== "S" && producto.estado !== 1;
+  const noDisponible = sinStock || isInactive;
 
   // Mismas reglas que ProductCard: lista activa, oferta/campaña/destacado
   const precioSinImpuestos = getPrecioSinImpuestos(producto);
@@ -106,18 +108,9 @@ export default function ProductInfo({ producto }: ProductInfoProps) {
         )}
       </div>
 
-      {/* Stock */}
-      <div className="flex items-center gap-2">
-        <Package className="w-4 h-4 text-terciario/50 flex-shrink-0" />
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <span className="text-xs sm:text-sm text-terciario/70">Stock:</span>
-            <span className={`text-xs font-medium ${stockInfo.cantidad > 0 ? 'text-principal' : 'text-red-600'}`}>
-              {stockInfo.label}
-            </span>
-          </div>
-        </div>
-      </div>
+      {noDisponible && (
+        <p className="text-sm font-medium text-terciario/80">No disponible</p>
+      )}
 
       {/* Badges (mismo criterio que ProductCard: Oferta, Campaña, Destacado, Financiación) */}
       <div className="flex flex-wrap gap-2">

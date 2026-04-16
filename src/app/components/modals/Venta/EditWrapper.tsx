@@ -20,6 +20,11 @@ import type { IUpdateClienteDTO } from '@/app/types/cliente.type';
 import { ESTADO_PAGO_OPTIONS, METODO_PAGO_OPTIONS, TIPO_VENTA_OPTIONS } from '@/app/types/ventas.type';
 import { Button } from '@/app/components/ui/Button';
 import { getNumeroPedidoDisplay } from '@/app/utils/venta.utils';
+import {
+    hasDireccionCompletaParaEnvio,
+    isVentaRetiroEnTienda,
+} from '@/app/utils/venta-envio.validation';
+import { toast } from 'sonner';
 
 type FormData = UpdateVentaData & IUpdateClienteDTO;
 
@@ -69,12 +74,41 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
     const { updateClienteAsync, isUpdating: isUpdatingCliente } = useUpdateCliente();
     const isUpdating = isUpdatingVenta || isUpdatingCliente || isUpdatingEnvio;
 
+    const observacionesWatch = form.watch('observaciones');
+    const direccionWatch = form.watch('direccion');
+    const ciudadWatch = form.watch('ciudad');
+    const codPostalWatch = form.watch('cod_postal');
+    const obsParaEnvio =
+        (typeof observacionesWatch === 'string' ? observacionesWatch : '') ||
+        venta.observaciones ||
+        '';
+    const esRetiro = isVentaRetiroEnTienda(obsParaEnvio);
+    const direccionOk = hasDireccionCompletaParaEnvio({
+        direccion: direccionWatch,
+        ciudad: ciudadWatch,
+        cod_postal: codPostalWatch,
+    });
+    const requiereDireccionParaEnvio = !esRetiro;
+    const bloqueadoPorDireccion = requiereDireccionParaEnvio && !direccionOk;
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const valid = await form.trigger(['estado_pago', 'metodo_pago', 'observaciones']);
         if (!valid) return;
 
         const data = form.getValues();
+        const obs = data.observaciones ?? venta.observaciones ?? '';
+        const retiro = isVentaRetiroEnTienda(obs);
+        const confirmaPago =
+            data.estado_pago === 'aprobado' && venta.estado_pago !== 'aprobado';
+
+        if (confirmaPago && !retiro && !hasDireccionCompletaParaEnvio(data)) {
+            toast.error(
+                'Completá calle, ciudad y código postal del cliente (paso Datos) antes de aprobar el pago, o indicá retiro en tienda en observaciones.'
+            );
+            return;
+        }
+
         const ventaPayload: UpdateVentaData = {
             estado_pago: data.estado_pago,
             metodo_pago: data.metodo_pago,
@@ -84,8 +118,7 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
         else ventaPayload.estado_envio = data.estado_envio;
 
         try {
-            await updateVentaAsync({ id: venta.id_venta, data: ventaPayload });
-            if (c?.id_usuario && step === 2) {
+            if (c?.id_usuario) {
                 const clientePayload: IUpdateClienteDTO = {
                     telefono: data.telefono || null,
                     direccion: data.direccion || null,
@@ -98,6 +131,7 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
                 };
                 await updateClienteAsync({ id: c.id_usuario, data: clientePayload });
             }
+            await updateVentaAsync({ id: venta.id_venta, data: ventaPayload });
             form.reset();
             onClose();
         } catch {
@@ -109,6 +143,15 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
         const empresa = empresaEnvio.trim();
         const tracking = codigoSeguimiento.trim();
         if (!empresa && !tracking) return;
+
+        const data = form.getValues();
+        const obs = data.observaciones ?? venta.observaciones ?? '';
+        if (!isVentaRetiroEnTienda(obs) && !hasDireccionCompletaParaEnvio(data)) {
+            toast.error(
+                'Completá la dirección del cliente (paso Datos) para cargar seguimiento, salvo que sea retiro en tienda (indicalo en observaciones).'
+            );
+            return;
+        }
 
         await updateEnvioAsync({
             id: venta.id_venta,
@@ -210,45 +253,56 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
                                 error={form.formState.errors.metodo_pago?.message}
                             />
                         </div>
-                        <div className="space-y-3 rounded-lg border border-input bg-muted/20 p-4">
-                            <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                                <Package className="w-4 h-4" />
-                                Seguimiento de envío (manual)
-                            </h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <Input
-                                    label="Empresa de envío"
-                                    placeholder="Ej: Andreani"
-                                    className="bg-background"
-                                    value={empresaEnvio}
-                                    onChange={(e) => setEmpresaEnvio(e.target.value)}
-                                />
-                                <Input
-                                    label="Código de seguimiento"
-                                    placeholder="Ej: 360000102000579"
-                                    className="bg-background"
-                                    value={codigoSeguimiento}
-                                    onChange={(e) => setCodigoSeguimiento(e.target.value)}
-                                />
+                        {!esRetiro && (
+                            <div className="space-y-3 rounded-lg border border-input bg-muted/20 p-4">
+                                <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                    <Package className="w-4 h-4" />
+                                    Seguimiento de envío (manual)
+                                </h4>
+                                {bloqueadoPorDireccion && (
+                                    <p className="text-sm text-amber-700 dark:text-amber-400">
+                                        Completá calle, ciudad y CP del cliente en el paso Datos para poder cargar seguimiento (no aplica si el pedido es retiro en tienda: indicarlo en observaciones).
+                                    </p>
+                                )}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <Input
+                                        label="Empresa de envío"
+                                        placeholder="Ej: Andreani"
+                                        className="bg-background"
+                                        value={empresaEnvio}
+                                        onChange={(e) => setEmpresaEnvio(e.target.value)}
+                                    />
+                                    <Input
+                                        label="Código de seguimiento"
+                                        placeholder="Ej: 360000102000579"
+                                        className="bg-background"
+                                        value={codigoSeguimiento}
+                                        onChange={(e) => setCodigoSeguimiento(e.target.value)}
+                                    />
+                                </div>
+                                <div className="flex justify-end">
+                                    <Button
+                                        type="button"
+                                        variant="outline-primary"
+                                        disabled={
+                                            isUpdating ||
+                                            (!empresaEnvio.trim() && !codigoSeguimiento.trim()) ||
+                                            bloqueadoPorDireccion
+                                        }
+                                        onClick={() => void handleGuardarSeguimiento()}
+                                    >
+                                        Guardar seguimiento
+                                    </Button>
+                                </div>
                             </div>
-                            <div className="flex justify-end">
-                                <Button
-                                    type="button"
-                                    variant="outline-primary"
-                                    disabled={isUpdating || (!empresaEnvio.trim() && !codigoSeguimiento.trim())}
-                                    onClick={() => void handleGuardarSeguimiento()}
-                                >
-                                    Guardar seguimiento
-                                </Button>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 )}
 
                 {step === 2 && (
                     <div className="overflow-y-auto max-h-[min(70vh,600px)] pr-1">
                         <p className="text-sm text-muted-foreground mb-3">
-                            Editá los datos del cliente y las observaciones. Al guardar se actualizan la venta y el cliente.
+                            Editá los datos del cliente y las observaciones. Al guardar se actualizan primero el cliente y luego la venta. Para envío a domicilio, calle, ciudad y código postal son obligatorios antes de aprobar el pago; si es retiro en tienda, indicarlo en observaciones.
                         </p>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {/* Col 1: Contacto (editable) + Tipo (solo lectura) */}

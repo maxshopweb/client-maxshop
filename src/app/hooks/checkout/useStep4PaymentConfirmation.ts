@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useCheckoutStore } from "./useCheckoutStore";
 import { useAuth } from "@/app/context/AuthContext";
@@ -9,6 +9,8 @@ import { useCreateOrderFromCheckout } from "@/app/hooks/ventas/useCreateOrderFro
 import { useCheckoutFlowGuard } from "./useCheckoutFlowGuard";
 import { useCostoEnvioEnStep4 } from "./useCostoEnvioEnStep4";
 import { toast } from "sonner";
+import { isCarritoStockOk, validateCarritoCompleto } from "@/app/utils/stock";
+import { OBSERVACION_RETIRO_EN_TIENDA } from "@/app/utils/venta-envio.validation";
 
 export function useStep4PaymentConfirmation() {
   const router = useRouter();
@@ -27,6 +29,8 @@ export function useStep4PaymentConfirmation() {
   const { items } = useCartStore();
   const { isCalculandoEnvio } = useCostoEnvioEnStep4();
   const [selectedMethod, setSelectedMethod] = useState<string | null>(paymentMethod);
+
+  const carritoStockOk = useMemo(() => isCarritoStockOk(items), [items]);
 
   const guard = useCheckoutFlowGuard({ requiredStep: 4, redirectOnFail: false });
 
@@ -94,16 +98,22 @@ export function useStep4PaymentConfirmation() {
       return;
     }
 
+    const stockCheck = validateCarritoCompleto(items);
+    if (!stockCheck.ok) {
+      toast.error("Stock insuficiente", { description: stockCheck.message });
+      return;
+    }
+
     const detalles = items.map((item) => ({
       id_prod: item.id_prod,
       cantidad: item.cantidad,
-      precio_unitario: item.precio_unitario,
       descuento_aplicado: item.descuento || 0,
     }));
     const idCliente = user?.uid || undefined;
     const fullPhone = `${personalData.phoneArea}${personalData.phone}`;
-    // Observaciones solo para notas del pedido; tel y dirección van en direccion/telefono
-    const observaciones = "";
+    // Retiro: marca la venta en API (Andreani, mails). Envío: sin nota extra; tel y dirección van en direccion/telefono
+    const observaciones =
+      shippingData.tipoEntrega === "retiro" ? OBSERVACION_RETIRO_EN_TIENDA : "";
 
     const direccionData =
       shippingData.tipoEntrega === "envio" && shippingData.postalCode
@@ -145,5 +155,6 @@ export function useStep4PaymentConfirmation() {
     isCalculandoEnvio,
     createOrder,
     isCreating,
+    carritoStockOk,
   };
 }

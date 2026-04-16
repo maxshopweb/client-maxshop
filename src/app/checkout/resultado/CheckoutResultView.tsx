@@ -20,8 +20,8 @@ function CheckoutResultContent({ initialConfig }: { initialConfig: IConfigTienda
   const router = useRouter();
   const result = useCheckoutResult();
   const { clearCart } = useCartStore();
-  const { resetCheckout, setWasGuest, shippingData } = useCheckoutStore();
-  const { logout } = useAuth();
+  const { resetCheckout, shippingData } = useCheckoutStore();
+  const { logout, isGuest, loading: authLoading } = useAuth();
   const isRetiroFlowRef = useRef(shippingData?.tipoEntrega === "retiro");
 
   const resultWithBank = useMemo((): ICheckoutResult => {
@@ -57,14 +57,15 @@ function CheckoutResultContent({ initialConfig }: { initialConfig: IConfigTienda
 
   useEffect(() => {
     if (!result.id_venta) return;
-    const wasGuest = useCheckoutStore.getState().wasGuest;
     clearCart();
     resetCheckout();
-    if (wasGuest) {
-      setWasGuest(true);
+    // Cerrar sesión solo si el usuario sigue siendo invitado (estado === 1) en auth.
+    // No usar wasGuest persistido: puede quedar true tras registrarse (localStorage viejo).
+    if (authLoading) return;
+    if (isGuest) {
       logout(true);
     }
-  }, [result.id_venta, clearCart, resetCheckout, setWasGuest, logout]);
+  }, [result.id_venta, clearCart, resetCheckout, logout, authLoading, isGuest]);
 
   if (!result.id_venta && result.status !== "processing") {
     return (

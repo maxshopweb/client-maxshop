@@ -8,6 +8,7 @@ import ConfirmModal from "../modals/ConfirmModal";
 import { useHandleCart } from "@/app/hooks/useHandleCart";
 import { useNormalizeProduct } from "@/app/hooks/useNormalizeProduct";
 import { formatCurrencyARS } from "@/app/utils/currency";
+import { getStockDisponible } from "@/app/utils/stock";
 
 interface ProductCartProps {
   // Puede recibir ICartItem (del cartStore) o CartItem (del checkoutStore)
@@ -65,6 +66,10 @@ export default function ProductCart({
   const isDeleting = itemToDelete === id_prod;
   const totalSinImpuestos = subtotal_sin_iva ?? (precio_unitario_sin_iva || 0) * cantidad;
   const showSubtotal = false;
+
+  const stockDisponible =
+    "producto" in product ? getStockDisponible((product as ICartItem).producto) : null;
+  const alLimiteStock = stockDisponible !== null && cantidad >= stockDisponible;
 
   // Variante pequeña para resumen (solo lectura)
   if (variant === 'sm' || readOnly) {
@@ -198,14 +203,16 @@ export default function ProductCart({
                   {cantidad}
                 </span>
                 <button
+                  type="button"
                   onClick={() => {
-                    if (!readOnly) {
+                    if (!readOnly && !alLimiteStock) {
                       incrementar(id_prod, cantidad);
                       onUpdate?.();
                     }
                   }}
-                  className="p-1.5 hover:bg-input rounded-sm transition-all duration-200 active:scale-95 flex items-center justify-center border border-transparent hover:border-principal/30"
-                  aria-label="Aumentar cantidad"
+                  disabled={readOnly || alLimiteStock}
+                  className="p-1.5 hover:bg-input rounded-sm transition-all duration-200 active:scale-95 flex items-center justify-center border border-transparent hover:border-principal/30 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-transparent"
+                  aria-label={alLimiteStock ? "Límite alcanzado" : "Aumentar cantidad"}
                 >
                   <Plus className="w-3.5 h-3.5 text-foreground" />
                 </button>

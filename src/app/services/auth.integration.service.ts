@@ -194,6 +194,11 @@ class AuthIntegrationService {
       });
       const usuario = this.mapBackendUserToUsuario(backendResult.user, backendResult.estado);
 
+      const verifyResult = await AuthService.sendRegistrationEmailVerification(firebaseUser);
+      if (!verifyResult.success) {
+        console.warn('[register] Email de verificación no enviado:', verifyResult.error);
+      }
+
       return {
         success: true,
         data: { firebaseUser, firebaseToken: token, backend: backendResult, usuario },

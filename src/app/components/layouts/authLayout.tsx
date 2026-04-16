@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { ReactNode } from 'react';
 import { ArrowLeft, ShoppingBagIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -88,9 +87,9 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4, ease: "easeOut" }}
-                className="md:hidden w-full max-w-md mx-auto bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl flex flex-col relative z-20 py-10"
+                className="md:hidden w-full max-w-md mx-auto max-h-[90vh] bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl flex flex-col relative z-20 py-10 overflow-hidden min-h-0"
             >
-                <div className="flex flex-col px-6 pt-8 gap-6 overflow-y-auto">
+                <div className="flex flex-col flex-1 min-h-0 min-w-0 w-full px-6 pt-8 gap-6 overflow-y-auto overflow-x-hidden overscroll-contain pb-4">
                     {/* Header Nav */}
                     <div className="flex justify-between items-center">
                         <a
@@ -118,21 +117,21 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
                     </div>
 
                     {/* Content */}
-                    <div className="flex flex-col">
+                    <div className="flex flex-col min-w-0 w-full">
                         {children}
                     </div>
                 </div>
             </motion.div>
 
-            {/* Desktop: Card Flotante Moderna */}
+            {/* Desktop: Card Flotante Moderna — altura acotada al viewport, scroll interno */}
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
-                className="hidden md:flex w-full max-w-5xl bg-white/90 backdrop-blur-2xl rounded-3xl shadow-2xl overflow-hidden flex-row relative z-30 mx-6 min-h-[600px] lg:min-h-[650px]"
+                className="hidden md:flex md:flex-row w-full max-w-5xl h-[min(90vh,680px)] max-h-[90vh] bg-white/90 backdrop-blur-2xl rounded-3xl shadow-2xl overflow-hidden relative z-30 mx-6 min-h-0 shrink-0"
             >
                 {/* Visual Side (Left) */}
-                <div className="w-1/2 relative overflow-hidden bg-gray-900">
+                <div className="w-1/2 min-h-0 h-full relative overflow-hidden bg-gray-900 self-stretch">
                     <Image
                         src="/imgs/login.jpg"
                         alt="MaxShop Background"
@@ -160,20 +159,22 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
                 </div>
 
                 {/* Content Side (Right) */}
-                <div className="w-1/2 flex flex-col p-12 lg:p-16 relative">
-                    <div className="absolute top-8 right-8">
+                <div className="w-1/2 min-h-0 min-w-0 h-full flex flex-col p-12 lg:p-16 relative self-stretch">
+                    <div className="absolute top-8 right-8 z-10">
                         <Image src="/logos/logo-negativo.svg" alt="logo" width={64} height={64} className="w-14 h-14 opacity-80" />
                     </div>
 
-                    <div className="flex flex-col h-full justify-center max-w-sm mx-auto w-full">
-                        <div className="mb-8">
+                    <div className="flex flex-col h-full min-h-0 min-w-0 max-w-sm mx-auto w-full pt-2">
+                        <div className="shrink-0 mb-6 pr-10 min-w-0">
                             <h2 className="text-2xl font-bold text-gray-900 mb-2">{title}</h2>
                             {subtitle && <p className="text-gray-500">{subtitle}</p>}
                         </div>
 
-                        {children}
+                        <div className="flex-1 min-h-0 min-w-0 w-full overflow-y-auto overflow-x-hidden overscroll-contain px-0.5">
+                            {children}
+                        </div>
 
-                        <div className="mt-auto pt-6 border-t border-gray-100 flex justify-center">
+                        <div className="shrink-0 pt-6 mt-auto border-t border-gray-100 flex justify-center">
                             <a
                                 href="/"
                                 onClick={handleGoHome}

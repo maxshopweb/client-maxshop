@@ -7,6 +7,7 @@ import { useCreateOrderFromCheckout } from "@/app/hooks/ventas/useCreateOrderFro
 import { useAuth } from "@/app/context/AuthContext";
 import { IDatosPago } from "@/app/types/cart.type";
 import { toast } from "sonner";
+import { OBSERVACION_RETIRO_EN_TIENDA } from "@/app/utils/venta-envio.validation";
 
 interface UseLocalPaymentHandlerOptions {
   formData: Partial<IDatosPago>;
@@ -65,7 +66,6 @@ export function useLocalPaymentHandler({ formData }: UseLocalPaymentHandlerOptio
     const detalles = items.map((item) => ({
       id_prod: item.id_prod,
       cantidad: item.cantidad,
-      precio_unitario: item.precio_unitario,
       descuento_aplicado: item.descuento || 0,
     }));
 
@@ -75,8 +75,8 @@ export function useLocalPaymentHandler({ formData }: UseLocalPaymentHandlerOptio
     // Concatenar teléfono completo (área + número)
     const fullPhone = `${personalData.phoneArea}${personalData.phone}`;
 
-    // Observaciones solo para notas del pedido; tel y dirección van en direccion/telefono
-    const observaciones = "";
+    const observaciones =
+      shippingData.tipoEntrega === "retiro" ? OBSERVACION_RETIRO_EN_TIENDA : "";
 
     // Preparar datos de dirección estructurados para actualizar el cliente (solo si es envío)
     const direccionData = shippingData.tipoEntrega === 'envio' && shippingData.postalCode ? {

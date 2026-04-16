@@ -19,7 +19,7 @@ interface CreateOrderFromCheckoutData {
   detalles: Array<{
     id_prod: number;
     cantidad: number;
-    precio_unitario: number;
+    precio_unitario?: number;
     descuento_aplicado?: number;
   }>;
   observaciones?: string;

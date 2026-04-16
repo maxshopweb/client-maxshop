@@ -43,6 +43,14 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
 };
 
 class AuthService {
+  /** URL pública de la app (evita continueUrl con localhost en mails de Firebase). */
+  private getAppBaseUrl(): string {
+    if (typeof window !== 'undefined') {
+      return process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+    }
+    return process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  }
+
   private mapFirebaseError(error: unknown, defaultMessage: string): string {
     if (error instanceof FirebaseError) {
       return AUTH_ERROR_MESSAGES[error.code] ?? defaultMessage;
@@ -125,14 +133,6 @@ class AuthService {
       }
 
       const credential = await createUserWithEmailAndPassword(auth, email.trim(), password);
-      
-      // Enviar email de verificación con URL personalizada
-      const actionCodeSettings = {
-        url: `${window.location.origin}/register/verify-email`,
-        handleCodeInApp: false,
-      };
-      
-      await sendEmailVerification(credential.user, actionCodeSettings);
 
       return {
         success: true,
@@ -200,6 +200,27 @@ class AuthService {
     }
   }
 
+  /**
+   * Envía el mail de verificación de Firebase (solo tras registro exitoso en backend).
+   */
+  async sendRegistrationEmailVerification(user: User): Promise<AuthResult<void>> {
+    try {
+      if (user.emailVerified) {
+        return { success: true, data: null, error: null };
+      }
+      const baseUrl = this.getAppBaseUrl();
+      const actionCodeSettings = {
+        url: `${baseUrl}/register/verify-email`,
+        handleCodeInApp: false
+      };
+      await sendEmailVerification(user, actionCodeSettings);
+      return { success: true, data: null, error: null };
+    } catch (error) {
+      const message = this.mapFirebaseError(error, 'Error al enviar el email de verificación.');
+      return { success: false, data: null, error: message };
+    }
+  }
+
   async resendEmailVerification(): Promise<AuthResult<void>> {
     try {
       const currentUser = auth.currentUser;
@@ -209,12 +230,13 @@ class AuthService {
       if (currentUser.emailVerified) {
         return { success: false, data: null, error: 'El email ya está verificado.' };
       }
-      
+
+      const baseUrl = this.getAppBaseUrl();
       const actionCodeSettings = {
-        url: `${window.location.origin}/register/verify-email`,
-        handleCodeInApp: false,
+        url: `${baseUrl}/register/verify-email`,
+        handleCodeInApp: false
       };
-      
+
       await sendEmailVerification(currentUser, actionCodeSettings);
       return { success: true, data: null, error: null };
     } catch (error) {

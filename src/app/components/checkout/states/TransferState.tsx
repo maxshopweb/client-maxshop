@@ -36,7 +36,7 @@ export default function TransferState({ id_venta, cod_interno, datos_bancarios, 
       />
       <ResultMessage mensaje={config.mensaje} id_venta={id_venta} cod_interno={cod_interno}>
         {config.mostrarDatosBancarios && datos_bancarios && (
-          <BankDetails datos={datos_bancarios} id_venta={id_venta} cod_interno={cod_interno} metodo={metodo} />
+          <BankDetails datos={datos_bancarios} id_venta={id_venta} cod_interno={cod_interno} />
         )}
       </ResultMessage>
       <ResultActions acciones={config.acciones} />

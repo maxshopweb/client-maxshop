@@ -14,8 +14,6 @@ export default function PasswordRequirements({
 }: PasswordRequirementsProps) {
   const { validation } = usePasswordValidation(password);
 
-  if (!password) return null;
-
   const requirements = [
     { key: 'minLength', label: 'Mínimo 6 caracteres', met: validation.minLength },
     { key: 'hasNumber', label: 'Al menos un número', met: validation.hasNumber },
@@ -25,21 +23,21 @@ export default function PasswordRequirements({
   ];
 
   return (
-    <div className={`mt-1 space-y-1 ${className}`}>
+    <div className={`mt-1 space-y-1 min-w-0 ${className}`}>
       {requirements.map((req) => (
         <div
           key={req.key}
-          className="flex items-center gap-2 text-xs transition-colors"
+          className="flex items-start gap-2 text-xs transition-colors min-w-0"
           style={{
             color: req.met ? 'rgb(34, 197, 94)' : 'rgb(107, 114, 128)',
           }}
         >
           {req.met ? (
-            <Check size={14} strokeWidth={2.5} className="flex-shrink-0" />
+            <Check size={14} strokeWidth={2.5} className="shrink-0 mt-0.5" />
           ) : (
-            <X size={14} strokeWidth={2.5} className="flex-shrink-0" />
+            <X size={14} strokeWidth={2.5} className="shrink-0 mt-0.5" />
           )}
-          <span>{req.label}</span>
+          <span className="min-w-0 break-words leading-snug">{req.label}</span>
         </div>
       ))}
     </div>
