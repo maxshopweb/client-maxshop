@@ -74,6 +74,10 @@ class WebSocketClient {
    * Conecta al servidor WebSocket
    */
   connect(): void {
+    if (process.env.NEXT_PUBLIC_DISABLE_WS === 'true') {
+      return;
+    }
+
     if (this.ws?.readyState === WebSocket.OPEN) {
       return;
     }

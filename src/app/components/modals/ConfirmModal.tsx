@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import ModalBase from "./BaseModal";
-import { AlertCircle, CheckCircle, Info } from 'lucide-react';
+import { AlertCircle, CheckCircle, Info, Loader2 } from 'lucide-react';
 
 interface ConfirmModalProps {
     isOpen: boolean;
@@ -84,13 +84,20 @@ const ConfirmModal = ({
                         <button
                             onClick={handleConfirm}
                             disabled={isConfirming}
-                            className="flex-1 py-3 px-6 rounded-2xl font-medium transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg disabled:opacity-60"
+                            className="flex-1 py-3 px-6 rounded-2xl font-medium transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg disabled:opacity-60 inline-flex items-center justify-center gap-2"
                             style={{
                                 backgroundColor: 'var(--principal)',
                                 color: 'white'
                             }}
                         >
-                            {isConfirming ? '...' : confirmText}
+                            {isConfirming ? (
+                                <>
+                                    <Loader2 className="h-5 w-5 animate-spin shrink-0" aria-hidden />
+                                    <span>{confirmText}</span>
+                                </>
+                            ) : (
+                                confirmText
+                            )}
                         </button>
                     </div>
                 </div>
