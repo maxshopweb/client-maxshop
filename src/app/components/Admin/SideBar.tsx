@@ -15,7 +15,8 @@ import {
     LogOut,
     ShoppingCart,
     Zap,
-    FileText
+    FileText,
+    RefreshCw
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -37,6 +38,7 @@ const navItems: NavItem[] = [
     { icon: Users, label: "Clientes", path: "/admin/clientes" },
     { icon: Calendar, label: "Eventos", path: "/admin/eventos" },
     { icon: Zap, label: "Utilidades", path: "/admin/utilidades" },
+    { icon: RefreshCw, label: "Sincronización", path: "/admin/sincronizacion" },
     { icon: FileText, label: "Auditoría", path: "/admin/auditoria" },
     { icon: Settings, label: "Config", path: "/admin/config" },
 ];
