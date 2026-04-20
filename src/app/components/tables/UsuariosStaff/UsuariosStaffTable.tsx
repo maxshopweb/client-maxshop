@@ -78,14 +78,14 @@ export function UsuariosStaffTable({
   return (
     <div className="bg-card border border-card rounded-lg shadow-lg overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full">
           <thead>
             {table.getHeaderGroups().map((hg) => (
-              <tr key={hg.id} className="border-b border-card bg-input/30">
+              <tr key={hg.id} className="border-b border-gray-200 bg-gray-50">
                 {hg.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="text-left px-4 py-3 font-semibold text-input whitespace-nowrap"
+                    className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap"
                   >
                     {header.isPlaceholder
                       ? null
@@ -95,14 +95,11 @@ export function UsuariosStaffTable({
               </tr>
             ))}
           </thead>
-          <tbody>
+          <tbody className="bg-white divide-y divide-gray-200">
             {table.getRowModel().rows.map((row) => (
-              <tr
-                key={row.id}
-                className="border-b border-card/80 hover:bg-input/20 transition-colors"
-              >
+              <tr key={row.id} className="hover:bg-gray-50 transition-colors">
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-4 py-3 align-middle text-input">
+                  <td key={cell.id} className="px-4 py-3 align-middle text-text">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
