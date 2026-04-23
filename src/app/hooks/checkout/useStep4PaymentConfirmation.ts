@@ -43,8 +43,16 @@ export function useStep4PaymentConfirmation() {
         setTimeout(() => router.push(`/login?redirect=${encodeURIComponent("/checkout?step=4")}`), 2000);
         return;
       }
+      const backendDetails = error?.response?.data?.details;
+      const detailsDescription = Array.isArray(backendDetails) && backendDetails.length > 0
+        ? backendDetails.join(" | ")
+        : null;
       toast.error("Error al crear pedido", {
-        description: error?.response?.data?.error || error?.message || "Ocurrió un error al procesar tu pedido",
+        description:
+          detailsDescription ||
+          error?.response?.data?.error ||
+          error?.message ||
+          "Ocurrió un error al procesar tu pedido",
       });
     },
   });
@@ -107,6 +115,7 @@ export function useStep4PaymentConfirmation() {
     const detalles = items.map((item) => ({
       id_prod: item.id_prod,
       cantidad: item.cantidad,
+      precio_unitario: item.precio_unitario,
       descuento_aplicado: item.descuento || 0,
     }));
     const idCliente = user?.uid || undefined;
