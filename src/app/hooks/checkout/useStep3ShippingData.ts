@@ -41,8 +41,6 @@ export function useStep3ShippingData() {
   const city = watch("city");
   const state = watch("state");
   const postalCode = watch("postalCode");
-  const retiroCiudad = watch("retiro_ciudad");
-  const retiroProvincia = watch("retiro_provincia");
 
   const { provinciaOptions } = useContactFormOptions();
   const { data: direcciones = [] } = useQuery({
@@ -85,7 +83,7 @@ export function useStep3ShippingData() {
     }
   }, [tipoEntrega, state, city, ciudadStore, provinciaStore, provinciaOptions, setValue]);
 
-  // Autocompletar ciudad/provincia de retiro desde dirección guardada (una vez por selección de retiro)
+  // Autocompletar dirección en retiro desde dirección principal (una vez por selección de retiro)
   useEffect(() => {
     if (tipoEntrega !== "retiro") {
       retiroAutofillAppliedRef.current = false;
@@ -94,14 +92,17 @@ export function useStep3ShippingData() {
     if (!isAuthenticated || retiroAutofillAppliedRef.current) return;
     const principal = direcciones.find((d) => d.es_principal) ?? direcciones[0];
     if (!principal) return;
-    if (principal.ciudad) {
-      setValue("retiro_ciudad", String(principal.ciudad), { shouldValidate: true });
-    }
-    if (principal.provincia) {
-      setValue("retiro_provincia", String(principal.provincia), { shouldValidate: true });
-    }
+    const opts = { shouldValidate: true, shouldDirty: true };
+    setValue("address", String(principal.direccion ?? ""), opts);
+    setValue("altura", String(principal.altura ?? ""), opts);
+    setValue("piso", String(principal.piso ?? ""), opts);
+    setValue("dpto", String(principal.dpto ?? ""), opts);
+    setValue("city", String(principal.ciudad ?? ""), opts);
+    setValue("state", String(principal.provincia ?? ""), opts);
+    setValue("postalCode", principal.cod_postal != null ? String(principal.cod_postal) : "", opts);
     retiroAutofillAppliedRef.current = true;
-  }, [tipoEntrega, isAuthenticated, direcciones, setValue]);
+    void trigger();
+  }, [tipoEntrega, isAuthenticated, direcciones, setValue, trigger]);
 
   // Sync tipoEntrega → store
   useEffect(() => {
@@ -163,20 +164,26 @@ export function useStep3ShippingData() {
     await trigger();
   };
 
-  // Dirección válida: guardada, o manual con calle, altura, ciudad, provincia y CP (4 dígitos)
-  const cpValid = postalCode && /^\d{4}$/.test(String(postalCode).trim());
-  const isAddressVerified =
-    tipoEntrega !== "envio" ||
-    !!selectedDireccionId ||
-    (!!(address && String(address).trim()) &&
-      !!(altura && String(altura).trim()) &&
-      !!(city && String(city).trim()) &&
-      !!(state && String(state).trim()) &&
-      !!cpValid);
+  const cpValid = postalCode && /^\d{4,5}$/.test(String(postalCode).trim());
+  const manualEnvioComplete =
+    !!(address && String(address).trim()) &&
+    !!(altura && String(altura).trim()) &&
+    !!(city && String(city).trim()) &&
+    !!(state && String(state).trim()) &&
+    !!cpValid;
 
-  const isRetiroReady =
-    tipoEntrega !== "retiro" ||
-    (!!retiroCiudad?.trim() && !!retiroProvincia?.trim());
+  const manualRetiroComplete =
+    !!(address && String(address).trim()) &&
+    !!(altura && String(altura).trim()) &&
+    !!(city && String(city).trim()) &&
+    !!(state && String(state).trim());
+
+  const isAddressVerified =
+    tipoEntrega === "envio"
+      ? !!selectedDireccionId || manualEnvioComplete
+      : tipoEntrega === "retiro"
+        ? !!selectedDireccionId || manualRetiroComplete
+        : false;
 
   return {
     form: { register, handleSubmit, errors, isValid, watch, setValue, control, trigger },
@@ -193,6 +200,5 @@ export function useStep3ShippingData() {
     onSubmit,
     handleDireccionSelect,
     isAddressVerified,
-    isRetiroReady,
   };
 }

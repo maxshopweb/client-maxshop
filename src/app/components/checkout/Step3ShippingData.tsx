@@ -26,7 +26,6 @@ export default function Step3ShippingData() {
     onSubmit,
     handleDireccionSelect,
     isAddressVerified,
-    isRetiroReady,
   } = useStep3ShippingData();
 
   const { searchByPostalCode, setAddressDataStore, isLoading: isLoadingCp, error: errorCp, foundData } = usePostalCodeSearch();
@@ -78,7 +77,7 @@ export default function Step3ShippingData() {
           error={errors.tipoEntrega?.message}
         />
 
-        {tipoEntrega === "envio" && (
+        {(tipoEntrega === "envio" || tipoEntrega === "retiro") && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
@@ -86,8 +85,18 @@ export default function Step3ShippingData() {
             className="space-y-4 pt-4 border-t"
             style={{ borderColor: "rgba(23, 28, 53, 0.1)" }}
           >
-            <h3 className="text-lg font-semibold text-foreground/90">Dirección de envío</h3>
-            {isAndreaniManualMode && (
+            {tipoEntrega === "retiro" && (
+              <p className="text-sm text-foreground/60">
+                Retirarás tu pedido en nuestro local sin costo. Tu pedido estará disponible para retiro entre 24 y 48 horas hábiles.
+                Completá tu domicilio para facturación y datos del cliente.
+              </p>
+            )}
+
+            <h3 className="text-lg font-semibold text-foreground/90">
+              {tipoEntrega === "envio" ? "Dirección de envío" : "Tu domicilio"}
+            </h3>
+
+            {isAndreaniManualMode && tipoEntrega === "envio" && (
               <div className="rounded-lg border bg-foreground/[0.03] px-3 py-2 text-sm text-foreground/80" style={{ borderColor: "rgba(23, 28, 53, 0.1)" }}>
                 <p>Envío a domicilio disponible. El costo se confirmará por WhatsApp/soporte.</p>
                 <p>El código de seguimiento se enviará una vez despachado.</p>
@@ -99,7 +108,6 @@ export default function Step3ShippingData() {
                 <label className="block text-sm font-medium text-foreground mb-2">Seleccionar dirección guardada</label>
                 <Select
                   options={[
-                    // { value: "", label: "Usar dirección nueva" },
                     ...direcciones.map((d) => ({
                       value: d.id_direccion,
                       label: `${d.nombre || "Sin nombre"} - ${d.direccion} ${d.altura}${d.es_principal ? " (Principal)" : ""}`,
@@ -189,87 +197,47 @@ export default function Step3ShippingData() {
               />
             </div>
 
-            <div className="space-y-1">
-              <div className="flex gap-2 items-end">
-                <Input
-                  label="Código Postal *"
-                  {...register("postalCode")}
-                  error={errors.postalCode?.message || errorCp || undefined}
-                  placeholder="5000"
-                  className="rounded-lg flex-1"
-                  style={{
-                    backgroundColor: "var(--white)",
-                    border: errors.postalCode || errorCp ? "1px solid rgb(239, 68, 68)" : "1px solid rgba(23, 28, 53, 0.1)",
-                  }}
-                />
-                <Button
-                  type="button"
-                  variant="outline-primary"
-                  size="md"
-                  className="shrink-0 h-11 min-h-11 rounded-lg"
-                  onClick={handleBuscarCp}
-                  disabled={!postalCodeWatch || !/^[0-9]{4}$/.test(String(postalCodeWatch).trim()) || isLoadingCp}
-                >
-                  {isLoadingCp ? (
-                    <span className="animate-pulse">...</span>
-                  ) : (
-                    <>
-                      <Search className="w-4 h-4 mr-1" />
-                      Buscar
-                    </>
-                  )}
-                </Button>
-              </div>
-              <p className="text-xs text-foreground/60">Ingresá tu CP y tocá Buscar para completar localidad y provincia.</p>
-            </div>
+            {tipoEntrega === "envio" && (
+              <>
+                <div className="space-y-1">
+                  <div className="flex gap-2 items-end">
+                    <Input
+                      label="Código Postal *"
+                      {...register("postalCode")}
+                      error={errors.postalCode?.message || errorCp || undefined}
+                      placeholder="5000"
+                      className="rounded-lg flex-1"
+                      style={{
+                        backgroundColor: "var(--white)",
+                        border: errors.postalCode || errorCp ? "1px solid rgb(239, 68, 68)" : "1px solid rgba(23, 28, 53, 0.1)",
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline-primary"
+                      size="md"
+                      className="shrink-0 h-11 min-h-11 rounded-lg"
+                      onClick={handleBuscarCp}
+                      disabled={!postalCodeWatch || !/^[0-9]{4}$/.test(String(postalCodeWatch).trim()) || isLoadingCp}
+                    >
+                      {isLoadingCp ? (
+                        <span className="animate-pulse">...</span>
+                      ) : (
+                        <>
+                          <Search className="w-4 h-4 mr-1" />
+                          Buscar
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-foreground/60">Ingresá tu CP y tocá Buscar para completar localidad y provincia.</p>
+                </div>
 
-            <input type="hidden" {...register("direccion_formateada")} />
-            <input type="hidden" {...register("latitud", { valueAsNumber: true })} />
-            <input type="hidden" {...register("longitud", { valueAsNumber: true })} />
-          </motion.div>
-        )}
-
-        {tipoEntrega === "retiro" && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="space-y-4 pt-4 border-t"
-            style={{ borderColor: "rgba(23, 28, 53, 0.1)" }}
-          >
-            <p className="text-sm text-foreground/60">
-              Retirarás tu pedido en nuestro local sin costo. Tu pedido estará disponible para retiro entre 24 y 48 horas hábiles.
-            </p>
-            <p className="text-sm text-foreground/70">
-              Para facturar el pedido, indicanos tu ciudad y provincia.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Controller
-                name="retiro_provincia"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    label="Provincia *"
-                    options={provinciaOptions}
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder="Seleccionar provincia"
-                    error={errors.retiro_provincia?.message}
-                  />
-                )}
-              />
-              <Input
-                label="Ciudad *"
-                {...register("retiro_ciudad")}
-                error={errors.retiro_ciudad?.message}
-                placeholder="Ciudad"
-                className="rounded-lg"
-                style={{
-                  backgroundColor: "var(--white)",
-                  border: errors.retiro_ciudad ? "1px solid rgb(239, 68, 68)" : "1px solid rgba(23, 28, 53, 0.1)",
-                }}
-              />
-            </div>
+                <input type="hidden" {...register("direccion_formateada")} />
+                <input type="hidden" {...register("latitud", { valueAsNumber: true })} />
+                <input type="hidden" {...register("longitud", { valueAsNumber: true })} />
+              </>
+            )}
           </motion.div>
         )}
 
@@ -284,8 +252,7 @@ export default function Step3ShippingData() {
             size="lg"
             disabled={
               !tipoEntrega ||
-              (tipoEntrega === "envio" && !isAddressVerified) ||
-              (tipoEntrega === "retiro" && !isRetiroReady) ||
+              ((tipoEntrega === "envio" || tipoEntrega === "retiro") && !isAddressVerified) ||
               isSubmitting
             }
             className="rounded-lg flex-1"

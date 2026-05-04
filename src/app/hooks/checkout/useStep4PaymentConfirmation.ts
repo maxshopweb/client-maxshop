@@ -124,26 +124,30 @@ export function useStep4PaymentConfirmation() {
     const observaciones =
       shippingData.tipoEntrega === "retiro" ? OBSERVACION_RETIRO_EN_TIENDA : "";
 
+    const buildDireccionPayload = () => {
+      const rawCp = shippingData.postalCode?.trim();
+      let cod_postal: number | null = null;
+      if (rawCp) {
+        const parsed = parseInt(rawCp, 10);
+        cod_postal = !isNaN(parsed) && parsed > 0 ? parsed : null;
+      }
+      return {
+        direccion: shippingData.address || "",
+        altura: shippingData.altura || "",
+        piso: shippingData.piso || undefined,
+        dpto: shippingData.dpto || undefined,
+        ciudad: shippingData.city || "",
+        provincia: shippingData.state || "",
+        cod_postal,
+        telefono: fullPhone,
+      };
+    };
+
     const direccionData =
       shippingData.tipoEntrega === "envio" && shippingData.postalCode
-        ? {
-            direccion: shippingData.address || "",
-            altura: shippingData.altura || "",
-            piso: shippingData.piso || undefined,
-            dpto: shippingData.dpto || undefined,
-            ciudad: shippingData.city || "",
-            provincia: shippingData.state || "",
-            cod_postal: (() => {
-              const parsed = parseInt(shippingData.postalCode!.trim(), 10);
-              return isNaN(parsed) ? null : parsed;
-            })(),
-            telefono: fullPhone,
-          }
+        ? buildDireccionPayload()
         : shippingData.tipoEntrega === "retiro"
-          ? {
-              ciudad: shippingData.retiro_ciudad || "",
-              provincia: shippingData.retiro_provincia || "",
-            }
+          ? buildDireccionPayload()
           : undefined;
 
     createOrder({

@@ -172,11 +172,18 @@ export const useCheckoutStore = create<CheckoutStore>()(
         provincia: state.provincia,
         // wasGuest: no persistir — debe alinearse con auth (estado invitado), no con storage viejo
       }),
-      version: 1,
-      migrate: (persistedState: unknown, _version: number) => {
+      version: 2,
+      migrate: (persistedState: unknown, fromVersion: number) => {
         const s = persistedState as Record<string, unknown>;
         const { contactData: _removed, ...rest } = s ?? {};
-        return rest;
+        let out: Record<string, unknown> = { ...rest };
+        if (fromVersion < 2 && out.shippingData != null && typeof out.shippingData === "object" && !Array.isArray(out.shippingData)) {
+          const sd = { ...(out.shippingData as Record<string, unknown>) };
+          delete sd.retiro_ciudad;
+          delete sd.retiro_provincia;
+          out = { ...out, shippingData: sd };
+        }
+        return out;
       },
     }
   )
