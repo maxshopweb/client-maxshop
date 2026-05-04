@@ -160,6 +160,27 @@ class VentasService {
     return response.data as Blob;
   }
 
+  /** Descarga Ventas.xlsx desde el FTP (admin). Lanza Error con mensaje del servidor si 404/500. */
+  async downloadVentasExcelFtp(): Promise<Blob> {
+    const response = await axiosInstance.get('/ventas/excel-ftp', {
+      responseType: 'blob',
+      validateStatus: () => true,
+    });
+    const data = response.data as Blob;
+    if (response.status !== 200) {
+      let message = `Error HTTP ${response.status}`;
+      try {
+        const text = await data.text();
+        const j = JSON.parse(text) as { error?: string };
+        if (typeof j.error === 'string' && j.error.length > 0) message = j.error;
+      } catch {
+        /* dejar message por defecto */
+      }
+      throw new Error(message);
+    }
+    return data;
+  }
+
   async getByCliente(idCliente: string, filters: IVentaFilters = {}): Promise<IPaginatedResponse<IVenta>> {
     return this.getAll({ ...filters, id_cliente: idCliente });
   }

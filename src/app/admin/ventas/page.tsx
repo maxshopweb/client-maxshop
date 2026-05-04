@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { Plus, RefreshCw, ShoppingCart, DollarSign, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { Plus, RefreshCw, FileSpreadsheet, ShoppingCart, DollarSign, TrendingUp, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { VentasFilters } from '@/app/components/tables/Ventas/VentasFilters';
 import { VentasTableWrapper } from '@/app/components/tables/Ventas/VentasTableWrapper';
@@ -45,6 +45,7 @@ function VentasPageContent() {
     } = useVentasPage();
 
     const stats = useVentasStats();
+    const [isDownloadingFtp, setIsDownloadingFtp] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [pendingAction, setPendingAction] = useState<(() => () => Promise<void>) | null>(null);
 
@@ -64,6 +65,26 @@ function VentasPageContent() {
         setPendingAction(null);
         setShowPasswordModal(false);
     }, [pendingAction]);
+
+    const handleDownloadFtpExcel = useCallback(async () => {
+        setIsDownloadingFtp(true);
+        try {
+            const blob = await ventasService.downloadVentasExcelFtp();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Ventas.xlsx';
+            a.click();
+            URL.revokeObjectURL(url);
+            toast.success('Descarga iniciada', { description: 'Ventas.xlsx desde el FTP.' });
+        } catch (e) {
+            toast.error('No se pudo descargar el Excel', {
+                description: e instanceof Error ? e.message : 'Error desconocido.',
+            });
+        } finally {
+            setIsDownloadingFtp(false);
+        }
+    }, []);
 
     const handleBulkDownload = useCallback(async (ids: number[]) => {
         try {
@@ -99,6 +120,16 @@ function VentasPageContent() {
                     >
                         <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
                         Refrescar
+                    </Button>
+                    <Button
+                        type="button"
+                        onClick={handleDownloadFtpExcel}
+                        disabled={isDownloadingFtp}
+                        variant="outline-primary"
+                        className="flex items-center gap-2 justify-center"
+                    >
+                        <FileSpreadsheet className={`h-4 w-4 ${isDownloadingFtp ? 'animate-pulse' : ''}`} />
+                        Descargar EXCEL FTP
                     </Button>
                     <Button onClick={openCreateModal}>
                         <Plus className="h-5 w-5" />
