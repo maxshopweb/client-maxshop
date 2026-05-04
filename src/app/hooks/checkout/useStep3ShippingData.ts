@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useCheckoutStore } from "./useCheckoutStore";
 import { useAuth } from "@/app/context/AuthContext";
@@ -31,6 +31,7 @@ export function useStep3ShippingData() {
   const { isAuthenticated } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedDireccionId, setSelectedDireccionId] = useState<string | null>(id_direccion);
+  const retiroAutofillAppliedRef = useRef(false);
 
   const form = useShippingForm();
   const { register, handleSubmit, formState: { errors, isValid }, watch, setValue, control, trigger } = form;
@@ -40,12 +41,14 @@ export function useStep3ShippingData() {
   const city = watch("city");
   const state = watch("state");
   const postalCode = watch("postalCode");
+  const retiroCiudad = watch("retiro_ciudad");
+  const retiroProvincia = watch("retiro_provincia");
 
   const { provinciaOptions } = useContactFormOptions();
   const { data: direcciones = [] } = useQuery({
     queryKey: ["direcciones"],
     queryFn: () => direccionesService.getAll(),
-    enabled: isAuthenticated && tipoEntrega === "envio",
+    enabled: isAuthenticated,
   });
 
   // Sync postalCode form → store (debounced)
@@ -82,13 +85,35 @@ export function useStep3ShippingData() {
     }
   }, [tipoEntrega, state, city, ciudadStore, provinciaStore, provinciaOptions, setValue]);
 
+  // Autocompletar ciudad/provincia de retiro desde dirección guardada (una vez por selección de retiro)
+  useEffect(() => {
+    if (tipoEntrega !== "retiro") {
+      retiroAutofillAppliedRef.current = false;
+      return;
+    }
+    if (!isAuthenticated || retiroAutofillAppliedRef.current) return;
+    const principal = direcciones.find((d) => d.es_principal) ?? direcciones[0];
+    if (!principal) return;
+    if (principal.ciudad) {
+      setValue("retiro_ciudad", String(principal.ciudad), { shouldValidate: true });
+    }
+    if (principal.provincia) {
+      setValue("retiro_provincia", String(principal.provincia), { shouldValidate: true });
+    }
+    retiroAutofillAppliedRef.current = true;
+  }, [tipoEntrega, isAuthenticated, direcciones, setValue]);
+
   // Sync tipoEntrega → store
   useEffect(() => {
     if (tipoEntrega) {
       setTipoEntrega(tipoEntrega);
-      if (tipoEntrega === "retiro") setCostoEnvio(0);
+      if (tipoEntrega === "retiro") {
+        setCostoEnvio(0);
+        setIdDireccion(null);
+        setSelectedDireccionId(null);
+      }
     }
-  }, [tipoEntrega, setTipoEntrega, setCostoEnvio]);
+  }, [tipoEntrega, setTipoEntrega, setCostoEnvio, setIdDireccion]);
 
   const handleGoBack = () => {
     setCodigoPostalStore(null);
@@ -149,6 +174,10 @@ export function useStep3ShippingData() {
       !!(state && String(state).trim()) &&
       !!cpValid);
 
+  const isRetiroReady =
+    tipoEntrega !== "retiro" ||
+    (!!retiroCiudad?.trim() && !!retiroProvincia?.trim());
+
   return {
     form: { register, handleSubmit, errors, isValid, watch, setValue, control, trigger },
     tipoEntrega,
@@ -164,5 +193,6 @@ export function useStep3ShippingData() {
     onSubmit,
     handleDireccionSelect,
     isAddressVerified,
+    isRetiroReady,
   };
 }

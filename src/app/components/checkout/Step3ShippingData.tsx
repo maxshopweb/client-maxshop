@@ -26,6 +26,7 @@ export default function Step3ShippingData() {
     onSubmit,
     handleDireccionSelect,
     isAddressVerified,
+    isRetiroReady,
   } = useStep3ShippingData();
 
   const { searchByPostalCode, setAddressDataStore, isLoading: isLoadingCp, error: errorCp, foundData } = usePostalCodeSearch();
@@ -229,13 +230,47 @@ export default function Step3ShippingData() {
         )}
 
         {tipoEntrega === "retiro" && (
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-sm text-foreground/60"
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="space-y-4 pt-4 border-t"
+            style={{ borderColor: "rgba(23, 28, 53, 0.1)" }}
           >
-            Retirarás tu pedido en nuestro local sin costo. Tu pedido estará disponible para retiro entre 24 y 48 horas hábiles.
-          </motion.p>
+            <p className="text-sm text-foreground/60">
+              Retirarás tu pedido en nuestro local sin costo. Tu pedido estará disponible para retiro entre 24 y 48 horas hábiles.
+            </p>
+            <p className="text-sm text-foreground/70">
+              Para facturar el pedido, indicanos tu ciudad y provincia.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Controller
+                name="retiro_provincia"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    label="Provincia *"
+                    options={provinciaOptions}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Seleccionar provincia"
+                    error={errors.retiro_provincia?.message}
+                  />
+                )}
+              />
+              <Input
+                label="Ciudad *"
+                {...register("retiro_ciudad")}
+                error={errors.retiro_ciudad?.message}
+                placeholder="Ciudad"
+                className="rounded-lg"
+                style={{
+                  backgroundColor: "var(--white)",
+                  border: errors.retiro_ciudad ? "1px solid rgb(239, 68, 68)" : "1px solid rgba(23, 28, 53, 0.1)",
+                }}
+              />
+            </div>
+          </motion.div>
         )}
 
         <div className="flex gap-4 pt-4">
@@ -247,7 +282,12 @@ export default function Step3ShippingData() {
             type="button"
             variant="primary"
             size="lg"
-            disabled={!tipoEntrega || (tipoEntrega === "envio" && !isAddressVerified) || isSubmitting}
+            disabled={
+              !tipoEntrega ||
+              (tipoEntrega === "envio" && !isAddressVerified) ||
+              (tipoEntrega === "retiro" && !isRetiroReady) ||
+              isSubmitting
+            }
             className="rounded-lg flex-1"
             onClick={(e) => {
               e.preventDefault();

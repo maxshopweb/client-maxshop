@@ -50,50 +50,6 @@ export default function BankDetails({ datos, id_venta, cod_interno }: BankDetail
         </h3>
 
         <div className="space-y-4">
-          {/* Banco */}
-          <DetailRow
-            label="Banco"
-            value={datos.banco}
-            onCopy={() => copy(datos.banco, "banco")}
-            copied={copied === "banco"}
-          />
-
-          {/* Tipo de cuenta */}
-          <DetailRow
-            label="Tipo de cuenta"
-            value={datos.tipo_cuenta}
-            onCopy={() => copy(datos.tipo_cuenta, "tipo")}
-            copied={copied === "tipo"}
-          />
-
-          {/* Número de cuenta */}
-          <DetailRow
-            label="Número de cuenta"
-            value={datos.numero_cuenta}
-            onCopy={() => copy(datos.numero_cuenta, "cuenta")}
-            copied={copied === "cuenta"}
-          />
-
-          {/* CBU */}
-          {datos.cbu && (
-            <DetailRow
-              label="CBU"
-              value={datos.cbu}
-              onCopy={() => copy(datos.cbu!, "cbu")}
-              copied={copied === "cbu"}
-            />
-          )}
-
-          {/* Alias */}
-          {datos.alias && (
-            <DetailRow
-              label="Alias"
-              value={datos.alias}
-              onCopy={() => copy(datos.alias!, "alias")}
-              copied={copied === "alias"}
-            />
-          )}
-
           {/* Titular */}
           <DetailRow
             label="Titular"
@@ -102,13 +58,33 @@ export default function BankDetails({ datos, id_venta, cod_interno }: BankDetail
             copied={copied === "titular"}
           />
 
-          {/* CUIT */}
+          {/* CUIT/CUIL */}
           {datos.cuit && (
             <DetailRow
-              label="CUIT"
+              label="CUIT/CUIL"
               value={datos.cuit}
-              onCopy={() => copy(datos.cuit!, "cuit")}
+              onCopy={() => copy(datos.cuit, "cuit")}
               copied={copied === "cuit"}
+            />
+          )}
+
+          {/* CVU (almacenado en cbu por compatibilidad) */}
+          {datos.cbu && (
+            <DetailRow
+              label="CVU"
+              value={datos.cbu}
+              onCopy={() => copy(datos.cbu, "cvu")}
+              copied={copied === "cvu"}
+            />
+          )}
+
+          {/* Alias */}
+          {datos.alias && (
+            <DetailRow
+              label="Alias"
+              value={datos.alias}
+              onCopy={() => copy(datos.alias, "alias")}
+              copied={copied === "alias"}
             />
           )}
         </div>

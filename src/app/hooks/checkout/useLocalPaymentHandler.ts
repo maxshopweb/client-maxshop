@@ -78,20 +78,28 @@ export function useLocalPaymentHandler({ formData }: UseLocalPaymentHandlerOptio
     const observaciones =
       shippingData.tipoEntrega === "retiro" ? OBSERVACION_RETIRO_EN_TIENDA : "";
 
-    // Preparar datos de dirección estructurados para actualizar el cliente (solo si es envío)
-    const direccionData = shippingData.tipoEntrega === 'envio' && shippingData.postalCode ? {
-      direccion: shippingData.address || '',
-      altura: shippingData.altura || '',
-      piso: shippingData.piso || undefined,
-      dpto: shippingData.dpto || undefined,
-      ciudad: shippingData.city || '',
-      provincia: shippingData.state || '',
-      cod_postal: (() => {
-        const parsed = parseInt(shippingData.postalCode!.trim(), 10);
-        return isNaN(parsed) ? null : parsed;
-      })(),
-      telefono: fullPhone,
-    } : undefined;
+    // Actualizar cliente: envío completo, o retiro con ciudad/provincia para facturación
+    const direccionData =
+      shippingData.tipoEntrega === "envio" && shippingData.postalCode
+        ? {
+            direccion: shippingData.address || "",
+            altura: shippingData.altura || "",
+            piso: shippingData.piso || undefined,
+            dpto: shippingData.dpto || undefined,
+            ciudad: shippingData.city || "",
+            provincia: shippingData.state || "",
+            cod_postal: (() => {
+              const parsed = parseInt(shippingData.postalCode!.trim(), 10);
+              return isNaN(parsed) ? null : parsed;
+            })(),
+            telefono: fullPhone,
+          }
+        : shippingData.tipoEntrega === "retiro"
+          ? {
+              ciudad: shippingData.retiro_ciudad || "",
+              provincia: shippingData.retiro_provincia || "",
+            }
+          : undefined;
 
     // Crear el pedido usando el hook correcto
     createOrder({

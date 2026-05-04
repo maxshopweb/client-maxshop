@@ -10,7 +10,7 @@ export function useShippingForm() {
 
   const form = useForm<ShippingFormData>({
     resolver: zodResolver(shippingFormSchema),
-    defaultValues: shippingData || {
+    defaultValues: {
       tipoEntrega: tipoEntrega || undefined,
       address: '',
       altura: '',
@@ -20,6 +20,11 @@ export function useShippingForm() {
       state: '',
       postalCode: '',
       mismaDireccionEnvio: true,
+      retiro_ciudad: '',
+      retiro_provincia: '',
+      ...(shippingData || {}),
+      retiro_ciudad: shippingData?.retiro_ciudad ?? '',
+      retiro_provincia: shippingData?.retiro_provincia ?? '',
     },
     mode: 'onChange',
   });

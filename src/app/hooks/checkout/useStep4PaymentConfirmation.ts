@@ -139,7 +139,12 @@ export function useStep4PaymentConfirmation() {
             })(),
             telefono: fullPhone,
           }
-        : undefined;
+        : shippingData.tipoEntrega === "retiro"
+          ? {
+              ciudad: shippingData.retiro_ciudad || "",
+              provincia: shippingData.retiro_provincia || "",
+            }
+          : undefined;
 
     createOrder({
       id_cliente: idCliente,
