@@ -11,6 +11,7 @@ import { ConfigCard } from "@/app/components/Admin/Config/ConfigCard";
 import { IntegrationCard } from "@/app/components/Admin/Config/IntegrationCard";
 import { BannersPanel } from "@/app/components/Admin/Config/Banners/BannersPanel";
 import { DatosBancariosPanel } from "@/app/components/Admin/Config/DatosBancariosPanel";
+import { MantenimientoPanel } from "@/app/components/Admin/Config/MantenimientoPanel";
 import { Switch } from "@/app/components/ui/Switch";
 
 const INTEGRATIONS = [
@@ -57,6 +58,10 @@ export default function ConfigPage() {
             </ConfigSection>
 
             <DatosBancariosPanel config={config} isLoading={isLoading} mutation={mutation} />
+
+            <ConfigSection title="Modo mantenimiento">
+                <MantenimientoPanel config={config} isLoading={isLoading} mutation={mutation} />
+            </ConfigSection>
 
             <ConfigSection title="Reglas de negocio" columns={3}>
                 {isError && (
