@@ -60,9 +60,9 @@ export default function MobileMenuLinks({
               <button
                 type="button"
                 onClick={onOpenFilters}
-                className="w-full text-left py-3 px-4 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-all duration-300 text-sm"
+                className="w-full text-left py-4 px-4 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-all duration-300"
               >
-                Categorías, grupos y marcas
+                Categorías
               </button>
             </div>
           );
