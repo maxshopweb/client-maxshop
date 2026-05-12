@@ -137,7 +137,7 @@ export interface IProductoFilters {
     destacado?: boolean;
     publicado?: boolean;
     financiacion?: boolean;
-    /** Tienda: solo productos con lista Especial/Oferta (lista O) */
+    /** Tienda: lista Especial (O) o campaña (Q) */
     oferta?: boolean;
 
     // Filtro por stock

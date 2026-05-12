@@ -53,6 +53,8 @@ const valueRows = [
   {
     image: "/imgs/maxshop.jpg",
     badge: "Quiénes somos",
+    /** Ancla compartida con MENU_LINKS «Nosotros» (`/#about-us`) y useActiveSection */
+    sectionId: "about-us",
     title: "Trabajamos\npara vos.",
     description:
       "Equipamiento profesional y materiales de calidad para cada etapa de tu obra. Cada producto pasa por control antes de llegar a tus manos, y nuestro equipo te guía para elegir la solución adecuada a tu proyecto.",
@@ -78,7 +80,8 @@ function ValueRow({ row }: { row: (typeof valueRows)[number] }) {
 
   return (
     <div
-      className={`relative flex flex-col lg:flex-1 lg:min-h-0 overflow-hidden ${
+      id={"sectionId" in row && row.sectionId ? row.sectionId : undefined}
+      className={`relative flex flex-col lg:flex-1 lg:min-h-0 overflow-hidden scroll-mt-[140px] ${
         row.imageLeft ? "lg:flex-row" : "lg:flex-row-reverse"
       }`}
     >

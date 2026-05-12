@@ -361,7 +361,7 @@ export function ProductosFilters() {
                                                 </Checkbox.Indicator>
                                             </Checkbox.Root>
                                             <span className="text-sm text-input group-hover:text-principal transition-colors">
-                                                Solo productos en oferta
+                                                Ofertas y campañas (listas O y Q)
                                             </span>
                                         </label>
 
@@ -468,7 +468,7 @@ export function ProductosFilters() {
 
                     {filters.oferta === true && (
                         <FilterChip
-                            label="En oferta"
+                            label="Ofertas / campañas"
                             onRemove={() => setFilter('oferta', undefined)}
                         />
                     )}

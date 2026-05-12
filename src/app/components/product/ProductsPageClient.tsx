@@ -64,7 +64,7 @@ function ProductsPageContent() {
     useTiendaEndpoint: true,
   });
 
-  // Con oferta=true el backend ya filtra por lista Especial (O); usamos directamente la respuesta
+  // Con oferta=true el backend filtra por lista O o Q; usamos directamente la respuesta
   const productosToShow = productos;
   const totalProductos = pagination?.total ?? 0;
   const startIndex = pagination ? (pagination.page - 1) * pagination.limit + 1 : 0;
