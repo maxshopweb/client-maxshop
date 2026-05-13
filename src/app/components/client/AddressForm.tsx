@@ -83,11 +83,13 @@ export default function AddressForm({
         />
         <Input
           label="Piso"
+          maxLength={20}
           value={formData.piso || ""}
           onChange={(e) => setFormData({ ...formData, piso: e.target.value })}
         />
         <Input
           label="Dpto"
+          maxLength={20}
           value={formData.dpto || ""}
           onChange={(e) => setFormData({ ...formData, dpto: e.target.value })}
         />

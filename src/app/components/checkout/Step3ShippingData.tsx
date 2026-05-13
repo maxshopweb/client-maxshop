@@ -147,6 +147,7 @@ export default function Step3ShippingData() {
               />
               <Input
                 label="Piso (opcional)"
+                maxLength={20}
                 {...register("piso")}
                 error={errors.piso?.message}
                 placeholder="1"
@@ -158,6 +159,7 @@ export default function Step3ShippingData() {
               />
               <Input
                 label="Dpto (opcional)"
+                maxLength={20}
                 {...register("dpto")}
                 error={errors.dpto?.message}
                 placeholder="A"

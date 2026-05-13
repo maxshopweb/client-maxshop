@@ -7,8 +7,8 @@ export const shippingFormSchema = z.object({
   // Dirección (obligatoria en envío y retiro; mismo shape)
   address: z.string().optional(), // Calle (sin altura)
   altura: z.string().optional(), // Altura (número)
-  piso: z.string().optional(), // Piso (opcional)
-  dpto: z.string().optional(), // Departamento (opcional)
+  piso: z.string().trim().max(20, 'El piso admite como máximo 20 caracteres').optional(),
+  dpto: z.string().trim().max(20, 'El departamento admite como máximo 20 caracteres').optional(),
   city: z.string().optional(),
   state: z.string().optional(),
   postalCode: z.string().optional(),
