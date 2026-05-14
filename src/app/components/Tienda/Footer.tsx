@@ -118,7 +118,7 @@ export default function Footer() {
               </h3>
               <ul className="space-y-2.5">
                 {LEGAL_LINKS.map(({ label, href }) => (
-                  <li key={href}>
+                  <li key={label}>
                     <Link
                       href={href}
                       className="text-neutral-600 hover:text-neutral-900 transition-colors text-sm"

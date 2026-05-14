@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Plus, RefreshCw } from 'lucide-react';
+import { Plus, RefreshCw, ToggleLeft, ToggleRight, CheckSquare, Square } from 'lucide-react';
 import { Button } from '@/app/components/ui/Button';
 import { UtilidadesTabs, type UtilidadesTabKind } from './UtilidadesTabs';
 import { MaestrosTable } from './MaestrosTable';
@@ -19,6 +19,14 @@ import { useGrupos } from '@/app/hooks/grupos/useGrupos';
 import { useListasPrecio } from '@/app/hooks/listas-precio/useListasPrecio';
 import { useMaestrosFilters } from '@/app/hooks/maestros/useMaestrosFilters';
 import { useUtilidadesPagination } from '@/app/hooks/utilidades/useUtilidadesPagination';
+import {
+  useToggleMarcaActivo,
+  useToggleCategoriaActivo,
+  useToggleGrupoActivo,
+  useToggleAllMarcasActivo,
+  useToggleAllCategoriasActivo,
+  useToggleAllGruposActivo,
+} from '@/app/hooks/maestros/useMaestrosMutations';
 import type {
   MarcasPaginatedSSR,
   CategoriasPaginatedSSR,
@@ -26,6 +34,8 @@ import type {
   ListasPrecioPaginatedSSR,
 } from '@/app/lib/getMaestros';
 import type { AdminPaginationMeta } from '@/app/types/admin-pagination.type';
+import { AdminPageHeader } from '@/app/components/Admin/AdminPageHeader';
+import { AdminPageContainer } from '@/app/components/Admin/AdminPageContainer';
 
 function pickPaginatedMeta(d: unknown): AdminPaginationMeta | undefined {
   if (d && typeof d === 'object' && 'pagination' in d) {
@@ -33,8 +43,6 @@ function pickPaginatedMeta(d: unknown): AdminPaginationMeta | undefined {
   }
   return undefined;
 }
-import { AdminPageHeader } from '@/app/components/Admin/AdminPageHeader';
-import { AdminPageContainer } from '@/app/components/Admin/AdminPageContainer';
 
 type ModalType = 'create' | 'edit' | 'delete' | null;
 
@@ -60,6 +68,7 @@ export function UtilidadesPageClient({
 }: UtilidadesPageClientProps) {
   const [activeTab, setActiveTab] = useState<UtilidadesTabKind>('marca');
   const [modal, setModal] = useState<{ type: ModalType; item?: MaestroItem }>({ type: null });
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   const { busquedaInput, setBusquedaInput, clearBusqueda, busqueda } = useMaestrosFilters();
   const { page, limit, setPage, setLimit, goToPage, nextPage, prevPage } = useUtilidadesPagination();
@@ -71,6 +80,7 @@ export function UtilidadesPageClient({
     if (prevTabRef.current !== activeTab) {
       prevTabRef.current = activeTab;
       setPage(1);
+      setSelectedIds([]);
     }
   }, [activeTab, setPage]);
 
@@ -101,6 +111,13 @@ export function UtilidadesPageClient({
     enabled: activeTab === 'lista_precio',
     initialPaginated: initialListasPaginated,
   });
+
+  const toggleMarcaActivo = useToggleMarcaActivo();
+  const toggleCategoriaActivo = useToggleCategoriaActivo();
+  const toggleGrupoActivo = useToggleGrupoActivo();
+  const toggleAllMarcasActivo = useToggleAllMarcasActivo();
+  const toggleAllCategoriasActivo = useToggleAllCategoriasActivo();
+  const toggleAllGruposActivo = useToggleAllGruposActivo();
 
   const isListaTab = activeTab === 'lista_precio';
 
@@ -158,9 +175,46 @@ export function UtilidadesPageClient({
     void refetch();
   };
 
-  const label = isListaTab ? null : MAESTRO_LABELS[activeTab as MaestroKind];
+  const handleToggleActivo = (id: number, activo: boolean) => {
+    if (activeTab === 'marca') {
+      toggleMarcaActivo.mutate({ id, activo });
+    } else if (activeTab === 'categoria') {
+      toggleCategoriaActivo.mutate({ id, activo });
+    } else if (activeTab === 'grupo') {
+      toggleGrupoActivo.mutate({ id, activo });
+    }
+  };
 
+  const handleEnableAll = () => {
+    if (activeTab === 'marca') {
+      toggleAllMarcasActivo.mutate(true);
+    } else if (activeTab === 'categoria') {
+      toggleAllCategoriasActivo.mutate(true);
+    } else if (activeTab === 'grupo') {
+      toggleAllGruposActivo.mutate(true);
+    }
+  };
+
+  const handleDisableAll = () => {
+    if (activeTab === 'marca') {
+      toggleAllMarcasActivo.mutate(false);
+    } else if (activeTab === 'categoria') {
+      toggleAllCategoriasActivo.mutate(false);
+    } else if (activeTab === 'grupo') {
+      toggleAllGruposActivo.mutate(false);
+    }
+  };
+
+  const label = isListaTab ? null : MAESTRO_LABELS[activeTab as MaestroKind];
   const activePagination = isListaTab ? listasPagination : maestroPagination;
+
+  const isToggling =
+    toggleMarcaActivo.isPending ||
+    toggleCategoriaActivo.isPending ||
+    toggleGrupoActivo.isPending ||
+    toggleAllMarcasActivo.isPending ||
+    toggleAllCategoriasActivo.isPending ||
+    toggleAllGruposActivo.isPending;
 
   return (
     <div className="min-h-screen">
@@ -205,18 +259,47 @@ export function UtilidadesPageClient({
           </>
         ) : (
           <>
-            <MaestrosFilterInput
-              value={busquedaInput}
-              onChange={setBusquedaInput}
-              onClear={clearBusqueda}
-              placeholder="Buscar por nombre o código..."
-            />
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+              <div className="flex-1 min-w-[200px] max-w-md">
+                <MaestrosFilterInput
+                  value={busquedaInput}
+                  onChange={setBusquedaInput}
+                  onClear={clearBusqueda}
+                  placeholder="Buscar por nombre o código..."
+                />
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  type="button"
+                  variant="outline-success"
+                  onClick={handleEnableAll}
+                  disabled={isToggling}
+                  title="Habilitar todos"
+                >
+                  <ToggleRight className="h-4 w-4" />
+                  <span className="hidden sm:inline">Habilitar todos</span>
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline-cancel"
+                  onClick={handleDisableAll}
+                  disabled={isToggling}
+                  title="Deshabilitar todos"
+                >
+                  <ToggleLeft className="h-4 w-4" />
+                  <span className="hidden sm:inline">Deshabilitar todos</span>
+                </Button>
+              </div>
+            </div>
             <MaestrosTable
               kind={activeTab as MaestroKind}
               items={maestroItems as MaestroItem[]}
               isLoading={isLoading}
               onEdit={openEdit}
               onDelete={openDelete}
+              onToggleActivo={handleToggleActivo}
+              selectedIds={selectedIds}
+              onSelectionChange={setSelectedIds}
             />
             {activePagination && (
               <UtilidadesPagination

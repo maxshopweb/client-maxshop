@@ -135,3 +135,104 @@ export function useDeleteGrupo() {
     },
   });
 }
+
+// ========================================
+// TOGGLE ACTIVO INDIVIDUAL
+// ========================================
+
+export function useToggleMarcaActivo() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, activo }: { id: number; activo: boolean }) =>
+      marcaService.toggleActivo(id, activo),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['marcas'] });
+      toast.success(data.message);
+    },
+    onError: (error: unknown) => {
+      toast.error('Error al cambiar estado', { description: getErrorMessage(error) });
+    },
+  });
+}
+
+export function useToggleCategoriaActivo() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, activo }: { id: number; activo: boolean }) =>
+      categoriaService.toggleActivo(id, activo),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['categorias'] });
+      toast.success(data.message);
+    },
+    onError: (error: unknown) => {
+      toast.error('Error al cambiar estado', { description: getErrorMessage(error) });
+    },
+  });
+}
+
+export function useToggleGrupoActivo() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, activo }: { id: number; activo: boolean }) =>
+      grupoService.toggleActivo(id, activo),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['grupos'] });
+      toast.success(data.message);
+    },
+    onError: (error: unknown) => {
+      toast.error('Error al cambiar estado', { description: getErrorMessage(error) });
+    },
+  });
+}
+
+// ========================================
+// TOGGLE ALL ACTIVOS (MASIVAS)
+// ========================================
+
+export function useToggleAllMarcasActivo() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (activo: boolean) => marcaService.toggleAllActivos(activo),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['marcas'] });
+      toast.success(data.message);
+    },
+    onError: (error: unknown) => {
+      toast.error('Error al cambiar estados', { description: getErrorMessage(error) });
+    },
+  });
+}
+
+export function useToggleAllCategoriasActivo() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (activo: boolean) => categoriaService.toggleAllActivos(activo),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['categorias'] });
+      toast.success(data.message);
+    },
+    onError: (error: unknown) => {
+      toast.error('Error al cambiar estados', { description: getErrorMessage(error) });
+    },
+  });
+}
+
+export function useToggleAllGruposActivo() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (activo: boolean) => grupoService.toggleAllActivos(activo),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['grupos'] });
+      toast.success(data.message);
+    },
+    onError: (error: unknown) => {
+      toast.error('Error al cambiar estados', { description: getErrorMessage(error) });
+    },
+  });
+}

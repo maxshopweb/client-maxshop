@@ -16,20 +16,25 @@ interface UseCategoriasOptions {
     adminList?: { page: number; limit: number; busqueda: string };
     initialPaginated?: PaginatedListResponse<ICategoria>;
     enabled?: boolean;
+    activeOnly?: boolean;
 }
 
 export function useCategorias(options: UseCategoriasOptions = {}) {
-    const { initialData, adminList, initialPaginated, enabled = true } = options;
+    const { initialData, adminList, initialPaginated, enabled = true, activeOnly = false } = options;
     const adminMode = !!adminList;
 
     return useQuery<CategoriasQueryData>({
         queryKey: adminMode
             ? (['categorias', 'admin', adminList!.page, adminList!.limit, adminList!.busqueda] as const)
-            : (['categorias'] as const),
+            : activeOnly
+                ? (['categorias', 'active'] as const)
+                : (['categorias'] as const),
         queryFn: async (): Promise<CategoriasQueryData> =>
             adminMode
                 ? categoriaService.getPaginated(adminList!)
-                : categoriaService.getAll() as Promise<CategoriasQueryData>,
+                : activeOnly
+                    ? categoriaService.getActive() as Promise<CategoriasQueryData>
+                    : categoriaService.getAll() as Promise<CategoriasQueryData>,
         staleTime: adminMode ? 1000 * 60 : 1000 * 60 * 10,
         refetchOnMount: false,
         refetchOnWindowFocus: false,

@@ -10,20 +10,25 @@ interface UseGruposOptions {
   adminList?: { page: number; limit: number; busqueda: string };
   initialPaginated?: PaginatedListResponse<IGrupo>;
   enabled?: boolean;
+  activeOnly?: boolean;
 }
 
 export function useGrupos(options: UseGruposOptions = {}) {
-  const { initialData, adminList, initialPaginated, enabled = true } = options;
+  const { initialData, adminList, initialPaginated, enabled = true, activeOnly = false } = options;
   const adminMode = !!adminList;
 
   return useQuery<GruposQueryData>({
     queryKey: adminMode
       ? (['grupos', 'admin', adminList!.page, adminList!.limit, adminList!.busqueda] as const)
-      : (['grupos'] as const),
+      : activeOnly
+        ? (['grupos', 'active'] as const)
+        : (['grupos'] as const),
     queryFn: async (): Promise<GruposQueryData> =>
       adminMode
         ? grupoService.getPaginated(adminList!)
-        : grupoService.getAll(),
+        : activeOnly
+          ? grupoService.getActive()
+          : grupoService.getAll(),
     staleTime: adminMode ? 1000 * 60 : 1000 * 60 * 10,
     refetchOnMount: false,
     refetchOnWindowFocus: false,

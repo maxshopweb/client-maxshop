@@ -17,6 +17,11 @@ class GrupoService {
     return response.data;
   }
 
+  async getActive(): Promise<IGrupoResponse> {
+    const response = await axiosInstance.get<IGrupoResponse>('/grupos/active');
+    return response.data;
+  }
+
   async getById(id: number): Promise<IGrupoResponse> {
     const response = await axiosInstance.get<IGrupoResponse>(`/grupos/${id}`);
     return response.data;
@@ -34,6 +39,16 @@ class GrupoService {
 
   async update(id: number, data: IUpdateGrupoDTO): Promise<IGrupoResponse> {
     const response = await axiosInstance.put<IGrupoResponse>(`/grupos/${id}`, data);
+    return response.data;
+  }
+
+  async toggleActivo(id: number, activo: boolean): Promise<{ success: boolean; data: IGrupo; message: string }> {
+    const response = await axiosInstance.patch<{ success: boolean; data: IGrupo; message: string }>(`/grupos/${id}/activo`, { activo });
+    return response.data;
+  }
+
+  async toggleAllActivos(activo: boolean): Promise<{ success: boolean; data: { count: number }; message: string }> {
+    const response = await axiosInstance.patch<{ success: boolean; data: { count: number }; message: string }>('/grupos/toggle-all', { activo });
     return response.data;
   }
 

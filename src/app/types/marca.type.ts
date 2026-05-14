@@ -17,6 +17,7 @@ export interface ICreateMarcaDTO {
 export interface IUpdateMarcaDTO {
     nombre?: string;
     descripcion?: string;
+    activo?: boolean;
 }
 
 export interface MarcaResponse {

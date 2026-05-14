@@ -29,6 +29,21 @@ class CategoriaService {
         return response.data;
     }
 
+    async getActive(): Promise<CategoriaApiResponse> {
+        const response = await axiosInstance.get<CategoriaApiResponse>('/categorias/active');
+        return response.data;
+    }
+
+    async toggleActivo(id: number, activo: boolean): Promise<{ success: boolean; data: ICategoria; message: string }> {
+        const response = await axiosInstance.patch<{ success: boolean; data: ICategoria; message: string }>(`/categorias/${id}/activo`, { activo });
+        return response.data;
+    }
+
+    async toggleAllActivos(activo: boolean): Promise<{ success: boolean; data: { count: number }; message: string }> {
+        const response = await axiosInstance.patch<{ success: boolean; data: { count: number }; message: string }>('/categorias/toggle-all', { activo });
+        return response.data;
+    }
+
     async getById(id: number): Promise<{ success: boolean; data: ICategoria }> {
         const response = await axiosInstance.get<{ success: boolean; data: ICategoria }>(`/categorias/${id}`);
         return response.data;

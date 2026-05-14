@@ -25,9 +25,9 @@ export const buildTiendaProductsUrl = (key: NavbarFilterKey, value?: string) => 
 };
 
 export function useNavbarFilterData() {
-  const { data: categoriasResponse, isLoading: isLoadingCategorias } = useCategorias();
-  const { data: marcasResponse, isLoading: isLoadingMarcas } = useMarcas();
-  const { data: gruposResponse, isLoading: isLoadingGrupos } = useGrupos();
+  const { data: categoriasResponse, isLoading: isLoadingCategorias } = useCategorias({ activeOnly: true });
+  const { data: marcasResponse, isLoading: isLoadingMarcas } = useMarcas({ activeOnly: true });
+  const { data: gruposResponse, isLoading: isLoadingGrupos } = useGrupos({ activeOnly: true });
 
   const categoriasItems = useMemo(
     () =>

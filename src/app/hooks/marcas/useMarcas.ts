@@ -11,20 +11,25 @@ interface UseMarcasOptions {
     adminList?: { page: number; limit: number; busqueda: string };
     initialPaginated?: PaginatedListResponse<IMarca>;
     enabled?: boolean;
+    activeOnly?: boolean;
 }
 
 export function useMarcas(options: UseMarcasOptions = {}) {
-    const { initialData, adminList, initialPaginated, enabled = true } = options;
+    const { initialData, adminList, initialPaginated, enabled = true, activeOnly = false } = options;
     const adminMode = !!adminList;
 
     return useQuery<MarcasQueryData>({
         queryKey: adminMode
             ? (['marcas', 'admin', adminList!.page, adminList!.limit, adminList!.busqueda] as const)
-            : (['marcas'] as const),
+            : activeOnly
+                ? (['marcas', 'active'] as const)
+                : (['marcas'] as const),
         queryFn: async (): Promise<MarcasQueryData> =>
             adminMode
                 ? marcaService.getPaginated(adminList!)
-                : marcaService.getAll(),
+                : activeOnly
+                    ? marcaService.getActive()
+                    : marcaService.getAll(),
         staleTime: adminMode ? 1000 * 60 : 1000 * 60 * 10,
         refetchOnMount: false,
         refetchOnWindowFocus: false,

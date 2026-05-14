@@ -113,10 +113,10 @@ export function useProductFilters(): UseProductFiltersReturn {
     const lastPriceUpdateRef = useRef<string>("");
     const lastUrlSearchRef = useRef<string>(initialSearch.trim());
 
-    // Obtener datos del backend
-    const { data: categoriasResponse, isLoading: loadingCategorias } = useCategorias();
-    const { data: marcasResponse, isLoading: loadingMarcas } = useMarcas();
-    const { data: gruposResponse, isLoading: loadingGrupos } = useGrupos();
+    // Obtener datos del backend (solo activos)
+    const { data: categoriasResponse, isLoading: loadingCategorias } = useCategorias({ activeOnly: true });
+    const { data: marcasResponse, isLoading: loadingMarcas } = useMarcas({ activeOnly: true });
+    const { data: gruposResponse, isLoading: loadingGrupos } = useGrupos({ activeOnly: true });
 
     // Extraer los arrays de data
     const categorias = categoriasResponse?.data || [];
