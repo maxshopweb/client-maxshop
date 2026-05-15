@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { MenuLink } from "../navbar.types";
 import { useActiveSection } from "../hooks/useActiveSection";
+import { parseHomeSectionHashId, scrollToHashSectionWhenReady } from "../utils/hashSectionScroll";
 
 interface MobileMenuLinksProps {
   links: MenuLink[];
@@ -19,7 +21,20 @@ export default function MobileMenuLinks({
   onLinkClick,
   onOpenFilters,
 }: MobileMenuLinksProps) {
+  const router = useRouter();
   const activeSection = useActiveSection();
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    const id = parseHomeSectionHashId(href);
+    if (id && pathname === "/") {
+      e.preventDefault();
+      onLinkClick();
+      router.replace(`/#${id}`, { scroll: false });
+      scrollToHashSectionWhenReady(id);
+      return;
+    }
+    onLinkClick();
+  };
 
   return (
     <div className="p-4 space-y-2">
@@ -45,9 +60,9 @@ export default function MobileMenuLinks({
               <button
                 type="button"
                 onClick={onOpenFilters}
-                className="w-full text-left py-3 px-4 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-all duration-300 text-sm"
+                className="w-full text-left py-4 px-4 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-all duration-300"
               >
-                Categorías, grupos y marcas
+                Categorías
               </button>
             </div>
           );
@@ -77,7 +92,7 @@ export default function MobileMenuLinks({
           <Link
             key={link.label}
             href={link.href}
-            onClick={onLinkClick}
+            onClick={(e) => handleNavClick(e, link.href)}
             className={`block py-4 px-4 rounded-lg transition-all duration-300 ${
               isActive
                 ? "bg-white/20 text-white font-medium"

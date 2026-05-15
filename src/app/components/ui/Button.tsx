@@ -44,7 +44,8 @@ export function Button({
 
         "outline-secondary": "border-2 border-secundario !text-secundario bg-transparent hover:!bg-secundario hover:!text-white hover:shadow-lg hover:shadow-secundario/30 hover:scale-105 dark:border-white dark:!text-white dark:hover:!bg-white dark:hover:!text-secundario",
 
-        "outline-success": "border-2 border-principal !text-principal bg-transparent hover:!bg-principal hover:!text-white hover:shadow-lg hover:shadow-principal/30 hover:scale-105",
+        "outline-success":
+            "border-2 border-principal bg-principal/5 !text-principal hover:!border-principal hover:!bg-principal hover:!text-white hover:shadow-lg hover:shadow-principal/40 hover:scale-105 hover:[&_span]:!text-white hover:[&_svg]:!text-white",
 
         "outline-cancel": "border-2 border-principal text-principal bg-transparent hover:bg-principal hover:text-white hover:shadow-lg hover:shadow-principal/30 hover:scale-105 dark:border-white dark:text-white dark:hover:text-secundario",
 

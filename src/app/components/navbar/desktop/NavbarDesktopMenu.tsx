@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { MenuLink } from "../navbar.types";
 import { useActiveSection } from "../hooks/useActiveSection";
+import { parseHomeSectionHashId, scrollToHashSectionWhenReady } from "../utils/hashSectionScroll";
 
 interface NavbarDesktopMenuProps {
   links: MenuLink[];
@@ -17,7 +19,19 @@ export default function NavbarDesktopMenu({
   shouldShowBackground,
   actualTheme,
 }: NavbarDesktopMenuProps) {
+  const router = useRouter();
   const activeSection = useActiveSection();
+
+  const handleHashLinkClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
+    const id = parseHomeSectionHashId(href);
+    if (!id || pathname !== "/") return;
+    e.preventDefault();
+    router.replace(`/#${id}`, { scroll: false });
+    scrollToHashSectionWhenReady(id);
+  };
 
   return (
     <div className="flex items-center gap-4 lg:gap-6">
@@ -47,6 +61,7 @@ export default function NavbarDesktopMenu({
           <Link
             key={link.label}
             href={link.href}
+            onClick={(e) => handleHashLinkClick(e, link.href)}
             className="relative group py-2 px-1 flex flex-col items-center gap-0"
           >
             <span

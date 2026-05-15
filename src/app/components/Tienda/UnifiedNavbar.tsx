@@ -10,6 +10,7 @@ import { useNavbarAuth } from "@/app/components/navbar/hooks/useNavbarAuth";
 import { useNavbarSearch } from "@/app/components/navbar/hooks/useNavbarSearch";
 import { useNavbarLocation } from "@/app/components/navbar/hooks/useNavbarLocation";
 import { useNavbarMobileMenu } from "@/app/components/navbar/hooks/useNavbarMobileMenu";
+import { useHashScrollOnHome } from "@/app/components/navbar/hooks/useHashScrollOnHome";
 import { useNavbarCart } from "@/app/components/navbar/hooks/useNavbarCart";
 import { useProductos } from "@/app/hooks/productos/useProductos";
 import NavbarHeader from "@/app/components/navbar/desktop/NavbarHeader";
@@ -54,6 +55,8 @@ export default function UnifiedNavbar() {
   const { isOpen: isMobileMenuOpen, toggle: toggleMobileMenu, close: closeMobileMenu } = useNavbarMobileMenu();
   const { cantidadItems, openCart, closeCart, isCartOpen } = useNavbarCart();
   const [mobileMenuView, setMobileMenuView] = useState<"menu" | "filters">("menu");
+
+  useHashScrollOnHome();
 
   // Cargar productos para la búsqueda solo cuando el usuario usa el buscador (evita /productos?limit=100 en cada página)
   const searchActive = (searchQuery?.trim().length ?? 0) >= 1;

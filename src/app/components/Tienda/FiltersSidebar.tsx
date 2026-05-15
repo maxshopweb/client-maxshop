@@ -244,7 +244,7 @@ export default function FiltersSidebar({
               },
               {
                 id: "ofertas",
-                label: "Oferta",
+                label: "Ofertas / campañas",
                 checked: filters.oferta || false,
                 onChange: onOfertasChange,
               },

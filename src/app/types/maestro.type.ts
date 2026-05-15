@@ -26,6 +26,10 @@ export function getMaestroDescripcion(item: MaestroItem): string | null {
   return (item as { descripcion?: string | null }).descripcion ?? null;
 }
 
+export function getMaestroActivo(item: MaestroItem): boolean {
+  return (item as { activo?: boolean | null }).activo ?? true;
+}
+
 export const MAESTRO_LABELS: Record<MaestroKind, { singular: string; plural: string }> = {
   marca: { singular: 'Marca', plural: 'Marcas' },
   categoria: { singular: 'Categoría', plural: 'Categorías' },

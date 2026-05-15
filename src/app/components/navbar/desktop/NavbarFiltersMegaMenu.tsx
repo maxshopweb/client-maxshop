@@ -119,7 +119,7 @@ export default function NavbarFiltersMegaMenu({
           }`}
           aria-label={`Abrir filtros de ${triggerLabel.toLowerCase()}`}
         >
-          <span className="inline-flex items-center gap-1.5 text-xs lg:text-sm tracking-wide">
+          <span className="inline-flex items-center gap-1.5 text-sm lg:text-base tracking-wide transition-colors duration-200">
             {triggerLabel}
             <ChevronDown className="w-4 h-4 opacity-80 group-hover:opacity-100 transition-opacity" />
           </span>
