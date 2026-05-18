@@ -24,7 +24,7 @@ function ProductsPageContent() {
   const searchParams = useSearchParams();
 
   // Obtener filtros y paginación desde URL usando el hook
-  const { backendFilters, filters, page, limit } = useProductFilters();
+  const { backendFilters, filters, page, limit, setPriceRange } = useProductFilters();
   
   const TIENDA_PAGE_SIZE = 21;
   const TIENDA_MIN_PAGE_SIZE = 12;
@@ -121,6 +121,10 @@ function ProductsPageContent() {
     setIsFiltersOpen(false);
   }, []);
 
+  const handleClearPriceFilter = useCallback(() => {
+    setPriceRange(undefined, undefined);
+  }, [setPriceRange]);
+
   useEffect(() => {
     if (pagination?.hasNextPage && !isLoading) {
       prefetchNextPage();
@@ -197,6 +201,9 @@ function ProductsPageContent() {
             endIndex={endIndex}
             total={totalProductos}
             onFiltersOpen={handleFiltersOpen}
+            minPrice={filters.minPrice}
+            maxPrice={filters.maxPrice}
+            onClearPriceFilter={handleClearPriceFilter}
           />
 
           <div className="space-y-6">

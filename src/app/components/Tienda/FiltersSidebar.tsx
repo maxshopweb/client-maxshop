@@ -15,6 +15,7 @@ import type { ICategoria } from "@/app/types/categoria.type";
 import type { IMarca } from "@/app/types/marca.type";
 import type { IGrupo } from "@/app/types/grupo.type";
 import type { IPaginatedResponse } from "@/app/types/producto.type";
+import { getPriceSliderStep, snapPriceToStep } from "@/app/utils/price-filter.utils";
 
 const FALLBACK_PRICE_MAX = 100000;
 
@@ -116,6 +117,12 @@ export default function FiltersSidebar({
   // Valores actuales de los filtros
   // Usar localSearch para el input (actualización inmediata y fluida)
   const searchValue = localSearch;
+  const catalogMin =
+    catalogPriceRange != null &&
+    Number.isFinite(catalogPriceRange.min) &&
+    catalogPriceRange.min >= 0
+      ? catalogPriceRange.min
+      : 0;
   const catalogMax =
     catalogPriceRange != null &&
     Number.isFinite(catalogPriceRange.max) &&
@@ -123,10 +130,17 @@ export default function FiltersSidebar({
       ? catalogPriceRange.max
       : FALLBACK_PRICE_MAX;
 
-  const rawLow = localPriceRange[0] ?? 0;
-  const rawHigh = localPriceRange[1] ?? catalogMax;
-  let low = Math.max(0, rawLow);
-  let high = Math.max(0, rawHigh);
+  const step = getPriceSliderStep(catalogMax);
+  const urlMin = filters.minPrice;
+  const urlMax = filters.maxPrice;
+  const hasMaxFilter = urlMax !== undefined && urlMax > 0;
+
+  const rawLow = localPriceRange[0] ?? urlMin ?? 0;
+  const rawHigh = hasMaxFilter
+    ? (localPriceRange[1] ?? urlMax ?? catalogMax)
+    : catalogMax;
+  let low = Math.max(0, snapPriceToStep(rawLow, step));
+  let high = Math.max(0, snapPriceToStep(rawHigh, step));
   if (low > high) {
     low = high;
   }
@@ -135,10 +149,15 @@ export default function FiltersSidebar({
 
   const onSearchChange = (value: string) => setSearch(value);
   const onPriceChange = (value: [number, number]) => {
-    setPriceRange(
-      value[0] === 0 ? undefined : value[0],
-      value[1] >= catalogMax ? undefined : value[1]
-    );
+    const snappedLow = snapPriceToStep(value[0], step);
+    const snappedHigh = snapPriceToStep(value[1], step);
+    const minOut = snappedLow <= 0 ? undefined : snappedLow;
+    const atCatalogCeiling = snappedHigh >= catalogMax - step / 2;
+    const maxOut = atCatalogCeiling ? undefined : snappedHigh;
+    if (maxOut !== undefined && maxOut <= (minOut ?? 0)) {
+      return;
+    }
+    setPriceRange(minOut, maxOut);
   };
   const onCategoriaChange = (value: string | undefined) => setCategoria(value);
   const onMarcaChange = (value: string | undefined) => setMarca(value);
@@ -199,7 +218,10 @@ export default function FiltersSidebar({
           <FilterPriceSection
             min={0}
             max={sliderMax}
+            catalogMin={catalogMin}
+            catalogMax={catalogMax}
             value={priceRange}
+            maxPrice={urlMax}
             onValueChange={onPriceChange}
           />
         </motion.div>
