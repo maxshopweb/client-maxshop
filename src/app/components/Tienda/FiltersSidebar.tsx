@@ -116,27 +116,29 @@ export default function FiltersSidebar({
   // Valores actuales de los filtros
   // Usar localSearch para el input (actualización inmediata y fluida)
   const searchValue = localSearch;
-  const maxPrice =
+  const catalogMax =
     catalogPriceRange != null &&
     Number.isFinite(catalogPriceRange.max) &&
     catalogPriceRange.max > 0
       ? catalogPriceRange.max
       : FALLBACK_PRICE_MAX;
 
-  // Usar localPriceRange para el slider (actualización inmediata), acotado al rango del catálogo
   const rawLow = localPriceRange[0] ?? 0;
-  const rawHigh = localPriceRange[1] ?? maxPrice;
-  let low = Math.max(0, Math.min(rawLow, maxPrice));
-  let high = Math.max(0, Math.min(rawHigh, maxPrice));
+  const rawHigh = localPriceRange[1] ?? catalogMax;
+  let low = Math.max(0, rawLow);
+  let high = Math.max(0, rawHigh);
   if (low > high) {
     low = high;
   }
   const priceRange: [number, number] = [low, high];
+  const sliderMax = Math.max(catalogMax, low, high);
 
-  // Handlers que actualizan la URL
   const onSearchChange = (value: string) => setSearch(value);
   const onPriceChange = (value: [number, number]) => {
-    setPriceRange(value[0] === 0 ? undefined : value[0], value[1] === maxPrice ? undefined : value[1]);
+    setPriceRange(
+      value[0] === 0 ? undefined : value[0],
+      value[1] >= catalogMax ? undefined : value[1]
+    );
   };
   const onCategoriaChange = (value: string | undefined) => setCategoria(value);
   const onMarcaChange = (value: string | undefined) => setMarca(value);
@@ -196,7 +198,7 @@ export default function FiltersSidebar({
         <motion.div variants={itemVariants}>
           <FilterPriceSection
             min={0}
-            max={maxPrice}
+            max={sliderMax}
             value={priceRange}
             onValueChange={onPriceChange}
           />

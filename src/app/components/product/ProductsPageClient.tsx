@@ -50,10 +50,44 @@ function ProductsPageContent() {
     return final;
   }, [backendFilters, page, limit]);
 
+  /** Rango del catálogo sin filtros de precio (evita que el slider se encoja al filtrar). */
+  const catalogBoundsFilters = useMemo<IProductoFilters>(
+    () => ({
+      page: 1,
+      limit: 1,
+      order_by: finalFilters.order_by,
+      order: finalFilters.order,
+      busqueda: finalFilters.busqueda,
+      id_cat: finalFilters.id_cat,
+      id_marca: finalFilters.id_marca,
+      codi_grupo: finalFilters.codi_grupo,
+      destacado: finalFilters.destacado,
+      financiacion: finalFilters.financiacion,
+      oferta: finalFilters.oferta,
+    }),
+    [
+      finalFilters.order_by,
+      finalFilters.order,
+      finalFilters.busqueda,
+      finalFilters.id_cat,
+      finalFilters.id_marca,
+      finalFilters.codi_grupo,
+      finalFilters.destacado,
+      finalFilters.financiacion,
+      finalFilters.oferta,
+    ]
+  );
+
+  const { priceRange: catalogPriceRange } = useProductos({
+    filters: catalogBoundsFilters,
+    enabled: true,
+    keepPreviousData: true,
+    useTiendaEndpoint: true,
+  });
+
   const {
     productos,
     pagination,
-    priceRange: catalogPriceRange,
     isLoading,
     isFetching,
     prefetchNextPage,

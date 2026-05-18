@@ -103,15 +103,18 @@ export function useProductFilters(): UseProductFiltersReturn {
     // Estado local solo para inputs con debounce
     const initialSearch = searchParams.get("search") || "";
     const [localSearch, setLocalSearch] = useState(() => initialSearch);
+    const initialMinPrice = parseNumber(searchParams.get("minPrice"));
+    const initialMaxPrice = parseNumber(searchParams.get("maxPrice"));
     const [localPriceRange, setLocalPriceRange] = useState<[number | undefined, number | undefined]>(() => [
-        parseNumber(searchParams.get("minPrice")),
-        parseNumber(searchParams.get("maxPrice")),
+        initialMinPrice,
+        initialMaxPrice,
     ]);
 
     // Ref para evitar loop en debounce de search
     const lastSearchUpdateRef = useRef<string>(initialSearch.trim());
-    const lastPriceUpdateRef = useRef<string>("");
+    const lastPriceUpdateRef = useRef<string>(`${initialMinPrice}-${initialMaxPrice}`);
     const lastUrlSearchRef = useRef<string>(initialSearch.trim());
+    const lastUrlPriceRef = useRef<string>(`${initialMinPrice}-${initialMaxPrice}`);
 
     // Obtener datos del backend (solo activos)
     const { data: categoriasResponse, isLoading: loadingCategorias } = useCategorias({ activeOnly: true });
@@ -167,6 +170,21 @@ export function useProductFilters(): UseProductFiltersReturn {
                 return prev;
             });
         }
+    }, [queryKey, searchParams]);
+
+    // Sincronizar localPriceRange con URL cuando cambia desde fuera (navegación, link compartido)
+    useEffect(() => {
+        const urlMin = parseNumber(searchParams.get("minPrice"));
+        const urlMax = parseNumber(searchParams.get("maxPrice"));
+        const key = `${urlMin}-${urlMax}`;
+        if (key === lastUrlPriceRef.current) return;
+
+        lastUrlPriceRef.current = key;
+        setLocalPriceRange((prev) => {
+            if (prev[0] === urlMin && prev[1] === urlMax) return prev;
+            lastPriceUpdateRef.current = key;
+            return [urlMin, urlMax];
+        });
     }, [queryKey, searchParams]);
 
     // Debounce para search
@@ -373,8 +391,9 @@ export function useProductFilters(): UseProductFiltersReturn {
         
         // Actualizar refs para evitar problemas de sincronización
         lastSearchUpdateRef.current = "";
-        lastPriceUpdateRef.current = "";
+        lastPriceUpdateRef.current = "-";
         lastUrlSearchRef.current = "";
+        lastUrlPriceRef.current = "-";
 
         startTransition(() => {
             const params = new URLSearchParams();

@@ -26,7 +26,7 @@ export default function PriceSlider({
     if (controlledValue) {
       setLocalValue(controlledValue);
     }
-  }, [controlledValue]);
+  }, [controlledValue?.[0], controlledValue?.[1], min, max]);
 
   const handleValueChange = (newValue: number[]) => {
     const range: [number, number] = [newValue[0], newValue[1]];
