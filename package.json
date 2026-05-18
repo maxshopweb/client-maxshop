@@ -10,6 +10,14 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "sharp",
+      "esbuild",
+      "@firebase/util",
+      "protobufjs"
+    ]
+  },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-checkbox": "^1.3.3",
