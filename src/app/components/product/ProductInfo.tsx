@@ -1,11 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CreditCard, Tag, Sparkles } from "lucide-react";
-import { FaStar } from "react-icons/fa";
+import { CreditCard, Tag, Box } from "lucide-react";
+import { Badge } from "@/app/components/ui/Badge";
 import { IProductos } from "@/app/types/producto.type";
 import { formatPrecio } from "@/app/types/producto.type";
-import { getPrecioConImpuestos, getPrecioSinImpuestos } from "@/app/utils/producto.utils";
+import { getPrecioSinImpuestos } from "@/app/utils/producto.utils";
+import { getPresentacionPrecioProducto } from "@/app/utils/precio-presentacion.utils";
 import { formatCurrencyARS } from "@/app/utils/currency";
 
 interface ProductInfoProps {
@@ -17,32 +18,12 @@ export default function ProductInfo({ producto }: ProductInfoProps) {
   const isInactive = producto.activo !== "S" && producto.estado !== 1;
   const noDisponible = sinStock || isInactive;
 
-  // Mismas reglas que ProductCard: lista activa, oferta/campaña/destacado
   const precioSinImpuestos = getPrecioSinImpuestos(producto);
-  const precioFinalCalculado = getPrecioConImpuestos(producto);
-  const precioFinal = precioFinalCalculado ?? 0;
+  const { precioFinal, precioTachado, mostrarTachado, etiqueta } =
+    getPresentacionPrecioProducto(producto);
   const listaActiva = producto.lista_activa;
   const esOferta = listaActiva?.es_oferta === true;
   const esCampanya = listaActiva?.es_campanya === true;
-  const esDestacado = producto.destacado;
-
-  // Precio tachado: lista Venta cuando la activa no es Venta (backend envía precio_venta_referencia)
-  const precioTachado =
-    producto.precio_venta_referencia != null && producto.precio != null && producto.precio_venta_referencia > producto.precio
-      ? producto.precio_venta_referencia
-      : null;
-  const precioOriginal =
-    precioTachado == null &&
-    producto.precio_minorista &&
-    producto.precio != null &&
-    producto.precio < producto.precio_minorista
-      ? producto.precio_minorista
-      : null;
-  const mostrarTachado = precioTachado ?? precioOriginal;
-  const porcentajeOff =
-    mostrarTachado != null && precioFinal > 0 && mostrarTachado > precioFinal
-      ? Math.round((1 - precioFinal / mostrarTachado) * 100)
-      : 0;
 
   return (
     <motion.div
@@ -56,23 +37,14 @@ export default function ProductInfo({ producto }: ProductInfoProps) {
         <h1 className="text-xl sm:text-2xl md:text-3xl font-medium text-terciario mb-2 capitalize">
           {producto.nombre || "Producto sin nombre"}
         </h1>
-        {producto.modelo?.trim() && (
-          <p className="text-sm sm:text-base text-terciario/70 mb-2">
-            {producto.modelo.trim()}
+        {producto.cod_sku && (
+          <p className="text-xs sm:text-sm text-terciario/50">
+            SKU: <span className="text-terciario">{producto.cod_sku}</span>
           </p>
         )}
-        {/* SKU y Marca */}
-        <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-terciario/50">
-          {producto.cod_sku && (
-            <span>SKU: <span className="text-terciario">{producto.cod_sku}</span></span>
-          )}
-          {producto.marca?.nombre && (
-            <span className="capitalize">{producto.marca.nombre}</span>
-          )}
-        </div>
       </div>
 
-      {/* Precio (misma lógica visual que ProductCard: oferta=amber, campaña=emerald, resto=principal) */}
+      {/* Precio (oferta/campaña colorean el monto; badges promocionales van en la galería) */}
       <div className="space-y-1">
         <div className="flex items-baseline gap-2 sm:gap-3 flex-wrap">
           <span
@@ -82,21 +54,21 @@ export default function ProductInfo({ producto }: ProductInfoProps) {
           >
             {formatCurrencyARS(precioFinal)}
           </span>
-          {mostrarTachado != null && (
+          {mostrarTachado && precioTachado != null && (
             <>
               <span className="text-base sm:text-lg text-terciario/40 line-through">
-                {formatCurrencyARS(mostrarTachado)}
+                {formatCurrencyARS(precioTachado)}
               </span>
-              {porcentajeOff > 0 && (
+              {etiqueta && (
                 <span className="text-sm font-semibold text-amber-600">
-                  {porcentajeOff}% OFF
+                  {etiqueta}
                 </span>
               )}
             </>
           )}
         </div>
         {precioSinImpuestos != null && precioSinImpuestos > 0 && (
-          <p className="text-xs sm:text-sm text-terciario/60">
+          <p className="text-xs text-terciario/40">
             Sin impuestos: {formatCurrencyARS(precioSinImpuestos)}
           </p>
         )}
@@ -112,34 +84,27 @@ export default function ProductInfo({ producto }: ProductInfoProps) {
         <p className="text-sm font-medium text-terciario/80">No disponible</p>
       )}
 
-      {/* Badges (mismo criterio que ProductCard: Oferta, Campaña, Destacado, Financiación) */}
+      {/* Tags: marca, modelo, financiación (oferta/campaña/destacado en galería) */}
       <div className="flex flex-wrap gap-2">
-        {esOferta && (
-          <div className="flex items-center gap-1 px-2.5 py-1 bg-amber-500 text-white rounded-md text-xs font-semibold">
-            <Tag className="w-3 h-3" />
-            <span>Oferta</span>
-          </div>
+        {producto.marca?.nombre && (
+          <Badge variant="principal" className="gap-1.5 px-3 py-1 capitalize">
+            <Tag className="w-3 h-3 shrink-0" />
+            {producto.marca.nombre}
+          </Badge>
         )}
-        {esCampanya && !esOferta && (
-          <div className="flex items-center gap-1 px-2.5 py-1 bg-emerald-600 text-white rounded-md text-xs font-semibold">
-            <Sparkles className="w-3 h-3" />
-            <span>Campaña</span>
-          </div>
-        )}
-        {esDestacado && (
-          <div className="flex items-center gap-1 px-2 py-1 bg-principal/10 text-principal rounded-full text-xs font-medium">
-            <FaStar className="w-3 h-3" />
-            <span>Destacado</span>
-          </div>
+        {producto.modelo?.trim() && (
+          <Badge variant="info" className="gap-1.5 px-3 py-1">
+            <Box className="w-3 h-3 shrink-0" />
+            {producto.modelo.trim()}
+          </Badge>
         )}
         {producto.financiacion && (
-          <div className="flex items-center gap-1 px-2 py-1 bg-secundario/10 text-secundario rounded-full text-xs font-medium">
-            <CreditCard className="w-3 h-3" />
-            <span>Financiación</span>
-          </div>
+          <Badge variant="success" className="gap-1.5 px-3 py-1">
+            <CreditCard className="w-3 h-3 shrink-0" />
+            Financiación
+          </Badge>
         )}
       </div>
     </motion.div>
   );
 }
-

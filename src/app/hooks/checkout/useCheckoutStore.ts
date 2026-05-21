@@ -12,6 +12,10 @@ export interface CartItem {
   img_principal: string;
   subtotal: number;
   subtotalSinImpuestos: number;
+  /** Monto de bonificación de la línea (informativo; precio ya es el final). */
+  descuento?: number;
+  precio_anterior?: number | null;
+  bonificacion_porcentaje?: number | null;
 }
 
 interface CheckoutStore {
@@ -123,6 +127,9 @@ export const useCheckoutStore = create<CheckoutStore>()(
                 img_principal: item.producto?.img_principal || '',
                 subtotal: item.subtotal || 0,
                 subtotalSinImpuestos: item.subtotal_sin_iva || (item.precio_unitario_sin_iva || item.producto?.precio_sin_iva || 0) * (item.cantidad || 1),
+                descuento: item.descuento || 0,
+                precio_anterior: item.producto?.precio_anterior ?? null,
+                bonificacion_porcentaje: item.producto?.bonificacion_porcentaje ?? null,
               }));
               set({ cartItems });
             }

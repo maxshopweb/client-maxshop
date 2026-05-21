@@ -139,7 +139,44 @@ export function getPrecioConImpuestos(producto: IProductos): number | null {
     return null;
 }
 
-function getPorcentajeIva(producto: IProductos): number | null {
+/** Precio de lista con IVA (tachado) cuando hay bonificación. */
+export function getPrecioAnterior(producto: IProductos): number | null {
+    if (producto.precio_anterior != null) {
+        const n = Number(producto.precio_anterior);
+        if (!Number.isNaN(n) && n > 0) return n;
+    }
+    return null;
+}
+
+export function getMontoBonificacionUnitario(producto: IProductos): number {
+    if (producto.monto_bonificacion != null) {
+        const n = Number(producto.monto_bonificacion);
+        if (!Number.isNaN(n) && n > 0) return n;
+    }
+    const anterior = getPrecioAnterior(producto);
+    const final = getPrecioConImpuestos(producto);
+    if (anterior != null && final != null && anterior > final) {
+        return anterior - final;
+    }
+    return 0;
+}
+
+export function tieneBonificacionProducto(producto: IProductos): boolean {
+    const pct = getBonificacionPorcentaje(producto);
+    if (pct != null && pct > 0 && getPrecioAnterior(producto) != null) {
+        return true;
+    }
+    return getMontoBonificacionUnitario(producto) > 0;
+}
+
+export function getBonificacionPorcentaje(producto: IProductos): number | null {
+    const pct = producto.bonificacion_porcentaje;
+    if (pct == null) return null;
+    const n = Number(pct);
+    return !Number.isNaN(n) && n > 0 ? n : null;
+}
+
+export function getPorcentajeIva(producto: IProductos): number | null {
     const ivaData = producto.iva as (typeof producto.iva & { porcentaje?: number | null; porcen_iva?: number | null }) | null;
     if (ivaData?.porcentaje != null) {
         const numeric = Number(ivaData.porcentaje);

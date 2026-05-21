@@ -49,18 +49,34 @@ export default function ProductCart({
     precio_unitario_sin_iva,
     subtotal, 
     subtotal_sin_iva,
-    descuento, 
+    descuento,
     porcentajeDescuento,
-    tieneDescuento
+    tieneDescuento,
+    esBonificacion,
+    boniPct,
   } = useNormalizeProduct({ product });
 
-  // Precio lista Venta para tachar (solo cuando el item trae producto con precio_venta_referencia)
-  const precioVentaRef = 'producto' in product ? (product as ICartItem).producto?.precio_venta_referencia : undefined;
-  const mostrarPrecioTachado = precioVentaRef != null && precioVentaRef > precio_unitario;
-  const porcentajeOff =
-    mostrarPrecioTachado && precioVentaRef != null && precioVentaRef > 0
-      ? Math.round((1 - precio_unitario / precioVentaRef) * 100)
-      : 0;
+  const productoRef = 'producto' in product ? (product as ICartItem).producto : undefined;
+  const cartLine = 'producto' in product ? undefined : (product as CartItem);
+  const precioAnteriorRaw = productoRef?.precio_anterior ?? cartLine?.precio_anterior;
+  const precioAnteriorBoni = precioAnteriorRaw != null ? Number(precioAnteriorRaw) : null;
+  const precioVentaRef = productoRef?.precio_venta_referencia;
+  const hayBonificacion = esBonificacion || (boniPct != null && boniPct > 0) || descuento > 0;
+  const precioTachadoUnit =
+    precioAnteriorBoni != null && precioAnteriorBoni > precio_unitario
+      ? precioAnteriorBoni
+      : hayBonificacion && descuento > 0 && cantidad > 0
+        ? precio_unitario + descuento / cantidad
+        : !hayBonificacion && precioVentaRef != null && precioVentaRef > precio_unitario
+          ? precioVentaRef
+          : null;
+  const mostrarPrecioTachado = precioTachadoUnit != null;
+  const etiquetaPrecio =
+    hayBonificacion && boniPct != null
+      ? `Bonificación ${boniPct}%`
+      : porcentajeDescuento > 0
+        ? `${porcentajeDescuento}% OFF`
+        : null;
 
   // Verificar si este item es el que se está eliminando
   const isDeleting = itemToDelete === id_prod;
@@ -93,14 +109,14 @@ export default function ProductCart({
           )}
           <p className="text-sm font-semibold text-foreground mt-1 flex items-baseline gap-1.5 flex-wrap">
             <span>{formatCurrencyARS(precio_unitario)} c/u</span>
-            {mostrarPrecioTachado && (
+            {mostrarPrecioTachado && precioTachadoUnit != null && (
               <>
                 <span className="text-xs text-foreground/40 line-through">
-                  {formatCurrencyARS(precioVentaRef)} c/u
+                  {formatCurrencyARS(precioTachadoUnit)} c/u
                 </span>
-                {porcentajeOff > 0 && (
+                {etiquetaPrecio && (
                   <span className="text-xs font-semibold text-amber-600">
-                    {porcentajeOff}% OFF
+                    {etiquetaPrecio}
                   </span>
                 )}
               </>
@@ -149,28 +165,17 @@ export default function ProductCart({
             {/* Precio: primero actual, después tachado y % OFF */}
             <div className="mb-2">
               <div className="flex items-baseline gap-1.5 flex-wrap">
-                {tieneDescuento ? (
-                  <>
-                    <span className="text-base font-bold text-principal">
-                      {formatCurrencyARS(precio_unitario)} c/u
-                    </span>
-                    <span className="text-xs text-foreground/40 line-through">
-                      {formatCurrencyARS(precio_unitario * cantidad + descuento)}
-                    </span>
-                  </>
-                ) : (
-                  <span className="text-base font-bold text-principal">
-                    {formatCurrencyARS(precio_unitario)} c/u
-                  </span>
-                )}
-                {mostrarPrecioTachado && (
+                <span className="text-base font-bold text-principal">
+                  {formatCurrencyARS(precio_unitario)} c/u
+                </span>
+                {mostrarPrecioTachado && precioTachadoUnit != null && (
                   <>
                     <span className="text-xs text-foreground/40 line-through">
-                      {formatCurrencyARS(precioVentaRef)} c/u
+                      {formatCurrencyARS(precioTachadoUnit)} c/u
                     </span>
-                    {porcentajeOff > 0 && (
+                    {etiquetaPrecio && (
                       <span className="text-xs font-semibold text-amber-600">
-                        {porcentajeOff}% OFF
+                        {etiquetaPrecio}
                       </span>
                     )}
                   </>

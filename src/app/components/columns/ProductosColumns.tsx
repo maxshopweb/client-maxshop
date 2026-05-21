@@ -7,6 +7,7 @@ import { Switch } from '@/app/components/ui/Switch';
 import { Check } from 'lucide-react';
 import type { IProductos } from '@/app/types/producto.type';
 import { formatearPrecio, getStockInfo } from '@/app/utils/producto.utils';
+import { getPresentacionPrecioProducto } from '@/app/utils/precio-presentacion.utils';
 import { TableBadge } from '@/app/components/ui/TableBadge';
 import type { BadgeVariant } from '@/app/components/ui/Badge';
 import ProductImage from '../shared/ProductImage';
@@ -380,33 +381,37 @@ export const getProductosColumns = (
             header: 'Precio',
             cell: ({ row }) => {
                 const producto = row.original;
-                const precio = row.getValue('precio') as number | null;
-                const ref = producto.precio_venta_referencia;
-                const mostrarTachado = ref != null && precio != null && ref > precio;
-                const porcentajeOff =
-                    mostrarTachado && ref != null && ref > 0 && precio != null
-                        ? Math.round((1 - precio / ref) * 100)
-                        : 0;
+                const { precioFinal, precioTachado, mostrarTachado, etiqueta, tipoDescuento } =
+                    getPresentacionPrecioProducto(producto);
                 const esListaE = producto.lista_precio_activa === 'E' || producto.lista_activa?.codi_lista === 'E';
+                const codiLista = (producto.lista_precio_activa || producto.lista_activa?.codi_lista || '').toUpperCase();
                 return (
                     <div className="flex flex-col gap-0.5">
                         <div className="flex items-baseline gap-1.5 flex-wrap">
                             <span className="font-semibold text-text">
-                                {formatearPrecio(precio)}
+                                {formatearPrecio(precioFinal)}
                             </span>
-                            {mostrarTachado && (
+                            {mostrarTachado && precioTachado != null && (
                                 <>
                                     <span className="text-sm text-gray-400 line-through">
-                                        {formatearPrecio(ref)}
+                                        {formatearPrecio(precioTachado)}
                                     </span>
-                                    {porcentajeOff > 0 && (
+                                    {etiqueta && (
                                         <span className="text-xs font-semibold text-amber-600">
-                                            {porcentajeOff}% OFF
+                                            {etiqueta}
                                         </span>
                                     )}
                                 </>
                             )}
                         </div>
+                        {tipoDescuento === 'bonificacion' && codiLista && (
+                            <span className="text-xs text-muted-foreground">
+                                Lista {codiLista} · bonificación sobre precio con IVA
+                            </span>
+                        )}
+                        {tipoDescuento === 'oferta' && (
+                            <span className="text-xs text-muted-foreground">vs. lista Venta (V)</span>
+                        )}
                         {esListaE && (
                             <span className="text-xs text-muted-foreground">Lista E — Precio especial</span>
                         )}
