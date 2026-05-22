@@ -258,7 +258,11 @@ function PrecioDesglose({ pedido }: { pedido: IVenta }) {
         {/* Descuentos */}
         {tieneDescuentos && (
           <div className="flex items-center justify-between">
-            <span className="text-foreground/60">Descuentos</span>
+            <span className="text-foreground/60">
+              {pedido.detalles?.some((d) => d.bonificacion_porcentaje != null && Number(d.bonificacion_porcentaje) > 0)
+                ? 'Bonificación'
+                : 'Descuentos'}
+            </span>
             <span className="text-foreground font-medium text-green-600">
               -{formatPrecio(descuentos)}
             </span>

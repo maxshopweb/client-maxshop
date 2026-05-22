@@ -6,7 +6,8 @@ import type { IProductos } from "@/app/types/producto.type";
 import AddToCartButton from "@/app/components/cart/AddToCartButton";
 import ProductImage from "@/app/components/shared/ProductImage";
 import { formatCurrencyARS } from "@/app/utils/currency";
-import { getPrecioConImpuestos, getPrecioSinImpuestos } from "@/app/utils/producto.utils";
+import { getPrecioSinImpuestos } from "@/app/utils/producto.utils";
+import { getPresentacionPrecioProducto } from "@/app/utils/precio-presentacion.utils";
 
 function HalfStar({ size = 18 }: { size?: number }) {
   const id = "half-star-grad";
@@ -36,17 +37,12 @@ interface ProductCardProps {
 
 export default function ProductCard({ producto }: ProductCardProps) {
   const precioSinImpuestos = getPrecioSinImpuestos(producto) ?? 0;
-  const precioFinal = getPrecioConImpuestos(producto) ?? precioSinImpuestos;
+  const { precioFinal, precioTachado, mostrarTachado, etiqueta } =
+    getPresentacionPrecioProducto(producto);
   const listaActiva = producto.lista_activa;
   const esOferta = listaActiva?.es_oferta === true;
   const esCampanya = listaActiva?.es_campanya === true;
   const esDestacado = producto.destacado;
-  const ref = producto.precio_venta_referencia;
-  const mostrarTachado = ref != null && ref > precioFinal;
-  const porcentajeOff =
-    mostrarTachado && ref != null && ref > 0
-      ? Math.round((1 - precioFinal / ref) * 100)
-      : 0;
 
   return (
     <Link 
@@ -129,14 +125,14 @@ export default function ProductCard({ producto }: ProductCardProps) {
             >
               {formatCurrencyARS(precioFinal)}
             </span>
-            {mostrarTachado && (
+            {mostrarTachado && precioTachado != null && (
               <>
                 <span className="text-sm text-terciario/50 line-through">
-                  {formatCurrencyARS(ref)}
+                  {formatCurrencyARS(precioTachado)}
                 </span>
-                {porcentajeOff > 0 && (
+                {etiqueta && (
                   <span className="text-xs font-semibold text-amber-600">
-                    {porcentajeOff}% OFF
+                    {etiqueta}
                   </span>
                 )}
               </>

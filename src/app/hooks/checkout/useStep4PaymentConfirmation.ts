@@ -116,7 +116,7 @@ export function useStep4PaymentConfirmation() {
       id_prod: item.id_prod,
       cantidad: item.cantidad,
       precio_unitario: item.precio_unitario,
-      descuento_aplicado: item.descuento || 0,
+      descuento_aplicado: 0,
     }));
     const idCliente = user?.uid || undefined;
     const fullPhone = `${personalData.phoneArea}${personalData.phone}`;
