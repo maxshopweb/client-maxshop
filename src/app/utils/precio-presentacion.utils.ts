@@ -3,6 +3,7 @@ import {
   getPrecioConImpuestos,
   getPrecioAnterior,
   getBonificacionPorcentaje,
+  getPorcentajeIva,
   tieneBonificacionProducto,
 } from '@/app/utils/producto.utils';
 
@@ -22,15 +23,42 @@ export interface PresentacionPrecioProducto {
  * - Oferta/campaña (lista ≠ V, sin boni): tachado = precio_venta_referencia y % OFF calculado.
  */
 export function getPresentacionPrecioProducto(producto: IProductos): PresentacionPrecioProducto {
-  const precioFinal = getPrecioConImpuestos(producto) ?? 0;
-  const precioAnteriorBoni = getPrecioAnterior(producto);
+  let precioFinal = getPrecioConImpuestos(producto) ?? 0;
+  let precioAnteriorBoni = getPrecioAnterior(producto);
   const boniPct = getBonificacionPorcentaje(producto);
 
+  // Fallback: API/cache viejo con boni pero sin precio_anterior (evita tachar precio_venta_referencia).
   if (
-    tieneBonificacionProducto(producto) &&
-    precioAnteriorBoni != null &&
-    precioAnteriorBoni > precioFinal
+    boniPct != null &&
+    boniPct > 0 &&
+    (precioAnteriorBoni == null || precioAnteriorBoni <= precioFinal)
   ) {
+    const lista = producto.lista_precio_activa || producto.lista_activa?.codi_lista;
+    const sinIva = getPrecioSinIvaListaActiva(lista, {
+      precio_venta: producto.precio_venta != null ? Number(producto.precio_venta) : undefined,
+      precio_especial: producto.precio_especial != null ? Number(producto.precio_especial) : undefined,
+      precio_pvp: producto.precio_pvp != null ? Number(producto.precio_pvp) : undefined,
+      precio_campanya: producto.precio_campanya != null ? Number(producto.precio_campanya) : undefined,
+      precio_manual: producto.precio_manual != null ? Number(producto.precio_manual) : undefined,
+    });
+    const preview = calcularPreviewPrecioLista(sinIva, getPorcentajeIva(producto) ?? 0, boniPct);
+    if (
+      preview.listaConIva != null &&
+      preview.finalConIva != null &&
+      preview.finalConIva < preview.listaConIva
+    ) {
+      precioAnteriorBoni = preview.listaConIva;
+      precioFinal = preview.finalConIva;
+    }
+  }
+
+  const tieneBoni =
+    boniPct != null &&
+    boniPct > 0 &&
+    precioAnteriorBoni != null &&
+    precioAnteriorBoni > precioFinal;
+
+  if (tieneBoni) {
     return {
       precioFinal,
       precioTachado: precioAnteriorBoni,
@@ -46,7 +74,7 @@ export function getPresentacionPrecioProducto(producto: IProductos): Presentacio
     ref != null &&
     ref > precioFinal &&
     codiLista !== 'V' &&
-    !tieneBonificacionProducto(producto)
+    (boniPct == null || boniPct <= 0)
   ) {
     const pct = ref > 0 ? Math.round((1 - precioFinal / ref) * 100) : 0;
     return {

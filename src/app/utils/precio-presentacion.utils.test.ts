@@ -24,6 +24,24 @@ describe('getPresentacionPrecioProducto', () => {
     expect(p.etiqueta).toBe('Bonificación 10%');
   });
 
+  it('calcula bonificación si falta precio_anterior (cache API viejo)', () => {
+    const producto = {
+      precio: 1210,
+      bonificacion_porcentaje: 10,
+      lista_precio_activa: 'O',
+      precio_especial: 1000,
+      precio_venta: 512397,
+      precio_venta_referencia: 620000,
+      iva: { porcentaje: 21 },
+    } as IProductos;
+
+    const p = getPresentacionPrecioProducto(producto);
+    expect(p.precioFinal).toBe(1089);
+    expect(p.precioTachado).toBe(1210);
+    expect(p.tipoDescuento).toBe('bonificacion');
+    expect(p.etiqueta).toBe('Bonificación 10%');
+  });
+
   it('usa precio_venta_referencia solo sin bonificación y lista ≠ V', () => {
     const producto = {
       precio: 318000,
