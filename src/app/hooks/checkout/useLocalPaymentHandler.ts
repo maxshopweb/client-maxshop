@@ -66,8 +66,7 @@ export function useLocalPaymentHandler({ formData }: UseLocalPaymentHandlerOptio
     const detalles = items.map((item) => ({
       id_prod: item.id_prod,
       cantidad: item.cantidad,
-      precio_unitario: item.precio_unitario,
-      descuento_aplicado: 0,
+      descuento_aplicado: item.descuento || 0,
     }));
 
     // Obtener id_cliente si existe (del usuario autenticado)

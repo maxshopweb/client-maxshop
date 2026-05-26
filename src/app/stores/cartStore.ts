@@ -2,11 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ICartItem, ICartSummary, IDatosEnvio, IDatosFacturacion, IDatosPago, ICheckoutState } from '../types/cart.type';
 import { IProductos } from '../types/producto.type';
-import {
-  getPrecioConImpuestos,
-  getPrecioSinImpuestos,
-  getMontoBonificacionUnitario,
-} from '../utils/producto.utils';
+import { getPrecioConImpuestos, getPrecioSinImpuestos } from '../utils/producto.utils';
 
 interface CartState {
   // Items del carrito
@@ -46,9 +42,16 @@ const getPrecioSinImpuestosNum = (producto: IProductos): number => {
   return getPrecioSinImpuestos(producto) ?? 0;
 };
 
-/** Monto de bonificación por unidad (solo informativo; el precio del ítem ya es el final). */
-const getBonificacionUnitariaCarrito = (producto: IProductos): number => {
-  return getMontoBonificacionUnitario(producto);
+// Función para calcular descuento (solo para mostrar tachado si aplica)
+const calcularDescuento = (producto: IProductos): number => {
+  const precioMinorista = Number(producto.precio_minorista || 0);
+  const precio = Number(producto.precio || 0);
+  
+  if (precio && precioMinorista && precio < precioMinorista) {
+    return precioMinorista - precio;
+  }
+  
+  return 0;
 };
 
 export const useCartStore = create<CartState>()(
@@ -82,7 +85,7 @@ export const useCartStore = create<CartState>()(
             // Si ya existe, actualizar cantidad
             const newQuantity = existingItem.cantidad + cantidad;
             const precioUnitario = getPrecioConImpuestosNum(producto);
-            const descuento = getBonificacionUnitariaCarrito(producto);
+            const descuento = calcularDescuento(producto);
             const precioUnitarioSinImpuestos = getPrecioSinImpuestosNum(producto);
             
             const updatedItems = state.items.map((item) =>
@@ -106,8 +109,8 @@ export const useCartStore = create<CartState>()(
             const envio = 0; // Removido: se calcula dinámicamente en checkout
             const subtotalSinImpuestos = updatedItems.reduce((sum, item) => sum + (item.subtotal_sin_iva || 0), 0);
             const impuestos = Math.max(subtotal - subtotalSinImpuestos, 0);
-            const total = subtotal + envio;
-            const totalSinImpuestos = subtotalSinImpuestos + envio;
+            const total = subtotal - descuentos + envio;
+            const totalSinImpuestos = subtotalSinImpuestos - descuentos + envio;
             const cantidadItems = updatedItems.reduce((sum, item) => sum + item.cantidad, 0);
             
             const newSummary = {
@@ -128,7 +131,7 @@ export const useCartStore = create<CartState>()(
           } else {
             // Si no existe, agregar nuevo item
             const precioUnitario = getPrecioConImpuestosNum(producto);
-            const descuento = getBonificacionUnitariaCarrito(producto);
+            const descuento = calcularDescuento(producto);
             const precioUnitarioSinImpuestos = getPrecioSinImpuestosNum(producto);
             const newItem: ICartItem = {
               id_prod: producto.id_prod,
@@ -150,8 +153,8 @@ export const useCartStore = create<CartState>()(
             const envio = 0; // Removido: se calcula dinámicamente en checkout
             const subtotalSinImpuestos = updatedItems.reduce((sum, item) => sum + (item.subtotal_sin_iva || 0), 0);
             const impuestos = Math.max(subtotal - subtotalSinImpuestos, 0);
-            const total = subtotal + envio;
-            const totalSinImpuestos = subtotalSinImpuestos + envio;
+            const total = subtotal - descuentos + envio;
+            const totalSinImpuestos = subtotalSinImpuestos - descuentos + envio;
             const cantidadItems = updatedItems.reduce((sum, item) => sum + item.cantidad, 0);
             
             const newSummary = {
@@ -184,8 +187,8 @@ export const useCartStore = create<CartState>()(
           const envio = 0; // Se calcula dinámicamente en checkout via Andreani
           const subtotalSinImpuestos = updatedItems.reduce((sum, item) => sum + (item.subtotal_sin_iva || 0), 0);
           const impuestos = Math.max(subtotal - subtotalSinImpuestos, 0);
-          const total = subtotal + envio;
-          const totalSinImpuestos = subtotalSinImpuestos + envio;
+          const total = subtotal - descuentos + envio;
+          const totalSinImpuestos = subtotalSinImpuestos - descuentos + envio;
           const cantidadItems = updatedItems.reduce((sum, item) => sum + item.cantidad, 0);
           
           const newSummary = {
@@ -218,7 +221,7 @@ export const useCartStore = create<CartState>()(
             if (item.id_prod === id_prod) {
               // Recalcular precio unitario y descuento basándose en el producto actual
               const precioUnitario = getPrecioConImpuestosNum(item.producto);
-              const descuento = getBonificacionUnitariaCarrito(item.producto);
+              const descuento = calcularDescuento(item.producto);
               const precioUnitarioSinImpuestos = getPrecioSinImpuestosNum(item.producto);
               return {
                 ...item,
@@ -239,8 +242,8 @@ export const useCartStore = create<CartState>()(
           const envio = 0; // Se calcula dinámicamente en checkout via Andreani
           const subtotalSinImpuestos = updatedItems.reduce((sum, item) => sum + (item.subtotal_sin_iva || 0), 0);
           const impuestos = Math.max(subtotal - subtotalSinImpuestos, 0);
-          const total = subtotal + envio;
-          const totalSinImpuestos = subtotalSinImpuestos + envio;
+          const total = subtotal - descuentos + envio;
+          const totalSinImpuestos = subtotalSinImpuestos - descuentos + envio;
           const cantidadItems = updatedItems.reduce((sum, item) => sum + item.cantidad, 0);
           
           const newSummary = {
@@ -342,8 +345,8 @@ export const useCartStore = create<CartState>()(
         
         const subtotalSinImpuestos = state.items.reduce((sum, item) => sum + (item.subtotal_sin_iva || 0), 0);
         const impuestos = Math.max(subtotal - subtotalSinImpuestos, 0);
-        const total = subtotal + envio;
-        const totalSinImpuestos = subtotalSinImpuestos + envio;
+        const total = subtotal - descuentos + envio;
+        const totalSinImpuestos = subtotalSinImpuestos - descuentos + envio;
         const cantidadItems = state.items.reduce((sum, item) => sum + item.cantidad, 0);
         
         return {
@@ -370,7 +373,7 @@ export const useCartStore = create<CartState>()(
           // Recalcular precios y subtotales de cada item
           const updatedItems = state.items.map((item) => {
             const precioUnitario = getPrecioConImpuestosNum(item.producto);
-            const descuento = getBonificacionUnitariaCarrito(item.producto);
+            const descuento = calcularDescuento(item.producto);
             const precioUnitarioSinImpuestos = getPrecioSinImpuestosNum(item.producto);
             return {
               ...item,
@@ -388,8 +391,8 @@ export const useCartStore = create<CartState>()(
           const envio = 0; // Se calcula dinámicamente en checkout via Andreani
           const subtotalSinImpuestos = updatedItems.reduce((sum, item) => sum + (item.subtotal_sin_iva || 0), 0);
           const impuestos = Math.max(subtotal - subtotalSinImpuestos, 0);
-          const total = subtotal + envio;
-          const totalSinImpuestos = subtotalSinImpuestos + envio;
+          const total = subtotal - descuentos + envio;
+          const totalSinImpuestos = subtotalSinImpuestos - descuentos + envio;
           const cantidadItems = updatedItems.reduce((sum, item) => sum + item.cantidad, 0);
           
           // Actualizar estado

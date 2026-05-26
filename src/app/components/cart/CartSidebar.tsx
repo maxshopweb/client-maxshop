@@ -119,9 +119,9 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                 </div>
                 {summary.descuentos > 0 && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-foreground/70">Bonificación</span>
+                    <span className="text-foreground/70">Descuentos</span>
                     <span className="text-principal font-medium">
-                      -{formatCurrencyARS(summary.descuentos)}
+                      {formatCurrencyARS(-summary.descuentos)}
                     </span>
                   </div>
                 )}
