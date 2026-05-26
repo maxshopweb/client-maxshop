@@ -11,6 +11,7 @@ interface VentasTableWrapperProps {
     onEdit: (venta: IVenta) => void;
     onDelete: (venta: IVenta) => void;
     onView: (venta: IVenta) => void;
+    onEnviarFactura?: (venta: IVenta) => void;
     onBulkDelete: (ids: number[]) => void;
     onBulkDownload: (ids: number[]) => void;
     highlightId?: number;

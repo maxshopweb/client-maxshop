@@ -9,7 +9,7 @@ import { useNotificationsStore } from '@/app/stores/notificationsStore';
 import type { IVenta } from '@/app/types/ventas.type';
 import type { EstadoPago } from '@/app/types/estados.type';
 
-type ModalType = 'create' | 'edit' | 'delete' | 'view' | 'bulk-delete' | null;
+type ModalType = 'create' | 'edit' | 'delete' | 'view' | 'bulk-delete' | 'enviar-factura' | null;
 
 interface ModalState {
   type: ModalType;
@@ -51,6 +51,10 @@ export function useVentasPage() {
 
   const openViewDialog = useCallback((venta: IVenta) => {
     setModal({ type: 'view', venta });
+  }, []);
+
+  const openEnviarFacturaModal = useCallback((venta: IVenta) => {
+    setModal({ type: 'enviar-factura', venta });
   }, []);
 
   const openBulkDeleteDialog = useCallback((ids: number[]) => {
@@ -95,6 +99,7 @@ export function useVentasPage() {
     openEditModal,
     openDeleteDialog,
     openViewDialog,
+    openEnviarFacturaModal,
     openBulkDeleteDialog,
     closeModal,
 
