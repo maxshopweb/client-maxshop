@@ -521,7 +521,7 @@ export default function SincronizacionPage() {
             Sincronización FTP
           </h1>
           <p className="text-sm mt-1" style={{ color: "rgba(var(--foreground-rgb), 0.5)" }}>
-            Monitoreo del proceso automático de integración con el sistema externo. Actualización cada 2 minutos.
+            Monitoreo del proceso automático de integración con el sistema externo. Actualización automática cada 20 minutos.
           </p>
         </div>
       </div>

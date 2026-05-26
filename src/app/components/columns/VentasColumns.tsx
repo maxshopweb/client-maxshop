@@ -1,5 +1,5 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Edit, Trash2, Eye, Package, Store, Truck } from 'lucide-react';
+import { MoreHorizontal, Edit, Trash2, Eye, Package, Store, Truck, FileText } from 'lucide-react';
 import * as Checkbox from '@radix-ui/react-checkbox';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { Check } from 'lucide-react';
@@ -15,6 +15,7 @@ interface VentasTableActions {
     onEdit: (venta: IVenta) => void;
     onDelete: (venta: IVenta) => void;
     onView: (venta: IVenta) => void;
+    onEnviarFactura?: (venta: IVenta) => void;
     onUpdateEstadoPago?: (venta: IVenta) => void;
     onUpdateEstadoEnvio?: (venta: IVenta) => void;
 }
@@ -87,6 +88,16 @@ export const getVentasColumns = (
                                     <Edit className="mr-2 h-4 w-4" />
                                     Editar
                                 </DropdownMenu.Item>
+
+                                {actions.onEnviarFactura && (
+                                    <DropdownMenu.Item
+                                        className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-input rounded outline-none text-input transition-colors"
+                                        onClick={() => actions.onEnviarFactura!(venta)}
+                                    >
+                                        <FileText className="mr-2 h-4 w-4" />
+                                        Enviar factura
+                                    </DropdownMenu.Item>
+                                )}
 
                                 <DropdownMenu.Separator className="h-px bg-[var(--card-border)] my-1" />
 

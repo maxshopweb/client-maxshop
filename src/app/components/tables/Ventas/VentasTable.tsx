@@ -17,6 +17,7 @@ interface VentasTableProps {
     onEdit: (venta: IVenta) => void;
     onDelete: (venta: IVenta) => void;
     onView: (venta: IVenta) => void;
+    onEnviarFactura?: (venta: IVenta) => void;
     tableState: ReturnType<typeof useVentasTable>;
     highlightId?: number;
 }
@@ -25,6 +26,7 @@ export function VentasTable({
     onEdit,
     onDelete,
     onView,
+    onEnviarFactura,
     tableState,
     highlightId,
 }: VentasTableProps) {
@@ -48,6 +50,7 @@ export function VentasTable({
         onEdit,
         onDelete,
         onView,
+        onEnviarFactura,
     });
 
     // Instancia de la tabla

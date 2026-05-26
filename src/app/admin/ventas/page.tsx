@@ -12,6 +12,8 @@ import { ConfirmActionWithPasswordModal } from '@/app/components/modals/ConfirmA
 import { CreateVentaModal } from '@/app/components/modals/Venta/CreateWrapper';
 import { EditVentaModal } from '@/app/components/modals/Venta/EditWrapper';
 import { ViewVentaModal } from '@/app/components/modals/Venta/ViewVentaModal';
+import { EnviarFacturaModal } from '@/app/components/modals/Venta/EnviarFacturaModal';
+import { FacturasPendientesCard } from '@/app/components/Ventas/FacturasPendientesCard';
 import { useVentasPage } from '@/app/hooks/ventas/useVentasPage';
 import { useVentasStats } from '@/app/hooks/ventas/useVentasStats';
 import { AnimatedStatCard } from '@/app/components/ui/AnimatedStatCard';
@@ -39,6 +41,7 @@ function VentasPageContent() {
         openEditModal,
         openDeleteDialog,
         openViewDialog,
+        openEnviarFacturaModal,
         openBulkDeleteDialog,
         closeModal,
         refetch,
@@ -169,10 +172,13 @@ function VentasPageContent() {
 
                     <VentasFilters />
 
+                <FacturasPendientesCard />
+
                 <VentasTableWrapper
                     onEdit={openEditModal}
                     onDelete={openDeleteDialog}
                     onView={openViewDialog}
+                    onEnviarFactura={openEnviarFacturaModal}
                     onBulkDelete={openBulkDeleteDialog}
                     onBulkDownload={handleBulkDownload}
                     highlightId={highlightId}
@@ -221,6 +227,14 @@ function VentasPageContent() {
                     venta={modal.venta}
                     onClose={closeModal}
                     isOpen={true}
+                />
+            )}
+
+            {modal.type === 'enviar-factura' && modal.venta && (
+                <EnviarFacturaModal
+                    venta={modal.venta}
+                    onClose={closeModal}
+                    onSuccess={refetch}
                 />
             )}
         </div>
