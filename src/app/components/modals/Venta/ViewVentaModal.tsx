@@ -349,12 +349,8 @@ export function ViewVentaModal({ venta: ventaInitial, onClose, isOpen }: ViewVen
                                                         <div className="text-right space-y-1">
                                                             <div className="text-sm text-foreground/60">Cantidad: <span className="font-semibold text-foreground">{detalle.cantidad ?? 0}</span></div>
                                                             <div className="text-sm text-foreground/60">Precio unit.: <span className="font-semibold text-foreground">{formatPrecio(detalle.precio_unitario)}</span></div>
-                                                            {detalle.descuento_aplicado != null && detalle.descuento_aplicado > 0 && (
-                                                                <div className="text-sm text-red-600">
-                                                                    {detalle.bonificacion_porcentaje != null && Number(detalle.bonificacion_porcentaje) > 0
-                                                                        ? `Bonificación (${Number(detalle.bonificacion_porcentaje)}%): -${formatPrecio(detalle.descuento_aplicado)}`
-                                                                        : `Descuento: -${formatPrecio(detalle.descuento_aplicado)}`}
-                                                                </div>
+                                                            {detalle.descuento_aplicado && detalle.descuento_aplicado > 0 && (
+                                                                <div className="text-sm text-red-600">Descuento: -{formatPrecio(detalle.descuento_aplicado)}</div>
                                                             )}
                                                             <div className="text-base font-bold text-principal mt-2">Subtotal: {formatPrecio(detalle.sub_total)}</div>
                                                         </div>
@@ -388,11 +384,7 @@ export function ViewVentaModal({ venta: ventaInitial, onClose, isOpen }: ViewVen
                                         )}
                                         {venta.descuento_total != null && venta.descuento_total > 0 && (
                                             <div className="flex justify-between text-sm text-red-600">
-                                                <span>
-                                                    {venta.detalles?.some((d) => d.bonificacion_porcentaje != null && Number(d.bonificacion_porcentaje) > 0)
-                                                        ? 'Bonificación total:'
-                                                        : 'Descuento total:'}
-                                                </span>
+                                                <span>Descuento total:</span>
                                                 <span className="font-semibold">-{formatPrecio(venta.descuento_total)}</span>
                                             </div>
                                         )}

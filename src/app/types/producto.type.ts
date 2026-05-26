@@ -72,14 +72,9 @@ export interface IProductos {
     precio_mayorista?: number | null;
     precio_minorista?: number | null;
     precio_evento?: number | null;
-    /** Precio final con IVA a pagar (bonificación ya aplicada). */
     precio?: number | null;
-    /** Precio de lista con IVA (tachado cuando hay bonificación). */
-    precio_anterior?: number | null;
-    /** Monto de bonificación por unidad. */
-    monto_bonificacion?: number | null;
     precio_sin_iva?: number | null;
-    /** Precio lista Venta (V) con IVA; solo oferta/campaña sin bonificación (nunca tachado de boni). */
+    /** Precio lista Venta (V) con IVA; solo cuando lista activa no es Venta, para mostrar tachado */
     precio_venta_referencia?: number | null;
     iva_monto?: number | null;
     stock?: number | null;

@@ -1,6 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import Input from '@/app/components/ui/Input';
 import { DollarSign, Package, List, Percent } from 'lucide-react';
@@ -8,11 +7,6 @@ import type { CreateProductoData } from '@/app/schemas/producto.schema';
 import Select from '../../ui/Select';
 import { useContenidoCrearProducto } from '@/app/hooks/productos/useProductos';
 import type { IListaPrecio, ISituacionFiscal } from '@/app/types/producto.type';
-import { formatCurrencyARS } from '@/app/utils/currency';
-import {
-  calcularPreviewPrecioLista,
-  getPrecioSinIvaListaActiva,
-} from '@/app/utils/precio-presentacion.utils';
 
 const LISTA_TO_FIELD: Record<string, keyof CreateProductoData> = {
   V: 'precio_venta',
@@ -21,60 +15,20 @@ const LISTA_TO_FIELD: Record<string, keyof CreateProductoData> = {
   Q: 'precio_campanya',
 } as const;
 
-const LISTAS_PRECIO_CODI = new Set(['V', 'O', 'P', 'Q']);
-
 interface StepTwoProps {
   form: UseFormReturn<CreateProductoData>;
 }
 
 export function StepTwoPricing({ form }: StepTwoProps) {
   const { register, watch, setValue, formState: { errors } } = form;
-  const { listasPrecio, situacionesFiscales, ivas, isLoading: loadingContenido } = useContenidoCrearProducto();
+  const { listasPrecio, situacionesFiscales, isLoading: loadingContenido } = useContenidoCrearProducto();
 
-  const listasConPrecio = listasPrecio.filter(
-    (l) => LISTAS_PRECIO_CODI.has(l.codi_lista) && (l.venta_lista === 'S' || l.venta_lista == null)
-  );
-  const listasParaPublicar = listasPrecio.filter(
-    (l) => (LISTAS_PRECIO_CODI.has(l.codi_lista) || l.codi_lista === 'E') && (l.venta_lista === 'S' || l.venta_lista == null)
-  );
-
+  // Listas que tienen precio en el producto (V, O, P, Q) — inputs por lista
+  const listasConPrecio = listasPrecio.filter((l) => ['V', 'O', 'P', 'Q'].includes(l.codi_lista));
+  // Listas para el selector "con la que se publica" (incluye E = Precio especial)
+  const listasParaPublicar = listasPrecio.filter((l) => ['V', 'O', 'P', 'Q', 'E'].includes(l.codi_lista));
   const listaActiva = watch('lista_precio_activa');
-  const esListaE = listaActiva === 'E' || listaActiva === 'e';
-  const bonificacionPct = watch('bonificacion_porcentaje');
-  const codiImpuesto = watch('codi_impuesto');
-  const precioVenta = watch('precio_venta');
-  const precioEspecial = watch('precio_especial');
-  const precioPvp = watch('precio_pvp');
-  const precioCampanya = watch('precio_campanya');
-  const precioManual = watch('precio_manual');
-
-  const porcentajeIva = useMemo(() => {
-    if (!codiImpuesto) return 0;
-    const found = ivas.find(
-      (i) => i.codi_impuesto === codiImpuesto || String(i.id_iva) === codiImpuesto
-    );
-    return found?.porcentaje != null ? Number(found.porcentaje) : 0;
-  }, [codiImpuesto, ivas]);
-
-  const previewPrecio = useMemo(() => {
-    const sinIva = getPrecioSinIvaListaActiva(listaActiva, {
-      precio_venta: precioVenta,
-      precio_especial: precioEspecial,
-      precio_pvp: precioPvp,
-      precio_campanya: precioCampanya,
-      precio_manual: precioManual,
-    });
-    return calcularPreviewPrecioLista(sinIva, porcentajeIva, bonificacionPct);
-  }, [
-    listaActiva,
-    bonificacionPct,
-    porcentajeIva,
-    precioVenta,
-    precioEspecial,
-    precioPvp,
-    precioCampanya,
-    precioManual,
-  ]);
+  const esListaE = (listaActiva === 'E' || listaActiva === 'e');
 
   const optionalNumberOptions = {
     valueAsNumber: true,
@@ -87,14 +41,14 @@ export function StepTwoPricing({ form }: StepTwoProps) {
         Precios y Stock
       </h3>
 
+      {/* Precios por lista */}
       <div className="space-y-3">
         <div className="flex items-center gap-2 text-input font-medium">
           <List className="size-4" />
           <span>Precio por lista</span>
         </div>
         <p className="text-sm text-muted-foreground">
-          Asigná el precio sin IVA para cada lista de venta (V, O, P, Q). Al menos uno es obligatorio.
-          La bonificación se aplica solo sobre la lista pública que elijas abajo.
+          Asigná el precio del producto para cada lista. Al menos uno es obligatorio.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {loadingContenido ? (
@@ -105,7 +59,7 @@ export function StepTwoPricing({ form }: StepTwoProps) {
             listasConPrecio.map((lista: IListaPrecio) => {
               const fieldName = LISTA_TO_FIELD[lista.codi_lista];
               if (!fieldName) return null;
-              const label = lista.nombre ? `${lista.nombre} (${lista.codi_lista})` : `Lista ${lista.codi_lista}`;
+              const label = lista.nombre || `Lista ${lista.codi_lista}`;
               return (
                 <Input
                   key={lista.id_lista}
@@ -124,13 +78,14 @@ export function StepTwoPricing({ form }: StepTwoProps) {
         </div>
       </div>
 
+      {/* Lista con la que se publica */}
       <div className="space-y-2">
         <div className="flex items-center gap-2 text-input font-medium">
           <List className="size-4" />
           <span>Lista con la que se publica el producto</span>
         </div>
         <p className="text-sm text-muted-foreground">
-          Precio en tienda = precio de esta lista (con IVA). Si hay bonificación, se descuenta sobre ese monto.
+          Elegí qué precio mostrar en tienda (por defecto: Venta). Si elegís &quot;Precio especial (E)&quot;, el precio no se sobreescribe por sincronización.
         </p>
         <Select
           label="Lista pública"
@@ -138,10 +93,10 @@ export function StepTwoPricing({ form }: StepTwoProps) {
             { value: '', label: 'Seleccionar' },
             ...listasParaPublicar.map((l: IListaPrecio) => ({
               value: l.codi_lista,
-              label: l.nombre ? `${l.nombre} (${l.codi_lista})` : `Lista ${l.codi_lista}`,
+              label: l.nombre || (l.codi_lista === 'E' ? 'Precio especial (E)' : `Lista ${l.codi_lista}`),
             })),
           ]}
-          placeholder="Ej: Venta (V)"
+          placeholder="Ej: Venta"
           disabled={loadingContenido}
           value={String(watch('lista_precio_activa') ?? '')}
           onChange={(value) => {
@@ -153,7 +108,7 @@ export function StepTwoPricing({ form }: StepTwoProps) {
         {esListaE && (
           <div className="pt-2">
             <Input
-              label="Precio manual (lista E) — sin IVA, no se sobreescribe por sync"
+              label="Precio manual (lista E) — no se sobreescribe por sincronización"
               type="number"
               step="0.01"
               min="0"
@@ -166,6 +121,7 @@ export function StepTwoPricing({ form }: StepTwoProps) {
         )}
       </div>
 
+      {/* Bonificación a aplicar */}
       <div className="space-y-2">
         <Input
           label="Bonificación (%)"
@@ -178,38 +134,11 @@ export function StepTwoPricing({ form }: StepTwoProps) {
           error={errors.bonificacion_porcentaje?.message as string | undefined}
         />
         <p className="text-xs text-muted-foreground">
-          Porcentaje sobre el precio de la lista pública seleccionada, con IVA incluido. No usa otras listas (ej. Venta).
+          Porcentaje de bonificación por defecto para este producto. Se aplica sobre el total de la línea y se envía al Excel.
         </p>
       </div>
 
-      {previewPrecio.listaConIva != null && listaActiva && (
-        <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm space-y-1">
-          <p className="font-medium text-input">Vista previa (lista {String(listaActiva).toUpperCase()})</p>
-          <p>
-            Precio lista con IVA:{' '}
-            <span className="font-semibold">{formatCurrencyARS(previewPrecio.listaConIva)}</span>
-          </p>
-          {previewPrecio.montoBonificacion != null && previewPrecio.montoBonificacion > 0 ? (
-            <>
-              <p className="text-amber-700">
-                Bonificación ({bonificacionPct}%): -{formatCurrencyARS(previewPrecio.montoBonificacion)}
-              </p>
-              <p>
-                Precio final en tienda:{' '}
-                <span className="font-semibold text-principal">
-                  {formatCurrencyARS(previewPrecio.finalConIva!)}
-                </span>
-              </p>
-            </>
-          ) : (
-            <p>
-              Precio final en tienda:{' '}
-              <span className="font-semibold">{formatCurrencyARS(previewPrecio.finalConIva!)}</span>
-            </p>
-          )}
-        </div>
-      )}
-
+      {/* Situación fiscal (IVA) - id_sifi como value para claves únicas */}
       <div className="space-y-2">
         <div className="flex items-center gap-2 text-input font-medium">
           <Percent className="size-4" />
@@ -244,6 +173,7 @@ export function StepTwoPricing({ form }: StepTwoProps) {
         />
       </div>
 
+      {/* Stock */}
       <div className="space-y-3 pt-2 border-t border-border">
         <div className="flex items-center gap-2 text-input font-medium">
           <Package className="size-4" />

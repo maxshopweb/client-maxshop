@@ -22,17 +22,17 @@ export default function CartSummary() {
   );
 
   // Calcular totales
-  const { subtotal, subtotalSinImpuestos, bonificacionTotal, envio, total, totalSinImpuestos } = useMemo(() => {
+  const { subtotal, subtotalSinImpuestos, impuestos, envio, total, totalSinImpuestos } = useMemo(() => {
     const sub = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
     const subSinImp = cartItems.reduce((sum, item) => sum + (item.subtotalSinImpuestos ?? item.subtotal), 0);
-    const boni = cartItems.reduce((sum, item) => sum + (item.descuento || 0), 0);
+    const impuestosCalculados = Math.max(sub - subSinImp, 0);
     const env = costoEnvio || 0;
     const tot = sub + env;
     const totSinImp = subSinImp + env;
     return {
       subtotal: sub,
       subtotalSinImpuestos: subSinImp,
-      bonificacionTotal: boni,
+      impuestos: impuestosCalculados,
       envio: env,
       total: tot,
       totalSinImpuestos: totSinImp,
@@ -75,20 +75,8 @@ export default function CartSummary() {
 
       {/* Totales */}
       <div className="space-y-2 mb-4">
-        {bonificacionTotal > 0 && (
-          <>
-            <div className="flex justify-between text-sm">
-              <span className="text-foreground/70">Subtotal (lista)</span>
-              <span className="text-foreground font-medium">{formatCurrencyARS(subtotal + bonificacionTotal)}</span>
-            </div>
-            <div className="flex justify-between text-sm text-amber-700">
-              <span className="text-foreground/70">Bonificación</span>
-              <span className="font-medium">-{formatCurrencyARS(bonificacionTotal)}</span>
-            </div>
-          </>
-        )}
         <div className="flex justify-between text-sm">
-          <span className="text-foreground/70">{bonificacionTotal > 0 ? 'Subtotal productos' : 'Subtotal'}</span>
+          <span className="text-foreground/70">Subtotal</span>
           <div className="text-right">
             <span className="text-foreground font-medium block">{formatCurrencyARS(subtotal)}</span>
             {subtotalSinImpuestos > 0 && (

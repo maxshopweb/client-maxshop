@@ -17,8 +17,7 @@ export function useProduct(id: number, options: UseProductOptions = {}) {
     queryFn: () => productosService.getById(id),
     enabled: enabled && !!id,
     refetchOnMount,
-    staleTime: 30 * 1000,
-    refetchOnWindowFocus: true,
+    staleTime: 1000 * 60 * 5, // 5 minutos
     retry: 2,
   });
 }

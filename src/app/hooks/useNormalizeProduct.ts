@@ -41,22 +41,14 @@ export const useNormalizeProduct = ({ product }: UseNormalizeProductProps) => {
     const subtotal_sin_iva = isICartItem
         ? (product as ICartItem).subtotal_sin_iva ?? precio_unitario_sin_iva * cantidad
         : (product as CartItem).subtotalSinImpuestos ?? precio_unitario_sin_iva * cantidad;
-    const descuento = isICartItem
-        ? (product as ICartItem).descuento || 0
-        : (product as CartItem).descuento || 0;
+    const descuento = isICartItem 
+        ? (product as ICartItem).descuento || 0 
+        : 0;
 
-    const productoRef = isICartItem ? (product as ICartItem).producto : undefined;
-    const cartItem = !isICartItem ? (product as CartItem) : undefined;
-    const boniPctRaw = productoRef?.bonificacion_porcentaje ?? cartItem?.bonificacion_porcentaje;
-    const boniPct =
-        boniPctRaw != null && Number(boniPctRaw) > 0
-            ? Number(boniPctRaw)
-            : null;
     const tieneDescuento = descuento > 0;
-    const porcentajeDescuento = boniPct ?? (tieneDescuento && precio_unitario
+    const porcentajeDescuento = tieneDescuento && precio_unitario
         ? Math.round((descuento / (precio_unitario * cantidad + descuento)) * 100)
-        : 0);
-    const esBonificacion = boniPct != null && descuento > 0;
+        : 0;
 
     return {
         id_prod,
@@ -71,8 +63,6 @@ export const useNormalizeProduct = ({ product }: UseNormalizeProductProps) => {
         subtotal_sin_iva,
         descuento,
         porcentajeDescuento,
-        tieneDescuento,
-        esBonificacion,
-        boniPct,
+        tieneDescuento
     };
 }
