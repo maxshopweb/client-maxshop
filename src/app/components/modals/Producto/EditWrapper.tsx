@@ -36,7 +36,7 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
             codi_categoria: producto.codi_categoria || '',
             codi_marca: producto.codi_marca || '',
             codi_grupo: producto.codi_grupo || '',
-            codi_impuesto: producto.codi_impuesto || '',
+            codi_impuesto: producto.codi_impuesto?.trim() || '01',
             codi_barras: producto.codi_barras || '',
             unidad_medida: producto.unidad_medida || '',
             unidades_por_producto: producto.unidades_por_producto || undefined,

@@ -159,6 +159,10 @@ export interface IVentaFilters {
 
     /** Incluir ventas dadas de baja (estado_pago cancelado). Por defecto el backend no las lista. */
     incluir_canceladas?: boolean;
+    /** Número de operación (cod_interno). */
+    cod_interno?: string;
+    /** ID exacto de venta. */
+    id_venta?: number;
 }
 
 // ========================================

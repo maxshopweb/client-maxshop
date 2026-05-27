@@ -22,6 +22,7 @@ import { AdminPageHeader } from '@/app/components/Admin/AdminPageHeader';
 import { AdminPageContainer } from '@/app/components/Admin/AdminPageContainer';
 import { ventasService } from '@/app/services/venta.service';
 import { VentasFiltersProvider } from '@/app/hooks/ventas/useVentasFilters';
+import { ExportarVentasModal } from '@/app/components/modals/Venta/ExportarVentasModal';
 
 export default function VentasPage() {
     return (
@@ -48,7 +49,7 @@ function VentasPageContent() {
     } = useVentasPage();
 
     const stats = useVentasStats();
-    const [isDownloadingFtp, setIsDownloadingFtp] = useState(false);
+    const [showExportModal, setShowExportModal] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [pendingAction, setPendingAction] = useState<(() => () => Promise<void>) | null>(null);
 
@@ -68,26 +69,6 @@ function VentasPageContent() {
         setPendingAction(null);
         setShowPasswordModal(false);
     }, [pendingAction]);
-
-    const handleDownloadFtpExcel = useCallback(async () => {
-        setIsDownloadingFtp(true);
-        try {
-            const blob = await ventasService.downloadVentasExcelFtp();
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'Ventas.xlsx';
-            a.click();
-            URL.revokeObjectURL(url);
-            toast.success('Descarga iniciada', { description: 'Ventas.xlsx desde el FTP.' });
-        } catch (e) {
-            toast.error('No se pudo descargar el Excel', {
-                description: e instanceof Error ? e.message : 'Error desconocido.',
-            });
-        } finally {
-            setIsDownloadingFtp(false);
-        }
-    }, []);
 
     const handleBulkDownload = useCallback(async (ids: number[]) => {
         try {
@@ -126,13 +107,12 @@ function VentasPageContent() {
                     </Button>
                     <Button
                         type="button"
-                        onClick={handleDownloadFtpExcel}
-                        disabled={isDownloadingFtp}
+                        onClick={() => setShowExportModal(true)}
                         variant="outline-primary"
                         className="flex items-center gap-2 justify-center"
                     >
-                        <FileSpreadsheet className={`h-4 w-4 ${isDownloadingFtp ? 'animate-pulse' : ''}`} />
-                        Descargar EXCEL FTP
+                        <FileSpreadsheet className="h-4 w-4" />
+                        Exportar Ventas
                     </Button>
                     <Button onClick={openCreateModal}>
                         <Plus className="h-5 w-5" />
@@ -237,6 +217,11 @@ function VentasPageContent() {
                     onSuccess={refetch}
                 />
             )}
+
+            <ExportarVentasModal
+                isOpen={showExportModal}
+                onClose={() => setShowExportModal(false)}
+            />
         </div>
     );
 }

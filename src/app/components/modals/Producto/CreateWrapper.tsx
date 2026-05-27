@@ -34,7 +34,7 @@ export function CreateProductoModal({ onClose }: CreateProductoModalProps) {
             stock: 0,
             lista_precio_activa: 'V',
             estado: 2,
-            codi_impuesto: '01', // IVA 21% por defecto (no se muestra en el formulario)
+            codi_impuesto: '01', // IVA 21% por defecto (alícuota en Step 2)
         },
     });
 
