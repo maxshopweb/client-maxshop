@@ -42,6 +42,15 @@ export interface SyncStatsResponse {
   data: SyncStats;
 }
 
+export type SyncOnDemandTipo = 'catalogo' | 'precios' | 'stock';
+
+export interface SyncOnDemandResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+  data?: unknown;
+}
+
 class SincronizacionService {
   async getRuns(page = 1, limit = 50): Promise<SyncRunsResponse> {
     const response = await axiosInstance.get<SyncRunsResponse>(
@@ -60,6 +69,13 @@ class SincronizacionService {
   async getStats(): Promise<SyncStats> {
     const response = await axiosInstance.get<SyncStatsResponse>('/sincronizacion/stats');
     return response.data.data;
+  }
+
+  async triggerOnDemand(tipo: SyncOnDemandTipo): Promise<SyncOnDemandResponse> {
+    const response = await axiosInstance.post<SyncOnDemandResponse>(
+      `/sincronizacion/on-demand/${tipo}`
+    );
+    return response.data;
   }
 }
 

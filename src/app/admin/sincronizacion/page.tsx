@@ -5,6 +5,8 @@ import { AdminPageContainer } from "@/app/components/Admin/AdminPageContainer";
 import { useSyncStats } from "@/app/hooks/sincronizacion/useSyncStats";
 import { useSyncRuns } from "@/app/hooks/sincronizacion/useSyncRuns";
 import type { SyncRun } from "@/app/services/sincronizacion.service";
+import { Button } from "@/app/components/ui/Button";
+import { SincronizacionOnDemandModal } from "@/app/components/modals/Sincronizacion/SincronizacionOnDemandModal";
 import {
   RefreshCw,
   CheckCircle2,
@@ -512,6 +514,8 @@ function TablaRuns() {
 // ─── Página principal ─────────────────────────────────────────────────────────
 
 export default function SincronizacionPage() {
+  const [showOnDemandModal, setShowOnDemandModal] = useState(false);
+
   return (
     <AdminPageContainer>
       {/* Header */}
@@ -524,6 +528,10 @@ export default function SincronizacionPage() {
             Monitoreo del proceso automático de integración con el sistema externo. Actualización automática cada 20 minutos.
           </p>
         </div>
+        <Button variant="primary" size="sm" onClick={() => setShowOnDemandModal(true)}>
+          <RefreshCw size={14} className="mr-1.5" />
+          Sincronizar ahora
+        </Button>
       </div>
 
       {/* Cards de estadísticas */}
@@ -531,6 +539,13 @@ export default function SincronizacionPage() {
 
       {/* Tabla de corridas */}
       <TablaRuns />
+
+      {showOnDemandModal && (
+        <SincronizacionOnDemandModal
+          isOpen={showOnDemandModal}
+          onClose={() => setShowOnDemandModal(false)}
+        />
+      )}
     </AdminPageContainer>
   );
 }
