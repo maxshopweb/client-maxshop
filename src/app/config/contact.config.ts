@@ -14,6 +14,12 @@ export const CONTACT_CONFIG = {
   },
 } as const;
 
+export function buildWhatsappUrl(message?: string): string {
+  const digits = CONTACT_CONFIG.whatsapp.number.replace(/\D/g, "");
+  if (!message) return `https://wa.me/${digits}`;
+  return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
+}
+
 export const SOCIAL_LINKS = {
   facebook: "https://www.facebook.com/people/MAX-SHOP/61580596412615/",
   instagram: "https://instagram.com/maxshop.ar/",

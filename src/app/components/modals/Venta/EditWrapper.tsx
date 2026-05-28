@@ -1,30 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import ConfirmModal from '@/app/components/modals/ConfirmModal';
 import SimpleModal from '@/app/components/modals/SimpleModal';
 import Select from '@/app/components/ui/Select';
 import Textarea from '@/app/components/ui/Textarea';
 import Input from '@/app/components/ui/Input';
 import Link from 'next/link';
-import { FileText, CreditCard, User, ExternalLink, Phone, Home, MapPin, Package } from 'lucide-react';
+import { FileText, CreditCard, User, ExternalLink, Phone, Home, MapPin, Package, Store } from 'lucide-react';
 import {
     updateVentaSchema,
     type UpdateVentaData
 } from '@/app/schemas/venta.schema';
-import { useUpdateEnvio, useUpdateVenta } from '@/app/hooks/ventas/useVentasMutations';
+import { useUpdateEnvio, useUpdateVenta, useNotificarListoRetiro, useMarcarRetirado } from '@/app/hooks/ventas/useVentasMutations';
 import { useUpdateCliente } from '@/app/hooks/clientes/useClientes';
 import type { IVenta } from '@/app/types/ventas.type';
 import type { IUpdateClienteDTO } from '@/app/types/cliente.type';
-import { ESTADO_PAGO_OPTIONS, METODO_PAGO_OPTIONS, TIPO_VENTA_OPTIONS } from '@/app/types/ventas.type';
+import { ESTADO_PAGO_OPTIONS, METODO_PAGO_OPTIONS, TIPO_VENTA_OPTIONS, formatFecha } from '@/app/types/ventas.type';
 import { Button } from '@/app/components/ui/Button';
-import { getNumeroPedidoDisplay } from '@/app/utils/venta.utils';
+import {
+    getNumeroPedidoDisplay,
+    getRetiroOperativoEstado,
+    RETIRO_OPERATIVO_LABELS,
+} from '@/app/utils/venta.utils';
 import {
     hasDireccionCompletaParaEnvio,
     isVentaRetiroEnTienda,
 } from '@/app/utils/venta-envio.validation';
 import { toast } from 'sonner';
+import {
+    getMercadoPagoStatusLabel,
+    resolveEstadoPagoFormValue,
+} from '@/app/utils/checkoutResult.utils';
 
 type FormData = UpdateVentaData & IUpdateClienteDTO;
 
@@ -40,19 +49,32 @@ interface EditVentaModalProps {
     onClose: () => void;
 }
 
+type RetiroConfirmKind = 'reenviar_aviso' | 'marcar_retirado';
+
 export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
     const [step, setStep] = useState<StepId>(1);
+    const [ventaLocal, setVentaLocal] = useState(venta);
+    const [mensajeRetiro, setMensajeRetiro] = useState('');
+    const [retiroConfirm, setRetiroConfirm] = useState<RetiroConfirmKind | null>(null);
     const [empresaEnvio, setEmpresaEnvio] = useState(venta.envio?.empresa_envio || 'andreani');
     const [codigoSeguimiento, setCodigoSeguimiento] = useState(venta.envio?.cod_seguimiento || '');
-    const c = venta.cliente;
+    const c = ventaLocal.cliente;
+    const mpPayment = ventaLocal.mercado_pago_payments?.[0];
+
+    useEffect(() => {
+        setVentaLocal(venta);
+    }, [venta]);
 
     const form = useForm<FormData>({
         resolver: zodResolver(updateVentaSchema),
         mode: 'onChange',
         defaultValues: {
-            estado_pago: (venta.estado_pago ?? undefined) as UpdateVentaData['estado_pago'],
+            estado_pago:
+                resolveEstadoPagoFormValue(venta.estado_pago) ??
+                (venta.metodo_pago === 'mercadopago' ? 'pendiente' : undefined),
             estado_envio: (venta.estado_envio ?? undefined) as UpdateVentaData['estado_envio'],
             metodo_pago: (venta.metodo_pago ?? undefined) as UpdateVentaData['metodo_pago'],
+            referencia_pago_manual: venta.referencia_pago_manual ?? '',
             observaciones: venta.observaciones ?? undefined,
             telefono: c?.usuario?.telefono ?? '',
             direccion: c?.direccion ?? '',
@@ -72,17 +94,28 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
     });
     const { updateEnvioAsync, isUpdating: isUpdatingEnvio } = useUpdateEnvio();
     const { updateClienteAsync, isUpdating: isUpdatingCliente } = useUpdateCliente();
-    const isUpdating = isUpdatingVenta || isUpdatingCliente || isUpdatingEnvio;
+    const { notificarListoRetiroAsync, isNotificando } = useNotificarListoRetiro({
+        onSuccess: (data) => setVentaLocal(data),
+    });
+    const { marcarRetiradoAsync, isMarcandoRetirado } = useMarcarRetirado({
+        onSuccess: (data) => setVentaLocal(data),
+    });
+    const isUpdating = isUpdatingVenta || isUpdatingCliente || isUpdatingEnvio || isNotificando || isMarcandoRetirado;
 
+    const metodoPagoWatch = form.watch('metodo_pago');
+    const esMercadoPago =
+        metodoPagoWatch === 'mercadopago' || venta.metodo_pago === 'mercadopago';
     const observacionesWatch = form.watch('observaciones');
     const direccionWatch = form.watch('direccion');
     const ciudadWatch = form.watch('ciudad');
     const codPostalWatch = form.watch('cod_postal');
     const obsParaEnvio =
         (typeof observacionesWatch === 'string' ? observacionesWatch : '') ||
-        venta.observaciones ||
+        ventaLocal.observaciones ||
         '';
     const esRetiro = isVentaRetiroEnTienda(obsParaEnvio);
+    const retiroEstado = getRetiroOperativoEstado(ventaLocal);
+    const puedeGestionarRetiro = esRetiro && ventaLocal.estado_pago === 'aprobado';
     const direccionOk = hasDireccionCompletaParaEnvio({
         direccion: direccionWatch,
         ciudad: ciudadWatch,
@@ -114,6 +147,10 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
             metodo_pago: data.metodo_pago,
             observaciones: data.observaciones,
         };
+        if (esMercadoPago) {
+            const ref = (data.referencia_pago_manual ?? '').trim();
+            ventaPayload.referencia_pago_manual = ref || null;
+        }
         if (venta.id_envio) delete (ventaPayload as any).estado_envio;
         else ventaPayload.estado_envio = data.estado_envio;
 
@@ -154,7 +191,7 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
         }
 
         await updateEnvioAsync({
-            id: venta.id_venta,
+            id: ventaLocal.id_venta,
             data: {
                 empresa_envio: empresa || null,
                 cod_seguimiento: tracking || null,
@@ -162,16 +199,26 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
         });
     };
 
+    const ejecutarAvisarRetiro = async (): Promise<void> => {
+        const mensaje = mensajeRetiro.trim();
+        await notificarListoRetiroAsync({
+            id: ventaLocal.id_venta,
+            mensaje: mensaje || undefined,
+        });
+        setMensajeRetiro('');
+    };
+
     return (
+        <>
         <SimpleModal
             isOpen={true}
             onClose={onClose}
             title={
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span>Editar venta {getNumeroPedidoDisplay(venta.cod_interno, venta.id_venta) ?? `#${venta.id_venta}`}</span>
-                    {venta.cliente?.id_usuario && (
+                    <span>Editar venta {getNumeroPedidoDisplay(ventaLocal.cod_interno, ventaLocal.id_venta) ?? `#${ventaLocal.id_venta}`}</span>
+                    {ventaLocal.cliente?.id_usuario && (
                         <Link
-                            href={`/admin/clientes/${venta.cliente.id_usuario}?edit=1`}
+                            href={`/admin/clientes/${ventaLocal.cliente.id_usuario}?edit=1`}
                             onClick={onClose}
                             className="text-sm font-normal text-principal hover:underline flex items-center gap-1.5"
                         >
@@ -225,19 +272,61 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
                     <div className="space-y-4">
                         <div>
                             <Select
-                                label="Estado de pago"
-                                options={[
-                                    { value: '', label: 'Seleccionar estado' },
-                                    ...ESTADO_PAGO_OPTIONS.map(opt => ({
-                                        value: opt.value,
-                                        label: opt.label,
-                                    }))
-                                ]}
-                                value={form.watch('estado_pago') || ''}
-                                onChange={(value) => form.setValue('estado_pago', value as any)}
+                                label="Estado de pago (venta)"
+                                options={ESTADO_PAGO_OPTIONS.map((opt) => ({
+                                    value: opt.value,
+                                    label: opt.label,
+                                }))}
+                                value={form.watch('estado_pago') ?? ''}
+                                onChange={(value) =>
+                                    form.setValue(
+                                        'estado_pago',
+                                        (value || undefined) as UpdateVentaData['estado_pago']
+                                    )
+                                }
                                 error={form.formState.errors.estado_pago?.message}
                             />
+                            <p className="text-xs text-muted-foreground mt-1">
+                                Estado interno del pedido en MaxShop (no es el estado de Mercado Pago).
+                            </p>
                         </div>
+                        {esMercadoPago && (
+                            <div className="rounded-lg border border-input bg-muted/20 p-4 space-y-3">
+                                <h4 className="text-sm font-semibold text-foreground">
+                                    Mercado Pago (pasarela)
+                                </h4>
+                                <Input
+                                    label="Estado en Mercado Pago"
+                                    readOnly
+                                    className="bg-background"
+                                    value={getMercadoPagoStatusLabel(mpPayment?.status_mp)}
+                                />
+                                {mpPayment?.payment_id && (
+                                    <Input
+                                        label="Nº de operación registrado por MP"
+                                        readOnly
+                                        className="bg-background font-mono text-sm"
+                                        value={mpPayment.payment_id}
+                                    />
+                                )}
+                                <Input
+                                    label="Nº de operación manual (si falló el webhook)"
+                                    placeholder="Ej. ID de pago de Mercado Pago"
+                                    className="bg-background font-mono text-sm"
+                                    {...form.register('referencia_pago_manual')}
+                                    disabled={Boolean(mpPayment?.payment_id)}
+                                />
+                                {mpPayment?.payment_id ? (
+                                    <p className="text-xs text-muted-foreground">
+                                        Ya hay un pago registrado por MP; la referencia manual no aplica.
+                                    </p>
+                                ) : (
+                                    <p className="text-xs text-muted-foreground">
+                                        Solo para ventas con Mercado Pago sin registro automático. Al aprobar el pago, esta referencia queda guardada en la venta.
+                                    </p>
+                                )}
+                            </div>
+                        )}
                         <div>
                             <Select
                                 label="Método de pago"
@@ -253,6 +342,72 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
                                 error={form.formState.errors.metodo_pago?.message}
                             />
                         </div>
+                        {puedeGestionarRetiro && (
+                            <div className="space-y-3 rounded-lg border border-input bg-muted/20 p-4">
+                                <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                    <Store className="w-4 h-4" />
+                                    Retiro en tienda
+                                </h4>
+                                <p className="text-sm text-muted-foreground">
+                                    Estado:{' '}
+                                    <span className="font-medium text-foreground">
+                                        {retiroEstado !== 'no_aplica'
+                                            ? RETIRO_OPERATIVO_LABELS[retiroEstado]
+                                            : '—'}
+                                    </span>
+                                    {ventaLocal.listo_retiro_avisado_en && (
+                                        <span className="block text-xs mt-1">
+                                            Avisado: {formatFecha(ventaLocal.listo_retiro_avisado_en)}
+                                        </span>
+                                    )}
+                                    {ventaLocal.retirado_en && (
+                                        <span className="block text-xs mt-1">
+                                            Retirado: {formatFecha(ventaLocal.retirado_en)}
+                                        </span>
+                                    )}
+                                </p>
+                                {!ventaLocal.retirado_en && (
+                                    <>
+                                        <Textarea
+                                            label="Mensaje adicional para el cliente (opcional)"
+                                            placeholder="Ej. Traer DNI. Horario de retiro 9 a 18 hs."
+                                            value={mensajeRetiro}
+                                            onChange={(e) => setMensajeRetiro(e.target.value)}
+                                            rows={2}
+                                        />
+                                        <div className="flex flex-wrap gap-2 justify-end">
+                                            {!ventaLocal.listo_retiro_avisado_en ? (
+                                                <Button
+                                                    type="button"
+                                                    variant="primary"
+                                                    disabled={isNotificando}
+                                                    onClick={() => void ejecutarAvisarRetiro()}
+                                                >
+                                                    {isNotificando ? 'Enviando...' : 'Avisar retiro'}
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    type="button"
+                                                    variant="outline-primary"
+                                                    disabled={isNotificando}
+                                                    onClick={() => setRetiroConfirm('reenviar_aviso')}
+                                                >
+                                                    {isNotificando ? 'Enviando...' : 'Reenviar aviso'}
+                                                </Button>
+                                            )}
+                                            <Button
+                                                type="button"
+                                                variant="secondary"
+                                                disabled={isMarcandoRetirado}
+                                                onClick={() => setRetiroConfirm('marcar_retirado')}
+                                            >
+                                                {isMarcandoRetirado ? 'Guardando...' : 'Marcar retirado'}
+                                            </Button>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        )}
                         {!esRetiro && (
                             <div className="space-y-3 rounded-lg border border-input bg-muted/20 p-4">
                                 <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
@@ -395,6 +550,29 @@ export function EditVentaModal({ venta, onClose }: EditVentaModalProps) {
                 )}
             </form>
         </SimpleModal>
+
+        <ConfirmModal
+            isOpen={retiroConfirm === 'reenviar_aviso'}
+            onClose={() => setRetiroConfirm(null)}
+            onConfirm={ejecutarAvisarRetiro}
+            type="warning"
+            title="Reenviar aviso de retiro"
+            description="¿Reenviar el email de listo para retirar al cliente?"
+            confirmText="Reenviar"
+        />
+
+        <ConfirmModal
+            isOpen={retiroConfirm === 'marcar_retirado'}
+            onClose={() => setRetiroConfirm(null)}
+            onConfirm={async () => {
+                await marcarRetiradoAsync(ventaLocal.id_venta);
+            }}
+            type="warning"
+            title="Marcar retirado"
+            description="¿Confirmás que el cliente retiró el pedido en el local?"
+            confirmText="Confirmar retiro"
+        />
+        </>
     );
 }
 

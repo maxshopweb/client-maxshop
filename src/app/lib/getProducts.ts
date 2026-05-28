@@ -24,7 +24,7 @@ export async function getProducts(
   if (filters.financiacion !== undefined) params.append('financiacion', filters.financiacion.toString());
   if (filters.stock_bajo !== undefined) params.append('stock_bajo', filters.stock_bajo.toString());
 
-  const url = `${API_BASE_URL}/productos?${params.toString()}`;
+  const url = `${API_BASE_URL}/productos/tienda?${params.toString()}`;
 
   try {
     // Obtener token de cookies del servidor

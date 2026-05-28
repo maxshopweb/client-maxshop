@@ -187,7 +187,7 @@ export function useProductosPrefetch() {
     const prefetchProducto = (id: number) => {
         queryClient.prefetchQuery({
             queryKey: productosKeys.detail(id),
-            queryFn: () => productosService.getById(id),
+            queryFn: () => productosService.getByIdForCliente(id),
             staleTime: 1000 * 60 * 5,
         });
     };

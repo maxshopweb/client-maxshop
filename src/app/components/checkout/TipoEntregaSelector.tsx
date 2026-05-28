@@ -8,6 +8,7 @@ interface TipoEntregaSelectorProps {
   costoEnvio: number | null;
   onSelect: (tipo: 'envio' | 'retiro') => void;
   error?: string;
+  hideLabel?: boolean;
 }
 
 export default function TipoEntregaSelector({
@@ -15,13 +16,16 @@ export default function TipoEntregaSelector({
   costoEnvio,
   onSelect,
   error,
+  hideLabel = false,
 }: TipoEntregaSelectorProps) {
   return (
     <div className="space-y-4">
-      <label className="text-sm font-medium text-foreground mb-2">
-        Tipo de entrega *
-      </label>
-      <div className="grid grid-cols-2 gap-4 mt-2">
+      {!hideLabel && (
+        <label className="text-sm font-medium text-foreground mb-2">
+          Tipo de entrega *
+        </label>
+      )}
+      <div className={`grid grid-cols-2 gap-4 ${hideLabel ? "" : "mt-2"}`}>
         <button
           type="button"
           onClick={() => onSelect('envio')}

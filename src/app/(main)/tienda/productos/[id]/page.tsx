@@ -23,7 +23,7 @@ function ogImageFromProducto(producto: IProductos): string {
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { id } = await params;
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/productos/${id}`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/productos/tienda/${id}`, {
     cache: "no-store",
   });
 

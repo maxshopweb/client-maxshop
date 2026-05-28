@@ -1,4 +1,4 @@
-import { CONTACT_CONFIG } from "@/app/config/contact.config";
+import { CONTACT_CONFIG, buildWhatsappUrl as buildWhatsappUrlFromConfig } from "@/app/config/contact.config";
 
 export const CONTACT_INFO = CONTACT_CONFIG as typeof CONTACT_CONFIG;
 
@@ -12,8 +12,7 @@ export function useWhatsapp({ message }: UseWhatsappOptions = {}) {
 
   const buildUrl = (customMessage?: string) => {
     const effectiveMessage = customMessage ?? message ?? defaultMessage;
-    const text = encodeURIComponent(effectiveMessage);
-    return `https://wa.me/${number.replace(/\D/g, '')}${text ? `?text=${text}` : ''}`;
+    return buildWhatsappUrlFromConfig(effectiveMessage);
   };
 
   const open = (customMessage?: string) => {

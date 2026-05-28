@@ -30,6 +30,7 @@ class VentasService {
     if (filters.total_min !== undefined) params.append('total_min', filters.total_min.toString());
     if (filters.total_max !== undefined) params.append('total_max', filters.total_max.toString());
     if (filters.incluir_canceladas === true) params.append('incluir_canceladas', 'true');
+    if (filters.retiro) params.append('retiro', filters.retiro);
 
     const response = await axiosInstance.get<IPaginatedResponse<IVenta>>(
       `/ventas?${params.toString()}`
@@ -76,14 +77,53 @@ class VentasService {
     return response.data.data;
   }
 
-  async delete(id: number): Promise<void> {
+  async delete(id: number, options?: { motivo?: string }): Promise<void> {
     const response = await axiosInstance.delete<IApiResponse>(
-      `/ventas/${id}`
+      `/ventas/${id}`,
+      { data: options?.motivo ? { motivo: options.motivo } : undefined }
     );
 
     if (!response.data.success) {
       throw new Error(response.data.error || 'Error al eliminar venta');
     }
+  }
+
+  async cancelar(id: number, options?: { motivo?: string }): Promise<IVenta> {
+    const response = await axiosInstance.post<IApiResponse<IVenta>>(
+      `/ventas/${id}/cancelar`,
+      options?.motivo ? { motivo: options.motivo } : {}
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.error || 'Error al cancelar venta');
+    }
+
+    return response.data.data;
+  }
+
+  async notificarListoRetiro(id: number, options?: { mensaje?: string }): Promise<IVenta> {
+    const response = await axiosInstance.post<IApiResponse<IVenta>>(
+      `/ventas/${id}/notificar-listo-retiro`,
+      options?.mensaje ? { mensaje: options.mensaje } : {}
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.error || 'Error al notificar retiro');
+    }
+
+    return response.data.data;
+  }
+
+  async marcarRetirado(id: number): Promise<IVenta> {
+    const response = await axiosInstance.post<IApiResponse<IVenta>>(
+      `/ventas/${id}/marcar-retirado`
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.error || 'Error al marcar retirado');
+    }
+
+    return response.data.data;
   }
 
   async updateEstadoPago(id: number, estado: string): Promise<IVenta> {
@@ -259,10 +299,10 @@ class VentasService {
     }>;
     observaciones?: string;
     costo_envio?: number; // Costo del envío calculado
-    id_direccion?: string; // ID de dirección guardada (opcional)
-    // Datos de documento del cliente
-    tipo_documento?: string; // DNI, CUIT, etc.
-    numero_documento?: string; // Número de documento
+    id_direccion?: string;
+    tipo_documento?: string;
+    numero_documento?: string;
+    referencia_facturacion?: string;
     // Datos de dirección para actualizar el cliente (si no se usa id_direccion)
     direccion?: {
       direccion?: string;

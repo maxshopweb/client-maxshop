@@ -149,6 +149,13 @@ h1, h2, h3, h4, h5, h6 {
 .text-error { color: rgb(239, 68, 68); }
 
 .border-principal { border-color: var(--principal); }
+.pagination-page-active {
+  color: var(--principal);
+  font-weight: 600;
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
 .border-secundario { border-color: var(--secundario); }
 .border-terciario { border-color: var(--terciario); }
 .border-azul { border-color: var(--azul); }

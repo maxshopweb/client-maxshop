@@ -21,6 +21,9 @@ import { useBillingDataPersonal } from "@/app/hooks/checkout/useBillingDataPerso
 import { useBillingDataPersonalAuthUser } from "@/app/hooks/checkout/useBillingDataPersonalAuthUser";
 import { useGuestCheckoutPersonal } from "@/app/hooks/checkout/useGuestCheckoutPersonal";
 import { useContactFormOptions } from "@/app/hooks/checkout/useContactFormOptions";
+import { useStep2BillingAddress } from "@/app/hooks/checkout/useStep2BillingAddress";
+import { BillingAddressFields } from "@/app/components/checkout/BillingAddressFields";
+import { CheckoutFormSection } from "@/app/components/checkout/CheckoutFormSection";
 
 export default function Step2PersonalInfo() {
   const { personalData, setPersonalData, setCurrentStep, completeStep } = useCheckoutStore();
@@ -70,8 +73,6 @@ export default function Step2PersonalInfo() {
   } = useGuestCheckoutPersonal({
     onSuccess: (data) => {
       setPersonalData(data);
-      completeStep(2);
-      setCurrentStep(3);
     },
   });
 
@@ -99,19 +100,45 @@ export default function Step2PersonalInfo() {
   // Opciones de selects
   const { tipoDocumentoOptions, provinciaOptions } = useContactFormOptions();
 
-  // Handlers
-  const onSubmit = (data: PersonalFormData) => {
-    setPersonalData(data);
+  const billing = useStep2BillingAddress();
+  const {
+    form: billingForm,
+    direcciones: billingDirecciones,
+    isAuthenticated: billingAuth,
+    selectedDireccionId: billingDireccionId,
+    handleDireccionSelect: handleBillingDireccionSelect,
+    saveBillingAddress,
+    isBillingComplete,
+  } = billing;
+
+  const finishStep2 = async (
+    savePersonal: () => void | Promise<void | boolean>
+  ) => {
+    const billingOk = await saveBillingAddress();
+    if (!billingOk) return;
+    const personalResult = await savePersonal();
+    if (personalResult === false) return;
     completeStep(2);
     setCurrentStep(3);
   };
 
+  const onSubmitGuest = (data: PersonalFormData) => {
+    void finishStep2(() => handleGuestFormSubmit(data));
+  };
+
+  const onSubmit = (data: PersonalFormData) => {
+    void finishStep2(async () => {
+      setPersonalData(data);
+      return true;
+    });
+  };
+
   const onSubmitAuthUser = (data: PersonalFormDataAuthUser) => {
     if (!user) return;
-    const merged = personalDataFromAuthUser(user, data);
-    setPersonalData(merged);
-    completeStep(2);
-    setCurrentStep(3);
+    void finishStep2(async () => {
+      setPersonalData(personalDataFromAuthUser(user, data));
+      return true;
+    });
   };
 
   // Mostrar loading mientras verifica auth
@@ -189,10 +216,8 @@ export default function Step2PersonalInfo() {
           Completando con {user?.nombre} {user?.apellido} ({user?.email})
         </p> */}
 
-        <form onSubmit={handleSubmitAuth(onSubmitAuthUser as any)} className="space-y-6">
-          <div className="space-y-5">
-            <h3 className="text-lg font-semibold text-foreground/90 border-b pb-2">Documento y facturación</h3>
-
+        <form onSubmit={handleSubmitAuth(onSubmitAuthUser as any)} className="space-y-8">
+          <CheckoutFormSection title="Datos personales">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <Controller
                 name="tipoDocumento"
@@ -225,10 +250,34 @@ export default function Step2PersonalInfo() {
                 }}
               />
             </div>
-          </div>
+          </CheckoutFormSection>
 
-          <div className="space-y-5 pt-4 border-t">
-            <h3 className="text-lg font-semibold text-foreground/90 border-b pb-2">Facturación</h3>
+          <CheckoutFormSection title="Dirección de facturación">
+            <BillingAddressFields
+              register={billingForm.register}
+              control={billingForm.control}
+              errors={billingForm.errors}
+              provinciaOptions={provinciaOptions}
+              savedAddressSelector={
+                billingAuth && billingDirecciones.length > 0 ? (
+                  <div className="mb-4 p-4 rounded-lg border bg-foreground/[0.03]" style={{ borderColor: "rgba(23, 28, 53, 0.1)" }}>
+                    <label className="block text-sm font-medium text-foreground mb-2">Seleccionar dirección guardada</label>
+                    <Select
+                      options={billingDirecciones.map((d) => ({
+                        value: d.id_direccion,
+                        label: `${d.nombre || "Sin nombre"} - ${d.direccion} ${d.altura}${d.es_principal ? " (Principal)" : ""}`,
+                      }))}
+                      value={billingDireccionId || ""}
+                      onChange={handleBillingDireccionSelect}
+                      placeholder="Seleccionar dirección"
+                    />
+                  </div>
+                ) : undefined
+              }
+            />
+          </CheckoutFormSection>
+
+          <CheckoutFormSection title="Facturación">
             <div className="space-y-3">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
@@ -265,6 +314,21 @@ export default function Step2PersonalInfo() {
                     />
                     <span className="text-foreground">Usar los mismos datos de contacto</span>
                   </label>
+                  {necesitaFacturaAAuth && watchAuth("tipoDocumento") === "DNI" && (
+                    <Input
+                      label="CUIT *"
+                      {...registerAuth("facturacionA.cuit")}
+                      error={errorsAuth.facturacionA?.cuit?.message}
+                      placeholder="12345678901"
+                      className="rounded-lg"
+                      style={{
+                        backgroundColor: "var(--white)",
+                        border: errorsAuth.facturacionA?.cuit
+                          ? "1px solid rgb(239, 68, 68)"
+                          : "1px solid rgba(23, 28, 53, 0.1)",
+                      }}
+                    />
+                  )}
                   {!usarMismosDatosAuth && (
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
@@ -319,9 +383,9 @@ export default function Step2PersonalInfo() {
                 <p className="text-sm text-red-600">{errorsAuth.facturacionA.message as string}</p>
               )}
             </div>
-          </div>
+          </CheckoutFormSection>
 
-          <div className="pt-4 flex gap-4">
+          <div className="pt-2 flex gap-4">
             <Button
               type="button"
               variant="outline-primary"
@@ -336,7 +400,7 @@ export default function Step2PersonalInfo() {
               type="submit"
               variant="primary"
               size="lg"
-              disabled={!isValidAuth}
+              disabled={!isValidAuth || !isBillingComplete}
               className="rounded-lg flex-1"
             >
               Continuar
@@ -365,13 +429,10 @@ export default function Step2PersonalInfo() {
       </div>
 
       <form
-        onSubmit={isGuestMode ? handleSubmit(handleGuestFormSubmit as any) : handleSubmit(onSubmit as any)}
-        className="space-y-6"
+        onSubmit={isGuestMode ? handleSubmit(onSubmitGuest as any) : handleSubmit(onSubmit as any)}
+        className="space-y-8"
       >
-        {/* Información de contacto */}
-        <div className="space-y-5">
-          <h3 className="text-lg font-semibold text-foreground/90 border-b pb-2">Datos personales</h3>
-
+        <CheckoutFormSection title="Datos personales">
           {/* Email */}
           <div className="space-y-2">
             <Input
@@ -564,12 +625,34 @@ export default function Step2PersonalInfo() {
             )}
           </div>
 
-        </div>
+        </CheckoutFormSection>
 
-        {/* Opción de Facturación */}
-        <div className="space-y-5 pt-4 border-t">
-          <h3 className="text-lg font-semibold text-foreground/90 border-b pb-2">Facturación</h3>
+        <CheckoutFormSection title="Dirección de facturación">
+          <BillingAddressFields
+            register={billingForm.register}
+            control={billingForm.control}
+            errors={billingForm.errors}
+            provinciaOptions={provinciaOptions}
+            savedAddressSelector={
+              billingAuth && billingDirecciones.length > 0 ? (
+                <div className="mb-4 p-4 rounded-lg border bg-foreground/[0.03]" style={{ borderColor: "rgba(23, 28, 53, 0.1)" }}>
+                  <label className="block text-sm font-medium text-foreground mb-2">Seleccionar dirección guardada</label>
+                  <Select
+                    options={billingDirecciones.map((d) => ({
+                      value: d.id_direccion,
+                      label: `${d.nombre || "Sin nombre"} - ${d.direccion} ${d.altura}${d.es_principal ? " (Principal)" : ""}`,
+                    }))}
+                    value={billingDireccionId || ""}
+                    onChange={handleBillingDireccionSelect}
+                    placeholder="Seleccionar dirección"
+                  />
+                </div>
+              ) : undefined
+            }
+          />
+        </CheckoutFormSection>
 
+        <CheckoutFormSection title="Facturación">
           <div className="space-y-3">
             <label className="flex items-center gap-3 cursor-pointer">
               <input
@@ -609,6 +692,22 @@ export default function Step2PersonalInfo() {
                   />
                   <span className="text-foreground">Usar los mismos datos de contacto</span>
                 </label>
+
+                {necesitaFacturaA && watch("tipoDocumento") === "DNI" && (
+                  <Input
+                    label="CUIT *"
+                    {...register("facturacionA.cuit")}
+                    error={errors.facturacionA?.cuit?.message}
+                    placeholder="12345678901"
+                    className="rounded-lg"
+                    style={{
+                      backgroundColor: "var(--white)",
+                      border: errors.facturacionA?.cuit
+                        ? "1px solid rgb(239, 68, 68)"
+                        : "1px solid rgba(23, 28, 53, 0.1)",
+                    }}
+                  />
+                )}
 
                 {!usarMismosDatos && (
                   <motion.div
@@ -668,10 +767,10 @@ export default function Step2PersonalInfo() {
               <p className="text-sm text-red-600">{errors.facturacionA.message as string}</p>
             )}
           </div>
-        </div>
+        </CheckoutFormSection>
 
         {/* Botones */}
-        <div className="pt-4 flex gap-4">
+        <div className="pt-2 flex gap-4">
           <Button
             type="button"
             variant="outline-primary"
@@ -686,7 +785,7 @@ export default function Step2PersonalInfo() {
             type="submit"
             variant="primary"
             size="lg"
-            disabled={!isValid || isProcessingGuest}
+            disabled={!isValid || isProcessingGuest || !isBillingComplete}
             className="rounded-lg flex-1"
           >
             {isProcessingGuest ? (

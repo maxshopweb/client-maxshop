@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CreditCard, Tag, Sparkles } from "lucide-react";
+import { Tag, Sparkles } from "lucide-react";
 import { FaStar } from "react-icons/fa";
 import { IProductos } from "@/app/types/producto.type";
 import { formatPrecio } from "@/app/types/producto.type";
@@ -112,7 +112,7 @@ export default function ProductInfo({ producto }: ProductInfoProps) {
         <p className="text-sm font-medium text-terciario/80">No disponible</p>
       )}
 
-      {/* Badges (mismo criterio que ProductCard: Oferta, Campaña, Destacado, Financiación) */}
+      {/* Badges (mismo criterio que ProductCard: Oferta, Campaña, Destacado) */}
       <div className="flex flex-wrap gap-2">
         {esOferta && (
           <div className="flex items-center gap-1 px-2.5 py-1 bg-amber-500 text-white rounded-md text-xs font-semibold">
@@ -130,12 +130,6 @@ export default function ProductInfo({ producto }: ProductInfoProps) {
           <div className="flex items-center gap-1 px-2 py-1 bg-principal/10 text-principal rounded-full text-xs font-medium">
             <FaStar className="w-3 h-3" />
             <span>Destacado</span>
-          </div>
-        )}
-        {producto.financiacion && (
-          <div className="flex items-center gap-1 px-2 py-1 bg-secundario/10 text-secundario rounded-full text-xs font-medium">
-            <CreditCard className="w-3 h-3" />
-            <span>Financiación</span>
           </div>
         )}
       </div>

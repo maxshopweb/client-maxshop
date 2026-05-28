@@ -11,6 +11,7 @@ import { direccionesService } from "@/app/services/direcciones.service";
 
 export function useStep3ShippingData() {
   const {
+    billingAddress,
     shippingData,
     setShippingData,
     setCurrentStep,
@@ -18,8 +19,9 @@ export function useStep3ShippingData() {
     costoEnvio,
     setCostoEnvio,
     setTipoEntrega,
-    setIdDireccion,
-    id_direccion,
+    setIdDireccionEnvio,
+    id_direccion_envio,
+    id_direccion_facturacion,
     ciudad: ciudadStore,
     provincia: provinciaStore,
     codigoPostal: codigoPostalStore,
@@ -30,12 +32,13 @@ export function useStep3ShippingData() {
 
   const { isAuthenticated } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedDireccionId, setSelectedDireccionId] = useState<string | null>(id_direccion);
-  const retiroAutofillAppliedRef = useRef(false);
+  const [selectedDireccionId, setSelectedDireccionId] = useState<string | null>(id_direccion_envio);
+  const inheritAppliedRef = useRef(false);
 
   const form = useShippingForm();
   const { register, handleSubmit, formState: { errors, isValid }, watch, setValue, control, trigger } = form;
   const tipoEntrega = watch("tipoEntrega");
+  const usarMismaDireccionFacturacion = watch("usarMismaDireccionFacturacion");
   const address = watch("address");
   const altura = watch("altura");
   const city = watch("city");
@@ -49,7 +52,6 @@ export function useStep3ShippingData() {
     enabled: isAuthenticated,
   });
 
-  // Sync postalCode form → store (debounced)
   useEffect(() => {
     if (tipoEntrega !== "envio") return;
     const t = setTimeout(() => {
@@ -62,7 +64,6 @@ export function useStep3ShippingData() {
     return () => clearTimeout(t);
   }, [postalCode, tipoEntrega, codigoPostalStore, setCodigoPostalStore]);
 
-  // Sync store (provincia/ciudad) → form when empty
   useEffect(() => {
     if (tipoEntrega !== "envio") return;
     const empty = (s: string | undefined) => !s || !String(s).trim();
@@ -83,38 +84,48 @@ export function useStep3ShippingData() {
     }
   }, [tipoEntrega, state, city, ciudadStore, provinciaStore, provinciaOptions, setValue]);
 
-  // Autocompletar dirección en retiro desde dirección principal (una vez por selección de retiro)
   useEffect(() => {
-    if (tipoEntrega !== "retiro") {
-      retiroAutofillAppliedRef.current = false;
+    if (tipoEntrega !== "envio") {
+      inheritAppliedRef.current = false;
       return;
     }
-    if (!isAuthenticated || retiroAutofillAppliedRef.current) return;
-    const principal = direcciones.find((d) => d.es_principal) ?? direcciones[0];
-    if (!principal) return;
+    if (!usarMismaDireccionFacturacion || !billingAddress) return;
     const opts = { shouldValidate: true, shouldDirty: true };
-    setValue("address", String(principal.direccion ?? ""), opts);
-    setValue("altura", String(principal.altura ?? ""), opts);
-    setValue("piso", String(principal.piso ?? ""), opts);
-    setValue("dpto", String(principal.dpto ?? ""), opts);
-    setValue("city", String(principal.ciudad ?? ""), opts);
-    setValue("state", String(principal.provincia ?? ""), opts);
-    setValue("postalCode", principal.cod_postal != null ? String(principal.cod_postal) : "", opts);
-    retiroAutofillAppliedRef.current = true;
+    setValue("address", billingAddress.address ?? "", opts);
+    setValue("altura", billingAddress.altura ?? "", opts);
+    setValue("piso", billingAddress.piso ?? "", opts);
+    setValue("dpto", billingAddress.dpto ?? "", opts);
+    setValue("city", billingAddress.city ?? "", opts);
+    setValue("state", billingAddress.state ?? "", opts);
+    setValue("postalCode", billingAddress.postalCode ?? "", opts);
+    setValue("mismaDireccionEnvio", true, opts);
+    if (!selectedDireccionId && id_direccion_facturacion) {
+      setSelectedDireccionId(id_direccion_facturacion);
+      setIdDireccionEnvio(id_direccion_facturacion);
+    }
+    inheritAppliedRef.current = true;
     void trigger();
-  }, [tipoEntrega, isAuthenticated, direcciones, setValue, trigger]);
+  }, [
+    tipoEntrega,
+    usarMismaDireccionFacturacion,
+    billingAddress,
+    setValue,
+    trigger,
+    id_direccion_facturacion,
+    selectedDireccionId,
+    setIdDireccionEnvio,
+  ]);
 
-  // Sync tipoEntrega → store
   useEffect(() => {
     if (tipoEntrega) {
       setTipoEntrega(tipoEntrega);
       if (tipoEntrega === "retiro") {
         setCostoEnvio(0);
-        setIdDireccion(null);
+        setIdDireccionEnvio(null);
         setSelectedDireccionId(null);
       }
     }
-  }, [tipoEntrega, setTipoEntrega, setCostoEnvio, setIdDireccion]);
+  }, [tipoEntrega, setTipoEntrega, setCostoEnvio, setIdDireccionEnvio]);
 
   const handleGoBack = () => {
     setCodigoPostalStore(null);
@@ -141,7 +152,9 @@ export function useStep3ShippingData() {
   const handleDireccionSelect = async (value: string | number) => {
     const newId = value ? String(value) : null;
     setSelectedDireccionId(newId);
-    setIdDireccion(newId);
+    setIdDireccionEnvio(newId);
+    setValue("usarMismaDireccionFacturacion", false, { shouldValidate: true });
+    setValue("mismaDireccionEnvio", false, { shouldValidate: true });
     const dir = value ? direcciones.find((d) => d.id_direccion === String(value)) : null;
     const opts = { shouldValidate: true, shouldDirty: true };
     if (dir) {
@@ -164,6 +177,15 @@ export function useStep3ShippingData() {
     await trigger();
   };
 
+  const handleUsarMismaDireccionChange = (checked: boolean) => {
+    setValue("usarMismaDireccionFacturacion", checked, { shouldValidate: true });
+    setValue("mismaDireccionEnvio", checked, { shouldValidate: true });
+    if (!checked) {
+      setSelectedDireccionId(null);
+      setIdDireccionEnvio(null);
+    }
+  };
+
   const cpValid = postalCode && /^\d{4,5}$/.test(String(postalCode).trim());
   const manualEnvioComplete =
     !!(address && String(address).trim()) &&
@@ -172,17 +194,15 @@ export function useStep3ShippingData() {
     !!(state && String(state).trim()) &&
     !!cpValid;
 
-  const manualRetiroComplete =
-    !!(address && String(address).trim()) &&
-    !!(altura && String(altura).trim()) &&
-    !!(city && String(city).trim()) &&
-    !!(state && String(state).trim());
+  const billingHasCp = !!(billingAddress?.postalCode && /^\d{4,5}$/.test(billingAddress.postalCode.trim()));
 
   const isAddressVerified =
-    tipoEntrega === "envio"
-      ? !!selectedDireccionId || manualEnvioComplete
-      : tipoEntrega === "retiro"
-        ? !!selectedDireccionId || manualRetiroComplete
+    tipoEntrega === "retiro"
+      ? true
+      : tipoEntrega === "envio"
+        ? usarMismaDireccionFacturacion
+          ? !!selectedDireccionId || id_direccion_facturacion || (billingAddress && (billingHasCp || !!cpValid))
+          : !!selectedDireccionId || manualEnvioComplete
         : false;
 
   return {
@@ -195,10 +215,12 @@ export function useStep3ShippingData() {
     isAuthenticated,
     isSubmitting,
     selectedDireccionId,
-    setSelectedDireccionId,
+    usarMismaDireccionFacturacion,
+    billingAddress,
     handleGoBack,
     onSubmit,
     handleDireccionSelect,
+    handleUsarMismaDireccionChange,
     isAddressVerified,
   };
 }

@@ -1,16 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ShoppingCart, Check, Minus, Plus, Truck, CreditCard, Headphones } from "lucide-react";
+import { ShoppingCart, Check, Minus, Plus, Truck, CreditCard, Headphones, Trash2, X } from "lucide-react";
 import { IProductos } from "@/app/types/producto.type";
 import { useCartStore } from "@/app/stores/cartStore";
+import { useCheckoutStore } from "@/app/hooks/checkout/useCheckoutStore";
 import { useCartSidebar } from "@/app/hooks/useCartSidebar";
 import { Button } from "../ui/Button";
 import { toast } from "sonner";
 import { useConfigTienda } from "@/app/hooks/config/useConfigTienda";
 import { getEnvioGratisMensaje, getCuotasSinInteresMensaje } from "@/app/utils/promos-messages";
-import { validateAgregarAlCarrito } from "@/app/utils/stock";
+import { validateAgregarAlCarrito, validateCantidadVsStock } from "@/app/utils/stock";
+import SimpleModal from "@/app/components/modals/SimpleModal";
 
 interface AddToCartSectionProps {
   producto: IProductos;
@@ -20,9 +23,13 @@ export default function AddToCartSection({ producto }: AddToCartSectionProps) {
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const [added, setAdded] = useState(false);
-  const { addItem } = useCartStore();
+  const [buyNowModalOpen, setBuyNowModalOpen] = useState(false);
+  const { addItem, clearCart, updateQuantity } = useCartStore();
+  const cartItems = useCartStore((s) => s.items);
+  const { startNewCheckout } = useCheckoutStore();
   const cantidadEnCarrito = useCartStore((s) => s.items.find((i) => i.id_prod === producto.id_prod)?.cantidad ?? 0);
   const { open } = useCartSidebar();
+  const router = useRouter();
   const { data: config } = useConfigTienda();
 
   const stock = producto.stock ?? 0;
@@ -100,17 +107,82 @@ export default function AddToCartSection({ producto }: AddToCartSectionProps) {
     }
   };
 
+  const isOnlyThisProductInCart =
+    cartItems.length === 1 && cartItems[0]?.id_prod === producto.id_prod;
+
+  const proceedBuyNowExpress = () => {
+    if (cartItems.length === 0) {
+      const stockErr = validateAgregarAlCarrito(producto, 0, quantity);
+      if (stockErr) {
+        toast.error("No disponible");
+        return;
+      }
+      addItem(producto, quantity);
+    } else if (isOnlyThisProductInCart) {
+      const stockErr = validateCantidadVsStock(producto, quantity);
+      if (stockErr) {
+        toast.error("No disponible");
+        return;
+      }
+      if (quantity !== cantidadEnCarrito) {
+        updateQuantity(producto.id_prod, quantity);
+      }
+    } else {
+      const stockErr = validateAgregarAlCarrito(producto, 0, quantity);
+      if (stockErr) {
+        toast.error("No disponible");
+        return;
+      }
+      clearCart();
+      addItem(producto, quantity);
+    }
+
+    startNewCheckout();
+    router.push("/checkout?step=1");
+  };
+
+  const handleAddToExistingCart = () => {
+    const stockErr = validateAgregarAlCarrito(producto, cantidadEnCarrito, quantity);
+    if (stockErr) {
+      toast.error("No disponible");
+      return;
+    }
+
+    addItem(producto, quantity);
+    toast.success(
+      `${quantity} ${quantity === 1 ? "unidad" : "unidades"} agregada${quantity > 1 ? "s" : ""} al carrito`,
+      { duration: 2000 }
+    );
+    setBuyNowModalOpen(false);
+    open();
+  };
+
+  const handleBuyOnlyThisFromModal = () => {
+    const stockErr = validateAgregarAlCarrito(producto, 0, quantity);
+    if (stockErr) {
+      toast.error("No disponible");
+      return;
+    }
+
+    clearCart();
+    addItem(producto, quantity);
+    setBuyNowModalOpen(false);
+    startNewCheckout();
+    router.push("/checkout?step=1");
+  };
+
   const handleBuyNow = () => {
     if (cannotPurchase) {
       toast.error("No disponible");
       return;
     }
 
-    handleAddToCart();
-    // Redirigir al checkout después de agregar
-    setTimeout(() => {
-      window.location.href = "/checkout";
-    }, 500);
+    if (cartItems.length === 0 || isOnlyThisProductInCart) {
+      proceedBuyNowExpress();
+      return;
+    }
+
+    setBuyNowModalOpen(true);
   };
 
   return (
@@ -218,6 +290,47 @@ export default function AddToCartSection({ producto }: AddToCartSectionProps) {
           </Button>
         </div>
       </div>
+
+      <SimpleModal
+        isOpen={buyNowModalOpen}
+        onClose={() => setBuyNowModalOpen(false)}
+        title="Ya tenés productos en el carrito"
+        maxWidth="max-w-lg"
+        actions={(handleClose) => (
+          <div className="flex flex-col gap-2 w-full">
+            <Button
+              variant="primary"
+              size="lg"
+              fullWidth
+              onClick={handleBuyOnlyThisFromModal}
+            >
+              <span className="flex items-center justify-center gap-2">
+                <Trash2 className="w-4 h-4 shrink-0" />
+                Comprar solo este producto
+              </span>
+            </Button>
+            <Button
+              variant="outline-primary"
+              size="lg"
+              fullWidth
+              onClick={handleAddToExistingCart}
+            >
+              <span className="flex items-center justify-center gap-2">
+                <ShoppingCart className="w-4 h-4 shrink-0" />
+                Agregar al carrito
+              </span>
+            </Button>
+            <Button variant="ghost" size="lg" fullWidth onClick={handleClose}>
+              <span className="flex items-center justify-center gap-2">
+                <X className="w-4 h-4 shrink-0" />
+                Cancelar
+              </span>
+            </Button>
+          </div>
+        )}
+      >
+        {null}
+      </SimpleModal>
 
       {/* Beneficios: debajo de botones, una columna en desktop, texto discreto */}
       <div className="flex flex-col gap-2 sm:gap-2.5 pt-3 sm:pt-4">

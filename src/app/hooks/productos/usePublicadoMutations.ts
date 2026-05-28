@@ -6,9 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { getClientErrorMessage } from '@/app/utils/apiError';
 import { productosService } from '@/app/services/producto.service';
-import { CONFIG_TIENDA_QUERY_KEY } from '@/app/hooks/config/useConfigTienda';
 import { productosKeys } from './useProductos';
-import type { IConfigTienda } from '@/app/types/config-tienda.type';
 import type { IProductos } from '@/app/types/producto.type';
 
 export interface UseTogglePublicadoOptions {
@@ -108,26 +106,21 @@ export function useBulkUpdateCuotas(options: UseBulkUpdateCuotasOptions = {}) {
 
         onSuccess: (data, { ids, cuotas_habilitadas }) => {
             queryClient.invalidateQueries({ queryKey: productosKeys.lists() });
-            const config = queryClient.getQueryData<IConfigTienda>(CONFIG_TIENDA_QUERY_KEY);
-            const numCuotas =
-                config?.cuotas_sin_interes != null
-                    ? Math.max(1, Math.trunc(Number(config.cuotas_sin_interes)))
-                    : 3;
             const label =
                 cuotas_habilitadas === null
                     ? 'regla general'
                     : cuotas_habilitadas
-                      ? `${numCuotas} cuotas habilitadas`
-                      : `${numCuotas} cuotas deshabilitadas`;
-            toast.success('Cuotas actualizadas', {
+                      ? 'con financiación'
+                      : 'sin financiación';
+            toast.success('Financiación actualizada', {
                 description: `${data.updated} producto(s): ${label}`,
             });
             options.onSuccess?.(ids, cuotas_habilitadas);
         },
 
         onError: (error: Error) => {
-            toast.error('Error al actualizar cuotas', {
-                description: getClientErrorMessage(error, 'No pudimos actualizar las cuotas. Intentá de nuevo.'),
+            toast.error('Error al actualizar financiación', {
+                description: getClientErrorMessage(error, 'No pudimos actualizar la financiación. Intentá de nuevo.'),
             });
             options.onError?.(error);
         },

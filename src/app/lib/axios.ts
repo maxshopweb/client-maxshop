@@ -21,6 +21,7 @@ const PUBLIC_ENDPOINTS = [
   '/auth/forgot-password',
   '/auth/reset-password',
   '/auth/verify-email',
+  '/config/tienda',
 ];
 
 // Verifica si un endpoint es público (no requiere token)

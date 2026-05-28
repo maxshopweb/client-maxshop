@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { Button } from '@/app/components/ui/Button';
-import { useUpdateVenta } from '@/app/hooks/ventas/useVentasMutations';
+import Textarea from '@/app/components/ui/Textarea';
+import { useCancelarVenta } from '@/app/hooks/ventas/useVentasMutations';
 import type { IVenta } from '@/app/types/ventas.type';
 import SimpleModal from '@/app/components/modals/SimpleModal';
 import { getNumeroPedidoDisplay } from '@/app/utils/venta.utils';
@@ -13,16 +15,18 @@ interface DeleteVentaModalProps {
 }
 
 export function DeleteVentaModal({ venta, onClose, onRequestPasswordConfirm }: DeleteVentaModalProps) {
-    const { updateVenta, updateVentaAsync, isUpdating } = useUpdateVenta({
+    const [motivo, setMotivo] = useState('');
+    const { cancelarVentaAsync, isCancelling } = useCancelarVenta({
         onSuccess: () => {
             onClose();
         },
     });
 
     const doAction = async () => {
-        await updateVentaAsync({
+        const motivoTrim = motivo.trim();
+        await cancelarVentaAsync({
             id: venta.id_venta,
-            data: { estado_pago: 'cancelado' },
+            motivo: motivoTrim || undefined,
         });
         onClose();
     };
@@ -31,10 +35,7 @@ export function DeleteVentaModal({ venta, onClose, onRequestPasswordConfirm }: D
         if (onRequestPasswordConfirm) {
             onRequestPasswordConfirm(doAction);
         } else {
-            updateVenta({
-                id: venta.id_venta,
-                data: { estado_pago: 'cancelado' },
-            });
+            void doAction();
         }
     };
 
@@ -57,7 +58,7 @@ export function DeleteVentaModal({ venta, onClose, onRequestPasswordConfirm }: D
                         type="button"
                         onClick={handleClose}
                         variant="ghost"
-                        disabled={isUpdating}
+                        disabled={isCancelling}
                     >
                         Cancelar
                     </Button>
@@ -65,19 +66,33 @@ export function DeleteVentaModal({ venta, onClose, onRequestPasswordConfirm }: D
                         type="button"
                         onClick={handleConfirm}
                         variant="primary"
-                        disabled={isUpdating}
+                        disabled={isCancelling}
                     >
-                        {isUpdating ? 'Dando de baja...' : 'Dar de baja'}
+                        {isCancelling ? 'Dando de baja...' : 'Dar de baja'}
                     </Button>
                 </>
             )}
         >
-            <p className="text-foreground mb-6">
+            <p className="text-foreground mb-4">
                 ¿Estás seguro de que deseas dar de baja la venta{' '}
                 <span className="font-semibold">{getNumeroPedidoDisplay(venta.cod_interno, venta.id_venta) ?? `#${venta.id_venta}`}</span>?
-                Esta acción marcará la venta como cancelada. Para continuar se pedirá tu contraseña.
+                Esta acción marcará la venta como cancelada y enviará un email al cliente.
             </p>
+            <Textarea
+                label="Motivo (opcional)"
+                placeholder="Ej. Sin stock, pago no recibido, solicitud del cliente..."
+                value={motivo}
+                onChange={(e) => setMotivo(e.target.value)}
+                rows={3}
+            />
+            <p className="text-xs text-muted-foreground mt-2">
+                Si completás el motivo, se incluirá en el email de cancelación al cliente.
+            </p>
+            {onRequestPasswordConfirm && (
+                <p className="text-xs text-muted-foreground mt-3">
+                    Para continuar se pedirá tu contraseña.
+                </p>
+            )}
         </SimpleModal>
     );
 }
-

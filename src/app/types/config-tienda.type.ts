@@ -35,4 +35,7 @@ export interface IUpdateConfigTiendaDTO {
   cuotas_sin_interes_minimo?: number;
   datos_bancarios?: Partial<IDatosBancarios> | null;
   modo_mantenimiento?: boolean;
+  nombre?: string | null;
+  direccion?: string | null;
+  telefono?: string | null;
 }

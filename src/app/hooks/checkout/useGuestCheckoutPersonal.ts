@@ -30,31 +30,29 @@ export function useGuestCheckoutPersonal({ onSuccess }: UseGuestCheckoutPersonal
   }, []);
 
   const handleGuestFormSubmit = useCallback(
-    async (data: PersonalFormData) => {
+    async (data: PersonalFormData): Promise<boolean> => {
       setIsProcessingGuest(true);
       setEmailExistsError(null);
 
       try {
-        // Validar email antes de continuar
         const emailCheck = await EmailValidationService.checkEmailExists(data.email);
 
         if (emailCheck.exists && !emailCheck.canLoginAsGuest) {
-          const errorMessage = "Este email ya está registrado. ¿Deseas iniciar sesión?";
+          const errorMessage = "Este email ya está registrado.";
           setEmailExistsError(errorMessage);
           setIsProcessingGuest(false);
           toast.error(errorMessage, {
             duration: 5000,
             position: "top-center",
           });
-          return;
+          return false;
         }
 
-        // Iniciar sesión como invitado
         const result = await signInAsGuest({
           email: data.email,
           nombre: data.firstName,
           apellido: data.lastName,
-          telefono: `${data.phoneArea}${data.phone}`, // Concatenar área + número
+          telefono: `${data.phoneArea}${data.phone}`,
         });
 
         if (!result.success) {
@@ -62,19 +60,18 @@ export function useGuestCheckoutPersonal({ onSuccess }: UseGuestCheckoutPersonal
           setEmailExistsError(errorMessage);
           setIsProcessingGuest(false);
           toast.error(errorMessage);
-          return;
+          return false;
         }
 
-        // Si todo está bien, ejecutar callback de éxito
         onSuccess(data);
         toast.success("Sesión iniciada como invitado");
+        return true;
       } catch (error) {
         let errorMessage = "Error al continuar como invitado";
 
         if (error instanceof Error) {
           errorMessage = error.message;
 
-          // Simplificar mensajes de error técnicos
           if (
             errorMessage.includes("prisma") ||
             errorMessage.includes("column") ||
@@ -86,6 +83,7 @@ export function useGuestCheckoutPersonal({ onSuccess }: UseGuestCheckoutPersonal
 
         setEmailExistsError(errorMessage);
         toast.error(errorMessage);
+        return false;
       } finally {
         setIsProcessingGuest(false);
       }

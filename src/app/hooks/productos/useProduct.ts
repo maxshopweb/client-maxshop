@@ -14,7 +14,7 @@ export function useProduct(id: number, options: UseProductOptions = {}) {
 
   return useQuery({
     queryKey: ['product', id],
-    queryFn: () => productosService.getById(id),
+    queryFn: () => productosService.getByIdForCliente(id),
     enabled: enabled && !!id,
     refetchOnMount,
     staleTime: 1000 * 60 * 5, // 5 minutos

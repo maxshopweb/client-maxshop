@@ -90,6 +90,11 @@ function useVentasFiltersState() {
         const totalMax = searchParams.get('total_max');
         if (totalMax) params.total_max = Number(totalMax);
 
+        const retiro = searchParams.get('retiro');
+        if (retiro === 'sin_aviso' || retiro === 'avisado_sin_retirar' || retiro === 'retirado') {
+            params.retiro = retiro;
+        }
+
         return params;
     }, [searchParams]);
 
@@ -261,6 +266,7 @@ function useVentasFiltersState() {
             !!filters.estado_envio ||
             !!filters.metodo_pago ||
             !!filters.tipo_venta ||
+            !!filters.retiro ||
             filters.total_min !== undefined ||
             filters.total_max !== undefined
         );
@@ -279,6 +285,7 @@ function useVentasFiltersState() {
         if (filters.estado_envio) count++;
         if (filters.metodo_pago) count++;
         if (filters.tipo_venta) count++;
+        if (filters.retiro) count++;
         return count;
     }, [localBusqueda, localTotalMin, localTotalMax, filters]);
 

@@ -13,6 +13,9 @@ export function useShippingForm() {
         const s = { ...shippingData } as Record<string, unknown>;
         delete s.retiro_ciudad;
         delete s.retiro_provincia;
+        if (s.usarMismaDireccionFacturacion == null && s.mismaDireccionEnvio != null) {
+          s.usarMismaDireccionFacturacion = s.mismaDireccionEnvio;
+        }
         return s;
       })()
     : {};
@@ -28,6 +31,7 @@ export function useShippingForm() {
       city: '',
       state: '',
       postalCode: '',
+      usarMismaDireccionFacturacion: true,
       mismaDireccionEnvio: true,
       ...persistedShipping,
     },
@@ -36,4 +40,3 @@ export function useShippingForm() {
 
   return form;
 }
-

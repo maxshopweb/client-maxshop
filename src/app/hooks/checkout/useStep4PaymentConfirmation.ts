@@ -11,6 +11,10 @@ import { useCostoEnvioEnStep4 } from "./useCostoEnvioEnStep4";
 import { toast } from "sonner";
 import { isCarritoStockOk, validateCarritoCompleto } from "@/app/utils/stock";
 import { OBSERVACION_RETIRO_EN_TIENDA } from "@/app/utils/venta-envio.validation";
+import {
+  buildCheckoutOrderExtras,
+  resolveCheckoutDireccionPayload,
+} from "@/app/utils/buildCheckoutOrderPayload";
 
 export function useStep4PaymentConfirmation() {
   const router = useRouter();
@@ -21,9 +25,11 @@ export function useStep4PaymentConfirmation() {
     setCodigoPostal,
     setCostoEnvio,
     personalData,
+    billingAddress,
     shippingData,
     costoEnvio,
-    id_direccion,
+    id_direccion_facturacion,
+    id_direccion_envio,
   } = useCheckoutStore();
   const { user, isAuthenticated } = useAuth();
   const { items } = useCartStore();
@@ -43,16 +49,33 @@ export function useStep4PaymentConfirmation() {
         setTimeout(() => router.push(`/login?redirect=${encodeURIComponent("/checkout?step=4")}`), 2000);
         return;
       }
+
+      const errorMsg: string =
+        error?.response?.data?.error || error?.message || "Ocurrió un error al procesar tu pedido";
+
+      if (/stock/i.test(errorMsg)) {
+        toast.error("Stock insuficiente", {
+          description: "Revisá las cantidades en tu carrito e intentá de nuevo.",
+        });
+        setCurrentStep(1);
+        return;
+      }
+
+      if (/precio/i.test(errorMsg)) {
+        toast.error("Precios actualizados", {
+          description: "Los precios cambiaron. Revisá tu carrito e intentá de nuevo.",
+        });
+        setCurrentStep(1);
+        return;
+      }
+
       const backendDetails = error?.response?.data?.details;
       const detailsDescription = Array.isArray(backendDetails) && backendDetails.length > 0
         ? backendDetails.join(" | ")
         : null;
+
       toast.error("Error al crear pedido", {
-        description:
-          detailsDescription ||
-          error?.response?.data?.error ||
-          error?.message ||
-          "Ocurrió un error al procesar tu pedido",
+        description: detailsDescription || errorMsg,
       });
     },
   });
@@ -100,6 +123,11 @@ export function useStep4PaymentConfirmation() {
       setCurrentStep(2);
       return;
     }
+    if (!billingAddress) {
+      toast.error("Datos incompletos", { description: "Por favor completa la dirección de facturación" });
+      setCurrentStep(2);
+      return;
+    }
     if (!shippingData) {
       toast.error("Datos incompletos", { description: "Por favor completa los datos de envío" });
       setCurrentStep(3);
@@ -109,46 +137,31 @@ export function useStep4PaymentConfirmation() {
     const stockCheck = validateCarritoCompleto(items);
     if (!stockCheck.ok) {
       toast.error("Stock insuficiente", { description: stockCheck.message });
+      setCurrentStep(1);
       return;
     }
 
+    // El API calcula precios desde catálogo; omitir precio_unitario evita desync por cache local.
     const detalles = items.map((item) => ({
       id_prod: item.id_prod,
       cantidad: item.cantidad,
-      precio_unitario: item.precio_unitario,
       descuento_aplicado: item.descuento || 0,
     }));
     const idCliente = user?.uid || undefined;
     const fullPhone = `${personalData.phoneArea}${personalData.phone}`;
-    // Retiro: marca la venta en API (Andreani, mails). Envío: sin nota extra; tel y dirección van en direccion/telefono
     const observaciones =
       shippingData.tipoEntrega === "retiro" ? OBSERVACION_RETIRO_EN_TIENDA : "";
 
-    const buildDireccionPayload = () => {
-      const rawCp = shippingData.postalCode?.trim();
-      let cod_postal: number | null = null;
-      if (rawCp) {
-        const parsed = parseInt(rawCp, 10);
-        cod_postal = !isNaN(parsed) && parsed > 0 ? parsed : null;
-      }
-      return {
-        direccion: shippingData.address || "",
-        altura: shippingData.altura || "",
-        piso: shippingData.piso || undefined,
-        dpto: shippingData.dpto || undefined,
-        ciudad: shippingData.city || "",
-        provincia: shippingData.state || "",
-        cod_postal,
-        telefono: fullPhone,
-      };
-    };
+    const { id_direccion, direccion } = resolveCheckoutDireccionPayload({
+      tipoEntrega: shippingData.tipoEntrega,
+      billingAddress,
+      shippingData,
+      fullPhone,
+      id_direccion_facturacion,
+      id_direccion_envio,
+    });
 
-    const direccionData =
-      shippingData.tipoEntrega === "envio" && shippingData.postalCode
-        ? buildDireccionPayload()
-        : shippingData.tipoEntrega === "retiro"
-          ? buildDireccionPayload()
-          : undefined;
+    const orderExtras = buildCheckoutOrderExtras(personalData, billingAddress);
 
     createOrder({
       id_cliente: idCliente,
@@ -156,10 +169,11 @@ export function useStep4PaymentConfirmation() {
       detalles,
       observaciones,
       id_direccion: id_direccion || undefined,
-      direccion: id_direccion ? undefined : direccionData,
+      direccion,
       costo_envio: costoEnvio || 0,
-      tipo_documento: personalData.tipoDocumento || undefined,
-      numero_documento: personalData.documento || undefined,
+      tipo_documento: orderExtras.tipo_documento,
+      numero_documento: orderExtras.numero_documento,
+      referencia_facturacion: orderExtras.referencia_facturacion,
     });
   };
 

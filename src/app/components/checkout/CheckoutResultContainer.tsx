@@ -1,6 +1,7 @@
 "use client";
 
 import { ICheckoutResult } from "../../types/checkout-result.type";
+import type { CheckoutStateDisplayProps } from "../../types/checkout-result.type";
 import ApprovedState from "./states/ApprovedState";
 import PendingState from "./states/PendingState";
 import RejectedState from "./states/RejectedState";
@@ -11,70 +12,75 @@ import CancelledState from "./states/CancelledState";
 import RefundedState from "./states/RefundedState";
 import ChargedBackState from "./states/ChargedBackState";
 import TransferState from "./states/TransferState";
-import ProcessingState from "./states/ProcessingState";
+import ErrorState from "./states/ErrorState";
 
 interface CheckoutResultContainerProps {
   result: ICheckoutResult;
 }
 
+function displayProps(result: ICheckoutResult): CheckoutStateDisplayProps {
+  return {
+    id_venta: result.id_venta,
+    cod_interno: result.cod_interno,
+    payment_id: result.payment_id,
+    mensaje: result.mensaje,
+  };
+}
+
 export default function CheckoutResultContainer({ result }: CheckoutResultContainerProps) {
-  const { status, id_venta, cod_interno, datos_bancarios, metodo_pago } = result;
+  const { status, datos_bancarios } = result;
+  const props = displayProps(result);
 
-  // Renderizar según el estado de Mercado Pago o método local
   switch (status) {
-    // Estados de Mercado Pago
-    case 'approved':
-      return <ApprovedState id_venta={id_venta} cod_interno={cod_interno} />;
+    case "approved":
+      return <ApprovedState {...props} />;
 
-    case 'pending':
-      return <PendingState id_venta={id_venta} cod_interno={cod_interno} />;
+    case "pending":
+      return <PendingState {...props} />;
 
-    case 'authorized':
-      return <AuthorizedState id_venta={id_venta} cod_interno={cod_interno} />;
+    case "authorized":
+      return <AuthorizedState {...props} />;
 
-    case 'in_process':
-      return <InProcessState id_venta={id_venta} cod_interno={cod_interno} />;
+    case "in_process":
+      return <InProcessState {...props} />;
 
-    case 'in_mediation':
-      return <InMediationState id_venta={id_venta} cod_interno={cod_interno} />;
+    case "in_mediation":
+      return <InMediationState {...props} />;
 
-    case 'rejected':
-      return <RejectedState id_venta={id_venta} cod_interno={cod_interno} />;
+    case "rejected":
+      return <RejectedState {...props} />;
 
-    case 'cancelled':
-      return <CancelledState id_venta={id_venta} cod_interno={cod_interno} />;
+    case "cancelled":
+      return <CancelledState {...props} />;
 
-    case 'refunded':
-      return <RefundedState id_venta={id_venta} cod_interno={cod_interno} />;
+    case "refunded":
+      return <RefundedState {...props} />;
 
-    case 'charged_back':
-      return <ChargedBackState id_venta={id_venta} cod_interno={cod_interno} />;
+    case "charged_back":
+      return <ChargedBackState {...props} />;
 
-    // Métodos de pago locales
-    case 'transferencia':
+    case "transferencia":
       return (
         <TransferState
-          id_venta={id_venta}
-          cod_interno={cod_interno}
+          {...props}
           datos_bancarios={datos_bancarios}
           metodo="transferencia"
         />
       );
 
-    case 'efectivo':
+    case "efectivo":
       return (
         <TransferState
-          id_venta={id_venta}
-          cod_interno={cod_interno}
+          {...props}
           datos_bancarios={datos_bancarios}
           metodo="efectivo"
         />
       );
 
-    // Estados de procesamiento/error
-    case 'processing':
+    case "error":
+      return <ErrorState {...props} />;
+
     default:
-      return <ProcessingState id_venta={id_venta} cod_interno={cod_interno} />;
+      return <ErrorState {...props} mensaje={props.mensaje ?? "No pudimos mostrar el resultado de tu pedido. Contactanos si necesitás ayuda."} />;
   }
 }
-

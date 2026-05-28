@@ -179,23 +179,32 @@ export const getProductosColumns = (
             accessorKey: 'nombre',
             header: 'Producto',
             cell: ({ row }) => {
+                const producto = row.original;
                 const nombre = row.getValue('nombre') as string;
-                const sku = row.original.cod_sku;
-                const destacado = row.original.destacado;
-
-                const manual = row.original.precio_editado_manualmente === true;
+                const sku = producto.cod_sku;
+                const manual = producto.precio_editado_manualmente === true;
+                const isActivo = producto.estado === 1;
 
                 return (
                     <div className="flex flex-col gap-1">
                         <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-                            <Link
-                                href={`/tienda/productos/${row.original.id_prod}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="font-medium text-text hover:underline text-(--principal)"
-                            >
-                                {nombre}
-                            </Link>
+                            {isActivo ? (
+                                <Link
+                                    href={`/tienda/productos/${producto.id_prod}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="font-medium text-text hover:underline text-(--principal)"
+                                >
+                                    {nombre}
+                                </Link>
+                            ) : (
+                                <span
+                                    className="font-medium text-gray-400 cursor-not-allowed"
+                                    title="Producto inactivo — vista de tienda no disponible"
+                                >
+                                    {nombre}
+                                </span>
+                            )}
                             {manual && (
                                 <TableBadge variant="warning" className="shrink-0">
                                     Manual

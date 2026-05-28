@@ -30,6 +30,12 @@ export interface IVenta {
     referencia_pago_manual?: string | null;
     /** Referencia de facturación (ej. número de comprobante externo). */
     referencia_facturacion?: string | null;
+    /** Cuándo se avisó al cliente que puede retirar en tienda. */
+    listo_retiro_avisado_en?: Date | string | null;
+    /** Cuándo el cliente retiró el pedido en el local. */
+    retirado_en?: Date | string | null;
+    /** Motivo informado al cliente al cancelar. */
+    motivo_cancelacion?: string | null;
     // Relaciones
     usuario?: IUsuarios | null;
     cliente?: {
@@ -163,7 +169,11 @@ export interface IVentaFilters {
     cod_interno?: string;
     /** ID exacto de venta. */
     id_venta?: number;
+    /** Filtro operativo retiro en tienda. */
+    retiro?: RetiroFilter;
 }
+
+export type RetiroFilter = 'sin_aviso' | 'avisado_sin_retirar' | 'retirado';
 
 // ========================================
 // DTOs

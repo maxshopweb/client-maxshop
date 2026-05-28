@@ -29,7 +29,7 @@ export function useCheckoutFlowGuard(options: {
   const router = useRouter();
   const { isAuthenticated, loading: authLoading } = useAuth();
   const { items } = useCartStore();
-  const { personalData, shippingData, currentStep } = useCheckoutStore();
+  const { personalData, billingAddress, shippingData, currentStep } = useCheckoutStore();
   const { requireCart = true } = options;
 
   const result = useMemo<GuardResult>(() => {
@@ -58,7 +58,7 @@ export function useCheckoutFlowGuard(options: {
 
     // Validar Step 2 completado (para Step 3 y 4)
     if (options.requiredStep === 3 || options.requiredStep === 4) {
-      if (!personalData) {
+      if (!personalData || !billingAddress) {
         return {
           isValid: false,
           reason: "no-step2",
@@ -79,7 +79,7 @@ export function useCheckoutFlowGuard(options: {
     }
 
     return { isValid: true };
-  }, [authLoading, isAuthenticated, items, personalData, shippingData, options.requiredStep, requireCart]);
+  }, [authLoading, isAuthenticated, items, personalData, billingAddress, shippingData, options.requiredStep, requireCart]);
 
   // Redirigir automáticamente si está configurado
   useEffect(() => {

@@ -87,7 +87,7 @@ function ProductosPageContent() {
                         <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
                         Refrescar
                     </Button>
-                    <Button onClick={openCreateModal}>
+                    <Button onClick={openCreateModal} disabled={true}>
                         <Plus className="h-5 w-5" />
                         Nuevo Producto
                     </Button>

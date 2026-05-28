@@ -1,7 +1,6 @@
 import { Trash2, Power, PowerOff, Globe, GlobeLock, X, CreditCard, Ban, RefreshCw, Download } from 'lucide-react';
 import { useBulkUpdateEstado } from '@/app/hooks/productos/useProductosMutations';
 import { useBulkSetPublicado, useBulkUpdateCuotas } from '@/app/hooks/productos/usePublicadoMutations';
-import { useConfigTienda } from '@/app/hooks/config/useConfigTienda';
 import { Button } from '../../ui/Button';
 
 interface BulkActionsProps {
@@ -41,9 +40,6 @@ export function BulkActions({
         },
     });
 
-    const { data: config } = useConfigTienda();
-    const numCuotas = config?.cuotas_sin_interes != null ? Math.max(1, Math.trunc(Number(config.cuotas_sin_interes))) : 3;
-
     const selectedCount = selectedIds.length;
 
     const handleActivar = () => {
@@ -62,10 +58,10 @@ export function BulkActions({
         bulkSetPublicado({ ids: selectedIds, publicado: false });
     };
 
-    const handleCuotasHabilitar = () => {
+    const handleFinanciacionHabilitar = () => {
         bulkUpdateCuotas({ ids: selectedIds, cuotas_habilitadas: true });
     };
-    const handleCuotasDeshabilitar = () => {
+    const handleFinanciacionDeshabilitar = () => {
         bulkUpdateCuotas({ ids: selectedIds, cuotas_habilitadas: false });
     };
 
@@ -127,26 +123,26 @@ export function BulkActions({
                     </Button>
 
                     <Button
-                        onClick={handleCuotasHabilitar}
+                        onClick={handleFinanciacionHabilitar}
                         disabled={isLoading}
-                        title={`Habilitar ${numCuotas} cuotas`}
+                        title="Habilitar financiación"
                         variant="secondary"
                         className="h-8 px-2 sm:px-3 text-xs sm:text-sm"
                     >
                         <CreditCard className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        <span className="hidden md:inline">{numCuotas} cuot.</span>
-                        <span className="md:hidden">+cuot</span>
+                        <span className="hidden md:inline">Con financiación</span>
+                        <span className="md:hidden">+financ.</span>
                     </Button>
                     <Button
-                        onClick={handleCuotasDeshabilitar}
+                        onClick={handleFinanciacionDeshabilitar}
                         disabled={isLoading}
-                        title={`Deshabilitar ${numCuotas} cuotas`}
+                        title="Deshabilitar financiación"
                         variant="secondary"
                         className="h-8 px-2 sm:px-3 text-xs sm:text-sm"
                     >
                         <Ban className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        <span className="hidden md:inline">Sin cuot.</span>
-                        <span className="md:hidden">−cuot</span>
+                        <span className="hidden md:inline">Sin financiación</span>
+                        <span className="md:hidden">−financ.</span>
                     </Button>
 
                     {onBulkReanudarErp && (

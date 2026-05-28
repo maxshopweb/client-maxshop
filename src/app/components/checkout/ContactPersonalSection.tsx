@@ -5,6 +5,7 @@ import { ContactFormData } from "@/app/schemas/contactForm.schema";
 import Input from "@/app/components/ui/Input";
 import Select, { SelectOption } from "@/app/components/ui/Select";
 import { Button } from "@/app/components/ui/Button";
+import { CheckoutFormSection } from "@/app/components/checkout/CheckoutFormSection";
 
 interface ContactPersonalSectionProps {
   register: UseFormRegister<ContactFormData>;
@@ -28,9 +29,7 @@ export function ContactPersonalSection({
   tipoDocumentoOptions,
 }: ContactPersonalSectionProps) {
   return (
-    <div className="space-y-5">
-      <h3 className="text-lg font-semibold text-foreground border-b pb-2">Datos personales</h3>
-
+    <CheckoutFormSection title="Datos personales">
       {/* Email */}
       <div className="space-y-2">
         <Input
@@ -146,7 +145,7 @@ export function ContactPersonalSection({
             : "1px solid rgba(23, 28, 53, 0.1)",
         }}
       />
-    </div>
+    </CheckoutFormSection>
   );
 }
 

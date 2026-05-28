@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronDown, Check, Search, LucideIcon } from 'lucide-react';
+import { matchesSearch } from '@/app/utils/search.utils';
 
 export interface ComboboxOption {
     value: string | number;
@@ -48,9 +49,7 @@ export function Combobox({
     const selectedOption = options.find(opt => opt.value === value);
 
     const filteredOptions = searchable && searchTerm
-        ? options.filter(opt =>
-            opt.label.toLowerCase().includes(searchTerm.toLowerCase())
-        )
+        ? options.filter((opt) => matchesSearch(opt.label, searchTerm))
         : options;
 
     const updateMenuPosition = useCallback(() => {

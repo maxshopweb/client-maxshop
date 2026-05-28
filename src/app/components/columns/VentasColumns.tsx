@@ -1,5 +1,5 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Edit, Trash2, Eye, Package, Store, Truck, FileText } from 'lucide-react';
+import { MoreHorizontal, Edit, Trash2, Eye, Package, FileText } from 'lucide-react';
 import * as Checkbox from '@radix-ui/react-checkbox';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { Check } from 'lucide-react';
@@ -7,9 +7,8 @@ import type { IVenta } from '@/app/types/ventas.type';
 import { formatPrecio, formatFecha } from '@/app/types/ventas.type';
 import { TIPO_VENTA_OPTIONS } from '@/app/types/ventas.type';
 import { TableBadge } from '@/app/components/ui/TableBadge';
-import { Badge } from '@/app/components/ui/Badge';
 import { getNumeroPedidoDisplay } from '@/app/utils/venta.utils';
-import { isVentaRetiroEnTienda } from '@/app/utils/venta-envio.validation';
+import { VentaEntregaCell } from '@/app/components/columns/VentaEntregaCell';
 
 interface VentasTableActions {
     onEdit: (venta: IVenta) => void;
@@ -206,41 +205,9 @@ export const getVentasColumns = (
             },
         },
         {
-            accessorKey: 'estado_envio',
-            header: 'Estado envío',
-            cell: ({ row }) => {
-                const estado = row.getValue('estado_envio') as string | null;
-                return <TableBadge kind="estado_envio" value={estado} />;
-            },
-        },
-        {
             id: 'entrega',
-            header: 'Entrega',
-            cell: ({ row }) => {
-                const obs = row.original.observaciones;
-                const retiro = isVentaRetiroEnTienda(obs);
-                return (
-                    <span
-                        title={
-                            retiro
-                                ? 'Retiro en tienda (según observaciones)'
-                                : 'Envío a domicilio o sucursal / pick up courier'
-                        }
-                    >
-                        {retiro ? (
-                            <Badge variant="warning" className="gap-1.5 pl-2 pr-2.5 py-1">
-                                <Store className="w-3.5 h-3.5 shrink-0" aria-hidden />
-                                Pickup
-                            </Badge>
-                        ) : (
-                            <Badge variant="info" className="gap-1.5 pl-2 pr-2.5 py-1">
-                                <Truck className="w-3.5 h-3.5 shrink-0" aria-hidden />
-                                Envío
-                            </Badge>
-                        )}
-                    </span>
-                );
-            },
+            header: 'Retiro / envío',
+            cell: ({ row }) => <VentaEntregaCell venta={row.original} />,
             enableSorting: false,
         },
         {
@@ -289,7 +256,6 @@ export const defaultColumnOrder = [
     'total_neto',
     'metodo_pago',
     'estado_pago',
-    'estado_envio',
     'entrega',
     'tipo_venta',
     'detalles_count',

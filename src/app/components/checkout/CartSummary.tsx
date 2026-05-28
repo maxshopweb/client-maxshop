@@ -6,8 +6,13 @@ import { motion } from "framer-motion";
 import { useCheckoutStore } from "@/app/hooks/checkout/useCheckoutStore";
 import ProductCart from "@/app/components/cart/ProductCart";
 import { formatCurrencyARS } from "@/app/utils/currency";
+import { WhatsappLink } from "@/app/components/contact/ContactLinks";
 
-export default function CartSummary() {
+interface CartSummaryProps {
+  showProductList?: boolean;
+}
+
+export default function CartSummary({ showProductList = true }: CartSummaryProps) {
   const { cartItems, costoEnvio, tipoEntrega, codigoPostal } = useCheckoutStore();
   const isMutatingEnvio = useIsMutating({ mutationKey: ["cotizarEnvio"] });
   const isAndreaniManualMode = process.env.NEXT_PUBLIC_ANDREANI_MODO_MANUAL === "true";
@@ -49,29 +54,31 @@ export default function CartSummary() {
     >
       <h2 className="text-xl font-bold text-foreground mb-6">Resumen</h2>
 
-      {/* Lista de productos */}
-      <div className="space-y-3 mb-6 max-h-64 overflow-y-auto">
-        {cartItems.map((item, index) => (
-          <motion.div
-            key={item.id}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.05 }}
-          >
-            <ProductCart 
-              item={item} 
-              readOnly={true}
-              variant="sm"
-            />
-          </motion.div>
-        ))}
-      </div>
+      {showProductList && (
+        <>
+          <div className="space-y-3 mb-6 max-h-64 overflow-y-auto">
+            {cartItems.map((item, index) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <ProductCart
+                  item={item}
+                  readOnly={true}
+                  variant="sm"
+                />
+              </motion.div>
+            ))}
+          </div>
 
-      {/* Separador */}
-      <div
-        className="border-t mb-4"
-        style={{ borderColor: "rgba(23, 28, 53, 0.1)" }}
-      />
+          <div
+            className="border-t mb-4"
+            style={{ borderColor: "rgba(23, 28, 53, 0.1)" }}
+          />
+        </>
+      )}
 
       {/* Totales */}
       <div className="space-y-2 mb-4">
@@ -90,7 +97,9 @@ export default function CartSummary() {
           <div className="flex justify-between text-sm">
             <span className="text-foreground/70">Costo de envío</span>
             {isAndreaniManualMode ? (
-              <span className="text-foreground/60 text-xs">Se confirmará por WhatsApp/soporte</span>
+              <span className="text-foreground/60 text-xs">
+                Se confirmará por <WhatsappLink className="text-foreground/60 underline underline-offset-2 hover:text-foreground" />
+              </span>
             ) : isCalculandoEnvio ? (
               <span className="text-foreground/50 text-xs">Calculando...</span>
             ) : costoEnvio !== null && costoEnvio === 0 ? (

@@ -18,10 +18,19 @@ interface ResultMessageProps {
   children?: ReactNode;
   id_venta?: string | number;
   cod_interno?: string | null;
+  /** Nº de operación Mercado Pago (payment_id) */
+  payment_id?: string | null;
 }
 
-export default function ResultMessage({ mensaje, children, id_venta, cod_interno }: ResultMessageProps) {
+export default function ResultMessage({
+  mensaje,
+  children,
+  id_venta,
+  cod_interno,
+  payment_id,
+}: ResultMessageProps) {
   const numeroPedido = getNumeroPedidoDisplay(cod_interno, id_venta);
+  const numeroOperacion = payment_id?.trim() || null;
 
   return (
     <motion.div
@@ -43,12 +52,20 @@ export default function ResultMessage({ mensaje, children, id_venta, cod_interno
         </p>
 
         {/* Número de pedido (cod_interno tipo MAX-00000001) */}
-        {numeroPedido && (
-          <div className="mt-4 pt-4 border-t" style={{ borderColor: "rgba(23, 28, 53, 0.1)" }}>
-            <p className="text-sm text-foreground/60 text-center">
-              <span className="font-semibold">Número de pedido:</span>{" "}
-              <span className="font-mono text-principal">{numeroPedido}</span>
-            </p>
+        {(numeroPedido || numeroOperacion) && (
+          <div className="mt-4 pt-4 border-t space-y-2" style={{ borderColor: "rgba(23, 28, 53, 0.1)" }}>
+            {numeroPedido && (
+              <p className="text-sm text-foreground/60 text-center">
+                <span className="font-semibold">Número de pedido:</span>{" "}
+                <span className="font-mono text-principal">{numeroPedido}</span>
+              </p>
+            )}
+            {numeroOperacion && (
+              <p className="text-sm text-foreground/60 text-center">
+                <span className="font-semibold">Nº de operación (Mercado Pago):</span>{" "}
+                <span className="font-mono text-principal break-all">{numeroOperacion}</span>
+              </p>
+            )}
           </div>
         )}
       </div>

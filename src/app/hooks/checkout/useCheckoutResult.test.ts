@@ -51,15 +51,43 @@ describe('useCheckoutResult', () => {
     expect(result.current.metodo_pago).toBe('transferencia');
   });
 
-  it('sin parámetros queda en processing', () => {
+  it('sin parámetros devuelve error con mensaje', () => {
     const { result } = renderHook(() => useCheckoutResult());
-    expect(result.current.status).toBe('processing');
+    expect(result.current.status).toBe('error');
+    expect(result.current.mensaje).toBeTruthy();
     expect(result.current.id_venta).toBeUndefined();
   });
 
-  it('incluye cod_interno cuando viene en la URL', () => {
-    setParams({ status: 'approved', id_venta: '1', cod_interno: 'MAX-00000001' });
+  it('con id_venta sin status válido infiere pending con mensaje', () => {
+    setParams({ id_venta: '10' });
     const { result } = renderHook(() => useCheckoutResult());
-    expect(result.current.cod_interno).toBe('MAX-00000001');
+    expect(result.current.status).toBe('pending');
+    expect(result.current.mensaje).toContain('registrado');
+  });
+
+  it('status inválido devuelve error con mensaje', () => {
+    setParams({ status: 'aproved', id_venta: '5' });
+    const { result } = renderHook(() => useCheckoutResult());
+    expect(result.current.status).toBe('error');
+    expect(result.current.mensaje).toContain('aproved');
+  });
+
+  it('obtiene id_venta desde external_reference de Mercado Pago', () => {
+    setParams({ status: 'approved', external_reference: 'venta_456' });
+    const { result } = renderHook(() => useCheckoutResult());
+    expect(result.current.id_venta).toBe('456');
+    expect(result.current.status).toBe('approved');
+  });
+
+  it('incluye payment_id como número de operación', () => {
+    setParams({ status: 'approved', id_venta: '1', payment_id: '999888777' });
+    const { result } = renderHook(() => useCheckoutResult());
+    expect(result.current.payment_id).toBe('999888777');
+  });
+
+  it('usa collection_status si no hay status ni payment_status', () => {
+    setParams({ collection_status: 'pending', id_venta: '10' });
+    const { result } = renderHook(() => useCheckoutResult());
+    expect(result.current.status).toBe('pending');
   });
 });

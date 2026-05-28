@@ -1,7 +1,7 @@
 'use client';
 
 import { useDashboardAlerts } from '@/app/hooks/dashboard/useDashboardAlerts';
-import { AlertTriangle, Clock, CreditCard, ChevronRight } from 'lucide-react';
+import { AlertTriangle, Clock, CreditCard, ChevronRight, Store, PackageCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -33,6 +33,26 @@ export function AlertsPanel() {
             href: '/admin/ventas?estado_pago=pendiente'
         },
         {
+            key: 'retiros_sin_aviso',
+            label: 'Sin aviso',
+            value: data?.retiros_sin_aviso || 0,
+            icon: Store,
+            color: 'text-amber-600',
+            bg: 'bg-amber-500/10',
+            action: 'Avisar clientes',
+            href: '/admin/ventas?estado_pago=aprobado&retiro=sin_aviso'
+        },
+        {
+            key: 'retiros_esperando_retiro',
+            label: 'Por retirar',
+            value: data?.retiros_esperando_retiro || 0,
+            icon: PackageCheck,
+            color: 'text-violet-600',
+            bg: 'bg-violet-500/10',
+            action: 'Ver pedidos',
+            href: '/admin/ventas?retiro=avisado_sin_retirar'
+        },
+        {
             key: 'ventas_problemas_pago',
             label: 'Problemas Pago',
             value: data?.ventas_problemas_pago || 0,
@@ -49,9 +69,9 @@ export function AlertsPanel() {
     };
 
     return (
-        <div className="col-span-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="col-span-12 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-6">
             {isLoading
-                ? Array(3).fill(0).map((_, i) => (
+                ? Array(5).fill(0).map((_, i) => (
                     <div key={i} className="bg-white dark:bg-terciario p-4 rounded-xl shadow-sm border border-principal/10 dark:border-white/5">
                         <Skeleton height={20} width={100} className="mb-2" />
                         <Skeleton height={30} width={40} />
@@ -59,7 +79,7 @@ export function AlertsPanel() {
                 ))
                 : alerts.map((alert, index) => (
                     <motion.div
-                        key={index}
+                        key={alert.key}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3, delay: 0.7 + (index * 0.1) }}

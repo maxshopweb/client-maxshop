@@ -2,10 +2,31 @@
 
 import { useMemo } from "react";
 import { 
-  IResultConfig, 
+  IResultConfig,
+  IResultAction,
   CheckoutResultStatus,
   LocalPaymentMethod 
 } from "../../types/checkout-result.type";
+
+const GUEST_REGISTER_ACTION: IResultAction = {
+  label: "Crear cuenta",
+  variant: "outline-primary",
+  href: "/register",
+};
+
+function applyGuestCheckoutActions(acciones: IResultAction[]): IResultAction[] {
+  const filtered = acciones.filter((accion) => accion.href !== "/mi-cuenta");
+  const hasAccountCta = filtered.some(
+    (a) => a.href?.startsWith("/register") || a.href?.startsWith("/login")
+  );
+  if (filtered.length === 0) {
+    return [
+      { label: "Seguir comprando", variant: "primary", href: "/tienda/productos" },
+      GUEST_REGISTER_ACTION,
+    ];
+  }
+  return hasAccountCta ? filtered : [...filtered, GUEST_REGISTER_ACTION];
+}
 
 /**
  * Hook para obtener la configuración de UI según el estado del resultado
@@ -17,26 +38,37 @@ export function useCheckoutResultConfig(
   isGuest?: boolean
 ): IResultConfig {
   return useMemo(() => {
-    // Transferencia y efectivo comparten la misma UI y copy (datos bancarios de tienda)
-    const pedidoReservadoLocal: IResultConfig = {
+    const accionesPedidoReservado: IResultConfig["acciones"] = [
+      {
+        label: "Ver mis pedidos",
+        variant: "primary",
+        href: "/mi-cuenta",
+      },
+      {
+        label: "Seguir comprando",
+        variant: "outline-primary",
+        href: "/tienda/productos",
+      },
+    ];
+
+    const pedidoTransferencia: IResultConfig = {
       titulo: "Pedido reservado",
       mensaje:
-        "Tu pedido fue reservado exitosamente. Realiza la transferencia bancaria con los datos que aparecen a continuación. Una vez confirmado el pago, te notificaremos por email.",
+        "Tu pedido fue reservado exitosamente. Realizá la transferencia bancaria con los datos que aparecen a continuación.",
       icono: "CheckCircle2",
       color: "info",
       mostrarDatosBancarios: true,
-      acciones: [
-        {
-          label: "Ver mis pedidos",
-          variant: "primary",
-          href: "/mi-cuenta",
-        },
-        {
-          label: "Seguir comprando",
-          variant: "outline-primary",
-          href: "/tienda/productos",
-        },
-      ],
+      acciones: accionesPedidoReservado,
+    };
+
+    const pedidoEfectivo: IResultConfig = {
+      titulo: "Pedido reservado",
+      mensaje:
+        "Tu pedido fue reservado exitosamente. Aboná en efectivo al retirarlo en nuestro local. Te avisaremos cuando esté listo.",
+      icono: "CheckCircle2",
+      color: "info",
+      mostrarDatosBancarios: false,
+      acciones: accionesPedidoReservado,
     };
 
     // Configuraciones base por estado
@@ -205,8 +237,8 @@ export function useCheckoutResultConfig(
         ],
       },
       // Métodos de pago locales
-      transferencia: pedidoReservadoLocal,
-      efectivo: pedidoReservadoLocal,
+      transferencia: pedidoTransferencia,
+      efectivo: pedidoEfectivo,
       // Estados de procesamiento/error
       processing: {
         titulo: "Procesando...",
@@ -235,13 +267,12 @@ export function useCheckoutResultConfig(
       },
     };
 
-    const config = configs[status] || configs.processing;
+    const config = configs[status] || configs.error;
     
-    // Si es invitado, filtrar las acciones que requieren cuenta (href="/mi-cuenta")
     if (isGuest) {
       return {
         ...config,
-        acciones: config.acciones.filter(accion => accion.href !== '/mi-cuenta')
+        acciones: applyGuestCheckoutActions(config.acciones),
       };
     }
     

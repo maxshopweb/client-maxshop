@@ -21,7 +21,7 @@ interface BadgeProps {
 }
 
 const baseBadgeClasses =
-  'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border';
+  'inline-flex w-fit max-w-full shrink-0 items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium leading-tight border whitespace-nowrap';
 
 // Estilos idénticos a VentasColumns (efectivo, estado_pago, estado_envio): borde oscuro + fondo claro
 export const badgeVariantStyles: Record<BadgeVariant, React.CSSProperties> = {

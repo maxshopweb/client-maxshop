@@ -5,17 +5,12 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useDebounce } from '@/app/hooks/useDebounce';
 import type { MaestroKind, MaestroItem } from '@/app/types/maestro.type';
 import { getMaestroCodigo, getMaestroNombre } from '@/app/types/maestro.type';
+import { matchesSearch } from '@/app/utils/search.utils';
 
 const PARAM_BUSQUEDA = 'busqueda';
 const PARAM_PAGE = 'page';
 const MAX_BUSQUEDA_LENGTH = 80;
 const DEBOUNCE_MS = 300;
-
-/** Normaliza texto para búsqueda: trim, lowercase, sin acentos */
-function normalizeForSearch(value: string): string {
-  const trimmed = value.trim().toLowerCase();
-  return trimmed.normalize('NFD').replace(/\p{Diacritic}/gu, '') ?? trimmed;
-}
 
 /** Valida y normaliza el valor para guardar en URL: trim, max length */
 function validateBusqueda(value: string): string {
@@ -90,15 +85,11 @@ export function useMaestrosFilters(): UseMaestrosFiltersReturn {
 
   const filterItems = useCallback(
     (items: MaestroItem[], kind: MaestroKind): MaestroItem[] => {
-      const term = normalizeForSearch(busqueda);
-      if (!term) return items;
+      if (!busqueda.trim()) return items;
       return items.filter((item) => {
         const codigo = getMaestroCodigo(item, kind);
         const nombre = getMaestroNombre(item) ?? '';
-        return (
-          normalizeForSearch(codigo).includes(term) ||
-          normalizeForSearch(nombre).includes(term)
-        );
+        return matchesSearch(codigo, busqueda) || matchesSearch(nombre, busqueda);
       });
     },
     [busqueda]

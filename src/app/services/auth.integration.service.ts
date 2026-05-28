@@ -495,7 +495,7 @@ class AuthIntegrationService {
         return {
           success: false,
           data: null,
-          error: 'Este email ya está registrado. ¿Deseas iniciar sesión?'
+          error: 'Este email ya está registrado.'
         };
       }
 

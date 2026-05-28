@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { UserPlus, RefreshCw, Loader2, Wand2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { AdminPageHeader } from '@/app/components/Admin/AdminPageHeader';
@@ -25,7 +25,7 @@ import {
 
 export function UsuariosStaffPageClient() {
   const filterState = useAdminStaffFilters();
-  const { filters, goToPage } = filterState;
+  const { filters, goToPage, nextPage, prevPage, setFilter } = filterState;
   const listQuery = useAdminStaffList({ filters });
   const { data, isLoading, isFetching, isError, error, refetch } = listQuery;
   const { createStaff, resetPassword, setActive } = useAdminStaffMutations();
@@ -36,6 +36,18 @@ export function UsuariosStaffPageClient() {
   const total = data?.total ?? 0;
   const page = filters.page ?? 1;
   const limit = filters.limit ?? 20;
+
+  const staffPagination = useMemo(() => {
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+    return {
+      total,
+      page,
+      limit,
+      totalPages,
+      hasPrevPage: page > 1,
+      hasNextPage: page < totalPages,
+    };
+  }, [total, page, limit]);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [createEmailLocal, setCreateEmailLocal] = useState('');
@@ -140,7 +152,13 @@ export function UsuariosStaffPageClient() {
       />
 
       {!isLoading && total > 0 && (
-        <UsuariosStaffPaginacion total={total} page={page} limit={limit} onGoToPage={goToPage} />
+        <UsuariosStaffPaginacion
+          pagination={staffPagination}
+          onPageChange={goToPage}
+          onLimitChange={(n) => setFilter('limit', n)}
+          onNextPage={nextPage}
+          onPrevPage={prevPage}
+        />
       )}
 
       <SimpleModal

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Copy, Check } from "lucide-react";
 import { IBankDetails } from "../../types/checkout-result.type";
 import { useClipboard } from "../../hooks/checkout/useClipboard";
+import { ComprobanteNotice } from "../contact/ContactLinks";
 
 /** Devuelve el código de operación a mostrar: cod_interno o "MAX-" + id_venta a 8 dígitos */
 function getNumeroPedidoDisplay(cod_interno?: string | null, id_venta?: string | number): string | null {
@@ -103,6 +104,8 @@ export default function BankDetails({ datos, id_venta, cod_interno }: BankDetail
           </div>
         )}
       </div>
+
+      <ComprobanteNotice orderId={numeroPedido} />
     </motion.div>
   );
 }

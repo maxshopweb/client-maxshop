@@ -20,14 +20,20 @@ export type CheckoutResultStatus =
   | 'processing' 
   | 'error';
 
-// Información del resultado del checkout
-export interface ICheckoutResult {
-  status: CheckoutResultStatus;
+/** Props compartidas por pantallas de estado del checkout */
+export interface CheckoutStateDisplayProps {
   id_venta?: string | number;
-  /** Código de operación para el cliente (ej. MAX-00000001). Si no viene, se deriva de id_venta. */
   cod_interno?: string | null;
+  /** payment_id de Mercado Pago (nº de operación en pasarela) */
+  payment_id?: string | null;
+  /** Mensaje custom cuando el estado se infiere (ej. URL sin status válido) */
+  mensaje?: string | null;
+}
+
+// Información del resultado del checkout
+export interface ICheckoutResult extends CheckoutStateDisplayProps {
+  status: CheckoutResultStatus;
   metodo_pago?: string;
-  mensaje?: string;
   // Para transferencia/efectivo
   datos_bancarios?: IBankDetails;
 }

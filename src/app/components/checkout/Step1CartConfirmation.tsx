@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { useCheckoutStore, CartItem } from "@/app/hooks/checkout/useCheckoutStore";
+import { useCheckoutStore } from "@/app/hooks/checkout/useCheckoutStore";
 import { useCartStore } from "@/app/stores/cartStore";
 import { useAuthStore } from "@/app/stores/userStore";
 import { useAuth } from "@/app/context/AuthContext";
@@ -18,29 +18,10 @@ import EmptyCartCheckoutState from "@/app/components/cart/EmptyCartCheckoutState
 export default function Step1CartConfirmation() {
   const router = useRouter();
   const { items } = useCartStore();
-  const { setCartItems, setCurrentStep, completeStep, resetCheckout } = useCheckoutStore();
+  const { setCurrentStep, completeStep, resetCheckout } = useCheckoutStore();
   const logoutStore = useAuthStore((s) => s.logout);
   const { isGuest } = useAuth();
   const [showExitConfirm, setShowExitConfirm] = useState(false);
-
-  // Sincronizar items del carrito con el checkout store
-  const syncCartItems = () => {
-    const formattedItems: CartItem[] = items.map((item) => ({
-      id: item.id_prod,
-      nombre: item.producto?.nombre || "Producto sin nombre",
-      precio: item.precio_unitario || 0,
-      precioSinImpuestos: item.precio_unitario_sin_iva || item.producto?.precio_sin_iva || 0,
-      cantidad: item.cantidad || 1,
-      img_principal: item.producto?.img_principal || "",
-      subtotal: item.subtotal || 0,
-      subtotalSinImpuestos: item.subtotal_sin_iva || (item.precio_unitario_sin_iva || item.producto?.precio_sin_iva || 0) * (item.cantidad || 1),
-    }));
-    setCartItems(formattedItems);
-  };
-
-  useEffect(() => {
-    syncCartItems();
-  }, [items, setCartItems]);
 
   const handleContinue = () => {
     if (items.length > 0) {
@@ -85,17 +66,15 @@ export default function Step1CartConfirmation() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
           >
-            <ProductCart 
-              item={item} 
+            <ProductCart
+              item={item}
               readOnly={false}
               variant="md"
-              onUpdate={syncCartItems}
             />
           </motion.div>
         ))}
       </div>
 
-      {/* Botones */}
       <div className="pt-4 flex gap-4">
         <Button
           variant="outline-primary"
@@ -130,4 +109,3 @@ export default function Step1CartConfirmation() {
     </motion.div>
   );
 }
-

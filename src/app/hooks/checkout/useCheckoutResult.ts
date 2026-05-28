@@ -2,66 +2,62 @@
 
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
-import { 
-  ICheckoutResult, 
-  CheckoutResultStatus,
-  MercadoPagoStatus,
+import {
+  ICheckoutResult,
   LocalPaymentMethod,
 } from "../../types/checkout-result.type";
+import {
+  parseVentaIdFromExternalReference,
+  resolveCheckoutResultStatus,
+} from "../../utils/checkoutResult.utils";
 
 /**
  * Hook para obtener el resultado del checkout desde los parámetros de la URL
- * 
- * Responsabilidad única: Parsear y normalizar los parámetros de la URL
- * No contiene lógica de UI ni validaciones de acceso
  */
 export function useCheckoutResult(): ICheckoutResult {
   const searchParams = useSearchParams();
 
   return useMemo(() => {
-    // Leer parámetros de la URL
-    const status = searchParams.get('status') as MercadoPagoStatus | null;
-    const metodo = searchParams.get('metodo') as LocalPaymentMethod | null;
-    const id_venta = searchParams.get('id_venta');
-    const cod_interno = searchParams.get('cod_interno') || undefined;
-    const metodo_pago = searchParams.get('metodo_pago');
-    const payment_status = searchParams.get('payment_status'); // Alternativo de Mercado Pago
+    const statusParam = searchParams.get("status");
+    const metodo = searchParams.get("metodo") as LocalPaymentMethod | null;
+    const idVentaParam = searchParams.get("id_venta");
+    const cod_interno = searchParams.get("cod_interno") || undefined;
+    const metodo_pago = searchParams.get("metodo_pago");
+    const payment_status = searchParams.get("payment_status");
+    const collection_status = searchParams.get("collection_status");
+    const external_reference = searchParams.get("external_reference");
+    const payment_id =
+      searchParams.get("payment_id") ||
+      searchParams.get("collection_id") ||
+      null;
+    const preference_id = searchParams.get("preference_id");
+    const collection_id = searchParams.get("collection_id");
 
-    // Determinar el estado final
-    // Prioridad: status > payment_status > metodo > metodo_pago
-    let finalStatus: CheckoutResultStatus = 'processing';
+    const id_venta =
+      idVentaParam ||
+      parseVentaIdFromExternalReference(external_reference) ||
+      undefined;
 
-    if (status) {
-      // Si viene el parámetro 'status' (Mercado Pago)
-      finalStatus = status;
-    } else if (payment_status) {
-      // Si viene 'payment_status' (formato alternativo de Mercado Pago)
-      finalStatus = payment_status as MercadoPagoStatus;
-    } else if (metodo) {
-      // Si es transferencia o efectivo
-      finalStatus = metodo;
-    } else if (metodo_pago) {
-      // Si viene el método de pago en otro formato
-      if (metodo_pago === 'transferencia' || metodo_pago === 'efectivo') {
-        finalStatus = metodo_pago;
-      } else {
-        // Intentar interpretar como estado de Mercado Pago
-        const mercadoPagoStatuses: MercadoPagoStatus[] = [
-          'pending', 'approved', 'authorized', 'in_process', 
-          'in_mediation', 'rejected', 'cancelled', 'refunded', 'charged_back'
-        ];
-        if (mercadoPagoStatuses.includes(metodo_pago as MercadoPagoStatus)) {
-          finalStatus = metodo_pago as MercadoPagoStatus;
-        }
-      }
-    }
+    const resolved = resolveCheckoutResultStatus({
+      statusParam,
+      payment_status,
+      collection_status,
+      metodo,
+      metodo_pago,
+      id_venta,
+      payment_id,
+      external_reference,
+      preference_id,
+      collection_id,
+    });
 
     return {
-      status: finalStatus,
+      status: resolved.status,
+      mensaje: resolved.mensaje,
       id_venta: id_venta || undefined,
       cod_interno: cod_interno || undefined,
       metodo_pago: metodo_pago || metodo || undefined,
+      payment_id: payment_id || undefined,
     };
   }, [searchParams]);
 }
-

@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { ventasService } from '@/app/services/venta.service';
 import { ventasKeys } from './useVentas';
+import { dashboardKeys } from '@/app/hooks/dashboard/dashboardKeys';
 import type {
     IVenta,
     ICreateVentaDTO,
@@ -390,6 +391,121 @@ export function useBulkDeleteVentas(options: UseBulkDeleteOptions = {}) {
         isSuccess: mutation.isSuccess,
         isError: mutation.isError,
         error: mutation.error,
+    };
+}
+
+function invalidateVentaAndAlerts(queryClient: ReturnType<typeof useQueryClient>, id?: number) {
+    queryClient.invalidateQueries({ queryKey: ventasKeys.lists() });
+    queryClient.invalidateQueries({ queryKey: dashboardKeys.alerts() });
+    if (id != null) {
+        queryClient.invalidateQueries({ queryKey: ventasKeys.detail(id) });
+    }
+}
+
+interface UseCancelarVentaOptions {
+    onSuccess?: (data: IVenta) => void;
+    onError?: (error: Error) => void;
+}
+
+export function useCancelarVenta(options: UseCancelarVentaOptions = {}) {
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: ({ id, motivo }: { id: number; motivo?: string }) =>
+            ventasService.cancelar(id, { motivo }),
+
+        onSuccess: (data, { id }) => {
+            queryClient.removeQueries({ queryKey: ventasKeys.detail(id) });
+            invalidateVentaAndAlerts(queryClient);
+            toast.success('Venta cancelada', {
+                description: `Pedido #${data.id_venta} dado de baja`,
+            });
+            options.onSuccess?.(data);
+        },
+
+        onError: (error: Error) => {
+            toast.error('Error al cancelar venta', {
+                description: error.message || 'Ocurrió un error inesperado',
+            });
+            options.onError?.(error);
+        },
+    });
+
+    return {
+        cancelarVenta: mutation.mutate,
+        cancelarVentaAsync: mutation.mutateAsync,
+        isCancelling: mutation.isPending,
+    };
+}
+
+interface UseNotificarListoRetiroOptions {
+    onSuccess?: (data: IVenta) => void;
+    onError?: (error: Error) => void;
+}
+
+export function useNotificarListoRetiro(options: UseNotificarListoRetiroOptions = {}) {
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: ({ id, mensaje }: { id: number; mensaje?: string }) =>
+            ventasService.notificarListoRetiro(id, { mensaje }),
+
+        onSuccess: (data, { id }) => {
+            queryClient.setQueryData(ventasKeys.detail(id), data);
+            invalidateVentaAndAlerts(queryClient);
+            toast.success('Aviso enviado', {
+                description: 'El cliente recibió el email de listo para retirar',
+            });
+            options.onSuccess?.(data);
+        },
+
+        onError: (error: Error) => {
+            toast.error('Error al avisar retiro', {
+                description: error.message || 'Ocurrió un error inesperado',
+            });
+            options.onError?.(error);
+        },
+    });
+
+    return {
+        notificarListoRetiro: mutation.mutate,
+        notificarListoRetiroAsync: mutation.mutateAsync,
+        isNotificando: mutation.isPending,
+    };
+}
+
+interface UseMarcarRetiradoOptions {
+    onSuccess?: (data: IVenta) => void;
+    onError?: (error: Error) => void;
+}
+
+export function useMarcarRetirado(options: UseMarcarRetiradoOptions = {}) {
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: (id: number) => ventasService.marcarRetirado(id),
+
+        onSuccess: (data, id) => {
+            queryClient.setQueryData(ventasKeys.detail(id), data);
+            invalidateVentaAndAlerts(queryClient);
+            toast.success('Pedido retirado', {
+                description: 'Se marcó como retirado en tienda',
+            });
+            options.onSuccess?.(data);
+        },
+
+        onError: (error: Error) => {
+            toast.error('Error al marcar retirado', {
+                description: error.message || 'Ocurrió un error inesperado',
+            });
+            options.onError?.(error);
+        },
+    });
+
+    return {
+        marcarRetirado: mutation.mutate,
+        marcarRetiradoAsync: mutation.mutateAsync,
+        isMarcandoRetirado: mutation.isPending,
     };
 }
 

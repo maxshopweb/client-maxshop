@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-// Schema para datos de facturación A (todos opcionales, validación condicional)
 const facturacionASchema = z.object({
   razonSocial: z.string().optional(),
   nombreEmpresa: z.string().optional(),
@@ -11,8 +10,42 @@ const facturacionASchema = z.object({
   codigoPostalFiscal: z.string().optional(),
 });
 
+function resolveFacturaACuit(data: {
+  necesitaFacturaA: boolean;
+  usarMismosDatosFacturacion: boolean;
+  tipoDocumento: 'DNI' | 'CUIT';
+  documento: string;
+  facturacionA?: z.infer<typeof facturacionASchema>;
+}) {
+  if (!data.necesitaFacturaA) return null;
+  if (data.usarMismosDatosFacturacion && data.tipoDocumento === 'CUIT') {
+    return data.documento?.trim() || null;
+  }
+  return data.facturacionA?.cuit?.trim() || null;
+}
+
+const facturaAFieldsRefine = (data: {
+  necesitaFacturaA: boolean;
+  usarMismosDatosFacturacion: boolean;
+  tipoDocumento: 'DNI' | 'CUIT';
+  documento: string;
+  facturacionA?: z.infer<typeof facturacionASchema>;
+}) => {
+  if (!data.necesitaFacturaA) return true;
+
+  const cuit = resolveFacturaACuit(data);
+  if (!cuit || !/^\d{11}$/.test(cuit)) return false;
+
+  if (!data.usarMismosDatosFacturacion) {
+    if (!data.facturacionA) return false;
+    if (!data.facturacionA.razonSocial || data.facturacionA.razonSocial.length < 2) return false;
+    if (!data.facturacionA.nombreEmpresa || data.facturacionA.nombreEmpresa.length < 2) return false;
+  }
+
+  return true;
+};
+
 export const personalFormSchema = z.object({
-  // Información de contacto
   email: z.string().email('Email inválido'),
   firstName: z.string().min(2, 'Nombre debe tener al menos 2 caracteres'),
   lastName: z.string().min(2, 'Apellido debe tener al menos 2 caracteres'),
@@ -24,61 +57,36 @@ export const personalFormSchema = z.object({
     .refine((val) => !val.startsWith('0'), {
       message: 'El código de área no debe comenzar con 0',
     }),
-  
-  // Facturación
   necesitaFacturaA: z.boolean().default(false),
   usarMismosDatosFacturacion: z.boolean().default(true),
-  
-  // Datos de facturación A (condicional)
   facturacionA: facturacionASchema.optional(),
 })
 .refine((data) => {
-  // Validar que phoneArea + phone tenga 9-11 dígitos
   const fullPhone = `${data.phoneArea}${data.phone}`;
-  if (!/^\d{9,11}$/.test(fullPhone)) {
-    return false;
-  }
-  return true;
+  return /^\d{9,11}$/.test(fullPhone);
 }, {
   message: 'Teléfono completo debe tener 9-11 dígitos',
   path: ['phone'],
 })
-.refine((data) => {
-  // Si necesita factura A y no usa los mismos datos, debe completar facturaciónA
-  if (data.necesitaFacturaA && !data.usarMismosDatosFacturacion) {
-    if (!data.facturacionA) return false;
-    if (!data.facturacionA.razonSocial || data.facturacionA.razonSocial.length < 2) return false;
-    if (!data.facturacionA.nombreEmpresa || data.facturacionA.nombreEmpresa.length < 2) return false;
-    if (!data.facturacionA.cuit || !/^\d{11}$/.test(data.facturacionA.cuit)) return false;
-  }
-  return true;
-}, {
-  message: 'Debe completar los datos de facturación A (Razón Social, Nombre de Empresa y CUIT)',
-  path: ['facturacionA'],
+.refine(facturaAFieldsRefine, {
+  message: 'Factura A requiere CUIT de 11 dígitos y datos de empresa completos',
+  path: ['facturacionA', 'cuit'],
 });
 
 export type PersonalFormData = z.infer<typeof personalFormSchema>;
 
-/** Schema reducido para usuario autenticado (solo DNI + facturación) */
+/** Schema reducido para usuario autenticado (solo DNI + facturación en checkout) */
 export const personalFormSchemaAuthUser = z.object({
   tipoDocumento: z.enum(['DNI', 'CUIT']),
   documento: z.string().min(7, 'Documento inválido').max(11, 'Documento inválido'),
   necesitaFacturaA: z.boolean().default(false),
   usarMismosDatosFacturacion: z.boolean().default(true),
   facturacionA: facturacionASchema.optional(),
-}).refine((data) => {
-  if (data.necesitaFacturaA && !data.usarMismosDatosFacturacion) {
-    if (!data.facturacionA) return false;
-    if (!data.facturacionA.razonSocial || data.facturacionA.razonSocial.length < 2) return false;
-    if (!data.facturacionA.nombreEmpresa || data.facturacionA.nombreEmpresa.length < 2) return false;
-    if (!data.facturacionA.cuit || !/^\d{11}$/.test(data.facturacionA.cuit)) return false;
-  }
-  return true;
-}, {
-  message: 'Debe completar los datos de facturación A (Razón Social, Nombre de Empresa y CUIT)',
-  path: ['facturacionA'],
+}).refine(facturaAFieldsRefine, {
+  message: 'Factura A requiere CUIT de 11 dígitos y datos de empresa completos',
+  path: ['facturacionA', 'cuit'],
 });
 
 export type PersonalFormDataAuthUser = z.infer<typeof personalFormSchemaAuthUser>;
 
-
+export { resolveFacturaACuit };

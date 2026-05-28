@@ -3,27 +3,23 @@
 import { useState, useEffect } from "react";
 import { UseFormSetValue, UseFormWatch } from "react-hook-form";
 import { PersonalFormData } from "../../schemas/personalForm.schema";
+import { useCheckoutStore } from "./useCheckoutStore";
 
 interface UseBillingDataPersonalOptions {
   setValue: UseFormSetValue<PersonalFormData>;
   watch: UseFormWatch<PersonalFormData>;
 }
 
-/**
- * Hook para gestionar el estado y sincronización de datos de facturación
- * Versión adaptada para PersonalFormData (sin dirección de envío)
- */
 export function useBillingDataPersonal({ setValue, watch }: UseBillingDataPersonalOptions) {
   const [necesitaFacturaA, setNecesitaFacturaA] = useState(false);
   const [usarMismosDatos, setUsarMismosDatos] = useState(true);
+  const billingAddress = useCheckoutStore((s) => s.billingAddress);
 
-  // Observar valores del formulario necesarios para sincronización
   const firstName = watch("firstName");
   const lastName = watch("lastName");
   const tipoDocumento = watch("tipoDocumento");
   const documento = watch("documento");
 
-  // Sincronizar estado local con el formulario
   useEffect(() => {
     setValue("necesitaFacturaA", necesitaFacturaA, { shouldValidate: true });
   }, [necesitaFacturaA, setValue]);
@@ -32,7 +28,6 @@ export function useBillingDataPersonal({ setValue, watch }: UseBillingDataPerson
     setValue("usarMismosDatosFacturacion", usarMismosDatos, { shouldValidate: true });
   }, [usarMismosDatos, setValue]);
 
-  // Sincronizar datos de facturación cuando se usan los mismos datos de contacto
   useEffect(() => {
     if (necesitaFacturaA && usarMismosDatos) {
       const razonSocial = `${firstName || ""} ${lastName || ""}`.trim();
@@ -42,23 +37,24 @@ export function useBillingDataPersonal({ setValue, watch }: UseBillingDataPerson
     }
   }, [necesitaFacturaA, usarMismosDatos, firstName, lastName, tipoDocumento, documento, setValue]);
 
+  useEffect(() => {
+    if (!necesitaFacturaA || !billingAddress) return;
+    const domicilio = `${billingAddress.address || ""} ${billingAddress.altura || ""}`.trim();
+    setValue("facturacionA.domicilioFiscal", domicilio, { shouldValidate: false });
+    setValue("facturacionA.ciudadFiscal", billingAddress.city || "", { shouldValidate: false });
+    setValue("facturacionA.provinciaFiscal", billingAddress.state || "", { shouldValidate: false });
+    setValue("facturacionA.codigoPostalFiscal", billingAddress.postalCode || "", { shouldValidate: false });
+  }, [necesitaFacturaA, billingAddress, setValue]);
+
   const handleNecesitaFacturaAChange = (checked: boolean) => {
     setNecesitaFacturaA(checked);
-    if (!checked) {
-      setUsarMismosDatos(true);
-    }
-  };
-
-  const handleUsarMismosDatosChange = (checked: boolean) => {
-    setUsarMismosDatos(checked);
+    if (!checked) setUsarMismosDatos(true);
   };
 
   return {
     necesitaFacturaA,
     usarMismosDatos,
     setNecesitaFacturaA: handleNecesitaFacturaAChange,
-    setUsarMismosDatos: handleUsarMismosDatosChange,
+    setUsarMismosDatos,
   };
 }
-
-

@@ -3,7 +3,7 @@ import { z } from 'zod';
 // Enums para validación
 const MetodoPagoEnum = z.enum(['efectivo', 'tarjeta_debito', 'tarjeta_credito', 'transferencia', 'mercadopago', 'otro']);
 const TipoVentaEnum = z.enum(['presencial', 'online', 'otro']);
-const EstadoPagoEnum = z.enum(['pendiente', 'aprobado', 'rechazado', 'cancelado']);
+const EstadoPagoEnum = z.enum(['pendiente', 'aprobado', 'rechazado', 'cancelado', 'vencido']);
 const EstadoEnvioEnum = z.enum(['pendiente', 'preparando', 'enviado', 'en_transito', 'entregado', 'cancelado']);
 
 // Schema para detalle de venta

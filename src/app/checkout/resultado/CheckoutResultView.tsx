@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCheckoutResult } from "@/app/hooks/checkout/useCheckoutResult";
 import { useCheckoutStore } from "@/app/hooks/checkout/useCheckoutStore";
 import { useCartStore } from "@/app/stores/cartStore";
@@ -10,6 +10,11 @@ import CheckoutResultContainer from "@/app/components/checkout/CheckoutResultCon
 import { ResultSkeleton } from "@/app/components/checkout/ResultSkeleton";
 import type { IConfigTienda } from "@/app/types/config-tienda.type";
 import type { ICheckoutResult } from "@/app/types/checkout-result.type";
+import { hasCheckoutLandingContext } from "@/app/utils/checkoutResult.utils";
+import {
+  markCheckoutResultAsGuest,
+  clearCheckoutResultGuestFlag,
+} from "@/app/utils/checkoutGuestResult";
 import { motion } from "framer-motion";
 
 interface CheckoutResultViewProps {
@@ -18,14 +23,15 @@ interface CheckoutResultViewProps {
 
 function CheckoutResultContent({ initialConfig }: { initialConfig: IConfigTienda }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const result = useCheckoutResult();
   const { clearCart } = useCartStore();
-  const { resetCheckout, shippingData } = useCheckoutStore();
+  const { resetCheckout, setIsCreatingOrder, setIsRedirectingToPayment, shippingData } = useCheckoutStore();
   const { logout, isGuest, loading: authLoading } = useAuth();
   const isRetiroFlowRef = useRef(shippingData?.tipoEntrega === "retiro");
 
   const resultWithBank = useMemo((): ICheckoutResult => {
-    if (result.status === "transferencia" || result.status === "efectivo") {
+    if (result.status === "transferencia") {
       const db = initialConfig?.datos_bancarios;
       return {
         ...result,
@@ -46,33 +52,53 @@ function CheckoutResultContent({ initialConfig }: { initialConfig: IConfigTienda
     return result;
   }, [result, initialConfig?.datos_bancarios]);
 
+  const showLanding = hasCheckoutLandingContext(result);
+
+  useEffect(() => {
+    if (searchParams.get("guest") === "1") {
+      markCheckoutResultAsGuest();
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    return () => clearCheckoutResultGuestFlag();
+  }, []);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const urlHasIdVenta = window.location.search.includes("id_venta=");
-    if (urlHasIdVenta) return;
-    if (!result.id_venta && result.status !== "processing") {
-      router.push("/checkout");
-    }
-  }, [result.id_venta, result.status, router]);
+    if (showLanding) return;
+    router.push("/checkout");
+  }, [showLanding, router]);
 
   useEffect(() => {
-    if (!result.id_venta) return;
+    if (!showLanding) return;
+
     clearCart();
     resetCheckout();
-    // Cerrar sesión solo si el usuario sigue siendo invitado (estado === 1) en auth.
-    // No usar wasGuest persistido: puede quedar true tras registrarse (localStorage viejo).
+    setIsCreatingOrder(false);
+    setIsRedirectingToPayment(false);
     if (authLoading) return;
     if (isGuest) {
+      markCheckoutResultAsGuest();
       logout(true);
     }
-  }, [result.id_venta, clearCart, resetCheckout, logout, authLoading, isGuest]);
+  }, [
+    showLanding,
+    clearCart,
+    resetCheckout,
+    setIsCreatingOrder,
+    setIsRedirectingToPayment,
+    logout,
+    authLoading,
+    isGuest,
+  ]);
 
-  if (!result.id_venta && result.status !== "processing") {
+  if (!showLanding) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-principal border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-lg text-foreground/60">Cargando resultado...</p>
+          <p className="text-lg text-foreground/60">Redirigiendo...</p>
         </div>
       </div>
     );

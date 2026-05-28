@@ -8,6 +8,10 @@ import { useAuth } from "@/app/context/AuthContext";
 import { IDatosPago } from "@/app/types/cart.type";
 import { toast } from "sonner";
 import { OBSERVACION_RETIRO_EN_TIENDA } from "@/app/utils/venta-envio.validation";
+import {
+  buildCheckoutOrderExtras,
+  resolveCheckoutDireccionPayload,
+} from "@/app/utils/buildCheckoutOrderPayload";
 
 interface UseLocalPaymentHandlerOptions {
   formData: Partial<IDatosPago>;
@@ -16,7 +20,7 @@ interface UseLocalPaymentHandlerOptions {
 export function useLocalPaymentHandler({ formData }: UseLocalPaymentHandlerOptions) {
   const router = useRouter();
   const { items } = useCartStore();
-  const { setCurrentStep, personalData, shippingData, costoEnvio, id_direccion } = useCheckoutStore();
+  const { setCurrentStep, personalData, billingAddress, shippingData, costoEnvio, id_direccion_facturacion, id_direccion_envio } = useCheckoutStore();
   const { user } = useAuth();
 
   const { createOrder, isCreating } = useCreateOrderFromCheckout({
@@ -54,6 +58,14 @@ export function useLocalPaymentHandler({ formData }: UseLocalPaymentHandlerOptio
       return;
     }
 
+    if (!billingAddress) {
+      toast.error('Datos incompletos', {
+        description: 'Por favor completa la dirección de facturación',
+      });
+      setCurrentStep(2);
+      return;
+    }
+
     if (!shippingData) {
       toast.error('Datos incompletos', {
         description: 'Por favor completa los datos de envío',
@@ -78,41 +90,28 @@ export function useLocalPaymentHandler({ formData }: UseLocalPaymentHandlerOptio
     const observaciones =
       shippingData.tipoEntrega === "retiro" ? OBSERVACION_RETIRO_EN_TIENDA : "";
 
-    const buildDireccionPayload = () => {
-      const rawCp = shippingData.postalCode?.trim();
-      let cod_postal: number | null = null;
-      if (rawCp) {
-        const parsed = parseInt(rawCp, 10);
-        cod_postal = !isNaN(parsed) && parsed > 0 ? parsed : null;
-      }
-      return {
-        direccion: shippingData.address || "",
-        altura: shippingData.altura || "",
-        piso: shippingData.piso || undefined,
-        dpto: shippingData.dpto || undefined,
-        ciudad: shippingData.city || "",
-        provincia: shippingData.state || "",
-        cod_postal,
-        telefono: fullPhone,
-      };
-    };
+    const { id_direccion, direccion } = resolveCheckoutDireccionPayload({
+      tipoEntrega: shippingData.tipoEntrega,
+      billingAddress,
+      shippingData,
+      fullPhone,
+      id_direccion_facturacion,
+      id_direccion_envio,
+    });
 
-    const direccionData =
-      shippingData.tipoEntrega === "envio" && shippingData.postalCode
-        ? buildDireccionPayload()
-        : shippingData.tipoEntrega === "retiro"
-          ? buildDireccionPayload()
-          : undefined;
+    const orderExtras = buildCheckoutOrderExtras(personalData, billingAddress);
 
-    // Crear el pedido usando el hook correcto
     createOrder({
       id_cliente: idCliente,
       metodo_pago: formData.metodo,
       detalles,
       observaciones,
       id_direccion: id_direccion || undefined,
-      direccion: id_direccion ? undefined : direccionData,
+      direccion,
       costo_envio: costoEnvio || 0,
+      tipo_documento: orderExtras.tipo_documento,
+      numero_documento: orderExtras.numero_documento,
+      referencia_facturacion: orderExtras.referencia_facturacion,
     });
   };
 

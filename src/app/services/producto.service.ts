@@ -102,6 +102,7 @@ class ProductosService {
     return response.data;
   }
 
+  /** Admin: producto no eliminado (requiere auth). */
   async getById(id: number): Promise<IProductos> {
     const response = await axiosInstance.get<IApiResponse<IProductos>>(
       `/productos/${id}`
@@ -109,6 +110,19 @@ class ProductosService {
 
     if (!response.data.success || !response.data.data) {
       throw new Error(response.data.error || 'Producto no encontrado');
+    }
+
+    return response.data.data;
+  }
+
+  /** Tienda/cliente: solo activo y publicado. */
+  async getByIdForCliente(id: number): Promise<IProductos> {
+    const response = await axiosInstance.get<IApiResponse<IProductos>>(
+      `/productos/tienda/${id}`
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.error || 'Producto no encontrado o no disponible');
     }
 
     return response.data.data;
@@ -302,46 +316,32 @@ class ProductosService {
 
   async getRelatedProducts(id: number, limit: number = 4): Promise<IProductos[]> {
     try {
-      // Obtener el producto actual para usar su categoría/marca
-      const currentProduct = await this.getById(id);
-      
-      // Buscar productos relacionados por categoría o marca
-      const filters: IProductoFilters = {
-        limit,
-        estado: 1, // EstadoGeneral.ACTIVO
-      };
+      const currentProduct = await this.getByIdForCliente(id);
 
-      // Priorizar productos de la misma categoría
+      const filters: IProductoFilters = { limit };
+
       if (currentProduct.id_cat) {
         filters.id_cat = currentProduct.id_cat;
       }
 
-      // Si no hay suficientes, buscar por marca
-      const response = await this.getAll(filters);
-      
-      // Filtrar el producto actual y limitar resultados (ya vienen filtrados por imagen)
+      const response = await this.getProductosTienda(filters);
+
       const related = response.data
         .filter(p => p.id_prod !== id)
         .slice(0, limit);
 
-      // Si no hay suficientes por categoría, buscar por marca
       if (related.length < limit && currentProduct.id_marca) {
-        const marcaFilters: IProductoFilters = {
+        const marcaResponse = await this.getProductosTienda({
           limit: limit - related.length,
           id_marca: currentProduct.id_marca,
-          estado: 1, // EstadoGeneral.ACTIVO
-        };
-        
-        const marcaResponse = await this.getAll(marcaFilters);
-        // Los productos ya vienen filtrados por imagen desde getAll
+        });
         const marcaProducts = marcaResponse.data
           .filter(p => p.id_prod !== id && !related.some(r => r.id_prod === p.id_prod))
           .slice(0, limit - related.length);
-        
+
         related.push(...marcaProducts);
       }
 
-      // Asegurar que todos tengan imagen (doble verificación por seguridad)
       return this.filterProductsWithImage(related);
     } catch (error) {
       console.error('Error al obtener productos relacionados:', error);

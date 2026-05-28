@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { AlertTriangle, CheckCircle2, Clock, FileText, RefreshCw, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { Badge } from '@/app/components/ui/Badge';
 import { Button } from '@/app/components/ui/Button';
 import { useFacturasEstadisticas } from '@/app/hooks/ventas/useFacturasEstadisticas';
 import { facturasService } from '@/app/services/facturas.service';
@@ -69,10 +70,10 @@ export function FacturasPendientesCard() {
                         <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
                             Facturas pendientes
                             {hasAlertas && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
-                                    <AlertTriangle size={11} />
+                                <Badge variant="warning" className="gap-1">
+                                    <AlertTriangle size={11} aria-hidden />
                                     Requiere atención
-                                </span>
+                                </Badge>
                             )}
                         </h3>
                         <p className="text-xs text-foreground/60 mt-0.5">

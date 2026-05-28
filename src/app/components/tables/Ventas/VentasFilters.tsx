@@ -4,7 +4,8 @@ import { useState } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import Input from '../../ui/Input';
 import Select from '../../ui/Select';
-import { ESTADO_PAGO_OPTIONS, ESTADO_ENVIO_OPTIONS, METODO_PAGO_OPTIONS, TIPO_VENTA_OPTIONS } from '@/app/types/ventas.type';
+import { ESTADO_PAGO_OPTIONS, ESTADO_ENVIO_OPTIONS, METODO_PAGO_OPTIONS, TIPO_VENTA_OPTIONS, type IVentaFilters } from '@/app/types/ventas.type';
+import { RETIRO_FILTRO_OPTIONS } from '@/app/utils/venta.utils';
 
 export function VentasFilters() {
     const {
@@ -109,6 +110,30 @@ export function VentasFilters() {
                                         setFilter('estado_envio', value ? value as any : undefined);
                                     }}
                                     placeholder="Seleccionar estado"
+                                />
+                            </div>
+
+                            {/* RETIRO EN TIENDA */}
+                            <div>
+                                <Select
+                                    label="Retiro en tienda"
+                                    options={[
+                                        { value: '', label: 'Todos' },
+                                        ...RETIRO_FILTRO_OPTIONS.map((opt) => ({
+                                            value: opt.value,
+                                            label: opt.label,
+                                        })),
+                                    ]}
+                                    value={filters.retiro || ''}
+                                    onChange={(value) => {
+                                        setFilter(
+                                            'retiro',
+                                            value
+                                                ? (value as IVentaFilters['retiro'])
+                                                : undefined
+                                        );
+                                    }}
+                                    placeholder="Estado de retiro"
                                 />
                             </div>
 

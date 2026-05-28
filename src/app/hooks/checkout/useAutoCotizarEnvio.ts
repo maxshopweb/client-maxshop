@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { UseFormWatch } from "react-hook-form";
 import { ShippingFormData } from "../../schemas/shippingForm.schema";
 import { useCheckoutStore } from "./useCheckoutStore";
 import { useCartStore } from "@/app/stores/cartStore";
 import { useAuth } from "@/app/context/AuthContext";
 import { useCotizarEnvio } from "./useCotizarEnvio";
+import { getCartFingerprint } from "@/app/utils/mapCartItemsToCheckout";
 
 interface UseAutoCotizarEnvioProps {
   watch: UseFormWatch<ShippingFormData>;
@@ -20,6 +21,8 @@ interface UseAutoCotizarEnvioProps {
 export function useAutoCotizarEnvio({ watch, enabled = true }: UseAutoCotizarEnvioProps) {
   const { setCostoEnvio, setTipoEntrega } = useCheckoutStore();
   const { items } = useCartStore();
+  const cartFingerprint = getCartFingerprint(items);
+  const prevCartFingerprintRef = useRef<string | null>(null);
   const { isAuthenticated } = useAuth();
   const cotizarEnvioMutation = useCotizarEnvio();
 
@@ -40,6 +43,18 @@ export function useAutoCotizarEnvio({ watch, enabled = true }: UseAutoCotizarEnv
       }
     }
   }, [tipoEntrega, setTipoEntrega, setCostoEnvio]);
+
+  // Invalidar costo al cambiar cantidad o productos del carrito
+  useEffect(() => {
+    if (
+      prevCartFingerprintRef.current !== null &&
+      prevCartFingerprintRef.current !== cartFingerprint &&
+      tipoEntrega === "envio"
+    ) {
+      setCostoEnvio(null);
+    }
+    prevCartFingerprintRef.current = cartFingerprint;
+  }, [cartFingerprint, tipoEntrega, setCostoEnvio]);
 
   // Cotizar automáticamente cuando TODOS los campos de dirección estén completos
   useEffect(() => {
@@ -91,6 +106,7 @@ export function useAutoCotizarEnvio({ watch, enabled = true }: UseAutoCotizarEnv
     state,
     postalCode,
     items.length,
+    cartFingerprint,
     isAuthenticated,
     cotizarEnvioMutation.isPending,
     cotizarEnvioMutation,

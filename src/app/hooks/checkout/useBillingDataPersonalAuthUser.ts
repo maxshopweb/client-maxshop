@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { UseFormSetValue, UseFormWatch } from "react-hook-form";
 import { PersonalFormDataAuthUser } from "../../schemas/personalForm.schema";
 import { IUsuario } from "@/app/types/user";
+import { useCheckoutStore } from "./useCheckoutStore";
 
 interface UseBillingDataPersonalAuthUserOptions {
   user: IUsuario | null;
@@ -11,10 +12,6 @@ interface UseBillingDataPersonalAuthUserOptions {
   watch: UseFormWatch<PersonalFormDataAuthUser>;
 }
 
-/**
- * Gestión de facturación para el formulario reducido (usuario autenticado).
- * Cuando "usar mismos datos", toma nombre/apellido del user y CUIT del form.
- */
 export function useBillingDataPersonalAuthUser({
   user,
   setValue,
@@ -22,6 +19,7 @@ export function useBillingDataPersonalAuthUser({
 }: UseBillingDataPersonalAuthUserOptions) {
   const [necesitaFacturaA, setNecesitaFacturaA] = useState(false);
   const [usarMismosDatos, setUsarMismosDatos] = useState(true);
+  const billingAddress = useCheckoutStore((s) => s.billingAddress);
 
   const tipoDocumento = watch("tipoDocumento");
   const documento = watch("documento");
@@ -42,6 +40,15 @@ export function useBillingDataPersonalAuthUser({
       setValue("facturacionA.cuit", tipoDocumento === "CUIT" ? documento || "" : "", { shouldValidate: false });
     }
   }, [necesitaFacturaA, usarMismosDatos, user, tipoDocumento, documento, setValue]);
+
+  useEffect(() => {
+    if (!necesitaFacturaA || !billingAddress) return;
+    const domicilio = `${billingAddress.address || ""} ${billingAddress.altura || ""}`.trim();
+    setValue("facturacionA.domicilioFiscal", domicilio, { shouldValidate: false });
+    setValue("facturacionA.ciudadFiscal", billingAddress.city || "", { shouldValidate: false });
+    setValue("facturacionA.provinciaFiscal", billingAddress.state || "", { shouldValidate: false });
+    setValue("facturacionA.codigoPostalFiscal", billingAddress.postalCode || "", { shouldValidate: false });
+  }, [necesitaFacturaA, billingAddress, setValue]);
 
   return {
     necesitaFacturaA,

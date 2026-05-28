@@ -61,8 +61,9 @@ export default function UnifiedNavbar() {
   // Cargar productos para la búsqueda solo cuando el usuario usa el buscador (evita /productos?limit=100 en cada página)
   const searchActive = (searchQuery?.trim().length ?? 0) >= 1;
   const { productos, isLoading: isLoadingProductos } = useProductos({
-    filters: { limit: 1000 },
+    filters: { limit: 200 },
     enabled: searchActive,
+    useTiendaEndpoint: true,
   });
 
   const handleLocationClick = () => {

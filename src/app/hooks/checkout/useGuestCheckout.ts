@@ -37,7 +37,7 @@ export function useGuestCheckout({ onSuccess }: UseGuestCheckoutOptions) {
         const emailCheck = await EmailValidationService.checkEmailExists(data.email);
 
         if (emailCheck.exists && !emailCheck.canLoginAsGuest) {
-          const errorMessage = "Este email ya está registrado. ¿Deseas iniciar sesión?";
+          const errorMessage = "Este email ya está registrado.";
           setEmailExistsError(errorMessage);
           setIsProcessingGuest(false);
           toast.error(errorMessage, {

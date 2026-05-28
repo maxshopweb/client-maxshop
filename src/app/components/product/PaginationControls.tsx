@@ -63,6 +63,7 @@ export function PaginationControls({
     <div className="flex flex-col items-center gap-4 mt-8 pt-6 ">
       <div className="flex items-center justify-center gap-2 flex-wrap">
         <button
+          type="button"
           onClick={handlePrevPage}
           disabled={currentPage === 1 || isLoading}
           className="flex items-center gap-2 px-4 py-2 rounded-lg border border-input bg-background text-foreground hover:bg-principal hover:text-white hover:border-principal transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -86,13 +87,14 @@ export function PaginationControls({
           return (
             <button
               key={page}
+              type="button"
               onClick={() => onPageChange(page)}
               disabled={isLoading}
               className={`
-                min-w-[40px] px-3 py-2 rounded-lg border text-sm font-medium transition-colors
+                min-w-[40px] px-3 py-2 rounded-lg border text-sm transition-colors
                 ${isActive
-                  ? 'bg-principal text-white border-principal'
-                  : 'bg-background text-foreground border-input hover:bg-principal hover:text-white hover:border-principal'
+                  ? 'pagination-page-active border-transparent bg-transparent'
+                  : 'bg-background text-foreground border-input font-medium hover:text-principal hover:border-input'
                 }
                 disabled:opacity-50 disabled:cursor-not-allowed
               `}
@@ -103,6 +105,7 @@ export function PaginationControls({
         })}
 
         <button
+          type="button"
           onClick={handleNextPage}
           disabled={currentPage >= totalPages || isLoading}
           className="flex items-center gap-2 px-4 py-2 rounded-lg border border-input bg-background text-foreground hover:bg-principal hover:text-white hover:border-principal transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -113,7 +116,7 @@ export function PaginationControls({
       </div>
 
       <div className="text-sm text-foreground/70">
-        Página {currentPage} de {totalPages}
+        Página <span className="font-semibold text-principal">{currentPage}</span> de {totalPages}
       </div>
     </div>
   );

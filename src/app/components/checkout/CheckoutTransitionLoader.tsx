@@ -5,36 +5,50 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCheckoutStore } from "@/app/hooks/checkout/useCheckoutStore";
 
+function getLoaderMessage(pathname: string, isRedirectingToPayment: boolean): string {
+  if (isRedirectingToPayment) {
+    return "Redirigiendo a Mercado Pago...";
+  }
+  if (pathname === "/checkout/resultado") {
+    return "Cargando resultado...";
+  }
+  return "Procesando tu pedido...";
+}
+
+function getLoaderSubmessage(isRedirectingToPayment: boolean): string {
+  if (isRedirectingToPayment) {
+    return "No cierres esta ventana";
+  }
+  return "Por favor espera un momento";
+}
+
 export function CheckoutTransitionLoader() {
   const pathname = usePathname();
-  const { isCreatingOrder } = useCheckoutStore();
+  const { isCreatingOrder, isRedirectingToPayment } = useCheckoutStore();
   const [shouldShow, setShouldShow] = useState(false);
 
+  const isBlocking = isCreatingOrder || isRedirectingToPayment;
+
   useEffect(() => {
-    // Mostrar loader si está creando el pedido
-    if (isCreatingOrder) {
+    if (isBlocking) {
       setShouldShow(true);
       return;
     }
 
-    // Si estamos en la página de resultado y acabamos de llegar
-    // mantener el loader visible brevemente para transición suave
-    if (pathname === '/checkout/resultado' && shouldShow) {
-      // Mantener visible por un momento para que la página se cargue completamente
+    if (pathname === "/checkout/resultado" && shouldShow) {
       const timer = setTimeout(() => {
         setShouldShow(false);
       }, 500);
       return () => clearTimeout(timer);
     }
 
-    // Si no está creando, ocultar después de un breve delay
-    if (!isCreatingOrder && shouldShow) {
+    if (!isBlocking && shouldShow) {
       const timer = setTimeout(() => {
         setShouldShow(false);
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [isCreatingOrder, pathname, shouldShow]);
+  }, [isBlocking, isCreatingOrder, isRedirectingToPayment, pathname, shouldShow]);
 
   return (
     <AnimatePresence>
@@ -64,13 +78,13 @@ export function CheckoutTransitionLoader() {
                 className="text-lg font-semibold"
                 style={{ color: "var(--foreground)" }}
               >
-                {pathname === '/checkout/resultado' ? 'Cargando resultado...' : 'Procesando tu pedido...'}
+                {getLoaderMessage(pathname, isRedirectingToPayment)}
               </p>
               <p
                 className="text-sm"
                 style={{ color: "var(--foreground)" }}
               >
-                Por favor espera un momento
+                {getLoaderSubmessage(isRedirectingToPayment)}
               </p>
             </div>
           </div>
@@ -79,4 +93,3 @@ export function CheckoutTransitionLoader() {
     </AnimatePresence>
   );
 }
-

@@ -5,6 +5,7 @@ import { useCheckoutStore } from "./useCheckoutStore";
 import { useCartStore } from "@/app/stores/cartStore";
 import { useCotizarEnvio } from "./useCotizarEnvio";
 import { toast } from "sonner";
+import { getCartFingerprint } from "@/app/utils/mapCartItemsToCheckout";
 
 /**
  * Calcula el costo de envío en Step 4 cuando hay código postal en el store.
@@ -13,9 +14,11 @@ import { toast } from "sonner";
 export function useCostoEnvioEnStep4() {
   const { codigoPostal, tipoEntrega, costoEnvio, setCostoEnvio } = useCheckoutStore();
   const { items } = useCartStore();
+  const cartFingerprint = getCartFingerprint(items);
   const cotizarEnvioMutation = useCotizarEnvio();
   const lastCalculatedCPRef = useRef<string | null>(null);
   const prevCPFromStoreRef = useRef<string | null>(codigoPostal);
+  const prevCartFingerprintRef = useRef<string>(cartFingerprint);
   const [isCalculando, setIsCalculando] = useState(false);
   const isAndreaniManualMode = process.env.NEXT_PUBLIC_ANDREANI_MODO_MANUAL === 'true';
 
@@ -32,6 +35,14 @@ export function useCostoEnvioEnStep4() {
 
     const cpValid = codigoPostal && /^[0-9]{4}$/.test(codigoPostal);
     if (!cpValid || !items.length) return;
+
+    const cartChanged = cartFingerprint !== prevCartFingerprintRef.current;
+    prevCartFingerprintRef.current = cartFingerprint;
+
+    if (cartChanged && costoEnvio != null) {
+      setCostoEnvio(null);
+      lastCalculatedCPRef.current = null;
+    }
 
     const cpChanged = codigoPostal !== prevCPFromStoreRef.current;
     prevCPFromStoreRef.current = codigoPostal;
@@ -75,7 +86,7 @@ export function useCostoEnvioEnStep4() {
         });
       })
       .finally(() => setIsCalculando(false));
-  }, [codigoPostal, tipoEntrega, items.length, setCostoEnvio, cotizarEnvioMutation.isPending, isAndreaniManualMode]);
+  }, [codigoPostal, tipoEntrega, cartFingerprint, items.length, costoEnvio, setCostoEnvio, cotizarEnvioMutation.isPending, isAndreaniManualMode]);
 
   const isCalculandoEnvio =
     !isAndreaniManualMode &&

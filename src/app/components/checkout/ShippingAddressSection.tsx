@@ -4,6 +4,7 @@ import { Controller, UseFormRegister, Control, FieldErrors } from "react-hook-fo
 import { ContactFormData } from "@/app/schemas/contactForm.schema";
 import Input from "@/app/components/ui/Input";
 import Select, { SelectOption } from "@/app/components/ui/Select";
+import { CheckoutFormSection } from "@/app/components/checkout/CheckoutFormSection";
 
 interface ShippingAddressSectionProps {
   register: UseFormRegister<ContactFormData>;
@@ -21,11 +22,7 @@ export function ShippingAddressSection({
   provinciaOptions,
 }: ShippingAddressSectionProps) {
   return (
-    <div className="space-y-4 sm:space-y-5 pt-4 border-t">
-      <h3 className="text-base sm:text-lg font-semibold text-foreground border-b pb-2">
-        Dirección de envío
-      </h3>
-
+    <CheckoutFormSection title="Dirección de envío">
       <Input
         label="Dirección (calle y número)"
         {...register("address")}
@@ -93,7 +90,7 @@ export function ShippingAddressSection({
       <input type="hidden" {...register("direccion_formateada")} />
       <input type="hidden" {...register("latitud", { valueAsNumber: true })} />
       <input type="hidden" {...register("longitud", { valueAsNumber: true })} />
-    </div>
+    </CheckoutFormSection>
   );
 }
 

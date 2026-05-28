@@ -62,7 +62,6 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
             id_iva: producto.iva?.id_iva ?? undefined,
             estado: (producto.stock ?? 0) <= 0 ? 2 : (producto.estado ?? 1),
             publicado: producto.publicado ?? false,
-            cuotas_habilitadas: producto.cuotas_habilitadas === true ? 'si' : producto.cuotas_habilitadas === false ? 'no' : 'regla',
         },
     });
 
@@ -161,7 +160,6 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
             codi_grupo: rawData.codi_grupo,
             codi_impuesto: rawData.codi_impuesto,
             publicado: rawData.publicado,
-            cuotas_habilitadas: rawData.cuotas_habilitadas === 'si' ? true : rawData.cuotas_habilitadas === 'no' ? false : null,
             id_cat: rawData.id_cat ? Number(rawData.id_cat) : undefined,
             id_marca: rawData.id_marca ? Number(rawData.id_marca) : undefined,
             id_iva: rawData.id_iva ? Number(rawData.id_iva) : undefined,

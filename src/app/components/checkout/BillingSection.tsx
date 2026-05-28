@@ -5,6 +5,7 @@ import { Controller, UseFormRegister, UseFormWatch, Control, FieldErrors } from 
 import { ContactFormData } from "../../schemas/contactForm.schema";
 import Input from "@/app/components/ui/Input";
 import Select, { SelectOption } from "@/app/components/ui/Select";
+import { CheckoutFormSection } from "@/app/components/checkout/CheckoutFormSection";
 
 interface BillingSectionProps {
   register: UseFormRegister<ContactFormData>;
@@ -34,9 +35,7 @@ export function BillingSection({
   provinciaOptions,
 }: BillingSectionProps) {
   return (
-    <div className="space-y-5 pt-4 border-t">
-      <h3 className="text-lg font-semibold text-foreground border-b pb-2">Facturación</h3>
-
+    <CheckoutFormSection title="Facturación">
       <div className="space-y-3">
         <label className="flex items-center gap-3 cursor-pointer">
           <input
@@ -199,7 +198,7 @@ export function BillingSection({
           </motion.div>
         )}
       </div>
-    </div>
+    </CheckoutFormSection>
   );
 }
 
