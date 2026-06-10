@@ -11,6 +11,7 @@ import { PaginationControls } from "./PaginationControls";
 import { useProductFilters } from "../../hooks/productos/useProductFilters";
 import { useProductos } from "../../hooks/productos/useProductos";
 import type { IProductoFilters } from "@/app/types/producto.type";
+import SearchEmptyState from "@/app/components/search/SearchEmptyState";
 
 // Memoizar FiltersSidebar para evitar re-renders innecesarios
 const MemoizedFiltersSidebar = memo(FiltersSidebar);
@@ -24,7 +25,15 @@ function ProductsPageContent() {
   const searchParams = useSearchParams();
 
   // Obtener filtros y paginación desde URL usando el hook
-  const { backendFilters, filters, page, limit, setPriceRange } = useProductFilters();
+  const {
+    backendFilters,
+    filters,
+    page,
+    limit,
+    setPriceRange,
+    setSearch,
+    clearFilters,
+  } = useProductFilters();
   
   const TIENDA_PAGE_SIZE = 21;
   const TIENDA_MIN_PAGE_SIZE = 12;
@@ -214,11 +223,17 @@ function ProductsPageContent() {
                 itemsPerPage={limit} 
               />
             ) : productosToShow.length === 0 ? (
-              <div className="text-center py-20 bg-gray-100">
-                <p className="text-lg text-foreground/60">
-                  No se encontraron productos con los filtros aplicados
-                </p>
-              </div>
+              <SearchEmptyState
+                variant="page"
+                reason={filters.search ? "search" : "filters"}
+                searchQuery={filters.search}
+                onClearSearch={
+                  filters.search
+                    ? () => setSearch("")
+                    : undefined
+                }
+                onViewCatalog={clearFilters}
+              />
             ) : (
               <>
                 <ProductsGrid 

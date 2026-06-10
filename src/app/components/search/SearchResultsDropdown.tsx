@@ -4,6 +4,8 @@ import Link from "next/link";
 import type { IProductos } from "@/app/types/producto.type";
 import ProductImage from "@/app/components/shared/ProductImage";
 import { Package } from "lucide-react";
+import SearchEmptyState from "./SearchEmptyState";
+import { buildCatalogSearchUrl } from "@/app/utils/catalog-search.utils";
 
 interface SearchProductItemProps {
   producto: IProductos;
@@ -60,7 +62,9 @@ interface SearchResultsDropdownProps {
   searchQuery: string;
   maxResults?: number;
   onClose?: () => void;
+  onSubmitSearch?: (query: string) => void;
   isLoading?: boolean;
+  resultsListId?: string;
 }
 
 export default function SearchResultsDropdown({
@@ -69,23 +73,33 @@ export default function SearchResultsDropdown({
   searchQuery,
   maxResults = 6,
   onClose,
+  onSubmitSearch,
   isLoading = false,
+  resultsListId,
 }: SearchResultsDropdownProps) {
   if (!isVisible) {
     return null;
   }
 
   const displayResults = results.slice(0, maxResults);
-  const hasMore = results.length > maxResults;
+  const hasResults = results.length > 0;
+  const catalogSearchHref = buildCatalogSearchUrl(searchQuery);
 
   return (
-    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-[60] max-h-[500px] overflow-hidden flex flex-col">
+    <div
+      id={resultsListId}
+      role="listbox"
+      aria-label={`Resultados de búsqueda para ${searchQuery}`}
+      className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-[60] max-h-[500px] overflow-hidden flex flex-col"
+    >
       {/* Header con contador o estado de carga */}
-      <div className="px-4 py-2 border-b border-gray-200 bg-gray-50">
+      <div className="px-4 py-2 border-b border-gray-200 bg-gray-50" aria-live="polite">
         <p className="text-xs text-gray-600">
           {isLoading
-            ? `Buscando...`
-            : `${results.length} resultado${results.length !== 1 ? 's' : ''} para "${searchQuery}"`}
+            ? `Buscando "${searchQuery}"...`
+            : hasResults
+              ? `${results.length} resultado${results.length !== 1 ? "s" : ""} para "${searchQuery}"`
+              : `Sin coincidencias para "${searchQuery}"`}
         </p>
       </div>
 
@@ -93,34 +107,40 @@ export default function SearchResultsDropdown({
       <div className="overflow-y-auto flex-1 p-2">
         {isLoading ? (
           <div className="py-6 text-center text-sm text-gray-500">Cargando productos...</div>
-        ) : results.length === 0 ? (
-          <div className="py-6 text-center text-sm text-gray-500">No hay resultados para "{searchQuery}"</div>
+        ) : !hasResults ? (
+          <SearchEmptyState
+            variant="dropdown"
+            reason="search"
+            searchQuery={searchQuery}
+            onClose={onClose}
+            onSearchInCatalog={() => onSubmitSearch?.(searchQuery)}
+          />
         ) : (
-        <div className="space-y-1">
-          {displayResults.map((producto) => (
-            <SearchProductItem
-              key={producto.id_prod}
-              producto={producto}
-              onClick={onClose}
-            />
-          ))}
-        </div>
+          <div className="space-y-1">
+            {displayResults.map((producto) => (
+              <SearchProductItem
+                key={producto.id_prod}
+                producto={producto}
+                onClick={onClose}
+              />
+            ))}
+          </div>
         )}
       </div>
 
-      {/* Footer si hay más resultados */}
-      {hasMore && (
+      {/* Footer: ver en catálogo cuando hay resultados */}
+      {hasResults && !isLoading && (
         <div className="px-4 py-2 border-t border-gray-200 bg-gray-50 text-center">
           <Link
-            href={`/tienda/productos?search=${encodeURIComponent(searchQuery)}`}
+            href={catalogSearchHref}
             onClick={onClose}
             className="text-sm text-principal hover:text-principal/80 font-medium"
           >
-            Ver todos los resultados ({results.length})
+            Ver todos en el catálogo
+            {results.length > maxResults ? ` (${results.length})` : ""}
           </Link>
         </div>
       )}
     </div>
   );
 }
-

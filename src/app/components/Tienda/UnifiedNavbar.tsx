@@ -8,11 +8,11 @@ import { MENU_LINKS } from "@/app/components/navbar/navbar.constants";
 import { useNavbarScroll } from "@/app/components/navbar/hooks/useNavbarScroll";
 import { useNavbarAuth } from "@/app/components/navbar/hooks/useNavbarAuth";
 import { useNavbarSearch } from "@/app/components/navbar/hooks/useNavbarSearch";
+import { useSearchSubmit } from "@/app/components/navbar/hooks/useSearchSubmit";
 import { useNavbarLocation } from "@/app/components/navbar/hooks/useNavbarLocation";
 import { useNavbarMobileMenu } from "@/app/components/navbar/hooks/useNavbarMobileMenu";
 import { useHashScrollOnHome } from "@/app/components/navbar/hooks/useHashScrollOnHome";
 import { useNavbarCart } from "@/app/components/navbar/hooks/useNavbarCart";
-import { useProductos } from "@/app/hooks/productos/useProductos";
 import NavbarHeader from "@/app/components/navbar/desktop/NavbarHeader";
 import NavbarLogo from "@/app/components/navbar/desktop/NavbarLogo";
 import NavbarSearchBar from "@/app/components/navbar/desktop/NavbarSearchBar";
@@ -28,6 +28,7 @@ import MobileFiltersMenu from "@/app/components/navbar/mobile/MobileFiltersMenu"
 import MobileMenuFooter from "@/app/components/navbar/mobile/MobileMenuFooter";
 import MobileLocationButton from "@/app/components/navbar/mobile/MobileLocationButton";
 import NavbarSearchContainer from "@/app/components/search/NavbarSearchContainer";
+import { NavbarSearchUrlSync } from "@/app/components/navbar/hooks/NavbarSearchUrlSync";
 
 export default function UnifiedNavbar() {
   const pathname = usePathname();
@@ -53,18 +54,13 @@ export default function UnifiedNavbar() {
     handleLocationSelect,
   } = useNavbarLocation();
   const { isOpen: isMobileMenuOpen, toggle: toggleMobileMenu, close: closeMobileMenu } = useNavbarMobileMenu();
+  const { submitSearch } = useSearchSubmit({
+    onAfterNavigate: closeMobileMenu,
+  });
   const { cantidadItems, openCart, closeCart, isCartOpen } = useNavbarCart();
   const [mobileMenuView, setMobileMenuView] = useState<"menu" | "filters">("menu");
 
   useHashScrollOnHome();
-
-  // Cargar productos para la búsqueda solo cuando el usuario usa el buscador (evita /productos?limit=100 en cada página)
-  const searchActive = (searchQuery?.trim().length ?? 0) >= 1;
-  const { productos, isLoading: isLoadingProductos } = useProductos({
-    filters: { limit: 200 },
-    enabled: searchActive,
-    useTiendaEndpoint: true,
-  });
 
   const handleLocationClick = () => {
     openLocationModal();
@@ -83,18 +79,27 @@ export default function UnifiedNavbar() {
 
   return (
     <>
+      <Suspense fallback={null}>
+        <NavbarSearchUrlSync onSearchFromUrl={setSearchQuery} />
+      </Suspense>
       <header className="fixed top-10 left-0 right-0 z-50">
         {/* Parte Superior: Logo, Toggle, User, Cart */}
         <NavbarHeader shouldShowBackground={shouldShowBackground}>
           <NavbarLogo pathname={pathname || ''} />
           <div className="hidden md:block flex-1">
             <NavbarSearchContainer
-              products={productos || []}
               searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              isLoading={isLoadingProductos}
+              onSubmitSearch={submitSearch}
             >
-              <NavbarSearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+              {({ onSubmitSearch, isDropdownVisible, resultsListId }) => (
+                <NavbarSearchBar
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                  onSubmitSearch={onSubmitSearch}
+                  isDropdownVisible={isDropdownVisible}
+                  resultsListId={resultsListId}
+                />
+              )}
             </NavbarSearchContainer>
           </div>
           <NavbarUserActions
@@ -167,12 +172,18 @@ export default function UnifiedNavbar() {
         />
 
         <NavbarSearchContainer
-          products={productos || []}
           searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          isLoading={isLoadingProductos}
+          onSubmitSearch={submitSearch}
         >
-          <MobileMenuSearch searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+          {({ onSubmitSearch, isDropdownVisible, resultsListId }) => (
+            <MobileMenuSearch
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onSubmitSearch={onSubmitSearch}
+              isDropdownVisible={isDropdownVisible}
+              resultsListId={resultsListId}
+            />
+          )}
         </NavbarSearchContainer>
 
         <MobileMenuLinks

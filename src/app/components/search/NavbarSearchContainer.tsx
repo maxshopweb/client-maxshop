@@ -1,47 +1,51 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import type { IProductos } from "@/app/types/producto.type";
+import { useState, useEffect, useRef, useId } from "react";
 import { useDebouncedValue } from "./hooks/useDebouncedValue";
-import { useProductSearch } from "./hooks/useProductSearch";
+import { useProductSearchSuggestions } from "./hooks/useProductSearchSuggestions";
 import SearchResultsDropdown from "./SearchResultsDropdown";
+import { isSearchQueryActive } from "@/app/utils/catalog-search.utils";
 
 interface NavbarSearchContainerProps {
-  products: IProductos[];
   searchQuery: string;
-  onSearchChange: (value: string) => void;
-  children: React.ReactNode;
+  onSubmitSearch?: (query: string) => void;
+  children: (props: {
+    onSubmitSearch: (query: string) => void;
+    isDropdownVisible: boolean;
+    resultsListId: string;
+  }) => React.ReactNode;
   maxResults?: number;
   debounceDelay?: number;
-  isLoading?: boolean;
 }
 
 export default function NavbarSearchContainer({
-  products,
   searchQuery,
-  onSearchChange,
+  onSubmitSearch,
   children,
   maxResults = 6,
   debounceDelay = 300,
-  isLoading = false,
 }: NavbarSearchContainerProps) {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const resultsListId = useId();
   const debouncedQuery = useDebouncedValue(searchQuery, debounceDelay);
 
-  const { results, hasResults } = useProductSearch({
+  const { results, isLoading, trimmedQuery } = useProductSearchSuggestions({
     query: debouncedQuery,
-    products,
+    enabled: isSearchQueryActive(searchQuery),
   });
 
-  // Mostrar dropdown cuando hay query y (hay resultados o está cargando)
+  const isTyping = searchQuery.trim() !== debouncedQuery.trim();
+  const showLoading = isLoading || isTyping;
+
+  // Mostrar dropdown cuando hay query activa (con o sin resultados)
   useEffect(() => {
-    if (debouncedQuery.trim().length > 0 && (hasResults || isLoading)) {
+    if (isSearchQueryActive(searchQuery)) {
       setIsDropdownVisible(true);
-    } else if (debouncedQuery.trim().length === 0 || (!hasResults && !isLoading)) {
+    } else {
       setIsDropdownVisible(false);
     }
-  }, [debouncedQuery, hasResults, isLoading]);
+  }, [searchQuery]);
 
   // Cerrar al hacer click fuera
   useEffect(() => {
@@ -64,16 +68,27 @@ export default function NavbarSearchContainer({
     setIsDropdownVisible(false);
   };
 
+  const handleSubmitSearch = (query: string) => {
+    onSubmitSearch?.(query);
+    handleClose();
+  };
+
   return (
     <div ref={containerRef} className="relative">
-      {children}
+      {children({
+        onSubmitSearch: handleSubmitSearch,
+        isDropdownVisible,
+        resultsListId,
+      })}
       <SearchResultsDropdown
         results={results}
         isVisible={isDropdownVisible}
-        searchQuery={debouncedQuery}
+        searchQuery={trimmedQuery || searchQuery.trim()}
         maxResults={maxResults}
         onClose={handleClose}
-        isLoading={isLoading}
+        onSubmitSearch={handleSubmitSearch}
+        isLoading={showLoading}
+        resultsListId={resultsListId}
       />
     </div>
   );
