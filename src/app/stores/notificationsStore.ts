@@ -9,7 +9,7 @@ export interface SaleNotification {
   id_venta: number;
   /** Código de operación para mostrar (ej. MAX-00000001). Si no viene, el UI lo deriva de id_venta. */
   cod_interno?: string | null;
-  estado_pago: 'pendiente' | 'aprobado' | 'cancelado';
+  estado_pago: 'pendiente' | 'aprobado' | 'cancelado' | 'rechazado';
   fecha: string;
   created_at: string;
   isRead: boolean;
@@ -24,11 +24,21 @@ export type AddNotificationOptions = {
   silent?: boolean;
 };
 
+export interface MpPaymentUpdateEvent {
+  id_venta: number;
+  payment_id: string;
+  status_mp: string;
+  estado_pago: string;
+  fecha: string;
+}
+
 interface NotificationsState {
   notifications: SaleNotification[];
   hasNewSales: boolean;
   lastSaleEvent: SaleNotification | null;
+  lastMpPaymentUpdate: MpPaymentUpdateEvent | null;
   addNotification: (notification: Omit<SaleNotification, 'isRead' | 'created_at'>, options?: AddNotificationOptions) => void;
+  notifyMpPaymentUpdate: (update: MpPaymentUpdateEvent) => void;
   markAsRead: (id_venta: number) => void;
   markAllAsRead: () => void;
   removeNotification: (id_venta: number) => void;
@@ -40,7 +50,25 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
   notifications: [],
   hasNewSales: false,
   lastSaleEvent: null,
+  lastMpPaymentUpdate: null,
   
+  notifyMpPaymentUpdate: (update) => {
+    set((state) => {
+      const estado = update.estado_pago as SaleNotification['estado_pago'];
+      const updatedNotifications = state.notifications.map((n) =>
+        n.id_venta === update.id_venta
+          ? { ...n, estado_pago: estado, isRead: false }
+          : n
+      );
+      const hadNotification = state.notifications.some((n) => n.id_venta === update.id_venta);
+      return {
+        notifications: hadNotification ? updatedNotifications : state.notifications,
+        hasNewSales: true,
+        lastMpPaymentUpdate: update,
+      };
+    });
+  },
+
   addNotification: (notification, options) => {
     const silent = options?.silent === true;
     const newNotification: SaleNotification = {
@@ -100,6 +128,7 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
       notifications: [],
       hasNewSales: false,
       lastSaleEvent: null,
+      lastMpPaymentUpdate: null,
     });
   },
   

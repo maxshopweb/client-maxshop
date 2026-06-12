@@ -330,6 +330,43 @@ class VentasService {
 
     return response.data.data;
   }
+
+  /**
+   * Sincroniza el estado de un pago MP tras el retorno de checkout (back_url).
+   */
+  async syncMercadoPagoPayment(payload: {
+    payment_id: string;
+    id_venta?: string | number;
+    external_reference?: string;
+  }): Promise<{
+    processResult: {
+      success: boolean;
+      paymentId: string;
+      action: string;
+      ventaId?: number;
+      error?: string;
+    };
+    venta: IVenta | null;
+  }> {
+    const response = await axiosInstance.post<
+      IApiResponse<{
+        processResult: {
+          success: boolean;
+          paymentId: string;
+          action: string;
+          ventaId?: number;
+          error?: string;
+        };
+        venta: IVenta | null;
+      }>
+    >('/ventas/checkout/mercadopago/sync', payload);
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.error || 'Error al sincronizar pago con Mercado Pago');
+    }
+
+    return response.data.data;
+  }
 }
 
 export const ventasService = new VentasService();

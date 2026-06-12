@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCheckoutResult } from "@/app/hooks/checkout/useCheckoutResult";
+import { useCheckoutMpSync } from "@/app/hooks/checkout/useCheckoutMpSync";
 import { useCheckoutStore } from "@/app/hooks/checkout/useCheckoutStore";
 import { useCartStore } from "@/app/stores/cartStore";
 import { useAuth } from "@/app/context/AuthContext";
@@ -25,32 +26,42 @@ function CheckoutResultContent({ initialConfig }: { initialConfig: IConfigTienda
   const router = useRouter();
   const searchParams = useSearchParams();
   const result = useCheckoutResult();
+  const mpSync = useCheckoutMpSync({
+    payment_id: result.payment_id,
+    id_venta: result.id_venta,
+    external_reference: result.external_reference,
+  });
   const { clearCart } = useCartStore();
   const { resetCheckout, setIsCreatingOrder, setIsRedirectingToPayment, shippingData } = useCheckoutStore();
   const { logout, isGuest, loading: authLoading } = useAuth();
   const isRetiroFlowRef = useRef(shippingData?.tipoEntrega === "retiro");
 
   const resultWithBank = useMemo((): ICheckoutResult => {
-    if (result.status === "transferencia") {
-      const db = initialConfig?.datos_bancarios;
-      return {
-        ...result,
-        datos_bancarios: db
-          ? {
-              banco: db.banco,
-              tipo_cuenta: db.tipo_cuenta,
-              numero_cuenta: db.numero_cuenta,
-              cbu: db.cbu ?? undefined,
-              alias: db.alias ?? undefined,
-              titular: db.titular,
-              cuit: db.cuit ?? undefined,
-              instrucciones: db.instrucciones ?? undefined,
-            }
-          : undefined,
-      };
+    const base: ICheckoutResult =
+      result.status === "transferencia"
+        ? {
+            ...result,
+            status: result.status,
+            datos_bancarios: initialConfig?.datos_bancarios
+              ? {
+                  banco: initialConfig.datos_bancarios.banco,
+                  tipo_cuenta: initialConfig.datos_bancarios.tipo_cuenta,
+                  numero_cuenta: initialConfig.datos_bancarios.numero_cuenta,
+                  cbu: initialConfig.datos_bancarios.cbu ?? undefined,
+                  alias: initialConfig.datos_bancarios.alias ?? undefined,
+                  titular: initialConfig.datos_bancarios.titular,
+                  cuit: initialConfig.datos_bancarios.cuit ?? undefined,
+                  instrucciones: initialConfig.datos_bancarios.instrucciones ?? undefined,
+                }
+              : undefined,
+          }
+        : result;
+
+    if (mpSync.syncedStatus) {
+      return { ...base, status: mpSync.syncedStatus };
     }
-    return result;
-  }, [result, initialConfig?.datos_bancarios]);
+    return base;
+  }, [result, initialConfig?.datos_bancarios, mpSync.syncedStatus]);
 
   const showLanding = hasCheckoutLandingContext(result);
 

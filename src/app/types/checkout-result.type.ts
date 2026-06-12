@@ -34,6 +34,7 @@ export interface CheckoutStateDisplayProps {
 export interface ICheckoutResult extends CheckoutStateDisplayProps {
   status: CheckoutResultStatus;
   metodo_pago?: string;
+  external_reference?: string;
   // Para transferencia/efectivo
   datos_bancarios?: IBankDetails;
 }

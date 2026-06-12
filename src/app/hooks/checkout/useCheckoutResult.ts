@@ -58,6 +58,7 @@ export function useCheckoutResult(): ICheckoutResult {
       cod_interno: cod_interno || undefined,
       metodo_pago: metodo_pago || metodo || undefined,
       payment_id: payment_id || undefined,
+      external_reference: external_reference || undefined,
     };
   }, [searchParams]);
 }

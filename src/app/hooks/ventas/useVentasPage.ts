@@ -27,7 +27,7 @@ export function useVentasPage() {
   const highlightId = searchParams.get('highlight');
   const { filters } = useVentasFilters();
   const { ventas, pagination, refetch, isFetching } = useVentas({ filters });
-  const { clearNotifications } = useNotificationsStore();
+  const { clearNotifications, lastMpPaymentUpdate } = useNotificationsStore();
   const { updateEstadoPago, updateEstadoPagoAsync, isUpdating: isUpdatingEstadoPago } = useUpdateEstadoPago();
   const { aprobarDesdeVencido, aprobarDesdeVencidoAsync, isAprobando } = useAprobarDesdeVencido();
 
@@ -35,6 +35,13 @@ export function useVentasPage() {
   useEffect(() => {
     clearNotifications();
   }, [clearNotifications]);
+
+  // Refrescar listado cuando llega actualización de pago MP por WebSocket
+  useEffect(() => {
+    if (lastMpPaymentUpdate) {
+      refetch();
+    }
+  }, [lastMpPaymentUpdate, refetch]);
 
   // Funciones para abrir modales
   const openCreateModal = useCallback(() => {

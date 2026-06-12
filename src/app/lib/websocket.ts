@@ -15,7 +15,7 @@ import { refreshFirebaseToken, isTokenNearExpiry } from '../utils/tokenRefresh';
 /** Payload que envía el backend en el evento SALE_CREATED */
 interface SaleCreatedPayload {
   id_venta: number;
-  estado_pago: 'pendiente' | 'aprobado' | 'cancelado';
+  estado_pago: 'pendiente' | 'aprobado' | 'cancelado' | 'rechazado';
   fecha: string;
   venta?: {
     id_venta: number;
@@ -28,11 +28,19 @@ interface SaleCreatedPayload {
   } | null;
 }
 
+interface MpPaymentUpdatedPayload {
+  id_venta: number;
+  payment_id: string;
+  status_mp: string;
+  estado_pago: string;
+  fecha: string;
+}
+
 interface WebSocketMessage {
   type: string;
   message?: string;
   event?: string;
-  payload?: SaleCreatedPayload;
+  payload?: SaleCreatedPayload | MpPaymentUpdatedPayload;
 }
 
 class WebSocketClient {
@@ -236,8 +244,8 @@ class WebSocketClient {
 
         case 'event':
           if (message.event === 'SALE_CREATED' && message.payload) {
+            const p = message.payload as SaleCreatedPayload;
             const { addNotification } = useNotificationsStore.getState();
-            const p = message.payload;
             const v = p.venta;
             const cliente = v?.cliente?.usuario
               ? [v.cliente.usuario.nombre, v.cliente.usuario.apellido].filter(Boolean).join(' ').trim() || v.cliente.usuario.email
@@ -254,6 +262,9 @@ class WebSocketClient {
               producto,
               total: v?.total_neto ?? undefined,
             });
+          } else if (message.event === 'MP_PAYMENT_UPDATED' && message.payload) {
+            const p = message.payload as MpPaymentUpdatedPayload;
+            useNotificationsStore.getState().notifyMpPaymentUpdate(p);
           }
           break;
 
