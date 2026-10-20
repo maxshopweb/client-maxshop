@@ -396,7 +396,12 @@ export const getProductosColumns = (
                     mostrarTachado && ref != null && ref > 0 && precio != null
                         ? Math.round((1 - precio / ref) * 100)
                         : 0;
-                const esListaE = producto.lista_precio_activa === 'E' || producto.lista_activa?.codi_lista === 'E';
+                const listaActiva = producto.lista_activa;
+                const codiLista = (listaActiva?.codi_lista || producto.lista_precio_activa || '').toUpperCase();
+                const mostrarNombreLista = Boolean(codiLista) && codiLista !== 'V';
+                const nombreLista = listaActiva?.nombre
+                    ? `${listaActiva.nombre} (${codiLista})`
+                    : (mostrarNombreLista ? `Lista ${codiLista}` : null);
                 return (
                     <div className="flex flex-col gap-0.5">
                         <div className="flex items-baseline gap-1.5 flex-wrap">
@@ -416,8 +421,8 @@ export const getProductosColumns = (
                                 </>
                             )}
                         </div>
-                        {esListaE && (
-                            <span className="text-xs text-muted-foreground">Lista E — Precio especial</span>
+                        {mostrarNombreLista && nombreLista && (
+                            <span className="text-xs text-muted-foreground">{nombreLista}</span>
                         )}
                     </div>
                 );

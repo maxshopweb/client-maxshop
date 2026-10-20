@@ -39,10 +39,11 @@ export interface ICrearProductoContenido {
     situacionesFiscales: ISituacionFiscal[];
 }
 
-/** Info de la lista activa solo para UI (oferta/campaña). Nombre de lista no se expone. */
+/** Info de la lista activa para UI (oferta/campaña y nombre ERP). */
 export interface IListaActivaInfo {
     codi_lista: string;
     tipo_lista: string | null;
+    nombre?: string | null;
     es_oferta?: boolean;
     es_campanya?: boolean;
 }
@@ -63,7 +64,7 @@ export interface IProductos {
     precio_especial?: number | null;
     precio_pvp?: number | null;
     precio_campanya?: number | null;
-    /** Precio cuando lista_precio_activa = 'E'. No se sobreescribe por sync. */
+    /** Precio de lista E (ERP). Se actualiza por sync salvo modo manual. */
     precio_manual?: number | null;
     /** Bonificación porcentual por defecto del producto (0-100). */
     bonificacion_porcentaje?: number | null;
@@ -137,7 +138,7 @@ export interface IProductoFilters {
     destacado?: boolean;
     publicado?: boolean;
     financiacion?: boolean;
-    /** Tienda: lista Especial (O) o campaña (Q) */
+    /** Tienda: lista especial (O, E) o campaña (Q) */
     oferta?: boolean;
 
     // Filtro por stock

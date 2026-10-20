@@ -75,23 +75,36 @@ export function truncarDescripcion(desc: string | null | undefined, maxLength: n
  */
 export function getPrecioSinImpuestos(producto: IProductos): number | null {
     const porcentajeIva = getPorcentajeIva(producto);
+    const pick = (value: unknown): number | null => {
+        if (value == null) return null;
+        const numeric = Number(value);
+        return !Number.isNaN(numeric) && numeric > 0 ? numeric : null;
+    };
+
+    const fromApi = pick(producto.precio_sin_iva);
+    if (fromApi != null) return fromApi;
+
+    const lista = (producto.lista_precio_activa || producto.lista_activa?.codi_lista || 'V').toUpperCase();
+    const byLista =
+        lista === 'E' ? pick(producto.precio_manual) :
+        lista === 'O' ? pick(producto.precio_especial) :
+        lista === 'P' ? pick(producto.precio_pvp) :
+        lista === 'Q' ? pick(producto.precio_campanya) :
+        pick(producto.precio_venta);
+    if (byLista != null) return byLista;
 
     const candidates = [
-        producto.precio_sin_iva,
         producto.precio_venta,
         producto.precio_especial,
         producto.precio_pvp,
         producto.precio_campanya,
+        producto.precio_manual,
         producto.precio_evento,
     ];
 
     for (const value of candidates) {
-        if (value != null) {
-            const numeric = Number(value);
-            if (!Number.isNaN(numeric) && numeric > 0) {
-                return numeric;
-            }
-        }
+        const numeric = pick(value);
+        if (numeric != null) return numeric;
     }
 
     if (producto.precio != null && porcentajeIva != null) {
@@ -156,6 +169,7 @@ function getPorcentajeIva(producto: IProductos): number | null {
     if (producto.iva_monto != null) {
         const base =
             producto.precio_sin_iva ??
+            producto.precio_manual ??
             producto.precio_venta ??
             producto.precio_especial ??
             producto.precio_pvp ??

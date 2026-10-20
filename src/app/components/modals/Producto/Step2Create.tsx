@@ -17,6 +17,7 @@ const LISTA_TO_FIELD: Record<string, keyof CreateProductoData> = {
   O: 'precio_especial',
   P: 'precio_pvp',
   Q: 'precio_campanya',
+  E: 'precio_manual',
 } as const;
 
 interface StepTwoProps {
@@ -64,12 +65,9 @@ export function StepTwoPricing({ form }: StepTwoProps) {
   const { register, watch, setValue, formState: { errors } } = form;
   const { listasPrecio, ivas, isLoading: loadingContenido } = useContenidoCrearProducto();
 
-  // Listas que tienen precio en el producto (V, O, P, Q) — inputs por lista
-  const listasConPrecio = listasPrecio.filter((l) => ['V', 'O', 'P', 'Q'].includes(l.codi_lista));
-  // Listas para el selector "con la que se publica" (incluye E = Precio especial)
+  const listasConPrecio = listasPrecio.filter((l) => ['V', 'O', 'P', 'Q', 'E'].includes(l.codi_lista));
   const listasParaPublicar = listasPrecio.filter((l) => ['V', 'O', 'P', 'Q', 'E'].includes(l.codi_lista));
   const listaActiva = watch('lista_precio_activa');
-  const esListaE = (listaActiva === 'E' || listaActiva === 'e');
   const codiImpuesto = watch('codi_impuesto') || CODI_IVA_DEFAULT;
   const precioVenta = watch('precio_venta');
   const precioEspecial = watch('precio_especial');
@@ -147,7 +145,7 @@ export function StepTwoPricing({ form }: StepTwoProps) {
           <span>Lista con la que se publica el producto</span>
         </div>
         <p className="text-sm text-muted-foreground">
-          Elegí qué precio mostrar en tienda (por defecto: Venta). Si elegís &quot;Precio especial (E)&quot;, el precio no se sobreescribe por sincronización.
+          Elegí qué precio mostrar en tienda. Los precios de cada lista (incluida E) se actualizan con la sincronización, salvo que el producto esté en modo manual.
         </p>
         <Select
           label="Lista pública"
@@ -155,7 +153,7 @@ export function StepTwoPricing({ form }: StepTwoProps) {
             { value: '', label: 'Seleccionar' },
             ...listasParaPublicar.map((l: IListaPrecio) => ({
               value: l.codi_lista,
-              label: l.nombre || (l.codi_lista === 'E' ? 'Precio especial (E)' : `Lista ${l.codi_lista}`),
+              label: l.nombre ? `${l.nombre} (${l.codi_lista})` : `Lista ${l.codi_lista}`,
             })),
           ]}
           placeholder="Ej: Venta"
@@ -164,23 +162,8 @@ export function StepTwoPricing({ form }: StepTwoProps) {
           onChange={(value) => {
             const v = (value as string) || undefined;
             setValue('lista_precio_activa', v, { shouldDirty: true });
-            if (v !== 'E' && v !== 'e') setValue('precio_manual', undefined, { shouldDirty: true });
           }}
         />
-        {esListaE && (
-          <div className="pt-2">
-            <Input
-              label="Precio manual (lista E) — no se sobreescribe por sincronización"
-              type="number"
-              step="0.01"
-              min="0"
-              placeholder="0.00"
-              icon={DollarSign}
-              {...register('precio_manual', optionalNumberOptions)}
-              error={errors.precio_manual?.message as string | undefined}
-            />
-          </div>
-        )}
       </div>
 
       {/* Bonificación a aplicar */}

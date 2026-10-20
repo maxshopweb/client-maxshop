@@ -137,7 +137,7 @@ export function EditProductoModal({ producto, onClose }: EditProductoModalProps)
             precio_especial: rawData.precio_especial ?? undefined,
             precio_pvp: rawData.precio_pvp ?? undefined,
             precio_campanya: rawData.precio_campanya ?? undefined,
-            precio_manual: (rawData.lista_precio_activa === 'E' || rawData.lista_precio_activa === 'e') ? (rawData.precio_manual ?? undefined) : undefined,
+            precio_manual: rawData.precio_manual ?? undefined,
             lista_precio_activa: rawData.lista_precio_activa || undefined,
             bonificacion_porcentaje: rawData.bonificacion_porcentaje ?? undefined,
             precio_mayorista: rawData.precio_mayorista ?? undefined,

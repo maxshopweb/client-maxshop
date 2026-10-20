@@ -24,7 +24,7 @@ const selectNumberField = z
   });
 
 export const productoStepOneSchema = z.object({
-  codi_arti: z.string().min(1, 'El código de artículo es requerido').max(50, 'Máximo 50 caracteres'),
+  codi_arti: z.string().min(1, 'El código de artículo es requerido').max(10, 'Máximo 10 caracteres'),
   nombre: z.string().min(1, 'El nombre es requerido').max(255, 'Máximo 255 caracteres'),
   descripcion: z.string().optional(),
   cod_sku: z.string().optional(),
@@ -49,12 +49,12 @@ export const productoStepOneSchema = z.object({
 
 export const productoStepTwoSchema = z
   .object({
-    // Precios por lista (V=venta, O=especial, P=pvp, Q=campaña)
+    // Precios por lista (V, O, P, Q, E=precio_manual)
     precio_venta: optionalNumberField,
     precio_especial: optionalNumberField,
     precio_pvp: optionalNumberField,
     precio_campanya: optionalNumberField,
-    /** Precio cuando lista_precio_activa = 'E' (no se sobreescribe por sync). */
+    /** Precio de lista E (ERP). */
     precio_manual: optionalNumberField,
     lista_precio_activa: z.string().optional(), // Con cuál lista se publica: V | O | P | Q | E
     /** Bonificación porcentual por defecto del producto (0-100). */
@@ -78,15 +78,43 @@ export const productoStepTwoSchema = z
         (data.precio_venta != null && data.precio_venta > 0) ||
         (data.precio_especial != null && data.precio_especial > 0) ||
         (data.precio_pvp != null && data.precio_pvp > 0) ||
-        (data.precio_campanya != null && data.precio_campanya > 0);
-      const hasManualPrice = (data.lista_precio_activa === 'E' || data.lista_precio_activa === 'e')
-        && data.precio_manual != null && data.precio_manual > 0;
-      return hasListPrice || hasManualPrice;
+        (data.precio_campanya != null && data.precio_campanya > 0) ||
+        (data.precio_manual != null && data.precio_manual > 0);
+      return hasListPrice;
     },
-    { message: 'Ingrese al menos un precio (por lista o precio manual si lista E)', path: ['precio_venta'] }
+    { message: 'Ingrese al menos un precio por lista', path: ['precio_venta'] }
+  )
+  .refine(
+    (data) => {
+      const lista = (data.lista_precio_activa ?? '').toUpperCase();
+      if (lista !== 'E') return true;
+      return data.precio_manual != null && data.precio_manual > 0;
+    },
+    { message: 'Si publicás con lista E, el precio de esa lista debe ser mayor a 0', path: ['precio_manual'] }
   );
 
-export const createProductoSchema = productoStepOneSchema.merge(productoStepTwoSchema);
+export const createProductoSchema = productoStepOneSchema
+  .merge(productoStepTwoSchema)
+  .refine(
+    (data) => {
+      const hasListPrice =
+        (data.precio_venta != null && data.precio_venta > 0) ||
+        (data.precio_especial != null && data.precio_especial > 0) ||
+        (data.precio_pvp != null && data.precio_pvp > 0) ||
+        (data.precio_campanya != null && data.precio_campanya > 0) ||
+        (data.precio_manual != null && data.precio_manual > 0);
+      return hasListPrice;
+    },
+    { message: 'Ingrese al menos un precio por lista', path: ['precio_venta'] }
+  )
+  .refine(
+    (data) => {
+      const lista = (data.lista_precio_activa ?? '').toUpperCase();
+      if (lista !== 'E') return true;
+      return data.precio_manual != null && data.precio_manual > 0;
+    },
+    { message: 'Si publicás con lista E, el precio de esa lista debe ser mayor a 0', path: ['precio_manual'] }
+  );
 
 export type ProductoStepOneData = z.infer<typeof productoStepOneSchema>;
 export type ProductoStepTwoData = z.infer<typeof productoStepTwoSchema>;
