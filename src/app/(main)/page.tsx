@@ -9,7 +9,7 @@ export default function TiendaHome() {
   return (
     <div className="flex flex-col">
       <div className="flex flex-col gap-8 md:gap-14">
-        <section className="relative z-0 w-full md:-mt-[172px]">
+        <section className="relative z-0 w-full">
           <HeroBanner />
         </section>
 
