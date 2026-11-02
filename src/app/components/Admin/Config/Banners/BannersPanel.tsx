@@ -185,7 +185,7 @@ export function BannersPanel() {
 
       {/* Leyenda */}
       <p className="text-xs text-text/40 mt-4">
-        Máximo {MAX_BANNERS} banners por tipo · Formatos: JPEG, PNG, WebP · Peso máximo: 2 MB
+        Máximo {MAX_BANNERS} banners por tipo · Formatos: JPEG, PNG, WebP · Peso máximo: 5 MB
       </p>
 
       {/* Modal confirmar eliminar */}
