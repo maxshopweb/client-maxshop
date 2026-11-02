@@ -9,15 +9,11 @@ import { parseHomeSectionHashId, scrollToHashSectionWhenReady } from "../utils/h
 interface NavbarDesktopMenuProps {
   links: MenuLink[];
   pathname: string;
-  shouldShowBackground: boolean;
-  actualTheme: "light" | "dark";
 }
 
 export default function NavbarDesktopMenu({
   links,
   pathname,
-  shouldShowBackground,
-  actualTheme,
 }: NavbarDesktopMenuProps) {
   const router = useRouter();
   const activeSection = useActiveSection();
@@ -67,20 +63,16 @@ export default function NavbarDesktopMenu({
             <span
               className={`text-sm lg:text-base tracking-wide transition-colors duration-200 ${
                 isActive
-                  ? shouldShowBackground
-                    ? "text-foreground font-medium"
-                    : "text-white font-medium"
-                  : shouldShowBackground
-                    ? "text-foreground/50 group-hover:text-foreground"
-                    : "text-white/60 group-hover:text-white"
+                  ? "text-white font-semibold"
+                  : "text-white/75 group-hover:text-white"
               }`}
             >
               {link.label}
             </span>
             <span
-              className={`block h-px transition-all duration-300 ${
-                shouldShowBackground ? "bg-principal" : "bg-white"
-              } ${isActive ? "w-full" : "w-0 group-hover:w-full"}`}
+              className={`block h-px bg-white transition-all duration-300 ${
+                isActive ? "w-full" : "w-0 group-hover:w-full"
+              }`}
             />
           </Link>
         );

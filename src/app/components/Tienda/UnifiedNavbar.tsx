@@ -32,7 +32,6 @@ import { NavbarSearchUrlSync } from "@/app/components/navbar/hooks/NavbarSearchU
 
 export default function UnifiedNavbar() {
   const pathname = usePathname();
-  const actualTheme = "light" as "light" | "dark";
   const primaryMenuLinks = MENU_LINKS.filter(
     (link) => link.href === "/" || link.href === "/tienda/productos"
   );
@@ -115,19 +114,13 @@ export default function UnifiedNavbar() {
 
         {/* Parte Inferior: Localidad + Links del Menú - Solo Desktop */}
         <nav
-          className={`hidden md:block transition-all duration-500 ${
-            shouldShowBackground
-              ? actualTheme === 'dark'
-                ? "shadow-md bg-secundario text-white"
-                : "shadow-md bg-white text-terciario"
-              : "bg-transparent"
+          className={`hidden border-t border-white/10 bg-principal text-white transition-shadow duration-300 md:block ${
+            shouldShowBackground ? "shadow-lg" : ""
           }`}
         >
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-12 md:h-14">
               <NavbarLocationIndicator
-                shouldShowBackground={shouldShowBackground}
-                actualTheme={actualTheme}
                 onLocationClick={handleLocationClick}
               />
 
@@ -135,21 +128,15 @@ export default function UnifiedNavbar() {
                 <NavbarDesktopMenu
                   links={primaryMenuLinks}
                   pathname={pathname || ''}
-                  shouldShowBackground={shouldShowBackground}
-                  actualTheme={actualTheme}
                 />
                 <Suspense fallback={null}>
                   <NavbarFiltersMegaMenu
-                    shouldShowBackground={shouldShowBackground}
-                    actualTheme={actualTheme}
                     triggerLabel="Categorías"
                   />
                 </Suspense>
                 <NavbarDesktopMenu
                   links={secondaryMenuLinks}
                   pathname={pathname || ''}
-                  shouldShowBackground={shouldShowBackground}
-                  actualTheme={actualTheme}
                 />
               </div>
             </div>

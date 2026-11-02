@@ -11,10 +11,8 @@ export default function NavbarHeader({
 }: NavbarHeaderProps) {
   return (
     <div
-      className={`transition-all duration-500 ${
-        shouldShowBackground
-          ? "py-2 shadow-lg bg-principal text-white"
-          : "py-4 bg-principal text-white"
+      className={`bg-principal py-4 text-white transition-shadow duration-300 ${
+        shouldShowBackground ? "shadow-lg" : ""
       }`}
     >
       <div className="container mx-auto px-4">

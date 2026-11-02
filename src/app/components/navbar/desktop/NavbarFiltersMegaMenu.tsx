@@ -8,8 +8,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { buildTiendaProductsUrl, useNavbarFilterData } from "../navbarFilters.shared";
 
 interface NavbarFiltersMegaMenuProps {
-  shouldShowBackground: boolean;
-  actualTheme: "light" | "dark";
   triggerLabel?: string;
   isActive?: boolean;
 }
@@ -81,8 +79,6 @@ function FilterColumn({
 }
 
 export default function NavbarFiltersMegaMenu({
-  shouldShowBackground,
-  actualTheme,
   triggerLabel = "Tienda",
   isActive = false,
 }: NavbarFiltersMegaMenuProps) {
@@ -103,20 +99,12 @@ export default function NavbarFiltersMegaMenu({
     isLoadingGrupos,
   } = useNavbarFilterData();
 
-  const triggerTextClassName = shouldShowBackground
-    ? actualTheme === "dark"
-      ? "text-white"
-      : "text-terciario"
-    : "text-white";
-
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger asChild>
         <button
           type="button"
-          className={`relative group py-2 px-1 flex flex-col items-center gap-0 transition-colors ${
-            triggerTextClassName
-          }`}
+          className="relative group flex flex-col items-center gap-0 px-1 py-2 text-white transition-colors"
           aria-label={`Abrir filtros de ${triggerLabel.toLowerCase()}`}
         >
           <span className="inline-flex items-center gap-1.5 text-sm lg:text-base tracking-wide transition-colors duration-200">
@@ -124,9 +112,7 @@ export default function NavbarFiltersMegaMenu({
             <ChevronDown className="w-4 h-4 opacity-80 group-hover:opacity-100 transition-opacity" />
           </span>
           <span
-            className={`block h-px transition-all duration-300 ${
-              shouldShowBackground ? "bg-principal" : "bg-white"
-            } ${
+            className={`block h-px bg-white transition-all duration-300 ${
               isActive ? "w-full" : "w-0 group-hover:w-full"
             }`}
           />
