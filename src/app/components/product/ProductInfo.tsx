@@ -7,12 +7,16 @@ import { IProductos } from "@/app/types/producto.type";
 import { formatPrecio } from "@/app/types/producto.type";
 import { getPrecioConImpuestos, getPrecioSinImpuestos } from "@/app/utils/producto.utils";
 import { formatCurrencyARS } from "@/app/utils/currency";
+import { computePrecioMedios } from "@/app/utils/precio-medios.utils";
+import { useConfigTienda } from "@/app/hooks/config/useConfigTienda";
+import PrecioMediosBlock from "@/app/components/product/PrecioMediosBlock";
 
 interface ProductInfoProps {
   producto: IProductos;
 }
 
 export default function ProductInfo({ producto }: ProductInfoProps) {
+  const { data: config } = useConfigTienda();
   const sinStock = (producto.stock ?? 0) === 0;
   const isInactive = producto.activo !== "S" && producto.estado !== 1;
   const noDisponible = sinStock || isInactive;
@@ -21,6 +25,11 @@ export default function ProductInfo({ producto }: ProductInfoProps) {
   const precioSinImpuestos = getPrecioSinImpuestos(producto);
   const precioFinalCalculado = getPrecioConImpuestos(producto);
   const precioFinal = precioFinalCalculado ?? 0;
+  const medios = computePrecioMedios({
+    precioPublicado: precioFinal,
+    cuotasHabilitadas: producto.cuotas_habilitadas,
+    config,
+  });
   const listaActiva = producto.lista_activa;
   const esOferta = listaActiva?.es_oferta === true;
   const esCampanya = listaActiva?.es_campanya === true;
@@ -100,6 +109,8 @@ export default function ProductInfo({ producto }: ProductInfoProps) {
             Sin impuestos: {formatCurrencyARS(precioSinImpuestos)}
           </p>
         )}
+
+        <PrecioMediosBlock medios={medios} showPctLabel />
 
         {producto.precio_mayorista && (
           <p className="text-xs sm:text-sm text-terciario/50">

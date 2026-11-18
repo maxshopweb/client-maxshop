@@ -163,6 +163,8 @@ export function useStep4PaymentConfirmation() {
 
     const orderExtras = buildCheckoutOrderExtras(personalData, billingAddress);
 
+    const codigoCupon = useCheckoutStore.getState().codigoCupon;
+
     createOrder({
       id_cliente: idCliente,
       metodo_pago: selectedMethod,
@@ -171,6 +173,7 @@ export function useStep4PaymentConfirmation() {
       id_direccion: id_direccion || undefined,
       direccion,
       costo_envio: costoEnvio || 0,
+      codigo_cupon: codigoCupon || undefined,
       tipo_documento: orderExtras.tipo_documento,
       numero_documento: orderExtras.numero_documento,
       referencia_facturacion: orderExtras.referencia_facturacion,

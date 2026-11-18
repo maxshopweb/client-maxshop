@@ -34,6 +34,9 @@ interface CheckoutStore {
   codigoPostal: string | null;
   ciudad: string | null;
   provincia: string | null;
+  /** Cupón aplicado en vista previa (el servidor revalida al crear el pedido). */
+  codigoCupon: string | null;
+  descuentoCupon: number | null;
 
   setCurrentStep: (step: 1 | 2 | 3 | 4) => void;
   completeStep: (step: number) => void;
@@ -51,6 +54,8 @@ interface CheckoutStore {
   setCodigoPostal: (cp: string | null) => void;
   setCiudad: (ciudad: string | null) => void;
   setProvincia: (provincia: string | null) => void;
+  setCuponAplicado: (codigo: string | null, descuento: number | null) => void;
+  clearCupon: () => void;
   clearShippingLocation: () => void;
   loadCartFromLocalStorage: () => void;
   setCartItems: (items: CartItem[]) => void;
@@ -79,6 +84,8 @@ export const useCheckoutStore = create<CheckoutStore>()(
       codigoPostal: null,
       ciudad: null,
       provincia: null,
+      codigoCupon: null,
+      descuentoCupon: null,
 
       setCurrentStep: (step) => set({ currentStep: step }),
 
@@ -103,6 +110,9 @@ export const useCheckoutStore = create<CheckoutStore>()(
       setCodigoPostal: (cp) => set({ codigoPostal: cp }),
       setCiudad: (ciudad) => set({ ciudad }),
       setProvincia: (provincia) => set({ provincia }),
+      setCuponAplicado: (codigo, descuento) =>
+        set({ codigoCupon: codigo, descuentoCupon: descuento }),
+      clearCupon: () => set({ codigoCupon: null, descuentoCupon: null }),
       clearShippingLocation: () =>
         set({
           codigoPostal: null,
@@ -118,7 +128,11 @@ export const useCheckoutStore = create<CheckoutStore>()(
           if (cartData) {
             const parsed = JSON.parse(cartData);
             if (parsed.state?.items) {
-              set({ cartItems: mapCartItemsToCheckout(parsed.state.items) });
+              set({
+                cartItems: mapCartItemsToCheckout(parsed.state.items),
+                codigoCupon: null,
+                descuentoCupon: null,
+              });
             }
           }
         } catch (error) {
@@ -126,7 +140,8 @@ export const useCheckoutStore = create<CheckoutStore>()(
         }
       },
 
-      setCartItems: (items) => set({ cartItems: items }),
+      setCartItems: (items) =>
+        set({ cartItems: items, codigoCupon: null, descuentoCupon: null }),
 
       invalidateCheckoutProgress: () =>
         set((state) => ({
@@ -139,6 +154,8 @@ export const useCheckoutStore = create<CheckoutStore>()(
           costoEnvio: null,
           id_direccion_facturacion: null,
           id_direccion_envio: null,
+          codigoCupon: null,
+          descuentoCupon: null,
         })),
 
       startNewCheckout: () => {
@@ -161,6 +178,8 @@ export const useCheckoutStore = create<CheckoutStore>()(
           codigoPostal,
           ciudad,
           provincia,
+          codigoCupon: null,
+          descuentoCupon: null,
         });
       },
 
@@ -184,6 +203,8 @@ export const useCheckoutStore = create<CheckoutStore>()(
           codigoPostal,
           ciudad,
           provincia,
+          codigoCupon: null,
+          descuentoCupon: null,
         });
       },
     }),
@@ -203,8 +224,10 @@ export const useCheckoutStore = create<CheckoutStore>()(
         codigoPostal: state.codigoPostal,
         ciudad: state.ciudad,
         provincia: state.provincia,
+        codigoCupon: state.codigoCupon,
+        descuentoCupon: state.descuentoCupon,
       }),
-      version: 3,
+      version: 4,
       migrate: (persistedState: unknown, fromVersion: number) => {
         const s = (persistedState ?? {}) as Record<string, unknown>;
         const { contactData: _removed, ...rest } = s;
@@ -230,6 +253,11 @@ export const useCheckoutStore = create<CheckoutStore>()(
             }
             out = { ...out, shippingData: sd };
           }
+        }
+
+        if (fromVersion < 4) {
+          out.codigoCupon = out.codigoCupon ?? null;
+          out.descuentoCupon = out.descuentoCupon ?? null;
         }
 
         return out;

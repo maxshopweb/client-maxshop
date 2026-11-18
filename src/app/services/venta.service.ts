@@ -299,6 +299,7 @@ class VentasService {
     }>;
     observaciones?: string;
     costo_envio?: number; // Costo del envío calculado
+    codigo_cupon?: string;
     id_direccion?: string;
     tipo_documento?: string;
     numero_documento?: string;

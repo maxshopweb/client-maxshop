@@ -17,7 +17,8 @@ import {
     Zap,
     FileText,
     RefreshCw,
-    UserCog
+    UserCog,
+    TicketPercent
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -36,6 +37,7 @@ const navItems: NavItem[] = [
     { icon: Home, label: "Inicio", path: "/admin" },
     { icon: Package, label: "Productos", path: "/admin/productos" },
     { icon: ShoppingCart, label: "Ventas", path: "/admin/ventas" },
+    { icon: TicketPercent, label: "Cupones", path: "/admin/cupones" },
     { icon: Users, label: "Clientes", path: "/admin/clientes" },
     { icon: UserCog, label: "Usuarios", path: "/admin/usuarios" },
     { icon: Calendar, label: "Eventos", path: "/admin/eventos" },

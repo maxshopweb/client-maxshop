@@ -5,8 +5,11 @@ import { Sparkles, Tag } from "lucide-react";
 import type { IProductos } from "@/app/types/producto.type";
 import AddToCartButton from "@/app/components/cart/AddToCartButton";
 import ProductImage from "@/app/components/shared/ProductImage";
+import PrecioMediosBlock from "@/app/components/product/PrecioMediosBlock";
 import { formatCurrencyARS } from "@/app/utils/currency";
 import { getPrecioConImpuestos, getPrecioSinImpuestos } from "@/app/utils/producto.utils";
+import { computePrecioMedios } from "@/app/utils/precio-medios.utils";
+import { useConfigTienda } from "@/app/hooks/config/useConfigTienda";
 
 function HalfStar({ size = 18 }: { size?: number }) {
   const id = "half-star-grad";
@@ -35,6 +38,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ producto }: ProductCardProps) {
+  const { data: config } = useConfigTienda();
   const precioSinImpuestos = getPrecioSinImpuestos(producto) ?? 0;
   const precioFinal = getPrecioConImpuestos(producto) ?? precioSinImpuestos;
   const listaActiva = producto.lista_activa;
@@ -47,6 +51,11 @@ export default function ProductCard({ producto }: ProductCardProps) {
     mostrarTachado && ref != null && ref > 0
       ? Math.round((1 - precioFinal / ref) * 100)
       : 0;
+  const medios = computePrecioMedios({
+    precioPublicado: precioFinal,
+    cuotasHabilitadas: producto.cuotas_habilitadas,
+    config,
+  });
 
   return (
     <Link 
@@ -147,6 +156,8 @@ export default function ProductCard({ producto }: ProductCardProps) {
               Sin impuestos: {formatCurrencyARS(precioSinImpuestos)}
             </p>
           )}
+
+          <PrecioMediosBlock medios={medios} compact />
           
           {/* Botón Agregar al Carrito */}
           <div onClick={(e) => e.stopPropagation()}>

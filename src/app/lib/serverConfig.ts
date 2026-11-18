@@ -23,6 +23,8 @@ function defaultConfig(): IConfigTienda {
     cuotas_sin_interes: null,
     cuotas_sin_interes_activo: true,
     cuotas_sin_interes_minimo: null,
+    descuento_transferencia_activo: false,
+    descuento_transferencia_pct: 0,
     datos_bancarios: null,
     modo_mantenimiento: false,
     nombre: null,

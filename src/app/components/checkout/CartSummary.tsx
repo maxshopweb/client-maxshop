@@ -1,21 +1,42 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useIsMutating } from "@tanstack/react-query";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import { useCheckoutStore } from "@/app/hooks/checkout/useCheckoutStore";
 import ProductCart from "@/app/components/cart/ProductCart";
 import { formatCurrencyARS } from "@/app/utils/currency";
 import { WhatsappLink } from "@/app/components/contact/ContactLinks";
+import { cuponesService } from "@/app/services/cupones.service";
+import { Button } from "@/app/components/ui/Button";
+import { useConfigTienda } from "@/app/hooks/config/useConfigTienda";
+import { computeDescuentoTransferencia } from "@/app/utils/precio-medios.utils";
 
 interface CartSummaryProps {
   showProductList?: boolean;
 }
 
 export default function CartSummary({ showProductList = true }: CartSummaryProps) {
-  const { cartItems, costoEnvio, tipoEntrega, codigoPostal } = useCheckoutStore();
+  const {
+    cartItems,
+    costoEnvio,
+    tipoEntrega,
+    codigoPostal,
+    paymentMethod,
+    codigoCupon,
+    descuentoCupon,
+    setCuponAplicado,
+    clearCupon,
+  } = useCheckoutStore();
+  const { data: config } = useConfigTienda();
   const isMutatingEnvio = useIsMutating({ mutationKey: ["cotizarEnvio"] });
   const isAndreaniManualMode = process.env.NEXT_PUBLIC_ANDREANI_MODO_MANUAL === "true";
+
+  const [showCoupon, setShowCoupon] = useState(false);
+  const [codigoInput, setCodigoInput] = useState("");
+  const [applying, setApplying] = useState(false);
+  const revalidatingRef = useRef(false);
 
   const isCalculandoEnvio = useMemo(
     () =>
@@ -26,23 +47,97 @@ export default function CartSummary({ showProductList = true }: CartSummaryProps
     [tipoEntrega, codigoPostal, costoEnvio, isMutatingEnvio]
   );
 
-  // Calcular totales
-  const { subtotal, subtotalSinImpuestos, impuestos, envio, total, totalSinImpuestos } = useMemo(() => {
+  const esTransferencia = paymentMethod === "transferencia";
+
+  const {
+    subtotal,
+    subtotalSinImpuestos,
+    envio,
+    descuentoTransferencia,
+    descuento,
+    total,
+    totalSinImpuestos,
+    baseCupon,
+  } = useMemo(() => {
     const sub = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
-    const subSinImp = cartItems.reduce((sum, item) => sum + (item.subtotalSinImpuestos ?? item.subtotal), 0);
-    const impuestosCalculados = Math.max(sub - subSinImp, 0);
+    const subSinImp = cartItems.reduce(
+      (sum, item) => sum + (item.subtotalSinImpuestos ?? item.subtotal),
+      0
+    );
     const env = costoEnvio || 0;
-    const tot = sub + env;
-    const totSinImp = subSinImp + env;
+    const descTransfer = esTransferencia
+      ? computeDescuentoTransferencia(sub, config)
+      : 0;
+    const baseCuponCalc = Math.max(0, sub - descTransfer);
+    const desc = Math.max(0, descuentoCupon || 0);
+    const tot = Math.max(0, sub - descTransfer - desc + env);
+    const totSinImp = Math.max(0, subSinImp - descTransfer - desc + env);
     return {
       subtotal: sub,
       subtotalSinImpuestos: subSinImp,
-      impuestos: impuestosCalculados,
       envio: env,
+      descuentoTransferencia: descTransfer,
+      descuento: desc,
       total: tot,
       totalSinImpuestos: totSinImp,
+      baseCupon: baseCuponCalc,
     };
-  }, [cartItems, costoEnvio]);
+  }, [cartItems, costoEnvio, descuentoCupon, esTransferencia, config]);
+
+  // Si cambia el medio a transferencia (o el % de config), revalidar el cupón
+  // contra el subtotal ya descontado.
+  useEffect(() => {
+    if (!codigoCupon || revalidatingRef.current) return;
+    let cancelled = false;
+    revalidatingRef.current = true;
+    (async () => {
+      try {
+        const result = await cuponesService.validate(codigoCupon, baseCupon);
+        if (cancelled) return;
+        if (!result.valid || result.monto_descuento == null) {
+          clearCupon();
+          toast.error(result.message || "El cupón ya no aplica con este medio de pago");
+          return;
+        }
+        setCuponAplicado(result.codigo || codigoCupon, result.monto_descuento);
+      } catch {
+        if (!cancelled) clearCupon();
+      } finally {
+        revalidatingRef.current = false;
+      }
+    })();
+    return () => {
+      cancelled = true;
+      revalidatingRef.current = false;
+    };
+    // Solo cuando cambia la base del cupón o el código.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [baseCupon, codigoCupon]);
+
+  const handleApply = async () => {
+    const codigo = codigoInput.trim();
+    if (!codigo) {
+      toast.error("Ingresá un código promocional");
+      return;
+    }
+    setApplying(true);
+    try {
+      const result = await cuponesService.validate(codigo, baseCupon);
+      if (!result.valid || result.monto_descuento == null) {
+        clearCupon();
+        toast.error(result.message || "Cupón no válido");
+        return;
+      }
+      setCuponAplicado(result.codigo || codigo.toUpperCase(), result.monto_descuento);
+      setCodigoInput("");
+      toast.success(result.message || "Cupón aplicado");
+    } catch (e) {
+      clearCupon();
+      toast.error(e instanceof Error ? e.message : "No se pudo validar el cupón");
+    } finally {
+      setApplying(false);
+    }
+  };
 
   return (
     <div
@@ -93,6 +188,28 @@ export default function CartSummary({ showProductList = true }: CartSummaryProps
             )}
           </div>
         </div>
+        {descuentoTransferencia > 0 && (
+          <div className="flex justify-between text-sm text-green-700">
+            <span>Descuento por transferencia</span>
+            <span className="font-medium">-{formatCurrencyARS(descuentoTransferencia)}</span>
+          </div>
+        )}
+        {descuento > 0 && codigoCupon && (
+          <div className="flex justify-between text-sm text-green-700">
+            <span>
+              Cupón{" "}
+              <span className="font-mono font-semibold">{codigoCupon}</span>
+            </span>
+            <button
+              type="button"
+              className="font-medium hover:underline"
+              onClick={() => clearCupon()}
+              title="Quitar cupón"
+            >
+              -{formatCurrencyARS(descuento)}
+            </button>
+          </div>
+        )}
         {tipoEntrega === "envio" && (
           <div className="flex justify-between text-sm">
             <span className="text-foreground/70">Costo de envío</span>
@@ -110,6 +227,55 @@ export default function CartSummary({ showProductList = true }: CartSummaryProps
               <span className="text-foreground/50 text-xs">-</span>
             )}
           </div>
+        )}
+      </div>
+
+      {/* Cupón */}
+      <div className="mb-4">
+        {!codigoCupon && (
+          <button
+            type="button"
+            onClick={() => setShowCoupon((v) => !v)}
+            className="text-sm font-medium underline-offset-2 hover:underline"
+            style={{ color: "var(--principal)" }}
+          >
+            Tengo un código promocional
+          </button>
+        )}
+        {(showCoupon || codigoCupon) && !codigoCupon && (
+          <div className="mt-2 flex gap-2">
+            <input
+              type="text"
+              value={codigoInput}
+              onChange={(e) => setCodigoInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  void handleApply();
+                }
+              }}
+              placeholder="código..."
+              className="flex-1 border border-foreground/20 rounded-lg px-3 py-2 text-sm font-mono uppercase"
+            />
+            <Button
+              variant="primary"
+              size="sm"
+              className="rounded-lg shrink-0"
+              disabled={applying}
+              onClick={() => void handleApply()}
+            >
+              {applying ? "..." : "Aplicar"}
+            </Button>
+          </div>
+        )}
+        {codigoCupon && (
+          <button
+            type="button"
+            onClick={() => clearCupon()}
+            className="mt-1 text-xs text-foreground/50 hover:text-foreground underline"
+          >
+            Quitar cupón
+          </button>
         )}
       </div>
 
@@ -143,4 +309,3 @@ export default function CartSummary({ showProductList = true }: CartSummaryProps
     </div>
   );
 }
-

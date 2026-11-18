@@ -23,6 +23,7 @@ interface CreateOrderFromCheckoutData {
   }>;
   observaciones?: string;
   costo_envio?: number; // Costo del envío calculado
+  codigo_cupon?: string;
   id_direccion?: string; // ID de dirección guardada (opcional)
   tipo_documento?: string;
   numero_documento?: string;

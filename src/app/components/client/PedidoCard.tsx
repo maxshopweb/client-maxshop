@@ -226,8 +226,10 @@ function PrecioDesglose({ pedido }: { pedido: IVenta }) {
   // Costo de envío
   const costoEnvio = pedido.envio?.costo_envio || 0;
 
-  // Descuentos
+  // Descuentos de producto (bonificación) vs transferencia / cupón de pedido
   const descuentos = pedido.descuento_total || 0;
+  const descuentoCupon = pedido.descuento_cupon || 0;
+  const descuentoTransferencia = pedido.descuento_transferencia || 0;
 
   // Total (ya está en total_neto)
   const total = pedido.total_neto || 0;
@@ -236,8 +238,17 @@ function PrecioDesglose({ pedido }: { pedido: IVenta }) {
   const tieneEnvio = costoEnvio > 0;
   const tieneIva = iva !== null && iva > 0;
   const tieneDescuentos = descuentos > 0;
+  const tieneCupon = descuentoCupon > 0;
+  const tieneTransferencia = descuentoTransferencia > 0;
 
-  if (!tieneEnvio && !tieneIva && !tieneDescuentos && subtotal === total) {
+  if (
+    !tieneEnvio &&
+    !tieneIva &&
+    !tieneDescuentos &&
+    !tieneCupon &&
+    !tieneTransferencia &&
+    subtotal === total
+  ) {
     // Si no hay desglose necesario, no mostrar nada
     return null;
   }
@@ -255,12 +266,32 @@ function PrecioDesglose({ pedido }: { pedido: IVenta }) {
           <span className="text-foreground font-medium">{formatPrecio(subtotal)}</span>
         </div>
 
-        {/* Descuentos */}
+        {/* Descuentos de producto */}
         {tieneDescuentos && (
           <div className="flex items-center justify-between">
-            <span className="text-foreground/60">Descuentos</span>
+            <span className="text-foreground/60">Bonificación productos</span>
             <span className="text-foreground font-medium text-green-600">
               -{formatPrecio(descuentos)}
+            </span>
+          </div>
+        )}
+
+        {tieneTransferencia && (
+          <div className="flex items-center justify-between">
+            <span className="text-foreground/60">Descuento por transferencia</span>
+            <span className="text-foreground font-medium text-green-600">
+              -{formatPrecio(descuentoTransferencia)}
+            </span>
+          </div>
+        )}
+
+        {tieneCupon && (
+          <div className="flex items-center justify-between">
+            <span className="text-foreground/60">
+              Cupón{pedido.codigo_cupon ? ` ${pedido.codigo_cupon}` : ''}
+            </span>
+            <span className="text-foreground font-medium text-green-600">
+              -{formatPrecio(descuentoCupon)}
             </span>
           </div>
         )}

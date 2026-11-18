@@ -17,6 +17,10 @@ export interface IVenta {
     total_con_iva?: number | null;
     descuento_total?: number | null;
     total_neto?: number | null;
+    id_cupon?: number | null;
+    codigo_cupon?: string | null;
+    descuento_cupon?: number | null;
+    descuento_transferencia?: number | null;
     metodo_pago?: MetodoPago | null;
     estado_pago?: EstadoPago | null;
     estado_envio?: EstadoEnvio | null;

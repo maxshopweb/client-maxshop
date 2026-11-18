@@ -404,8 +404,22 @@ export function ViewVentaModal({ venta: ventaInitial, onClose, isOpen }: ViewVen
                                         )}
                                         {venta.descuento_total != null && venta.descuento_total > 0 && (
                                             <div className="flex justify-between text-sm text-red-600">
-                                                <span>Descuento total</span>
+                                                <span>Bonificación productos</span>
                                                 <span className="font-medium">-{formatPrecio(venta.descuento_total)}</span>
+                                            </div>
+                                        )}
+                                        {venta.descuento_transferencia != null && venta.descuento_transferencia > 0 && (
+                                            <div className="flex justify-between text-sm text-green-700">
+                                                <span>Descuento por transferencia</span>
+                                                <span className="font-medium">-{formatPrecio(venta.descuento_transferencia)}</span>
+                                            </div>
+                                        )}
+                                        {venta.descuento_cupon != null && venta.descuento_cupon > 0 && (
+                                            <div className="flex justify-between text-sm text-green-700">
+                                                <span>
+                                                    Cupón{venta.codigo_cupon ? ` ${venta.codigo_cupon}` : ''}
+                                                </span>
+                                                <span className="font-medium">-{formatPrecio(venta.descuento_cupon)}</span>
                                             </div>
                                         )}
                                         <div className="flex justify-between items-baseline pt-2">

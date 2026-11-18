@@ -46,6 +46,10 @@ const initialCheckoutState = {
 
   provincia: null,
 
+  codigoCupon: null,
+
+  descuentoCupon: null,
+
 };
 
 

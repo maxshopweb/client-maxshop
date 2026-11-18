@@ -148,6 +148,41 @@ export default function ConfigPage() {
                     )}
                 </ConfigCard>
 
+                <ConfigCard
+                    title="Descuento por transferencia"
+                    status={promo.transferActivo ? "Activo" : "Inactivo"}
+                >
+                    <div className="flex items-center justify-between gap-3">
+                        <span className="font-medium text-text">Regla activa</span>
+                        <Switch
+                            checked={promo.transferActivo}
+                            onCheckedChange={promo.setTransferActivo}
+                            disabled={isLoading || mutation.isPending}
+                            aria-label="Activar o desactivar descuento por transferencia"
+                        />
+                    </div>
+                    <Input
+                        label="Porcentaje de descuento (0-100):"
+                        type="text"
+                        inputMode="decimal"
+                        autoComplete="off"
+                        value={promo.transferPct}
+                        onChange={(e) =>
+                            promo.setTransferPct(e.target.value.replace(/[^\d.,]/g, ''))
+                        }
+                        placeholder="23"
+                        disabled={isLoading}
+                    />
+                    {!promo.transferActivo && (
+                        <p className="mt-1 text-xs text-text/60">
+                            La regla está desactivada: el precio de transferencia no se mostrará ni se cobrará.
+                        </p>
+                    )}
+                    <p className="mt-1 text-text/60">
+                        Se aplica sobre el precio publicado (lista activa con bonificación).
+                    </p>
+                </ConfigCard>
+
                 <div className="flex items-end">
                     <Button
                         onClick={promo.handleSave}
@@ -155,7 +190,7 @@ export default function ConfigPage() {
                         variant="primary"
                         className="w-full"
                     >
-                        {mutation.isPending ? "Guardando..." : "Guardar envío y cuotas"}
+                        {mutation.isPending ? "Guardando..." : "Guardar reglas de negocio"}
                     </Button>
                 </div>
 
