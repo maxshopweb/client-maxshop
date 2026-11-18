@@ -26,8 +26,15 @@ export function useLocalPaymentHandler({ formData }: UseLocalPaymentHandlerOptio
   const { createOrder, isCreating } = useCreateOrderFromCheckout({
     onError: (error: any) => {
       console.error('Error al crear pedido:', error);
+      const errorMsg: string =
+        error?.response?.data?.error || error?.message || 'Ocurrió un error al procesar tu pedido';
+      const backendDetails = error?.response?.data?.details;
+      const detailsDescription =
+        Array.isArray(backendDetails) && backendDetails.length > 0
+          ? backendDetails.join(' | ')
+          : null;
       toast.error('Error al crear pedido', {
-        description: error?.response?.data?.error || error?.message || 'Ocurrió un error al procesar tu pedido',
+        description: detailsDescription || errorMsg,
       });
     },
   });
